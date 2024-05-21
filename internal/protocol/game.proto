@@ -1,0 +1,111 @@
+syntax = "proto3";
+option go_package = "/pb";
+package pb;
+import "player.proto";
+// 公告级别
+enum NTFLevel{
+  //系统公告
+  GeneralNTF = 0;//普通公告
+  UrgencyNTF = 1;//紧急公告
+  NTMaintainNTF = 2;//维护公告
+  ServeStopNTF = 3;//停服公告
+  PraiseNTF = 4;    //表扬公告
+  //个人公告
+  STrumpetNTF = 5;  // 小喇叭
+  MTrumpetNTF = 6;  // 银喇叭
+  BTrumpetNTF = 7;  // 金喇叭
+}
+//时间信息
+message TimeInfo {
+  int64 timeStamp = 1; //时间戳（起始时间戳）
+  int32 waitTime = 2;  //仍需等待时长
+  int32 outTime = 3;   //服务器已过时长
+  int32 totalTime = 4; //总时长
+}
+//牌局信息
+message InningInfo{
+  string number = 1;    // 牌局编号
+  int64 winnerID = 2;   // 赢家
+  int64 loserID = 3;    // 输家
+  int64 payoff = 4;     // 结算
+  int64 timeStamp = 5;  // 时间戳
+  string result = 6;    // 牌局结果奖励
+}
+//-----------------------------------------------------------------------------------------
+/////////////[优秀如你]-->Req:请求 Resp:反馈<--[交互专用]///////////////////////////////////
+/////////////[优秀如你]-->Req:请求 Resp:反馈<--[交互专用]///////////////////////////////////
+/////////////[优秀如你]-->Req:请求 Resp:反馈<--[交互专用]///////////////////////////////////
+//-----------------------------------------------------------------------------------------
+//入场协议 对战类 [EnterXXXGameResp]
+//受游戏本身特性影响,PlayerInfo有本地化需求
+//请查看对应的子游戏协议文件 中的 EnterXXXGameResp
+//若无本地化需求,统一走 EnterGameResp协议
+//退出游戏
+message ExitGameReq {
+}
+message ExitGameResp {
+  int64 userID = 1;
+}
+/////////////玩家行为(与游戏弱相关的行为)/////////////////////
+// [排行榜]
+message RankingListReq {
+  int32 topCount = 1; // =>0 默认20
+}
+message RankingListResp {
+  PlayerInfo userInfo = 1;    //玩家信息
+}
+// 托管[暂保留]
+message TrusteeReq {
+  bool isTrustee = 1; //是否托管
+}
+message TrusteeResp {
+  int64 userID = 1; // 玩家ID
+  bool isTrustee = 2; //是否托管
+}
+///////////////////游戏记录///////////////////////////////
+//获取游戏记录(根据kindID)
+message GetRecordReq{
+  int64 startTimeStamp = 1; //起始时间戳 = 0默认所有
+  int64 endTimeStamp = 2;   //结束时间戳 = 0
+}
+message GetRecordResp{
+  int64 userID = 1;  //玩家ID
+  int64 startTimeStamp = 2;
+  int64 endTimeStamp = 3;
+  repeated InningInfo innings = 4;//牌局信息
+  int32 pageNum = 5;//页码 默认20条一页
+}
+////////////////////notify/////////////////////////////
+// 踢出[暂保留]
+message NotifyBeOut {
+  int64 userID = 1;  //玩家ID
+  int64 gameID = 2; //游戏标识
+  int32 code = 3;    //操作码 0:时间到被剔除 1:刷子
+  string hints = 4;    //被踢出的原因
+}
+// 财产变化通知
+message NotifyBalanceChange{
+  int64 userID = 1;
+  int64 yuanBao = 2;          // 元宝 (客户端统一 */100)
+  int64 alterYuanBao = 3;     // 增减了多少元宝 (客户端统一 */100)
+  int64 coin = 4;             // 铜钱 (客户端统一 */100)
+  int64 alterCoin = 5;        // 增减了多少铜钱 (客户端统一 */100)
+  int32 code = 6;             // 操作原因 1:结算 2:充值 3:平台扣除 4:平台奖励 5:冻结 6:返还
+  string reason = 7;          // 备注详情
+}
+//公告
+message NotifyNoticeReq {
+  int64 gameID = 1;       // 游戏标识 =0大厅
+  string title = 2;       // 标题
+  string content = 3;     // 内容
+  NTFLevel  level = 4;    // 个人只能发送 喇叭
+  int32 timeout = 5;      // 总时长 0<= 默认一分钟
+}
+message NotifyNoticeResp {
+  int64 userID = 1;      //玩家ID =0时为所有玩家
+  int64 gameID = 2;      //游戏标识 =0大厅
+  NTFLevel  level = 3;    //公告级别
+  TimeInfo timeInfo = 4;  //时间
+  string title = 5;       //标题
+  string content = 6;     //内容
+}

@@ -1,0 +1,35 @@
+// TODO message结构的属性名请使用 驼峰小写字母开始
+// TODO enum枚举的属性名请使用 驼峰大写字母开始
+syntax = "proto3";
+option go_package = "/pb";
+package pb;
+//该协议文件不提供 req 和 resp 注:如需使用,请在子游戏协议中嵌套相关协议.
+enum PlayerState {
+  PlayerLookOn = 0;         //旁观(可作为刚入场时的初始状态)
+  PlayerSitDown = 1;        //坐下(此状态下，才能参与游戏)
+  PlayerAgree = 2;          //同意(可作为准备状态)
+  PlayerPlaying = 3;        //游戏中
+  PlayerPickUp = 4;         //托管
+  PlayerChouKa = 5;         //抽卡
+  PlayerChooseJiang = 6;    //选将
+  PlayerTrustee = 97;       //系统接管
+  PlayerGiveUp = 98;        //放弃
+  PlayerStandUp = 99;       //站起(可作为结束状态)
+}
+//玩家信息
+message PlayerInfo {
+  int64 userID = 1;       // ID
+  string name = 2;        // 账号
+  int32 faceID = 3;       // 头像
+  int32 age = 4;          // 年龄
+  int32 sex = 5;          // 性别
+  int64 yuanBao = 6;      // 元宝 *100
+  int64 coin = 7;         // 铜钱
+  int32 level = 8;        // 游戏级别
+  int32 ranking = 9;      // 排名
+  PlayerState state = 10; // 状态
+}
+//玩家列表(信息)
+message PlayerListInfo {
+  repeated PlayerInfo allInfos = 1; //所有玩家信息
+}
