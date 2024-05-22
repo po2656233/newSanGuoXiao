@@ -23,7 +23,7 @@ func (p *ActorAccount) AliasID() string {
 func (p *ActorAccount) OnInit() {
 	p.Remote().Register(p.RegisterReq)
 	p.Remote().Register(p.LoginReq)
-	p.Remote().Register(p.GetUID)
+	p.Remote().Register(p.GetUserIDReq)
 }
 
 // RegisterReq 注册开发者帐号
@@ -32,15 +32,15 @@ func (p *ActorAccount) RegisterReq(req *pb.RegisterReq) (*pb.RegisterResp, int32
 	password := req.Password
 
 	if strings.TrimSpace(accountName) == "" || strings.TrimSpace(password) == "" {
-		return nil, hints.Login02
+		return nil, hints.Register02
 	}
 
 	if len(accountName) < 3 || len(accountName) > 18 {
-		return nil, hints.Login02
+		return nil, hints.Register02
 	}
 
 	if len(password) < 3 || len(password) > 18 {
-		return nil, hints.Login02
+		return nil, hints.Register02
 	}
 
 	db2.DevAccountRegister(accountName, password, req.SecurityCode)
@@ -70,12 +70,12 @@ func (p *ActorAccount) LoginReq(req *pb.LoginReq) (*pb.LoginResp, int32) {
 	}, code.OK
 }
 
-// GetUID 获取uid
-func (p *ActorAccount) GetUID(req *pb.User) (*pb.Int64, int32) {
+// GetUserIDReq 获取uid
+func (p *ActorAccount) GetUserIDReq(req *pb.GetUserIDReq) (*pb.GetUserIDResp, int32) {
 	uid, ok := db2.BindUID(req.SdkId, req.Pid, req.OpenId)
 	if uid == 0 || ok == false {
 		return nil, hints.Login07
 	}
 
-	return &pb.Int64{Value: uid}, code.OK
+	return &pb.GetUserIDResp{Uid: uid}, code.OK
 }

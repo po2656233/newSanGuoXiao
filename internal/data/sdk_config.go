@@ -11,7 +11,7 @@ type (
 	SdkRow struct {
 		SdkId        int32             `json:"sdkId"`        // sdk id
 		CallbackName string            `json:"callbackName"` // 支付回调名称路由使用
-		Salt         string            `json:"-"`            // !禁止JSON输出
+		Salt         string            `json:"salt"`         //
 		Params       map[string]string `json:"-"`            // !禁止JSON输出
 		PIDList      []int32           `json:"pidList"`      // sdk包id列表(一个sdk可以输出多个安装包)
 		Desc         string            `json:"desc"`         // 描述

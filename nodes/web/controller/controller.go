@@ -6,7 +6,7 @@ import (
 	sgxString "github.com/po2656233/superplace/extend/string"
 	sgxLogger "github.com/po2656233/superplace/logger"
 	data2 "sanguoxiao/internal/data"
-	"sanguoxiao/internal/hints"
+	. "sanguoxiao/internal/hints"
 	pb "sanguoxiao/internal/protocol/gofile"
 	"sanguoxiao/internal/rpc"
 	"sanguoxiao/internal/token"
@@ -33,10 +33,10 @@ func (p *Controller) index(c *sgxGin.Context) {
 }
 
 // hello 输出json示例
-// http://127.0.0.1/hello
+// http://127.0.0.1:8089/hello
 func (p *Controller) hello(c *sgxGin.Context) {
 	// 输出json
-	hints.RenderResult(c, code.OK, map[string]string{
+	RenderResult(c, code.OK, map[string]string{
 		"data": "hello",
 	})
 }
@@ -51,7 +51,11 @@ func (p *Controller) register(c *sgxGin.Context) {
 		Password: password,
 		Address:  c.ClientIP(),
 	})
-	hints.RenderResult(c, statusCode, data)
+	if statusCode == code.OK {
+		RenderResult(c, statusCode, data)
+		return
+	}
+	RenderResult(c, statusCode, StatusText[int(statusCode)])
 }
 
 // login 根据pid获取sdkConfig，与第三方进行帐号登陆效验
@@ -61,21 +65,21 @@ func (p *Controller) login(c *sgxGin.Context) {
 
 	if pid < 1 {
 		sgxLogger.Warnf("if pid < 1 {. params=%s", c.GetParams())
-		hints.RenderResult(c, hints.Service002)
+		RenderResult(c, Service002)
 		return
 	}
 
 	config := data2.SdkConfig.Get(pid)
 	if config == nil {
 		sgxLogger.Warnf("if platformConfig == nil {. params=%s", c.GetParams())
-		hints.RenderResult(c, hints.Login02)
+		RenderResult(c, Login02, StatusText[Login02])
 		return
 	}
 
 	sdkInvoke, err := sdk.GetInvoke(config.SdkId)
 	if err != nil {
 		sgxLogger.Warnf("[pid = %d] get invoke error. params=%s", pid, c.GetParams())
-		hints.RenderResult(c, hints.Service001)
+		RenderResult(c, Service001, StatusText[Service001])
 		return
 	}
 
@@ -90,25 +94,25 @@ func (p *Controller) login(c *sgxGin.Context) {
 				sgxLogger.Warnf("code = %d, error = %s", statusCode, error[0])
 			}
 
-			hints.RenderResult(c, statusCode)
+			RenderResult(c, statusCode, StatusText[int(statusCode)])
 			return
 		}
 
 		if result == nil {
 			sgxLogger.Warnf("callback result map is nil. params= %s", c.GetParams())
-			hints.RenderResult(c, hints.Login02)
+			RenderResult(c, Login02, StatusText[Login02])
 			return
 		}
 
 		openId, found := result.GetString("open_id")
 		if found == false {
 			sgxLogger.Warnf("callback result map not found `open_id`. result = %s", result)
-			hints.RenderResult(c, hints.Login02)
+			RenderResult(c, Login02, StatusText[Login02])
 			return
 		}
 
 		base64Token := token.New(pid, openId, config.Salt).ToBase64()
-		hints.RenderResult(c, code.OK, base64Token)
+		RenderResult(c, code.OK, base64Token)
 	})
 }
 
@@ -119,13 +123,13 @@ func (p *Controller) serverList(c *sgxGin.Context) {
 
 	if pid < 1 {
 		sgxLogger.Warnf("if pid < 1 {. params=%v", c.GetParams())
-		hints.RenderResult(c, hints.Service002)
+		RenderResult(c, Service002, StatusText[Service002])
 		return
 	}
 
 	areaGroup, found := data2.AreaGroupConfig.Get(pid)
 	if found == false {
-		hints.RenderResult(c, hints.Service002)
+		RenderResult(c, Service002, StatusText[Service002])
 		return
 	}
 
@@ -147,7 +151,7 @@ func (p *Controller) serverList(c *sgxGin.Context) {
 		}
 	}
 
-	hints.RenderResult(c, code.OK, dataList)
+	RenderResult(c, code.OK, dataList)
 }
 
 // severList 区服列表
@@ -157,6 +161,6 @@ func (p *Controller) pidList(c *sgxGin.Context) {
 		Pids []int32 `json:"pids"`
 	}{}
 	pidList.Pids = data2.SdkConfig.GetPidList()
-	hints.RenderResult(c, code.OK, pidList)
+	RenderResult(c, code.OK, pidList)
 
 }

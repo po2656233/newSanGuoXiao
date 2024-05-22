@@ -67,14 +67,14 @@ func (p *ActorAgent) login(session *cproto.Session, req *pb2.LoginRequest) {
 		return
 	}
 	// 根据token带来的sdk参数，从中心节点获取uid
-	resp, errCode := rpc.SendData(p.App(), rpc.SourcePath, rpc.AccountActor, rpc.CenterType, &pb2.User{
+	resp, errCode := rpc.SendData(p.App(), rpc.SourcePath, rpc.AccountActor, rpc.CenterType, &pb2.GetUserIDReq{
 		SdkId:  sdkRow.SdkId,
 		Pid:    userToken.PID,
 		OpenId: userToken.OpenID,
 	})
 
-	rsp := resp.(*pb2.Int64)
-	uid := rsp.Value
+	rsp := resp.(*pb2.GetUserIDResp)
+	uid := rsp.Uid
 	if uid == 0 || code.IsFail(errCode) {
 		agent.ResponseCode(session, hints.Login07, true)
 		return

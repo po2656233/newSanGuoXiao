@@ -1,22 +1,102 @@
 [
   {
-    "areaId": 1,
-    "areaName": "1区",
+    "areaId": 11,
+    "areaName": "华东1区",
     "gate" : "127.0.0.1:10010"
   },
   {
-    "areaId": 2,
-    "areaName": "2区",
+    "areaId": 12,
+    "areaName": "华东2区",
     "gate" : "127.0.0.1:10010"
   },
   {
-    "areaId": 3,
-    "areaName": "3区",
+    "areaId": 13,
+    "areaName": "华东3区",
     "gate" : "127.0.0.1:10010"
   },
   {
-    "areaId": 4,
-    "areaName": "4区",
+    "areaId": 14,
+    "areaName": "华东4区",
+    "gate" : "127.0.0.1:10010"
+  },
+  {
+    "areaId": 21,
+    "areaName": "华南1区",
+    "gate" : "127.0.0.1:10010"
+  },
+  {
+    "areaId": 22,
+    "areaName": "华南2区",
+    "gate" : "127.0.0.1:10010"
+  },
+  {
+    "areaId": 23,
+    "areaName": "华南3区",
+    "gate" : "127.0.0.1:10010"
+  },
+  {
+    "areaId": 24,
+    "areaName": "华南4区",
+    "gate" : "127.0.0.1:10010"
+  },
+  {
+    "areaId": 31,
+    "areaName": "华中1区",
+    "gate" : "127.0.0.1:10010"
+  },
+  {
+    "areaId": 32,
+    "areaName": "华中2区",
+    "gate" : "127.0.0.1:10010"
+  },
+  {
+    "areaId": 33,
+    "areaName": "华中3区",
+    "gate" : "127.0.0.1:10010"
+  },
+  {
+    "areaId": 34,
+    "areaName": "华中4区",
+    "gate" : "127.0.0.1:10010"
+  },
+  {
+    "areaId": 41,
+    "areaName": "华西1区",
+    "gate" : "127.0.0.1:10010"
+  },
+  {
+    "areaId": 42,
+    "areaName": "华西2区",
+    "gate" : "127.0.0.1:10010"
+  },
+  {
+    "areaId": 43,
+    "areaName": "华西3区",
+    "gate" : "127.0.0.1:10010"
+  },
+  {
+    "areaId": 44,
+    "areaName": "华西4区",
+    "gate" : "127.0.0.1:10010"
+  },
+  {
+    "areaId": 51,
+    "areaName": "华北1区",
+    "gate" : "127.0.0.1:10010"
+  },
+  {
+    "areaId": 52,
+    "areaName": "华北2区",
+    "gate" : "127.0.0.1:10010"
+  },
+  {
+    "areaId": 53,
+    "areaName": "华北3区",
+    "gate" : "127.0.0.1:10010"
+  },
+  {
+    "areaId": 54,
+    "areaName": "华北4区",
     "gate" : "127.0.0.1:10010"
   }
 ]

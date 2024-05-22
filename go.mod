@@ -5,7 +5,6 @@ go 1.21.4
 require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/goburrow/cache v0.1.4
-	github.com/gogo/protobuf v1.3.2
 	github.com/golang/protobuf v1.5.4
 	github.com/po2656233/superplace v1.0.25
 	github.com/spf13/cast v1.6.0
