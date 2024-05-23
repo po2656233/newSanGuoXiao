@@ -3,6 +3,7 @@ package center
 import (
 	"github.com/po2656233/superplace"
 	"github.com/po2656233/superplace/components/cron"
+	superGORM "github.com/po2656233/superplace/components/gorm"
 	"sanguoxiao/internal/data"
 	"sanguoxiao/nodes/center/db"
 	"sanguoxiao/nodes/center/module/account"
@@ -20,6 +21,7 @@ func Run(profileFilePath, nodeId string) {
 	app.Register(superCron.New())
 	app.Register(data.New())
 	app.Register(db.New())
+	app.Register(superGORM.NewComponent())
 
 	app.AddActors(
 		&account.ActorAccount{},

@@ -1,0 +1,58 @@
+package {{.Name}}
+
+import (
+	"server/conf"
+	. "server/manger"
+	_ "server/sql/mysql" //仅仅希望导入 包内的init函数
+	"sync"
+)
+
+// BrTuitongziGame 继承于GameItem
+type {{.Name}}Game struct {
+}
+
+// NewGame 创建实例
+func NewGame(game *Game) *{{.Name}}Game {
+	p := &{{.Name}}Game{
+		Game: game,
+	}
+
+	p.Config = conf.YamlObj
+	p.Init()
+	return p
+}
+
+// Init 初始化信息
+func (self *{{.Name}}Game) Init() {
+
+}
+
+// Scene 场 景
+func (self *{{.Name}}Game) Scene(args []interface{}) {
+
+}
+
+// Start 开 始
+func (self *{{.Name}}Game) Start(args []interface{}) {
+
+}
+
+// Playing 游 戏
+func (self *{{.Name}}Game) Playing(args []interface{}) {
+
+}
+
+// Over 结 算
+func (self *{{.Name}}Game) Over(args []interface{}) {
+
+}
+
+// UpdateInfo 更新信息
+func (self *{{.Name}}Game) UpdateInfo(args []interface{}) {
+
+}
+
+// SuperControl 超级控制 在检测到没真实玩家时,且处于空闲状态时,自动关闭
+func (self *{{.Name}}Game) SuperControl(args []interface{}) {
+
+}

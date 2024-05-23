@@ -127,6 +127,41 @@
       "address": "127.0.0.1:6379",
       "password": "",
       "db": 7
+    },
+    "mysql": {
+      "dbUser":"",
+      "dbPassword":"",
+      "dbAddress":"",
+      "dbPort":"",
+      "dbName":""
     }
+  },
+  "db": {
+    "center_db_group": [
+      {
+        "enable": true,
+        "db_id": "center_db_1",
+        "db_name": "sgx_center",
+        "host": "127.0.0.1:3306",
+        "user_name": "root",
+        "password": "ko8899110",
+        "max_idle_connect": 4,
+        "max_open_connect": 8,
+        "log_mode": true
+      }
+    ],
+    "game_db_group": [
+      {
+        "enable": true,
+        "db_id": "game_db_1",
+        "db_name": "sanguoxiao",
+        "host": "127.0.0.1:3306",
+        "user_name": "root",
+        "password": "ko8899110",
+        "max_idle_connect": 4,
+        "max_open_connect": 8,
+        "log_mode": true
+      }
+    ]
   }
 }
