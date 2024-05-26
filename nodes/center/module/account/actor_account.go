@@ -5,6 +5,7 @@ import (
 	cactor "github.com/po2656233/superplace/net/actor"
 	"sanguoxiao/internal/hints"
 	"sanguoxiao/internal/protocol/gofile"
+	"sanguoxiao/internal/rpc"
 	db2 "sanguoxiao/nodes/center/db"
 	"strings"
 )
@@ -44,7 +45,10 @@ func (p *ActorAccount) RegisterReq(req *pb.RegisterReq) (*pb.RegisterResp, int32
 	}
 
 	db2.DevAccountRegister(accountName, password, req.SecurityCode)
-
+	app := p.App()
+	target := rpc.GetTargetPath(app, ".db", rpc.CenterType)
+	errCode := p.App().ActorSystem().Call(rpc.SourcePath, target, "Register", req)
+	_ = errCode
 	return &pb.RegisterResp{
 		Info: &pb.UserInfo{
 			UserID: 10,

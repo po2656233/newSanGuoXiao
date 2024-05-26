@@ -8,6 +8,7 @@ import (
 	"sanguoxiao/nodes/center"
 	"sanguoxiao/nodes/game"
 	"sanguoxiao/nodes/gate"
+	"sanguoxiao/nodes/leaf"
 	"sanguoxiao/nodes/master"
 	"sanguoxiao/nodes/web"
 )
@@ -23,6 +24,7 @@ func main() {
 			webCommand(),
 			gateCommand(),
 			gameCommand(),
+			leafCommand(), //游戏服
 		},
 	}
 
@@ -107,6 +109,20 @@ func gameCommand() *cli.Command {
 		Action: func(c *cli.Context) error {
 			path, node := getParameters(c)
 			game.Run(path, node)
+			return nil
+		},
+	}
+}
+
+func leafCommand() *cli.Command {
+	return &cli.Command{
+		Name:      "leaf",
+		Usage:     "run leaf node",
+		UsageText: "node leaf --path=./examples/config/profile-gc.json --node=9800",
+		Flags:     getFlag(),
+		Action: func(c *cli.Context) error {
+			path, node := getParameters(c)
+			leaf.Run(path, node)
 			return nil
 		},
 	}

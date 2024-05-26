@@ -4,16 +4,17 @@ package main
 生成sql对应的model结构数据 至sql/model目录
 */
 import (
-	sgxLogger "github.com/po2656233/superplace/logger"
 	gmysql "gorm.io/driver/mysql"
 	"gorm.io/gen"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
+	"log"
 	"os"
 	"strings"
 )
 
-const sqlModelDir = "internal/sqlmodel/"
+const sqlModelDir = "internal/"
+const modelPkgPath = "sqlmodel"
 
 // 请清空 [sqlmodel/model]目录下的文件,再执行
 func main() {
@@ -48,18 +49,19 @@ func GenModel(outDir string, db *gorm.DB) {
 	fileInfos, err := os.ReadDir(outDir)
 	if err != nil {
 		if err = os.Mkdir(outDir, 0755); err != nil {
-			sgxLogger.Error("生成[%v]目录失败 err%v", outDir, err)
+			log.Printf("生成[%v]目录失败 err%v", outDir, err)
 			return
 		}
 	}
 	if 0 < len(fileInfos) {
-		sgxLogger.Error("[%v]目录下已有model文件. 如需生成,请清空目录下的所有model文件!!!", outDir)
+		log.Printf("[%v]目录下已有model文件. 如需生成,请清空目录下的所有model文件!!!", outDir)
 		//return
 	}
 	// 生成model数据 	从当前数据库的所有表生成结构
 	g := gen.NewGenerator(gen.Config{
-		OutPath: outDir,
-		Mode:    gen.WithDefaultQuery | gen.WithQueryInterface | gen.WithoutContext,
+		OutPath:      outDir,
+		ModelPkgPath: outDir + modelPkgPath,
+		Mode:         gen.WithDefaultQuery | gen.WithQueryInterface | gen.WithoutContext,
 		//FieldNullable:     false, // generate pointer when field is nullable
 		//FieldCoverable:    true,  // generate pointer when field has default value
 		//FieldWithIndexTag: true,  // generate with gorm index tag

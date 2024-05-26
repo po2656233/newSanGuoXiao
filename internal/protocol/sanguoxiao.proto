@@ -1,0 +1,86 @@
+syntax = "proto3";
+option go_package = "/pb";
+package pb;
+import "game.proto";
+import "player.proto";
+enum Piece {
+  NoPiece = 0;
+  Jin = 1;   //金
+  Mu = 2;    //木
+  Shui = 3;  //水
+  Huo = 4;   //火
+  Tu = 5;    //土
+  Yao = 6;   //药
+}
+// 武将
+message WujiangInfo {
+  int32 iD = 1;
+  int64 healthPoint = 2;        // 当前体力值
+  int64 healthPointLimit = 3;   // 体力值上限
+  int64 damagePoint = 4;        // 攻击力
+  int64 armorPoint = 5;         // 防御力
+  string name = 6;              // 武将名称
+//  int32 sex = 7;                // 武将性别
+}
+// 格子
+message Grid {
+  int32 row = 1;    // 所在排
+  int32 col = 2;    // 所在列
+  Piece core = 3;   // 实际子项
+}
+// 棋盘
+message BoardInfo {
+  repeated Grid  cells = 1; // 所有格子
+}
+//三国消玩家信息
+message SanguoxiaoPlayer {
+  PlayerInfo  myInfo = 1;               // 个人信息
+  repeated WujiangInfo all = 2;         // 所有武将
+  repeated WujiangInfo team = 3;        // 出场武将 至少一个
+}
+//场景
+message SanguoxiaoSceneResp{
+  int64 timeStamp = 1;              // 时间戳
+  string inning = 2;                // 牌局号
+  BoardInfo board = 3;              // 方格盘信息
+  SanguoxiaoPlayer allPlayers = 4;  // 玩家列表
+}
+// 状态-选择武将
+message SanguoxiaoStateChooseResp {
+  TimeInfo times = 1;
+}
+// 状态-玩家操作
+message SanguoxiaoStatePlayingResp {
+  TimeInfo times = 1;
+  int64 userID = 2;
+}
+// 状态-方格消除
+message SanguoxiaoStateEraseResp {
+  TimeInfo times = 1;
+  BoardInfo nowBoard = 2;   // 当前盘子信息
+}
+// 状态-游戏结算
+message SanguoxiaoStateOverResp {
+  TimeInfo times = 1;
+  int64 winID = 2;
+  int64 loseID = 3;
+  int64 awardId = 4; //奖品ID 对应商品(GoodsInfo)ID
+}
+// 选择武将
+message SanguoxiaoChooseReq{
+  repeated WujiangInfo team = 1;        // 出场武将 至少一个
+}
+message SanguoxiaoChooseResp{
+  int64 userID = 1;
+  repeated WujiangInfo team = 2;        // 出场武将 至少一个
+}
+// 交换
+message SanguoxiaoSwapReq{
+  Grid origin = 1;        //原先的格子
+  Grid target = 2;        //移至的目标格子
+}
+message SanguoxiaoSwapResp{
+  int64 userID = 1;
+  Grid origin = 2;        //原先的格子
+  Grid target = 3;        //移至的目标格子
+}

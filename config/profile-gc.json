@@ -35,6 +35,9 @@
         "node_id": "gc-center",
         "address": "",
         "__settings__": {
+          "db_id_list" : {
+            "center_db_id": "center_db_1"
+          },
           "ref_logger": "center_log"
         },
         "enable": true
@@ -66,6 +69,18 @@
     "game": [
       {
         "node_id": "10001",
+        "__settings__": {
+          "db_id_list" : {
+            "game_db_id": "game_db_1"
+          },
+          "ref_logger": "game_log"
+        },
+        "enable": true
+      }
+    ],
+    "leaf": [
+      {
+        "node_id": "9800",
         "__settings__": {
           "db_id_list" : {
             "game_db_id": "game_db_1"
@@ -127,13 +142,6 @@
       "address": "127.0.0.1:6379",
       "password": "",
       "db": 7
-    },
-    "mysql": {
-      "dbUser":"",
-      "dbPassword":"",
-      "dbAddress":"",
-      "dbPort":"",
-      "dbName":""
     }
   },
   "db": {

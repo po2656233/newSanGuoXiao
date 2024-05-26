@@ -77,11 +77,12 @@ func CreateGame(gameName, fileName, data string) {
 }
 
 func main() {
-	//fmt.Println("getTmpDir（当前系统临时目录） = ", getTmpDir())
-	//fmt.Println("getCurrentAbPathByExecutable（仅支持go build） = ", getCurrentAbPathByExecutable())
-	//fmt.Println("getCurrentAbPathByCaller（仅支持go run） = ", getCurrentAbPathByCaller())
-	//fmt.Println("getCurrentAbPath（最终方案-全兼容） = ", getCurrentAbPath())
-	fileName := filepath.Join(getCurrentAbPath(), "game.tmpl")
+	fmt.Println("getTmpDir（当前系统临时目录） = ", getTmpDir())
+	fmt.Println("getCurrentAbPathByExecutable（仅支持go build） = ", getCurrentAbPathByExecutable())
+	fmt.Println("getCurrentAbPathByCaller（仅支持go run） = ", getCurrentAbPathByCaller())
+	fmt.Println("getCurrentAbPath（最终方案-全兼容） = ", getCurrentAbPath())
+	pathDir := getCurrentAbPathByCaller()
+	fileName := filepath.Join(pathDir, "game.tmpl")
 	f, err := os.ReadFile(fileName)
 	if err != nil {
 		fmt.Printf("ReadFile 文件路径:%s err:%v", fileName, err)
@@ -90,12 +91,12 @@ func main() {
 	// 创建所需的游戏
 	gameName := "Sanguoxiao"
 	lowName := strings.ToLower(gameName)
-	if err = os.Mkdir(filepath.Join(getCurrentAbPath(), lowName), os.ModePerm); err != nil {
+	if err = os.Mkdir(filepath.Join(pathDir, lowName), os.ModePerm); err != nil {
 		fmt.Printf("Mkdir 文件路径:%s err:%v", lowName, err)
 		return
 	}
 
-	gameFile := filepath.Join(getCurrentAbPath(), lowName, lowName+".go")
+	gameFile := filepath.Join(pathDir, lowName, lowName+".go")
 	CreateGame(gameName, gameFile, string(f))
 
 }

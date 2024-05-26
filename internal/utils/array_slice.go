@@ -9,6 +9,18 @@ import (
 	"unsafe"
 )
 
+// CopyInsert 插入某元素
+func CopyInsert(slice interface{}, pos int, value interface{}) interface{} {
+	v := reflect.ValueOf(slice)
+	if v.Kind() != reflect.Slice {
+		return nil
+	}
+	v = reflect.Append(v, reflect.ValueOf(value))
+	reflect.Copy(v.Slice(pos+1, v.Len()), v.Slice(pos, v.Len()))
+	v.Index(pos).Set(reflect.ValueOf(value))
+	return v.Interface()
+}
+
 func BytesToRune(byteArray []byte) []rune {
 	runeArray := make([]rune, 0)
 	for _, b := range byteArray {
@@ -31,6 +43,10 @@ func JSON2PB(formJsonStr string, toPb proto.Message) error {
 	return json.Unmarshal([]byte(formJsonStr), &toPb)
 }
 
+// BytesToPB proto的转化
+func BytesToPB(data []byte, toPb proto.Message) error {
+	return proto.Unmarshal(data, toPb)
+}
 func PB2JSON(fromPb proto.Message, toJsonStr string) error {
 	// pb转json字符串
 	jsonStr, err := json.Marshal(fromPb)

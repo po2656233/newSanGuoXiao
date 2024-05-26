@@ -85,7 +85,7 @@ func SendData(app facade.IApplication, source, actorID, nodeType string, req pro
 		respTypeName = fullName[:fSize-r2Size] + Response2
 	}
 
-	target := getTargetPath(app, actorID, nodeType)
+	target := GetTargetPath(app, actorID, nodeType)
 	if respTypeName != "" {
 		msgType, err := protoregistry.GlobalTypes.FindMessageByName(protoreflect.FullName(respTypeName))
 		if err != nil {
@@ -102,7 +102,7 @@ func SendData(app facade.IApplication, source, actorID, nodeType string, req pro
 	return resp, errCode
 }
 
-func getTargetPath(app facade.IApplication, actorID, nodeType string) string {
+func GetTargetPath(app facade.IApplication, actorID, nodeType string) string {
 	list := app.Discovery().ListByType(nodeType)
 	if len(list) == 0 {
 		return ""
