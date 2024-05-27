@@ -3,6 +3,7 @@ package leaf
 import (
 	"github.com/po2656233/superplace"
 	sgxCron "github.com/po2656233/superplace/components/cron"
+	sgxGops "github.com/po2656233/superplace/components/gops"
 	sgxSnowflake "github.com/po2656233/superplace/extend/snowflake"
 	cstring "github.com/po2656233/superplace/extend/string"
 	sgxUtils "github.com/po2656233/superplace/extend/utils"
@@ -24,7 +25,7 @@ func Run(profileFilePath, nodeId string) {
 	app := superplace.Configure(profileFilePath, nodeId, false, superplace.Cluster)
 
 	// diagnose
-	//app.Register(sgxGops.New())
+	app.Register(sgxGops.New())
 	// 注册调度组件
 	app.Register(sgxCron.New())
 	// 注册数据配置组件
@@ -34,7 +35,7 @@ func Run(profileFilePath, nodeId string) {
 	// 注册db组件
 	//app.Register(db.New())
 
-	// 注册db组件
+	// 注册jettengame组件
 	app.Register(jettengame.New())
 
 	app.Startup()
