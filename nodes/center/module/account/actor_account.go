@@ -44,17 +44,13 @@ func (p *ActorAccount) RegisterReq(req *pb.RegisterReq) (*pb.RegisterResp, int32
 		return nil, hints.Register02
 	}
 
-	db2.DevAccountRegister(accountName, password, req.SecurityCode)
+	db2.DevAccountRegister(accountName, password, req.Address)
 	app := p.App()
 	target := rpc.GetTargetPath(app, ".db", rpc.CenterType)
-	errCode := p.App().ActorSystem().Call(rpc.SourcePath, target, "Register", req)
+	resp := &pb.RegisterResp{}
+	errCode := p.App().ActorSystem().CallWait(rpc.SourcePath, target, "Register", req, resp)
 	_ = errCode
-	return &pb.RegisterResp{
-		Info: &pb.UserInfo{
-			UserID: 10,
-			Name:   accountName,
-		},
-	}, code.OK
+	return resp, code.OK
 }
 
 // LoginReq 根据帐号名获取开发者帐号表

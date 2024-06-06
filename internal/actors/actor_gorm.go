@@ -2,6 +2,7 @@ package actors
 
 import (
 	"errors"
+	"fmt"
 	superGorm "github.com/po2656233/superplace/components/gorm"
 	clog "github.com/po2656233/superplace/logger"
 	cactor "github.com/po2656233/superplace/net/actor"
@@ -149,7 +150,7 @@ func (self *ActorDB) CheckUser(name string) (uid int64) {
 }
 
 // /////////////////////////////////////////////////////////
-func (self *ActorDB) Register(req *pb.RegisterReq) {
+func (self *ActorDB) Register(req *pb.RegisterReq) (*pb.RegisterResp, error) {
 	m := req
 	identity := uuid.NewV4().String()
 	user := sqlmodel.User{
@@ -166,17 +167,26 @@ func (self *ActorDB) Register(req *pb.RegisterReq) {
 		Machinecode:  m.MachineCode,
 		Referralcode: m.InvitationCode,
 		//Serveraddr:   serverAddr,
-		Face:   int32(m.FaceID),
-		Gender: int32(m.Gender),
-		Age:    int32(m.Age),
+		Face:   m.FaceID,
+		Gender: m.Gender,
+		Age:    m.Age,
 		//Vip:          LessVIP,
 		//Level:        LessLevel,
-		//Platformid:   int32(m.PlatformID),
+		Agentid: m.PlatformID,
 		//Agentid:      agentID,
 		//Withdraw:     INVALID,
 		//Deposit:      LessMoney,
 		//Money:        LessMoney,
 	}
 	clog.Warnf("ooook req:%v", req)
-	self.AddUser(user)
+	uid, err := self.AddUser(user)
+	if err != nil {
+		uid = -1
+		clog.Errorf("[actor_gorm] Register uid:%v err:%v", uid, err)
+	}
+	resp := &pb.RegisterResp{
+		OpenId: fmt.Sprintf("%d", uid),
+	}
+
+	return resp, err
 }

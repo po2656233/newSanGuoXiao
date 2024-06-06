@@ -9,6 +9,7 @@ import (
 	sgxUtils "github.com/po2656233/superplace/extend/utils"
 	checkCenter "sanguoxiao/internal/component/check_center"
 	"sanguoxiao/internal/component/jettengame"
+	"sanguoxiao/internal/component/jettengame/game"
 	"sanguoxiao/internal/data"
 )
 
@@ -37,6 +38,10 @@ func Run(profileFilePath, nodeId string) {
 
 	// 注册jettengame组件
 	app.Register(jettengame.New())
+
+	app.AddActors(
+		game.GameActor,
+	)
 
 	app.Startup()
 }

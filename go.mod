@@ -11,7 +11,7 @@ require (
 	github.com/golang/protobuf v1.5.0
 	github.com/nacos-group/nacos-sdk-go v1.1.4
 	github.com/po2656233/goleaf v0.0.0-20231116110920-70f6a4ed4509
-	github.com/po2656233/superplace v1.1.1
+	github.com/po2656233/superplace v1.1.3
 	github.com/po2656233/superplace/components/cron v0.0.0-20240523134332-34dfe4c9536c
 	github.com/po2656233/superplace/components/data-config v0.0.0-20240523134332-34dfe4c9536c
 	github.com/po2656233/superplace/components/gin v0.0.0-20240523134332-34dfe4c9536c

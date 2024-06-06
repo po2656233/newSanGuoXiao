@@ -2,7 +2,7 @@
   "logger": {
     "game_log": {
       "level": "debug",
-      "stack_level": "error",
+      "stack_level": "panic",
       "enable_console": true,
       "enable_write_file": false,
       "max_age": 7,

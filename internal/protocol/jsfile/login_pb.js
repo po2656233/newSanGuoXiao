@@ -7568,7 +7568,6 @@ proto.pb.RegisterResp.prototype.toObject = function(opt_includeInstance) {
  */
 proto.pb.RegisterResp.toObject = function(includeInstance, msg) {
   var obj = {
-    info: (f = msg.getInfo()) && proto.pb.UserInfo.toObject(includeInstance, f),
     sdkid: jspb.Message.getFieldWithDefault(msg, 2, 0),
     pid: jspb.Message.getFieldWithDefault(msg, 3, 0),
     openid: jspb.Message.getFieldWithDefault(msg, 4, ""),
@@ -7610,11 +7609,6 @@ proto.pb.RegisterResp.deserializeBinaryFromReader = function(msg, reader) {
     }
     var field = reader.getFieldNumber();
     switch (field) {
-    case 1:
-      var value = new proto.pb.UserInfo;
-      reader.readMessage(value,proto.pb.UserInfo.deserializeBinaryFromReader);
-      msg.setInfo(value);
-      break;
     case 2:
       var value = /** @type {number} */ (reader.readInt32());
       msg.setSdkid(value);
@@ -7664,14 +7658,6 @@ proto.pb.RegisterResp.prototype.serializeBinary = function() {
  */
 proto.pb.RegisterResp.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
-  f = message.getInfo();
-  if (f != null) {
-    writer.writeMessage(
-      1,
-      f,
-      proto.pb.UserInfo.serializeBinaryToWriter
-    );
-  }
   f = message.getSdkid();
   if (f !== 0) {
     writer.writeInt32(
@@ -7707,39 +7693,6 @@ proto.pb.RegisterResp.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-};
-
-
-/**
- * optional UserInfo info = 1;
- * @return {?proto.pb.UserInfo}
- */
-proto.pb.RegisterResp.prototype.getInfo = function() {
-  return /** @type{?proto.pb.UserInfo} */ (
-    jspb.Message.getWrapperField(this, proto.pb.UserInfo, 1));
-};
-
-
-/** @param {?proto.pb.UserInfo|undefined} value */
-proto.pb.RegisterResp.prototype.setInfo = function(value) {
-  jspb.Message.setWrapperField(this, 1, value);
-};
-
-
-/**
- * Clears the message field making it undefined.
- */
-proto.pb.RegisterResp.prototype.clearInfo = function() {
-  this.setInfo(undefined);
-};
-
-
-/**
- * Returns whether this field is set.
- * @return {boolean}
- */
-proto.pb.RegisterResp.prototype.hasInfo = function() {
-  return jspb.Message.getField(this, 1) != null;
 };
 
 

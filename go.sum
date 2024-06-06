@@ -163,8 +163,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/po2656233/goleaf v0.0.0-20231116110920-70f6a4ed4509 h1:7R5pUlpngyzLBrlqXlufABwMuyIHPwxEbbm0ne18epQ=
 github.com/po2656233/goleaf v0.0.0-20231116110920-70f6a4ed4509/go.mod h1:YGmD8p1A1EuVLQUVCe79L2EmjhmJ44PjTkLzuuv0Sd4=
-github.com/po2656233/superplace v1.1.1 h1:1BoyTvM7nHlpC1K/57nVEYSIG42/qiFN21DqQKBD3Kc=
-github.com/po2656233/superplace v1.1.1/go.mod h1:IGSDsi9V3gutAWUcIAW+DUGWu+G9qPzYD4Mao8o+Nzg=
+github.com/po2656233/superplace v1.1.3 h1:vJJusVrvUJMoToAd1TH6T7eu9lARRS4TnWJSFowhuxQ=
+github.com/po2656233/superplace v1.1.3/go.mod h1:IGSDsi9V3gutAWUcIAW+DUGWu+G9qPzYD4Mao8o+Nzg=
 github.com/po2656233/superplace/components/cron v0.0.0-20240523134332-34dfe4c9536c h1:deqRvzgfy/EYtY2pZaexNBa9CbPa+99eenpAU+4gIkU=
 github.com/po2656233/superplace/components/cron v0.0.0-20240523134332-34dfe4c9536c/go.mod h1:Dzxzba4ftsJYaha+lKDPVhWd4eicBnt7HXhbfooqPjA=
 github.com/po2656233/superplace/components/data-config v0.0.0-20240523134332-34dfe4c9536c h1:tggHjOuc2Z7TBTgw5zuAMT7J2HaZU+l3rK79YlgKaNQ=

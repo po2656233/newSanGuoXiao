@@ -5,6 +5,7 @@ import (
 	"github.com/po2656233/superplace/const/code"
 	sgxString "github.com/po2656233/superplace/extend/string"
 	sgxLogger "github.com/po2656233/superplace/logger"
+	"math/rand"
 	data2 "sanguoxiao/internal/data"
 	. "sanguoxiao/internal/hints"
 	pb "sanguoxiao/internal/protocol/gofile"
@@ -52,7 +53,21 @@ func (p *Controller) register(c *sgxGin.Context) {
 		Address:  c.ClientIP(),
 	})
 	if statusCode == code.OK {
-		RenderResult(c, statusCode, data)
+		resp, ok := data.(*pb.RegisterResp)
+		if ok {
+			plist := data2.SdkConfig.GetPidList()
+			pid := int32(0)
+			size := len(plist)
+			if 0 < size {
+				index := rand.Int() % len(plist)
+				pid = plist[index]
+			}
+			config := data2.SdkConfig.Get(pid)
+			resp.SdkId = config.SdkId
+			resp.Pid = pid
+			resp.Ip = c.ClientIP()
+		}
+		RenderResult(c, statusCode, resp)
 		return
 	}
 	RenderResult(c, statusCode, StatusText[int(statusCode)])

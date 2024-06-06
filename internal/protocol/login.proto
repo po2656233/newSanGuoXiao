@@ -37,15 +37,6 @@ enum HeroType {
   HUO = 4;        //火
   TU = 5;         //土
 }
-////游戏场景
-//enum GameScene {
-//  Free = 0;           //空闲
-//  Start = 1;          //开始
-//  Playing = 2;        //游戏中
-//  Opening = 3;        //开奖
-//  Over = 4;           //结算
-//  Closing = 5;        //关闭
-//}
 //桌子状态
 enum TableState {
   InitTB = 0;     //初始化
@@ -270,10 +261,10 @@ message RegisterReq{
   string address = 14;     //住址
 }
 message RegisterResp{
-  UserInfo info = 1;
+//  UserInfo info = 1;
   int32  sdkId = 2;    // sdk id
   int32  pid = 3;      // 包id
-  string openId = 4;   // sdk的openid
+  string openId = 4;   // sdk的openid 即uid
   int32  serverId = 5; // 所在游戏服id
   string ip = 6;       // 请求ip
 }
