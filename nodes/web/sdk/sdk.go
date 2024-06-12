@@ -5,7 +5,7 @@ import (
 	sgxString "github.com/po2656233/superplace/extend/string"
 	cfacade "github.com/po2656233/superplace/facade"
 	sgxError "github.com/po2656233/superplace/logger/error"
-	"sanguoxiao/internal/data"
+	"sanguoxiao/internal/conf"
 )
 
 // sdk平台类型
@@ -21,8 +21,8 @@ var (
 type (
 	Invoke interface {
 		SdkId() int32                                                // sdk id
-		Login(config *data.SdkRow, params Params, callback Callback) // Login 登录验证接口
-		PayCallback(config *data.SdkRow, c *sgxGin.Context)          // PayCallback 支付回调接口
+		Login(config *conf.SdkRow, params Params, callback Callback) // Login 登录验证接口
+		PayCallback(config *conf.SdkRow, c *sgxGin.Context)          // PayCallback 支付回调接口
 	}
 
 	Params map[string]string

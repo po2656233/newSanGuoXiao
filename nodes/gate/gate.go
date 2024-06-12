@@ -9,7 +9,7 @@ import (
 	"github.com/po2656233/superplace/net/parser/pomelo"
 	"github.com/po2656233/superplace/net/parser/simple"
 	"sanguoxiao/internal/component/check_center"
-	"sanguoxiao/internal/data"
+	"sanguoxiao/internal/conf"
 	"time"
 )
 
@@ -33,7 +33,7 @@ func Run(profileFilePath, nodeId string) {
 	// 注册检则中心服组件，用于检则中心服是否先启动
 	app.Register(checkCenter.New())
 	// 注册数据配表组件，具体详见data-config的使用方法和参数配置
-	app.Register(data.New())
+	app.Register(conf.New())
 
 	//启动sgx引擎
 	app.Startup()
@@ -49,7 +49,7 @@ func buildPomeloParser(app *superplace.AppBuilder) cfacade.INetParser {
 	//当有新连接创建Agent时，启动一个自定义(ActorAgent)的子actor
 	agentActor.SetOnNewAgent(func(newAgent *pomelo.Agent) {
 		childActor := &ActorAgent{}
-		newAgent.AddOnClose(childActor.onSessionClose)
+		newAgent.AddOnClose(childActor.onPomeloSessionClose)
 		_, _ = agentActor.Child().Create(newAgent.SID(), childActor) // actorID == sid
 	})
 
@@ -67,7 +67,7 @@ func buildSimpleParser(app *superplace.AppBuilder) cfacade.INetParser {
 
 	agentActor.SetOnNewAgent(func(newAgent *simple.Agent) {
 		childActor := &ActorAgent{}
-		//newAgent.AddOnClose(childActor.onSessionClose)
+		newAgent.AddOnClose(childActor.onSimpleSessionClose)
 		_, _ = agentActor.Child().Create(newAgent.SID(), childActor)
 	})
 

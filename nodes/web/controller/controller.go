@@ -6,7 +6,7 @@ import (
 	sgxString "github.com/po2656233/superplace/extend/string"
 	sgxLogger "github.com/po2656233/superplace/logger"
 	"math/rand"
-	data2 "sanguoxiao/internal/data"
+	data2 "sanguoxiao/internal/conf"
 	. "sanguoxiao/internal/hints"
 	pb "sanguoxiao/internal/protocol/gofile"
 	"sanguoxiao/internal/rpc"

@@ -7,7 +7,7 @@ import (
 	cstring "github.com/po2656233/superplace/extend/string"
 	sgxLogger "github.com/po2656233/superplace/logger"
 	cerror "github.com/po2656233/superplace/logger/error"
-	"sanguoxiao/internal/data"
+	"sanguoxiao/internal/conf"
 	"sanguoxiao/internal/hints"
 	"sanguoxiao/internal/session_key"
 )
@@ -21,7 +21,7 @@ func (quickSdk) SdkId() int32 {
 	return QuickSDK
 }
 
-func (quickSdk) Login(config *data.SdkRow, params Params, callback Callback) {
+func (quickSdk) Login(config *conf.SdkRow, params Params, callback Callback) {
 	token, found := params.GetString("token")
 	if found == false || cstring.IsBlank(token) {
 		err := cerror.Error("token is nil")
@@ -59,7 +59,7 @@ func (quickSdk) Login(config *data.SdkRow, params Params, callback Callback) {
 	})
 }
 
-func (s quickSdk) PayCallback(config *data.SdkRow, c *sgxGin.Context) {
+func (s quickSdk) PayCallback(config *conf.SdkRow, c *sgxGin.Context) {
 	// TODO 这里实现quick sdk 支付回调的逻辑
 	c.RenderHTML("FAIL")
 }

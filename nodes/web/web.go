@@ -7,7 +7,7 @@ import (
 	sgxGin "github.com/po2656233/superplace/components/gin"
 	sgxFile "github.com/po2656233/superplace/extend/file"
 	"sanguoxiao/internal/component/check_center"
-	"sanguoxiao/internal/data"
+	"sanguoxiao/internal/conf"
 	"sanguoxiao/nodes/web/controller"
 	"sanguoxiao/nodes/web/sdk"
 )
@@ -23,7 +23,7 @@ func Run(profileFilePath, nodeId string) {
 	app.Register(checkCenter.New())
 
 	// 注册数据配表组件
-	app.Register(data.New())
+	app.Register(conf.New())
 
 	// 加载http server组件
 	app.Register(httpServerComponent(app.Address()))

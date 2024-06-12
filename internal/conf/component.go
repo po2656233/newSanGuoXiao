@@ -1,4 +1,4 @@
-package data
+package conf
 
 import (
 	dataConf "github.com/po2656233/superplace/components/data-config"

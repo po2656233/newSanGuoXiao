@@ -1,4 +1,4 @@
-package data
+package conf
 
 import (
 	cstring "github.com/po2656233/superplace/extend/string"

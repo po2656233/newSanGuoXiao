@@ -6,7 +6,7 @@ import (
 	sgxString "github.com/po2656233/superplace/extend/string"
 	cfacade "github.com/po2656233/superplace/facade"
 	sgxError "github.com/po2656233/superplace/logger/error"
-	"sanguoxiao/internal/data"
+	"sanguoxiao/internal/conf"
 	"sanguoxiao/internal/hints"
 	pb "sanguoxiao/internal/protocol/gofile"
 	"sanguoxiao/internal/rpc"
@@ -20,7 +20,7 @@ func (devSdk) SdkId() int32 {
 	return DevMode
 }
 
-func (p devSdk) Login(_ *data.SdkRow, params Params, callback Callback) {
+func (p devSdk) Login(_ *conf.SdkRow, params Params, callback Callback) {
 	accountName, _ := params.GetString("account")
 	password, _ := params.GetString("password")
 
@@ -44,5 +44,5 @@ func (p devSdk) Login(_ *data.SdkRow, params Params, callback Callback) {
 	})
 }
 
-func (devSdk) PayCallback(_ *data.SdkRow, _ *sgxGin.Context) {
+func (devSdk) PayCallback(_ *conf.SdkRow, _ *sgxGin.Context) {
 }

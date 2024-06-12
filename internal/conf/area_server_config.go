@@ -1,4 +1,4 @@
-package data
+package conf
 
 import (
 	sgxLogger "github.com/po2656233/superplace/logger"

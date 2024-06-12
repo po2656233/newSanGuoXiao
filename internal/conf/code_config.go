@@ -1,4 +1,4 @@
-package data
+package conf
 
 import (
 	"github.com/po2656233/superplace/const/code"

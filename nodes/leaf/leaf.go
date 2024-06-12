@@ -10,7 +10,7 @@ import (
 	checkCenter "sanguoxiao/internal/component/check_center"
 	"sanguoxiao/internal/component/jettengame"
 	"sanguoxiao/internal/component/jettengame/game"
-	"sanguoxiao/internal/data"
+	"sanguoxiao/internal/conf"
 )
 
 func Run(profileFilePath, nodeId string) {
@@ -30,7 +30,7 @@ func Run(profileFilePath, nodeId string) {
 	// 注册调度组件
 	app.Register(sgxCron.New())
 	// 注册数据配置组件
-	app.Register(data.New())
+	app.Register(conf.New())
 	// 注册检测中心节点组件，确认中心节点启动后，再启动当前节点
 	app.Register(checkCenter.New())
 	// 注册db组件

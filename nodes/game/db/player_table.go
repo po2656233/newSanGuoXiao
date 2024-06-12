@@ -5,7 +5,7 @@ import (
 	sgxTime "github.com/po2656233/superplace/extend/time"
 	clog "github.com/po2656233/superplace/logger"
 	cproto "github.com/po2656233/superplace/net/proto"
-	"sanguoxiao/internal/data"
+	"sanguoxiao/internal/conf"
 	"sanguoxiao/internal/guid"
 	"sanguoxiao/internal/hints"
 	"sanguoxiao/internal/session_key"
@@ -39,7 +39,7 @@ func (p *PlayerTable) InThisServerId() int32 {
 	return p.ServerId
 }
 
-func CreatePlayer(session *cproto.Session, name string, serverId int32, playerInit *data.PlayerInitRow) (*PlayerTable, int32) {
+func CreatePlayer(session *cproto.Session, name string, serverId int32, playerInit *conf.PlayerInitRow) (*PlayerTable, int32) {
 	// 检测是否有重名角色
 	if _, found := PlayerNameIsExist(name); found {
 		return nil, hints.Register05

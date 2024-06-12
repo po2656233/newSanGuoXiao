@@ -1,7 +1,19 @@
 [
   {
     "serverId": 20001,
-    "serverName": "华东1服",
+    "serverName": "东1服",
+    "areaId": 11,
+    "status": 1
+  },
+  {
+    "serverId": 20002,
+    "serverName": "东2服",
+    "areaId": 11,
+    "status": 1
+  },
+  {
+    "serverId": 20003,
+    "serverName": "东3服",
     "areaId": 11,
     "status": 1
   },

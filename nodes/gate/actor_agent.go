@@ -7,8 +7,9 @@ import (
 	clog "github.com/po2656233/superplace/logger"
 	cactor "github.com/po2656233/superplace/net/actor"
 	"github.com/po2656233/superplace/net/parser/pomelo"
+	"github.com/po2656233/superplace/net/parser/simple"
 	cproto "github.com/po2656233/superplace/net/proto"
-	"sanguoxiao/internal/data"
+	"sanguoxiao/internal/conf"
 	"sanguoxiao/internal/hints"
 	pb2 "sanguoxiao/internal/protocol/gofile"
 	"sanguoxiao/internal/rpc"
@@ -61,7 +62,7 @@ func (p *ActorAgent) login(session *cproto.Session, req *pb2.LoginRequest) {
 	}
 
 	// 验证pid是否配置
-	sdkRow := data.SdkConfig.Get(userToken.PID)
+	sdkRow := conf.SdkConfig.Get(userToken.PID)
 	if sdkRow == nil {
 		agent.ResponseCode(session, hints.Login15, true)
 		return
@@ -107,7 +108,7 @@ func (p *ActorAgent) validateToken(base64Token string) (*token.Token, int32) {
 		return nil, hints.Login15
 	}
 
-	platformRow := data.SdkConfig.Get(userToken.PID)
+	platformRow := conf.SdkConfig.Get(userToken.PID)
 	if platformRow == nil {
 		return nil, hints.Login15
 	}
@@ -140,7 +141,27 @@ func (p *ActorAgent) checkGateSession(uid cfacade.UID) {
 }
 
 // onSessionClose  当agent断开时，关闭对应的ActorAgent
-func (p *ActorAgent) onSessionClose(agent *pomelo.Agent) {
+func (p *ActorAgent) onPomeloSessionClose(agent *pomelo.Agent) {
+	session := agent.Session()
+	serverId := session.GetString(sessionKey.ServerID)
+	if serverId == "" {
+		return
+	}
+
+	// 通知game节点关闭session
+	childId := cstring.ToString(session.Uid)
+	if childId != "" {
+		targetPath := cfacade.NewChildPath(serverId, "player", childId)
+		p.Call(targetPath, "sessionClose", nil)
+	}
+
+	// 自己退出
+	p.Exit()
+	clog.Infof("sessionClose path = %s", p.Path())
+}
+
+// onSessionClose  当agent断开时，关闭对应的ActorAgent
+func (p *ActorAgent) onSimpleSessionClose(agent *simple.Agent) {
 	session := agent.Session()
 	serverId := session.GetString(sessionKey.ServerID)
 	if serverId == "" {
