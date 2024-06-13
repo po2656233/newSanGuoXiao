@@ -22,7 +22,7 @@ var (
 		//"game.player.select",  //查询玩家角色
 		//"game.player.create",  //玩家创建角色
 		//"game.player.enter",   //玩家角色进入游戏
-		"leaf.leafgame.enter", //玩家角色进入游戏
+		"leaf.game.enter", //玩家角色进入游戏
 	}
 
 	notLoginRsp = &pb.Int32{
