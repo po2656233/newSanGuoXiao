@@ -10,6 +10,7 @@ import (
 	"github.com/po2656233/superplace/net/parser/simple"
 	cproto "github.com/po2656233/superplace/net/proto"
 	"sanguoxiao/internal/conf"
+	"sanguoxiao/internal/constant"
 	"sanguoxiao/internal/hints"
 	pb2 "sanguoxiao/internal/protocol/gofile"
 	"sanguoxiao/internal/rpc"
@@ -135,7 +136,7 @@ func (p *ActorAgent) checkGateSession(uid cfacade.UID) {
 	members := p.App().Discovery().ListByType(p.App().NodeType(), p.App().NodeId())
 	for _, member := range members {
 		// user是gate.go里自定义的agentActorID
-		actorPath := cfacade.NewPath(member.GetNodeId(), "user")
+		actorPath := cfacade.NewPath(member.GetNodeId(), constant.ActorGate)
 		p.Call(actorPath, pomelo.KickFuncName, rsp)
 	}
 }
@@ -151,7 +152,7 @@ func (p *ActorAgent) onPomeloSessionClose(agent *pomelo.Agent) {
 	// 通知game节点关闭session
 	childId := cstring.ToString(session.Uid)
 	if childId != "" {
-		targetPath := cfacade.NewChildPath(serverId, "player", childId)
+		targetPath := cfacade.NewChildPath(serverId, constant.ActorGame, childId)
 		p.Call(targetPath, "sessionClose", nil)
 	}
 
@@ -171,8 +172,8 @@ func (p *ActorAgent) onSimpleSessionClose(agent *simple.Agent) {
 	// 通知game节点关闭session
 	childId := cstring.ToString(session.Uid)
 	if childId != "" {
-		targetPath := cfacade.NewChildPath(serverId, "player", childId)
-		p.Call(targetPath, "sessionClose", nil)
+		targetPath := cfacade.NewChildPath(serverId, constant.ActorGame, childId)
+		p.Call(targetPath, constant.SessionClose, nil)
 	}
 
 	// 自己退出

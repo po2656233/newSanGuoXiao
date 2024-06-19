@@ -1,7 +1,6 @@
 package gate
 
 import (
-	"encoding/binary"
 	"github.com/po2656233/superplace"
 	sgxGops "github.com/po2656233/superplace/components/gops"
 	cfacade "github.com/po2656233/superplace/facade"
@@ -10,6 +9,7 @@ import (
 	"github.com/po2656233/superplace/net/parser/simple"
 	"sanguoxiao/internal/component/check_center"
 	"sanguoxiao/internal/conf"
+	"sanguoxiao/internal/constant"
 	"time"
 )
 
@@ -25,8 +25,8 @@ func Run(profileFilePath, nodeId string) {
 	)
 
 	// 设置网络数据包解析器
-	netParser := buildPomeloParser(app)
-	//netParser := buildSimpleParser(app)
+	//netParser := buildPomeloParser(app) //停用
+	netParser := buildSimpleParser(app)
 	app.SetNetParser(netParser)
 
 	app.Register(sgxGops.New())
@@ -41,9 +41,9 @@ func Run(profileFilePath, nodeId string) {
 
 func buildPomeloParser(app *superplace.AppBuilder) cfacade.INetParser {
 	// 使用pomelo网络数据包解析器
-	agentActor := pomelo.NewActor("user")
+	agentActor := pomelo.NewActor(constant.ActorGate)
 	//创建一个tcp监听，用于client/robot压测机器人连接网关tcp
-	agentActor.AddConnector(cconnector.NewTCP(":10011"))
+	agentActor.AddConnector(cconnector.NewTCP(constant.TcpAddr))
 	//再创建一个websocket监听，用于h5客户端建立连接
 	agentActor.AddConnector(cconnector.NewWS(app.Address()))
 	//当有新连接创建Agent时，启动一个自定义(ActorAgent)的子actor
@@ -61,8 +61,8 @@ func buildPomeloParser(app *superplace.AppBuilder) cfacade.INetParser {
 
 // 构建简单的网络数据包解析器
 func buildSimpleParser(app *superplace.AppBuilder) cfacade.INetParser {
-	agentActor := simple.NewActor("user")
-	agentActor.AddConnector(cconnector.NewTCP(":10011"))
+	agentActor := simple.NewActor(constant.ActorGate)
+	agentActor.AddConnector(cconnector.NewTCP(constant.TcpAddr))
 	agentActor.AddConnector(cconnector.NewWS(app.Address()))
 
 	agentActor.SetOnNewAgent(func(newAgent *simple.Agent) {
@@ -72,22 +72,32 @@ func buildSimpleParser(app *superplace.AppBuilder) cfacade.INetParser {
 	})
 
 	// 设置大头&小头
-	agentActor.SetEndian(binary.LittleEndian)
+	agentActor.SetEndian(endian)
 	// 设置心跳时间
 	agentActor.SetHeartbeatTime(60 * time.Second)
 	// 设置积压消息数量
 	agentActor.SetWriteBacklog(64)
 
-	// 设置数据路由函数
-	//agentActor.SetOnDataRoute(onSimpleDataRoute)
+	// 设置数据路由函数 (leaf)
+	agentActor.SetOnDataRoute(onSimpleDataRoute)
 
 	// 设置消息节点路由(建议配合data-config组件进行使用)
 	// mid = 1 的消息路由到  gate节点.user的Actor.login函数上
-	agentActor.AddNodeRoute(1, &simple.NodeRoute{
+	agentActor.AddNodeRoute(constant.MIDGate, &simple.NodeRoute{
+		NodeType: constant.NodeTypeGate,
+		ActorID:  constant.ActorGate,
+		FuncName: constant.FuncLogin,
+	})
+	agentActor.AddNodeRoute(constant.MIDGame, &simple.NodeRoute{
+		NodeType: "leaf",
+		ActorID:  "game",
+		//FuncName: "enter",
+	})
+	agentActor.AddNodeRoute(constant.MIDPing, &simple.NodeRoute{
 		NodeType: "gate",
 		ActorID:  "user",
-		FuncName: "login",
+		//FuncName: "enter",
 	})
-
+	GetMsgFunc("internal/component/jettengame/conf/setting/message_id.json")
 	return agentActor
 }
