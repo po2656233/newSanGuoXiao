@@ -6,6 +6,7 @@ import (
 	sgxString "github.com/po2656233/superplace/extend/string"
 	sgxLogger "github.com/po2656233/superplace/logger"
 	"math/rand"
+	"net/http"
 	data2 "sanguoxiao/internal/conf"
 	. "sanguoxiao/internal/hints"
 	pb "sanguoxiao/internal/protocol/gofile"
@@ -37,7 +38,7 @@ func (p *Controller) index(c *sgxGin.Context) {
 // http://127.0.0.1:8089/hello
 func (p *Controller) hello(c *sgxGin.Context) {
 	// 输出json
-	RenderResult(c, code.OK, map[string]string{
+	RenderResult(c, http.StatusOK, map[string]string{
 		"data": "hello",
 	})
 }
@@ -67,7 +68,7 @@ func (p *Controller) register(c *sgxGin.Context) {
 			resp.Pid = pid
 			resp.Ip = c.ClientIP()
 		}
-		RenderResult(c, statusCode, resp)
+		RenderResult(c, http.StatusOK, resp)
 		return
 	}
 	RenderResult(c, statusCode, StatusText[int(statusCode)])
@@ -127,7 +128,7 @@ func (p *Controller) login(c *sgxGin.Context) {
 		}
 
 		base64Token := token.New(pid, openId, config.Salt).ToBase64()
-		RenderResult(c, code.OK, base64Token)
+		RenderResult(c, http.StatusOK, base64Token)
 	})
 }
 
@@ -166,7 +167,7 @@ func (p *Controller) serverList(c *sgxGin.Context) {
 		}
 	}
 
-	RenderResult(c, code.OK, dataList)
+	RenderResult(c, http.StatusOK, dataList)
 }
 
 // severList 区服列表
@@ -176,6 +177,6 @@ func (p *Controller) pidList(c *sgxGin.Context) {
 		Pids []int32 `json:"pids"`
 	}{}
 	pidList.Pids = data2.SdkConfig.GetPidList()
-	RenderResult(c, code.OK, pidList)
+	RenderResult(c, http.StatusOK, pidList)
 
 }

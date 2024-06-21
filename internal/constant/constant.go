@@ -3,6 +3,11 @@ package constant
 import superConst "github.com/po2656233/superplace/const"
 
 const (
+	MIDGate = 1
+	MIDGame = 2
+	MIDPing = 3
+)
+const (
 	NodeTypeGate = "gate"
 	NodeTypeGame = "game"
 	NodeTypeLeaf = "leaf"
@@ -22,12 +27,6 @@ const (
 	CenterDb     = "center_db_id"
 	TcpAddr      = ":10011"
 	SessionClose = "sessionClose"
-)
-
-const (
-	MIDGate = 1
-	MIDGame = 2
-	MIDPing = 3
 )
 
 // 源码中重要标识
