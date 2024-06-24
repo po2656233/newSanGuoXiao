@@ -98,12 +98,12 @@ func buildSimpleParser(app *superplace.AppBuilder) cfacade.INetParser {
 	agentActor.AddNodeRoute(constant.MIDGame, &simple.NodeRoute{
 		NodeType: "leaf",
 		ActorID:  "game",
-		//FuncName: "enter",
+		FuncName: "enter",
 	})
 	agentActor.AddNodeRoute(constant.MIDPing, &simple.NodeRoute{
 		NodeType: "gate",
 		ActorID:  "user",
-		//FuncName: "enter",
+		//FuncName: "ping",
 	})
 	GetMsgFunc("internal/component/jettengame/conf/setting/message_id.json")
 	return agentActor

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/golang/protobuf/proto"
+	superConst "github.com/po2656233/superplace/const"
 	exReflect "github.com/po2656233/superplace/extend/reflect"
 	cslice "github.com/po2656233/superplace/extend/slice"
 	cstring "github.com/po2656233/superplace/extend/string"
@@ -137,6 +138,9 @@ func onSimpleDataRoute(agent *simple.Agent, msg *simple.Message, route *simple.N
 	}
 
 	targetPath := cfacade.NewPath(member.GetNodeId(), route.ActorID)
+	if route.FuncName != "" {
+		targetPath += superConst.DOT + route.FuncName
+	}
 	if err := simple.ClusterLocalDataRoute(agent, session, msg, route, member.GetNodeId(), targetPath); err != nil {
 		clog.Errorf("[sid = %s,uid = %d] Session post message err:%v.[route = %+v]",
 			agent.SID(),

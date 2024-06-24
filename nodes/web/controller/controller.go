@@ -5,7 +5,6 @@ import (
 	"github.com/po2656233/superplace/const/code"
 	sgxString "github.com/po2656233/superplace/extend/string"
 	sgxLogger "github.com/po2656233/superplace/logger"
-	"math/rand"
 	"net/http"
 	data2 "sanguoxiao/internal/conf"
 	. "sanguoxiao/internal/hints"
@@ -60,8 +59,9 @@ func (p *Controller) register(c *sgxGin.Context) {
 			pid := int32(0)
 			size := len(plist)
 			if 0 < size {
-				index := rand.Int() % len(plist)
-				pid = plist[index]
+				pid = plist[0]
+				//index := rand.Int() % len(plist)
+				//pid = plist[index]
 			}
 			config := data2.SdkConfig.Get(pid)
 			resp.SdkId = config.SdkId
