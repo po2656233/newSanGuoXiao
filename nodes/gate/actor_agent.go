@@ -33,10 +33,16 @@ func (p *ActorAgent) OnInit() {
 	duplicateLoginCode, _ = p.App().Serializer().Marshal(&cproto.I32{
 		Value: hints.Login12,
 	})
-
-	p.Local().Register(p.login)
+	// pomelo
 	p.Remote().Register(p.setSession)
+	p.Local().Register(p.login)
+
+	// simple
+	p.Remote().Register(p.setSimpleSession)
+	p.Local().Register(p.simpleLogin)
 }
+
+////////////////////////pomelo//////////////////////////////////////
 
 func (p *ActorAgent) setSession(req *pb2.StringKeyValue) {
 	if req.Key == "" {
@@ -82,7 +88,7 @@ func (p *ActorAgent) login(session *cproto.Session, req *pb2.LoginRequest) {
 		return
 	}
 
-	p.checkGateSession(uid)
+	p.checkSession(uid)
 
 	if err := agent.Bind(uid); err != nil {
 		clog.Warn(err)
@@ -93,14 +99,11 @@ func (p *ActorAgent) login(session *cproto.Session, req *pb2.LoginRequest) {
 	agent.Session().Set(sessionKey.ServerID, cstring.ToString(req.ServerId))
 	agent.Session().Set(sessionKey.PID, cstring.ToString(userToken.PID))
 	agent.Session().Set(sessionKey.OpenID, userToken.OpenID)
-
-	response := &pb2.LoginResponse{
+	agent.Response(session, &pb2.LoginResponse{
 		Uid:    uid,
 		Pid:    userToken.PID,
 		OpenId: userToken.OpenID,
-	}
-
-	agent.Response(session, response)
+	})
 }
 
 func (p *ActorAgent) validateToken(base64Token string) (*token.Token, int32) {
@@ -122,7 +125,7 @@ func (p *ActorAgent) validateToken(base64Token string) (*token.Token, int32) {
 	return userToken, code.OK
 }
 
-func (p *ActorAgent) checkGateSession(uid cfacade.UID) {
+func (p *ActorAgent) checkSession(uid cfacade.UID) {
 	if agent, found := pomelo.GetAgentWithUID(uid); found {
 		agent.Kick(duplicateLoginCode, true)
 	}
@@ -159,6 +162,103 @@ func (p *ActorAgent) onPomeloSessionClose(agent *pomelo.Agent) {
 	// 自己退出
 	p.Exit()
 	clog.Infof("sessionClose path = %s", p.Path())
+}
+
+// ///////////////////////////simple/////////////////////////////////////////////
+func (p *ActorAgent) setSimpleSession(req *pb2.StringKeyValue) {
+	if req.Key == "" {
+		return
+	}
+
+	if agent, ok := simple.GetAgent(p.ActorID()); ok {
+		agent.Session().Set(req.Key, req.Value)
+	}
+}
+
+func (p *ActorAgent) simpleLogin(session *cproto.Session, req *pb2.LoginRequest) {
+	agent, found := simple.GetAgent(p.ActorID())
+	if !found {
+		return
+	}
+
+	// 验证token
+	userToken, errCode1 := p.validateToken(req.Token)
+	if code.IsFail(errCode1) {
+		agent.Response(session.Mid, &pb2.ResultResp{
+			State: errCode1,
+			Hints: hints.StatusText[int(errCode1)],
+		})
+		return
+	}
+
+	// 验证pid是否配置
+	sdkRow := conf.SdkConfig.Get(userToken.PID)
+	if sdkRow == nil {
+		agent.Response(session.Mid, &pb2.ResultResp{
+			State: hints.Login15,
+			Hints: hints.StatusText[hints.Login15],
+		})
+		return
+	}
+	// 根据token带来的sdk参数，从中心节点获取uid
+	resp, errCode2 := rpc.SendData(p.App(), rpc.SourcePath, rpc.AccountActor, rpc.CenterType, &pb2.GetUserIDReq{
+		SdkId:  sdkRow.SdkId,
+		Pid:    userToken.PID,
+		OpenId: userToken.OpenID,
+	})
+
+	rsp := resp.(*pb2.GetUserIDResp)
+	uid := rsp.Uid
+	if uid == 0 || code.IsFail(errCode2) {
+		agent.Response(session.Mid, &pb2.ResultResp{
+			State: hints.Login07,
+			Hints: hints.StatusText[hints.Login07],
+		})
+		return
+	}
+
+	p.checkSimpleSession(uid)
+
+	if err := agent.Bind(uid); err != nil {
+		clog.Warn(err)
+		agent.Response(session.Mid, &pb2.ResultResp{
+			State: hints.Flag0003,
+			Hints: hints.StatusText[hints.Flag0003],
+		})
+		return
+	}
+
+	agent.Session().Set(sessionKey.ServerID, cstring.ToString(req.ServerId))
+	agent.Session().Set(sessionKey.PID, cstring.ToString(userToken.PID))
+	agent.Session().Set(sessionKey.OpenID, userToken.OpenID)
+	agent.Response(session.Mid, &pb2.LoginResponse{
+		Uid:    uid,
+		Pid:    userToken.PID,
+		OpenId: userToken.OpenID,
+	})
+}
+
+func (p *ActorAgent) checkSimpleSession(uid cfacade.UID) {
+	if agent, found := simple.GetAgentWithUID(uid); found {
+		session := agent.Session()
+		agent.Response(session.Mid, &pb2.ResultResp{
+			State: hints.Login12,
+			Hints: hints.StatusText[hints.Login12],
+		})
+	}
+
+	rsp := &cproto.PomeloKick{
+		Uid:    uid,
+		Reason: duplicateLoginCode,
+	}
+
+	// 遍历所有网关节点，踢除旧的session
+	members := p.App().Discovery().ListByType(p.App().NodeType(), p.App().NodeId())
+	for _, member := range members {
+		// user是gate.go里自定义的agentActorID
+		actorPath := cfacade.NewPath(member.GetNodeId(), constant.ActorGate)
+		p.Call(actorPath, pomelo.KickFuncName, rsp)
+	}
 }
 
 // onSessionClose  当agent断开时，关闭对应的ActorAgent

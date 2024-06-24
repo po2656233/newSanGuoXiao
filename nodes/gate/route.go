@@ -71,7 +71,7 @@ func GetProtoData(msg proto.Message) ([]byte, error) {
 		return nil, err
 	}
 	pkg := bytes.NewBuffer([]byte{})
-	err = binary.Write(pkg, endian, uint16(id))
+	err = binary.Write(pkg, endian, uint32(id))
 	if err != nil {
 		return nil, err
 	}
@@ -86,28 +86,27 @@ func onSimpleDataRoute(agent *simple.Agent, msg *simple.Message, route *simple.N
 	session.Mid = msg.MID
 
 	// 所有置空函数
-	if route.FuncName == "" {
-		bytesReader := bytes.NewReader(msg.Data[:4])
-		var msgId uint32
-		err := binary.Read(bytesReader, endian, &msgId)
-		if err != nil {
-			clog.Warnf("[sid = %s,uid = %d] Session is not msgId err:%v.[route = %+v]",
-				agent.SID(),
-				agent.UID(),
-				err,
-				route,
-			)
-			return
-		}
-		strId := cstring.ToString(msgId)
-		if funcName, ok := mapFuncs[strId]; ok {
-			route.FuncName = funcName
-		}
-	}
-	if route.FuncName == "PingReq" {
-		data, _ := GetProtoData(&pb2.EnterGameResp{
-			GameID: 10,
-		})
+	//if route.FuncName == "" {
+	//	route.FuncName = exReflect.GetStructName(msg)
+	//	//bytesReader := bytes.NewReader(msg.Data[:4])
+	//	//var msgId uint32
+	//	//err := binary.Read(bytesReader, endian, &msgId)
+	//	//if err != nil {
+	//	//	clog.Warnf("[sid = %s,uid = %d] Session is not msgId err:%v.[route = %+v]",
+	//	//		agent.SID(),
+	//	//		agent.UID(),
+	//	//		err,
+	//	//		route,
+	//	//	)
+	//	//	return
+	//	//}
+	//	//strId := cstring.ToString(msgId)
+	//	//if funcName, ok := mapFuncs[strId]; ok {
+	//	//	route.FuncName = funcName
+	//	//}
+	//}
+	if session.Mid == MIDPing {
+		data, _ := GetProtoData(&pb2.PongResp{})
 		agent.Response(MIDPing, data)
 		return
 	}

@@ -10,9 +10,11 @@ import (
 	"sanguoxiao/internal/component/check_center"
 	"sanguoxiao/internal/conf"
 	"sanguoxiao/internal/constant"
+	"strings"
 	"time"
 )
 
+// !!! 注意 ---->节点名称包含pomelo则表示启动该协议，否则使用simple协议(即: mid+数据长度[不含mid和长度本身]+数据)
 // Run 运行gate节点
 // gate 主要用于对外提供网络连接、管理用户连接、消息转发
 func Run(profileFilePath, nodeId string) {
@@ -25,9 +27,13 @@ func Run(profileFilePath, nodeId string) {
 	)
 
 	// 设置网络数据包解析器
-	//netParser := buildPomeloParser(app) //停用
-	netParser := buildSimpleParser(app)
-	app.SetNetParser(netParser)
+	if strings.Contains(nodeId, "pomelo") {
+		netParser := buildPomeloParser(app)
+		app.SetNetParser(netParser)
+	} else {
+		netParser := buildSimpleParser(app)
+		app.SetNetParser(netParser)
+	}
 
 	app.Register(sgxGops.New())
 	// 注册检则中心服组件，用于检则中心服是否先启动
@@ -86,7 +92,8 @@ func buildSimpleParser(app *superplace.AppBuilder) cfacade.INetParser {
 	agentActor.AddNodeRoute(constant.MIDGate, &simple.NodeRoute{
 		NodeType: constant.NodeTypeGate,
 		ActorID:  constant.ActorGate,
-		FuncName: constant.FuncLogin,
+		//FuncName: constant.FuncLogin,
+		FuncName: "simpleLogin",
 	})
 	agentActor.AddNodeRoute(constant.MIDGame, &simple.NodeRoute{
 		NodeType: "leaf",
