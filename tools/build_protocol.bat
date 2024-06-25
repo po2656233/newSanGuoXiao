@@ -35,12 +35,14 @@ protoc --js_out=import_style=commonjs,binary:./jsfile/ %%i
 echo build proto to "go and js" complete!
 
 @echo off
+
+cd ../../tools
+node onekey.js
 rem timeout /t 2
 echo 开始 3s 倒计时...
 choice /c  abcdQ /n /t 3 /d a /m "如需暂停,请按Q键终止,否则退出"
 if %errorlevel%==5 goto stopTerminal
 goto :eof
-
 :stopTerminal
 pause
 

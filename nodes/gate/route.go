@@ -93,12 +93,7 @@ func onSimpleDataRoute(agent *simple.Agent, msg *simple.Message, route *simple.N
 	//	//var msgId uint32
 	//	//err := binary.Read(bytesReader, endian, &msgId)
 	//	//if err != nil {
-	//	//	clog.Warnf("[sid = %s,uid = %d] Session is not msgId err:%v.[route = %+v]",
-	//	//		agent.SID(),
-	//	//		agent.UID(),
-	//	//		err,
-	//	//		route,
-	//	//	)
+	//	//	clog.Warnf("[sid = %s,uid = %d] Session is not msgId err:%v.[route = %+v]", agent.SID(), agent.UID(), err, route)
 	//	//	return
 	//	//}
 	//	//strId := cstring.ToString(msgId)
