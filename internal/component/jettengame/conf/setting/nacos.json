@@ -1,0 +1,10 @@
+{
+  "enable": false,
+  "ip": "121.37.211.227",
+  "port": 8848,
+  "namespaceId": "eaa4c5d3-d6a5-4502-9deb-a4875decd950",
+  "serverDataId": "ServerBase",
+  "gameDataId": "GameSetting",
+  "group": "GAME_GROUP",
+  "clusterName": "Games"
+}
