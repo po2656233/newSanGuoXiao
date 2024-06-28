@@ -3,7 +3,7 @@ package ops
 import (
 	"github.com/po2656233/superplace/const/code"
 	cactor "github.com/po2656233/superplace/net/actor"
-	"sanguoxiao/internal/protocol/gofile"
+	"superman/internal/protocol/gofile"
 )
 
 var (

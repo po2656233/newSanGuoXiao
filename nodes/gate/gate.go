@@ -7,10 +7,10 @@ import (
 	cconnector "github.com/po2656233/superplace/net/connector"
 	"github.com/po2656233/superplace/net/parser/pomelo"
 	"github.com/po2656233/superplace/net/parser/simple"
-	"sanguoxiao/internal/component/check_center"
-	"sanguoxiao/internal/conf"
-	"sanguoxiao/internal/constant"
 	"strings"
+	"superman/internal/component/check_center"
+	"superman/internal/conf"
+	"superman/internal/constant"
 	"time"
 )
 

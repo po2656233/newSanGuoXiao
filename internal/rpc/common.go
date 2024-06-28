@@ -8,9 +8,9 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
-	"sanguoxiao/internal/hints"
-	pb "sanguoxiao/internal/protocol/gofile"
 	"strings"
+	"superman/internal/hints"
+	pb "superman/internal/protocol/gofile"
 )
 
 const (

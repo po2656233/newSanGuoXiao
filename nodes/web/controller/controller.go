@@ -6,12 +6,12 @@ import (
 	sgxString "github.com/po2656233/superplace/extend/string"
 	sgxLogger "github.com/po2656233/superplace/logger"
 	"net/http"
-	data2 "sanguoxiao/internal/conf"
-	. "sanguoxiao/internal/hints"
-	pb "sanguoxiao/internal/protocol/gofile"
-	"sanguoxiao/internal/rpc"
-	"sanguoxiao/internal/token"
-	"sanguoxiao/nodes/web/sdk"
+	data2 "superman/internal/conf"
+	. "superman/internal/hints"
+	pb "superman/internal/protocol/gofile"
+	"superman/internal/rpc"
+	"superman/internal/token"
+	"superman/nodes/web/sdk"
 )
 
 type Controller struct {

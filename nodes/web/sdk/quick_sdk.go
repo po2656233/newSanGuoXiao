@@ -7,9 +7,9 @@ import (
 	cstring "github.com/po2656233/superplace/extend/string"
 	sgxLogger "github.com/po2656233/superplace/logger"
 	cerror "github.com/po2656233/superplace/logger/error"
-	"sanguoxiao/internal/conf"
-	"sanguoxiao/internal/hints"
-	"sanguoxiao/internal/session_key"
+	"superman/internal/conf"
+	"superman/internal/hints"
+	"superman/internal/session_key"
 )
 
 type (

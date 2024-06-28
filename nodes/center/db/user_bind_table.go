@@ -3,7 +3,7 @@ package db
 import (
 	"fmt"
 	sgxTime "github.com/po2656233/superplace/extend/time"
-	"sanguoxiao/internal/guid"
+	"superman/internal/guid"
 )
 
 // UserBindTable uid绑定第三方平台表

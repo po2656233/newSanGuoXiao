@@ -9,13 +9,13 @@ import (
 	"github.com/po2656233/superplace/net/parser/pomelo"
 	"github.com/po2656233/superplace/net/parser/simple"
 	cproto "github.com/po2656233/superplace/net/proto"
-	"sanguoxiao/internal/conf"
-	"sanguoxiao/internal/constant"
-	"sanguoxiao/internal/hints"
-	pb2 "sanguoxiao/internal/protocol/gofile"
-	"sanguoxiao/internal/rpc"
-	"sanguoxiao/internal/session_key"
-	"sanguoxiao/internal/token"
+	"superman/internal/conf"
+	"superman/internal/constant"
+	"superman/internal/hints"
+	pb2 "superman/internal/protocol/gofile"
+	"superman/internal/rpc"
+	"superman/internal/session_key"
+	"superman/internal/token"
 )
 
 var (

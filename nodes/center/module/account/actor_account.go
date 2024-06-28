@@ -3,11 +3,11 @@ package account
 import (
 	"github.com/po2656233/superplace/const/code"
 	cactor "github.com/po2656233/superplace/net/actor"
-	"sanguoxiao/internal/hints"
-	"sanguoxiao/internal/protocol/gofile"
-	"sanguoxiao/internal/rpc"
-	db2 "sanguoxiao/nodes/center/db"
 	"strings"
+	"superman/internal/hints"
+	"superman/internal/protocol/gofile"
+	"superman/internal/rpc"
+	db2 "superman/nodes/center/db"
 )
 
 type (

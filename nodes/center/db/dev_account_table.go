@@ -4,8 +4,8 @@ import (
 	"github.com/po2656233/superplace/const/code"
 	sgxTime "github.com/po2656233/superplace/extend/time"
 	sgxError "github.com/po2656233/superplace/logger/error"
-	"sanguoxiao/internal/guid"
-	"sanguoxiao/internal/hints"
+	"superman/internal/guid"
+	"superman/internal/hints"
 )
 
 // DevAccountTable 开发模式的帐号信息表(platform.TypeDevMode)

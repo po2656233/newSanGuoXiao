@@ -4,8 +4,8 @@ import (
 	cfacade "github.com/po2656233/superplace/facade"
 	clog "github.com/po2656233/superplace/logger"
 	"github.com/po2656233/superplace/net/parser/pomelo"
-	event2 "sanguoxiao/internal/event"
-	"sanguoxiao/nodes/game/module/online"
+	event2 "superman/internal/event"
+	"superman/nodes/game/module/online"
 	"time"
 )
 

@@ -7,7 +7,7 @@ import (
 	extendCrypto "github.com/po2656233/superplace/extend/crypto"
 	sgxTime "github.com/po2656233/superplace/extend/time"
 	sgxLogger "github.com/po2656233/superplace/logger"
-	"sanguoxiao/internal/hints"
+	"superman/internal/hints"
 )
 
 const (

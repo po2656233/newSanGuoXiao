@@ -17,12 +17,12 @@ import (
 	"github.com/po2656233/superplace/net/parser/simple"
 	cproto "github.com/po2656233/superplace/net/proto"
 	"os"
-	. "sanguoxiao/internal/constant"
-	"sanguoxiao/internal/hints"
-	"sanguoxiao/internal/protocol/gofile"
-	pb2 "sanguoxiao/internal/protocol/gofile"
-	"sanguoxiao/internal/session_key"
 	"strconv"
+	. "superman/internal/constant"
+	"superman/internal/hints"
+	"superman/internal/protocol/gofile"
+	pb2 "superman/internal/protocol/gofile"
+	"superman/internal/session_key"
 )
 
 var (

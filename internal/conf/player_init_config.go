@@ -3,7 +3,7 @@ package conf
 import (
 	"github.com/po2656233/superplace/logger"
 	"github.com/po2656233/superplace/logger/error"
-	"sanguoxiao/internal/types"
+	"superman/internal/types"
 )
 
 type (

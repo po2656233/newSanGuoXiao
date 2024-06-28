@@ -6,10 +6,10 @@ import (
 	sgxString "github.com/po2656233/superplace/extend/string"
 	cfacade "github.com/po2656233/superplace/facade"
 	sgxError "github.com/po2656233/superplace/logger/error"
-	"sanguoxiao/internal/conf"
-	"sanguoxiao/internal/hints"
-	pb "sanguoxiao/internal/protocol/gofile"
-	"sanguoxiao/internal/rpc"
+	"superman/internal/conf"
+	"superman/internal/hints"
+	pb "superman/internal/protocol/gofile"
+	"superman/internal/rpc"
 )
 
 type devSdk struct {

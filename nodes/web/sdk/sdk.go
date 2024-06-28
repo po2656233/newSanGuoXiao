@@ -5,7 +5,7 @@ import (
 	sgxString "github.com/po2656233/superplace/extend/string"
 	cfacade "github.com/po2656233/superplace/facade"
 	sgxError "github.com/po2656233/superplace/logger/error"
-	"sanguoxiao/internal/conf"
+	"superman/internal/conf"
 )
 
 // sdk平台类型

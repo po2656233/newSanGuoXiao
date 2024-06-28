@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.25.0
 // 	protoc        v3.7.0
-// source: sanguoxiao.proto
+// source: superman.proto
 
 package pb
 
@@ -70,11 +70,11 @@ func (x Piece) String() string {
 }
 
 func (Piece) Descriptor() protoreflect.EnumDescriptor {
-	return file_sanguoxiao_proto_enumTypes[0].Descriptor()
+	return file_superman_proto_enumTypes[0].Descriptor()
 }
 
 func (Piece) Type() protoreflect.EnumType {
-	return &file_sanguoxiao_proto_enumTypes[0]
+	return &file_superman_proto_enumTypes[0]
 }
 
 func (x Piece) Number() protoreflect.EnumNumber {
@@ -83,7 +83,7 @@ func (x Piece) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Piece.Descriptor instead.
 func (Piece) EnumDescriptor() ([]byte, []int) {
-	return file_sanguoxiao_proto_rawDescGZIP(), []int{0}
+	return file_superman_proto_rawDescGZIP(), []int{0}
 }
 
 // 武将
@@ -103,7 +103,7 @@ type WujiangInfo struct {
 func (x *WujiangInfo) Reset() {
 	*x = WujiangInfo{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_sanguoxiao_proto_msgTypes[0]
+		mi := &file_superman_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -116,7 +116,7 @@ func (x *WujiangInfo) String() string {
 func (*WujiangInfo) ProtoMessage() {}
 
 func (x *WujiangInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_sanguoxiao_proto_msgTypes[0]
+	mi := &file_superman_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -129,7 +129,7 @@ func (x *WujiangInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WujiangInfo.ProtoReflect.Descriptor instead.
 func (*WujiangInfo) Descriptor() ([]byte, []int) {
-	return file_sanguoxiao_proto_rawDescGZIP(), []int{0}
+	return file_superman_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *WujiangInfo) GetID() int32 {
@@ -188,7 +188,7 @@ type Grid struct {
 func (x *Grid) Reset() {
 	*x = Grid{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_sanguoxiao_proto_msgTypes[1]
+		mi := &file_superman_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -201,7 +201,7 @@ func (x *Grid) String() string {
 func (*Grid) ProtoMessage() {}
 
 func (x *Grid) ProtoReflect() protoreflect.Message {
-	mi := &file_sanguoxiao_proto_msgTypes[1]
+	mi := &file_superman_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -214,7 +214,7 @@ func (x *Grid) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Grid.ProtoReflect.Descriptor instead.
 func (*Grid) Descriptor() ([]byte, []int) {
-	return file_sanguoxiao_proto_rawDescGZIP(), []int{1}
+	return file_superman_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *Grid) GetRow() int32 {
@@ -250,7 +250,7 @@ type BoardInfo struct {
 func (x *BoardInfo) Reset() {
 	*x = BoardInfo{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_sanguoxiao_proto_msgTypes[2]
+		mi := &file_superman_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -263,7 +263,7 @@ func (x *BoardInfo) String() string {
 func (*BoardInfo) ProtoMessage() {}
 
 func (x *BoardInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_sanguoxiao_proto_msgTypes[2]
+	mi := &file_superman_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -276,7 +276,7 @@ func (x *BoardInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BoardInfo.ProtoReflect.Descriptor instead.
 func (*BoardInfo) Descriptor() ([]byte, []int) {
-	return file_sanguoxiao_proto_rawDescGZIP(), []int{2}
+	return file_superman_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *BoardInfo) GetCells() []*Grid {
@@ -300,7 +300,7 @@ type SanguoxiaoPlayer struct {
 func (x *SanguoxiaoPlayer) Reset() {
 	*x = SanguoxiaoPlayer{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_sanguoxiao_proto_msgTypes[3]
+		mi := &file_superman_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -313,7 +313,7 @@ func (x *SanguoxiaoPlayer) String() string {
 func (*SanguoxiaoPlayer) ProtoMessage() {}
 
 func (x *SanguoxiaoPlayer) ProtoReflect() protoreflect.Message {
-	mi := &file_sanguoxiao_proto_msgTypes[3]
+	mi := &file_superman_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -326,7 +326,7 @@ func (x *SanguoxiaoPlayer) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SanguoxiaoPlayer.ProtoReflect.Descriptor instead.
 func (*SanguoxiaoPlayer) Descriptor() ([]byte, []int) {
-	return file_sanguoxiao_proto_rawDescGZIP(), []int{3}
+	return file_superman_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *SanguoxiaoPlayer) GetMyInfo() *PlayerInfo {
@@ -365,7 +365,7 @@ type SanguoxiaoSceneResp struct {
 func (x *SanguoxiaoSceneResp) Reset() {
 	*x = SanguoxiaoSceneResp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_sanguoxiao_proto_msgTypes[4]
+		mi := &file_superman_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -378,7 +378,7 @@ func (x *SanguoxiaoSceneResp) String() string {
 func (*SanguoxiaoSceneResp) ProtoMessage() {}
 
 func (x *SanguoxiaoSceneResp) ProtoReflect() protoreflect.Message {
-	mi := &file_sanguoxiao_proto_msgTypes[4]
+	mi := &file_superman_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -391,7 +391,7 @@ func (x *SanguoxiaoSceneResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SanguoxiaoSceneResp.ProtoReflect.Descriptor instead.
 func (*SanguoxiaoSceneResp) Descriptor() ([]byte, []int) {
-	return file_sanguoxiao_proto_rawDescGZIP(), []int{4}
+	return file_superman_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *SanguoxiaoSceneResp) GetTimeStamp() int64 {
@@ -434,7 +434,7 @@ type SanguoxiaoStateChooseResp struct {
 func (x *SanguoxiaoStateChooseResp) Reset() {
 	*x = SanguoxiaoStateChooseResp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_sanguoxiao_proto_msgTypes[5]
+		mi := &file_superman_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -447,7 +447,7 @@ func (x *SanguoxiaoStateChooseResp) String() string {
 func (*SanguoxiaoStateChooseResp) ProtoMessage() {}
 
 func (x *SanguoxiaoStateChooseResp) ProtoReflect() protoreflect.Message {
-	mi := &file_sanguoxiao_proto_msgTypes[5]
+	mi := &file_superman_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -460,7 +460,7 @@ func (x *SanguoxiaoStateChooseResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SanguoxiaoStateChooseResp.ProtoReflect.Descriptor instead.
 func (*SanguoxiaoStateChooseResp) Descriptor() ([]byte, []int) {
-	return file_sanguoxiao_proto_rawDescGZIP(), []int{5}
+	return file_superman_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *SanguoxiaoStateChooseResp) GetTimes() *TimeInfo {
@@ -483,7 +483,7 @@ type SanguoxiaoStatePlayingResp struct {
 func (x *SanguoxiaoStatePlayingResp) Reset() {
 	*x = SanguoxiaoStatePlayingResp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_sanguoxiao_proto_msgTypes[6]
+		mi := &file_superman_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -496,7 +496,7 @@ func (x *SanguoxiaoStatePlayingResp) String() string {
 func (*SanguoxiaoStatePlayingResp) ProtoMessage() {}
 
 func (x *SanguoxiaoStatePlayingResp) ProtoReflect() protoreflect.Message {
-	mi := &file_sanguoxiao_proto_msgTypes[6]
+	mi := &file_superman_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -509,7 +509,7 @@ func (x *SanguoxiaoStatePlayingResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SanguoxiaoStatePlayingResp.ProtoReflect.Descriptor instead.
 func (*SanguoxiaoStatePlayingResp) Descriptor() ([]byte, []int) {
-	return file_sanguoxiao_proto_rawDescGZIP(), []int{6}
+	return file_superman_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *SanguoxiaoStatePlayingResp) GetTimes() *TimeInfo {
@@ -539,7 +539,7 @@ type SanguoxiaoStateEraseResp struct {
 func (x *SanguoxiaoStateEraseResp) Reset() {
 	*x = SanguoxiaoStateEraseResp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_sanguoxiao_proto_msgTypes[7]
+		mi := &file_superman_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -552,7 +552,7 @@ func (x *SanguoxiaoStateEraseResp) String() string {
 func (*SanguoxiaoStateEraseResp) ProtoMessage() {}
 
 func (x *SanguoxiaoStateEraseResp) ProtoReflect() protoreflect.Message {
-	mi := &file_sanguoxiao_proto_msgTypes[7]
+	mi := &file_superman_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -565,7 +565,7 @@ func (x *SanguoxiaoStateEraseResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SanguoxiaoStateEraseResp.ProtoReflect.Descriptor instead.
 func (*SanguoxiaoStateEraseResp) Descriptor() ([]byte, []int) {
-	return file_sanguoxiao_proto_rawDescGZIP(), []int{7}
+	return file_superman_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *SanguoxiaoStateEraseResp) GetTimes() *TimeInfo {
@@ -597,7 +597,7 @@ type SanguoxiaoStateOverResp struct {
 func (x *SanguoxiaoStateOverResp) Reset() {
 	*x = SanguoxiaoStateOverResp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_sanguoxiao_proto_msgTypes[8]
+		mi := &file_superman_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -610,7 +610,7 @@ func (x *SanguoxiaoStateOverResp) String() string {
 func (*SanguoxiaoStateOverResp) ProtoMessage() {}
 
 func (x *SanguoxiaoStateOverResp) ProtoReflect() protoreflect.Message {
-	mi := &file_sanguoxiao_proto_msgTypes[8]
+	mi := &file_superman_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -623,7 +623,7 @@ func (x *SanguoxiaoStateOverResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SanguoxiaoStateOverResp.ProtoReflect.Descriptor instead.
 func (*SanguoxiaoStateOverResp) Descriptor() ([]byte, []int) {
-	return file_sanguoxiao_proto_rawDescGZIP(), []int{8}
+	return file_superman_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *SanguoxiaoStateOverResp) GetTimes() *TimeInfo {
@@ -666,7 +666,7 @@ type SanguoxiaoChooseReq struct {
 func (x *SanguoxiaoChooseReq) Reset() {
 	*x = SanguoxiaoChooseReq{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_sanguoxiao_proto_msgTypes[9]
+		mi := &file_superman_proto_msgTypes[9]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -679,7 +679,7 @@ func (x *SanguoxiaoChooseReq) String() string {
 func (*SanguoxiaoChooseReq) ProtoMessage() {}
 
 func (x *SanguoxiaoChooseReq) ProtoReflect() protoreflect.Message {
-	mi := &file_sanguoxiao_proto_msgTypes[9]
+	mi := &file_superman_proto_msgTypes[9]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -692,7 +692,7 @@ func (x *SanguoxiaoChooseReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SanguoxiaoChooseReq.ProtoReflect.Descriptor instead.
 func (*SanguoxiaoChooseReq) Descriptor() ([]byte, []int) {
-	return file_sanguoxiao_proto_rawDescGZIP(), []int{9}
+	return file_superman_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *SanguoxiaoChooseReq) GetTeam() []*WujiangInfo {
@@ -714,7 +714,7 @@ type SanguoxiaoChooseResp struct {
 func (x *SanguoxiaoChooseResp) Reset() {
 	*x = SanguoxiaoChooseResp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_sanguoxiao_proto_msgTypes[10]
+		mi := &file_superman_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -727,7 +727,7 @@ func (x *SanguoxiaoChooseResp) String() string {
 func (*SanguoxiaoChooseResp) ProtoMessage() {}
 
 func (x *SanguoxiaoChooseResp) ProtoReflect() protoreflect.Message {
-	mi := &file_sanguoxiao_proto_msgTypes[10]
+	mi := &file_superman_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -740,7 +740,7 @@ func (x *SanguoxiaoChooseResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SanguoxiaoChooseResp.ProtoReflect.Descriptor instead.
 func (*SanguoxiaoChooseResp) Descriptor() ([]byte, []int) {
-	return file_sanguoxiao_proto_rawDescGZIP(), []int{10}
+	return file_superman_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *SanguoxiaoChooseResp) GetUserID() int64 {
@@ -770,7 +770,7 @@ type SanguoxiaoSwapReq struct {
 func (x *SanguoxiaoSwapReq) Reset() {
 	*x = SanguoxiaoSwapReq{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_sanguoxiao_proto_msgTypes[11]
+		mi := &file_superman_proto_msgTypes[11]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -783,7 +783,7 @@ func (x *SanguoxiaoSwapReq) String() string {
 func (*SanguoxiaoSwapReq) ProtoMessage() {}
 
 func (x *SanguoxiaoSwapReq) ProtoReflect() protoreflect.Message {
-	mi := &file_sanguoxiao_proto_msgTypes[11]
+	mi := &file_superman_proto_msgTypes[11]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -796,7 +796,7 @@ func (x *SanguoxiaoSwapReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SanguoxiaoSwapReq.ProtoReflect.Descriptor instead.
 func (*SanguoxiaoSwapReq) Descriptor() ([]byte, []int) {
-	return file_sanguoxiao_proto_rawDescGZIP(), []int{11}
+	return file_superman_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *SanguoxiaoSwapReq) GetOrigin() *Grid {
@@ -826,7 +826,7 @@ type SanguoxiaoSwapResp struct {
 func (x *SanguoxiaoSwapResp) Reset() {
 	*x = SanguoxiaoSwapResp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_sanguoxiao_proto_msgTypes[12]
+		mi := &file_superman_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -839,7 +839,7 @@ func (x *SanguoxiaoSwapResp) String() string {
 func (*SanguoxiaoSwapResp) ProtoMessage() {}
 
 func (x *SanguoxiaoSwapResp) ProtoReflect() protoreflect.Message {
-	mi := &file_sanguoxiao_proto_msgTypes[12]
+	mi := &file_superman_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -852,7 +852,7 @@ func (x *SanguoxiaoSwapResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SanguoxiaoSwapResp.ProtoReflect.Descriptor instead.
 func (*SanguoxiaoSwapResp) Descriptor() ([]byte, []int) {
-	return file_sanguoxiao_proto_rawDescGZIP(), []int{12}
+	return file_superman_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *SanguoxiaoSwapResp) GetUserID() int64 {
@@ -876,9 +876,9 @@ func (x *SanguoxiaoSwapResp) GetTarget() *Grid {
 	return nil
 }
 
-var File_sanguoxiao_proto protoreflect.FileDescriptor
+var File_superman_proto protoreflect.FileDescriptor
 
-var file_sanguoxiao_proto_rawDesc = []byte{
+var file_superman_proto_rawDesc = []byte{
 	0x0a, 0x10, 0x73, 0x61, 0x6e, 0x67, 0x75, 0x6f, 0x78, 0x69, 0x61, 0x6f, 0x2e, 0x70, 0x72, 0x6f,
 	0x74, 0x6f, 0x12, 0x02, 0x70, 0x62, 0x1a, 0x0a, 0x67, 0x61, 0x6d, 0x65, 0x2e, 0x70, 0x72, 0x6f,
 	0x74, 0x6f, 0x1a, 0x0c, 0x70, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
@@ -976,20 +976,20 @@ var file_sanguoxiao_proto_rawDesc = []byte{
 }
 
 var (
-	file_sanguoxiao_proto_rawDescOnce sync.Once
-	file_sanguoxiao_proto_rawDescData = file_sanguoxiao_proto_rawDesc
+	file_superman_proto_rawDescOnce sync.Once
+	file_superman_proto_rawDescData = file_superman_proto_rawDesc
 )
 
-func file_sanguoxiao_proto_rawDescGZIP() []byte {
-	file_sanguoxiao_proto_rawDescOnce.Do(func() {
-		file_sanguoxiao_proto_rawDescData = protoimpl.X.CompressGZIP(file_sanguoxiao_proto_rawDescData)
+func file_superman_proto_rawDescGZIP() []byte {
+	file_superman_proto_rawDescOnce.Do(func() {
+		file_superman_proto_rawDescData = protoimpl.X.CompressGZIP(file_superman_proto_rawDescData)
 	})
-	return file_sanguoxiao_proto_rawDescData
+	return file_superman_proto_rawDescData
 }
 
-var file_sanguoxiao_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_sanguoxiao_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
-var file_sanguoxiao_proto_goTypes = []interface{}{
+var file_superman_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_superman_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_superman_proto_goTypes = []interface{}{
 	(Piece)(0),                         // 0: pb.Piece
 	(*WujiangInfo)(nil),                // 1: pb.WujiangInfo
 	(*Grid)(nil),                       // 2: pb.Grid
@@ -1007,7 +1007,7 @@ var file_sanguoxiao_proto_goTypes = []interface{}{
 	(*PlayerInfo)(nil),                 // 14: pb.PlayerInfo
 	(*TimeInfo)(nil),                   // 15: pb.TimeInfo
 }
-var file_sanguoxiao_proto_depIdxs = []int32{
+var file_superman_proto_depIdxs = []int32{
 	0,  // 0: pb.Grid.core:type_name -> pb.Piece
 	2,  // 1: pb.BoardInfo.cells:type_name -> pb.Grid
 	14, // 2: pb.SanguoxiaoPlayer.myInfo:type_name -> pb.PlayerInfo
@@ -1033,15 +1033,15 @@ var file_sanguoxiao_proto_depIdxs = []int32{
 	0,  // [0:18] is the sub-list for field type_name
 }
 
-func init() { file_sanguoxiao_proto_init() }
-func file_sanguoxiao_proto_init() {
-	if File_sanguoxiao_proto != nil {
+func init() { file_superman_proto_init() }
+func file_superman_proto_init() {
+	if File_superman_proto != nil {
 		return
 	}
 	file_game_proto_init()
 	file_player_proto_init()
 	if !protoimpl.UnsafeEnabled {
-		file_sanguoxiao_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
+		file_superman_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*WujiangInfo); i {
 			case 0:
 				return &v.state
@@ -1053,7 +1053,7 @@ func file_sanguoxiao_proto_init() {
 				return nil
 			}
 		}
-		file_sanguoxiao_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+		file_superman_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Grid); i {
 			case 0:
 				return &v.state
@@ -1065,7 +1065,7 @@ func file_sanguoxiao_proto_init() {
 				return nil
 			}
 		}
-		file_sanguoxiao_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+		file_superman_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*BoardInfo); i {
 			case 0:
 				return &v.state
@@ -1077,7 +1077,7 @@ func file_sanguoxiao_proto_init() {
 				return nil
 			}
 		}
-		file_sanguoxiao_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+		file_superman_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SanguoxiaoPlayer); i {
 			case 0:
 				return &v.state
@@ -1089,7 +1089,7 @@ func file_sanguoxiao_proto_init() {
 				return nil
 			}
 		}
-		file_sanguoxiao_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+		file_superman_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SanguoxiaoSceneResp); i {
 			case 0:
 				return &v.state
@@ -1101,7 +1101,7 @@ func file_sanguoxiao_proto_init() {
 				return nil
 			}
 		}
-		file_sanguoxiao_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+		file_superman_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SanguoxiaoStateChooseResp); i {
 			case 0:
 				return &v.state
@@ -1113,7 +1113,7 @@ func file_sanguoxiao_proto_init() {
 				return nil
 			}
 		}
-		file_sanguoxiao_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+		file_superman_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SanguoxiaoStatePlayingResp); i {
 			case 0:
 				return &v.state
@@ -1125,7 +1125,7 @@ func file_sanguoxiao_proto_init() {
 				return nil
 			}
 		}
-		file_sanguoxiao_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+		file_superman_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SanguoxiaoStateEraseResp); i {
 			case 0:
 				return &v.state
@@ -1137,7 +1137,7 @@ func file_sanguoxiao_proto_init() {
 				return nil
 			}
 		}
-		file_sanguoxiao_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+		file_superman_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SanguoxiaoStateOverResp); i {
 			case 0:
 				return &v.state
@@ -1149,7 +1149,7 @@ func file_sanguoxiao_proto_init() {
 				return nil
 			}
 		}
-		file_sanguoxiao_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+		file_superman_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SanguoxiaoChooseReq); i {
 			case 0:
 				return &v.state
@@ -1161,7 +1161,7 @@ func file_sanguoxiao_proto_init() {
 				return nil
 			}
 		}
-		file_sanguoxiao_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+		file_superman_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SanguoxiaoChooseResp); i {
 			case 0:
 				return &v.state
@@ -1173,7 +1173,7 @@ func file_sanguoxiao_proto_init() {
 				return nil
 			}
 		}
-		file_sanguoxiao_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+		file_superman_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SanguoxiaoSwapReq); i {
 			case 0:
 				return &v.state
@@ -1185,7 +1185,7 @@ func file_sanguoxiao_proto_init() {
 				return nil
 			}
 		}
-		file_sanguoxiao_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
+		file_superman_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SanguoxiaoSwapResp); i {
 			case 0:
 				return &v.state
@@ -1202,19 +1202,19 @@ func file_sanguoxiao_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: file_sanguoxiao_proto_rawDesc,
+			RawDescriptor: file_superman_proto_rawDesc,
 			NumEnums:      1,
 			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_sanguoxiao_proto_goTypes,
-		DependencyIndexes: file_sanguoxiao_proto_depIdxs,
-		EnumInfos:         file_sanguoxiao_proto_enumTypes,
-		MessageInfos:      file_sanguoxiao_proto_msgTypes,
+		GoTypes:           file_superman_proto_goTypes,
+		DependencyIndexes: file_superman_proto_depIdxs,
+		EnumInfos:         file_superman_proto_enumTypes,
+		MessageInfos:      file_superman_proto_msgTypes,
 	}.Build()
-	File_sanguoxiao_proto = out.File
-	file_sanguoxiao_proto_rawDesc = nil
-	file_sanguoxiao_proto_goTypes = nil
-	file_sanguoxiao_proto_depIdxs = nil
+	File_superman_proto = out.File
+	file_superman_proto_rawDesc = nil
+	file_superman_proto_goTypes = nil
+	file_superman_proto_depIdxs = nil
 }

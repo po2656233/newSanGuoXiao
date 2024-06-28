@@ -5,10 +5,10 @@ import (
 	sgxTime "github.com/po2656233/superplace/extend/time"
 	clog "github.com/po2656233/superplace/logger"
 	cproto "github.com/po2656233/superplace/net/proto"
-	"sanguoxiao/internal/conf"
-	"sanguoxiao/internal/guid"
-	"sanguoxiao/internal/hints"
-	"sanguoxiao/internal/session_key"
+	"superman/internal/conf"
+	"superman/internal/guid"
+	"superman/internal/hints"
+	"superman/internal/session_key"
 )
 
 // PlayerTable 角色基础表

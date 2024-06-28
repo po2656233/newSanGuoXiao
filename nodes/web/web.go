@@ -6,10 +6,10 @@ import (
 	sgxCron "github.com/po2656233/superplace/components/cron"
 	sgxGin "github.com/po2656233/superplace/components/gin"
 	sgxFile "github.com/po2656233/superplace/extend/file"
-	"sanguoxiao/internal/component/check_center"
-	"sanguoxiao/internal/conf"
-	"sanguoxiao/nodes/web/controller"
-	"sanguoxiao/nodes/web/sdk"
+	"superman/internal/component/check_center"
+	"superman/internal/conf"
+	"superman/nodes/web/controller"
+	"superman/nodes/web/sdk"
 )
 
 func Run(profileFilePath, nodeId string) {

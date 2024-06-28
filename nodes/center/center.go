@@ -4,11 +4,11 @@ import (
 	"github.com/po2656233/superplace"
 	"github.com/po2656233/superplace/components/cron"
 	superGORM "github.com/po2656233/superplace/components/gorm"
-	"sanguoxiao/internal/actors"
-	"sanguoxiao/internal/conf"
-	"sanguoxiao/nodes/center/db"
-	"sanguoxiao/nodes/center/module/account"
-	"sanguoxiao/nodes/center/module/ops"
+	"superman/internal/actors"
+	"superman/internal/conf"
+	"superman/nodes/center/db"
+	"superman/nodes/center/module/account"
+	"superman/nodes/center/module/ops"
 )
 
 func Run(profileFilePath, nodeId string) {

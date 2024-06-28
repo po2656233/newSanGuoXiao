@@ -7,11 +7,11 @@ import (
 	sgxSnowflake "github.com/po2656233/superplace/extend/snowflake"
 	cstring "github.com/po2656233/superplace/extend/string"
 	sgxUtils "github.com/po2656233/superplace/extend/utils"
-	"sanguoxiao/internal/component/check_center"
-	"sanguoxiao/internal/conf"
-	"sanguoxiao/nodes/game/db"
-	"sanguoxiao/nodes/game/module/player"
-	"sanguoxiao/nodes/game/module/sanguoxiao"
+	"superman/internal/component/check_center"
+	"superman/internal/conf"
+	"superman/nodes/game/db"
+	"superman/nodes/game/module/player"
+	"superman/nodes/game/module/sanguoxiao"
 )
 
 func Run(profileFilePath, nodeId string) {
@@ -39,7 +39,7 @@ func Run(profileFilePath, nodeId string) {
 
 	app.AddActors(
 		&player.ActorPlayers{},
-		&sanguoxiao.ActorSanGuoXiao{},
+		&superman.ActorSanGuoXiao{},
 	)
 
 	app.Startup()

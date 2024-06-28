@@ -2,13 +2,13 @@ package mysql
 
 import (
 	"errors"
-	"sanguoxiao/internal/constant"
-	"sanguoxiao/internal/hints"
-	protoMsg "sanguoxiao/internal/protocol/gofile"
-	"sanguoxiao/internal/sqlmodel"
-	"sanguoxiao/internal/utils"
 	"strconv"
 	"strings"
+	"superman/internal/constant"
+	"superman/internal/hints"
+	protoMsg "superman/internal/protocol/gofile"
+	"superman/internal/sqlmodel"
+	"superman/internal/utils"
 	"time"
 )
 

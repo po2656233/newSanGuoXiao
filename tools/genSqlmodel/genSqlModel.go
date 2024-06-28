@@ -22,7 +22,7 @@ func main() {
 	password := "ko8899110"
 	address := "127.0.0.1"
 	port := "3306"
-	dbName := "sanguoxiao"
+	dbName := "superman"
 	dataSourceName := user + ":" + password + "@tcp(" + address + ":" + port + ")/" + dbName + "?charset=utf8"
 	//注意 注意 此处为移除gorm的日志自定义了相关结构。正式使用时 请放开
 	db, err1 := gorm.Open(gmysql.Open(dataSourceName), &gorm.Config{

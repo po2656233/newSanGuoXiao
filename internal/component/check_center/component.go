@@ -3,7 +3,7 @@ package checkCenter
 import (
 	sgxFacade "github.com/po2656233/superplace/facade"
 	sgxLogger "github.com/po2656233/superplace/logger"
-	"sanguoxiao/internal/rpc"
+	"superman/internal/rpc"
 	"time"
 )
 

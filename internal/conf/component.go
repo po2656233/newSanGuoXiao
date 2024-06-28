@@ -3,7 +3,7 @@ package conf
 import (
 	dataConf "github.com/po2656233/superplace/components/data-config"
 	mapStructure "github.com/po2656233/superplace/extend/mapstructure"
-	"sanguoxiao/internal/types"
+	"superman/internal/types"
 )
 
 var (

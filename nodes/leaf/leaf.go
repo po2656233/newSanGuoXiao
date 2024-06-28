@@ -7,10 +7,10 @@ import (
 	sgxSnowflake "github.com/po2656233/superplace/extend/snowflake"
 	cstring "github.com/po2656233/superplace/extend/string"
 	sgxUtils "github.com/po2656233/superplace/extend/utils"
-	checkCenter "sanguoxiao/internal/component/check_center"
-	"sanguoxiao/internal/component/jettengame"
-	"sanguoxiao/internal/component/jettengame/game"
-	"sanguoxiao/internal/conf"
+	checkCenter "superman/internal/component/check_center"
+	"superman/internal/conf"
+	"superman/nodes/leaf/jettengame"
+	"superman/nodes/leaf/jettengame/game"
 )
 
 func Run(profileFilePath, nodeId string) {
