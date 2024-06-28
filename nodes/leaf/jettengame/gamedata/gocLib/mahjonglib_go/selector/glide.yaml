@@ -1,3 +1,0 @@
-package: mahjong-selector
-import:
-- package: server/gamedata/gocLib/util

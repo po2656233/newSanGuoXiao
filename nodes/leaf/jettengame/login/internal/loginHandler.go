@@ -18,7 +18,7 @@ import (
 	"github.com/po2656233/goleaf/gate"
 	"github.com/po2656233/goleaf/log"
 	uuid "github.com/satori/go.uuid"
-	"superman/nodes/leaf/jettengame/gamedata/gocLib/util"
+	"superman/nodes/leaf/jettengame/gamedata/goclib/util"
 )
 
 var sqlHandle = mysql.SqlHandle()    //数据库管理

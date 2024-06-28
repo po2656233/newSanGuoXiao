@@ -25,7 +25,7 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"github.com/po2656233/goleaf/log"
-	"superman/nodes/leaf/jettengame/gamedata/gocLib/util"
+	"superman/nodes/leaf/jettengame/gamedata/goclib/util"
 )
 
 // ----------游戏----------------------
