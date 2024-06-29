@@ -163,7 +163,7 @@ function genServer() {
     }
 
     routerStr += "}\n\n"
-	msgStr += '  \n\tbase.ToJsonFile("conf/setting/message_id.json", msgMap, "", "\\t") \n'
+	msgStr += '  \n\tbase.ToJsonFile("conf/leafconf/message_id.json", msgMap, "", "\\t") \n'
 	msgStr += "\tmsgMap = nil\n"
 	msgStr += "}\n"
 

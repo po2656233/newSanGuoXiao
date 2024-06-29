@@ -3,6 +3,7 @@ package mysql
 import (
 	gMysql "gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	. "superman/internal/utils"
 	"sync"
 )
 

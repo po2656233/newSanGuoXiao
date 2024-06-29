@@ -27,7 +27,7 @@ var (
 
 	ServerName       = "jetten" // 当前服务名
 	ProtoPackageName = "pb"     // proto的包名
-	ServerJsonPath   = "internal/component/jettengame/conf/setting/server.json"
-	NacosJsonPath    = "internal/component/jettengame/conf/setting/nacos.json"
-	GameYamlPath     = "internal/component/jettengame/conf/setting/game.yaml"
+	ServerJsonPath   = "config/leafconf/server.json"
+	NacosJsonPath    = "config/leafconf/nacos.json"
+	GameYamlPath     = "config/leafconf/game.yaml"
 )

@@ -304,6 +304,6 @@ func init() {
 	RegisterMessage(&protoMsg.ZhaocaimiaoOpenInfo{})
 	RegisterMessage(&protoMsg.ZhaocaimiaoOpenResp{})
 
-	base.ToJsonFile("conf/setting/message_id.json", msgMap, "", "\t")
+	base.ToJsonFile("../../../config/leafconf/message_id.json", msgMap, "", "\t")
 	msgMap = nil
 }

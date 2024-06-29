@@ -9,17 +9,20 @@ import (
 )
 
 // GetFuncName 获取函数名
-func GetFuncName(layer int) string {
+func GetFuncName(layer int) (typeName, fnName string) {
 	//参数 layer 函数所在的层数
 	if pc, _, _, ok := runtime.Caller(layer + 1); ok {
 		funcName := runtime.FuncForPC(pc).Name()
 		funcs := strings.Split(funcName, ".")
 		size := len(funcs)
 		if size-1 >= 0 {
-			return funcs[size-1]
+			fnName = funcs[size-1]
+			if size-2 >= 0 && funcs[size-2][0] == '(' {
+				typeName = funcs[size-2]
+			}
 		}
 	}
-	return ""
+	return
 }
 
 // GoID 获取goroutine的id

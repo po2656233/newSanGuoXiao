@@ -149,7 +149,7 @@
       {
         "enable": true,
         "db_id": "center_db_1",
-        "db_name": "sgx_center",
+        "db_name": "super_center",
         "host": "127.0.0.1:3306",
         "user_name": "root",
         "password": "ko8899110",

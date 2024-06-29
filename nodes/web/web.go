@@ -6,6 +6,7 @@ import (
 	sgxCron "github.com/po2656233/superplace/components/cron"
 	sgxGin "github.com/po2656233/superplace/components/gin"
 	sgxFile "github.com/po2656233/superplace/extend/file"
+	clog "github.com/po2656233/superplace/logger"
 	"superman/internal/component/check_center"
 	"superman/internal/conf"
 	"superman/nodes/web/controller"
@@ -51,12 +52,12 @@ func httpServerComponent(addr string) *sgxGin.Component {
 	// 加载./view目录的html模板文件(详情查看gin文档)
 	viewFiles := sgxFile.WalkFiles("./view/", ".html")
 	if len(viewFiles) < 1 {
-		panic("view files not found.")
+		clog.Errorf("view files not found.")
+	} else {
+		httpServer.LoadHTMLFiles(viewFiles...)
 	}
-	httpServer.LoadHTMLFiles(viewFiles...)
 
 	//注册 controller
 	httpServer.Register(new(controller.Controller))
-
 	return httpServer
 }

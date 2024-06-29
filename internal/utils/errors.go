@@ -1,13 +1,24 @@
 package utils
 
-import clog "github.com/po2656233/superplace/logger"
+import (
+	exUtils "github.com/po2656233/superplace/extend/utils"
+	clog "github.com/po2656233/superplace/logger"
+)
 
 // CheckError 异常处理
-func CheckError(err error) bool {
+func CheckError(err error) (isOk bool) {
+	isOk = true
 	if err != nil {
-		//fmt.Println(err.Error())
-		clog.Error("数据异常:%v", err) // 正式开服的时候，这里一定是错误类型 错误内容 等异常信息输出到日志上面的
-		return false
+		isOk = false
 	}
-	return true
+	exUtils.Try(func() {
+		if !isOk {
+			panic(err)
+		}
+	}, func(errString string) {
+		// 上层的上上层级 调试后可得7
+		typeName, fnName := GetFuncName(7)
+		clog.Errorf("[%s]%s err:%s", fnName, typeName, errString)
+	})
+	return isOk
 }

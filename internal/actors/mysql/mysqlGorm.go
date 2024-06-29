@@ -8,7 +8,7 @@ import (
 	"superman/internal/hints"
 	protoMsg "superman/internal/protocol/gofile"
 	"superman/internal/sqlmodel"
-	"superman/internal/utils"
+	. "superman/internal/utils"
 	"time"
 )
 
@@ -74,8 +74,9 @@ func (sqlSelf *SqlOrm) updateMoney(userID int64, money int64) error {
 func (sqlSelf *SqlOrm) CheckUser(name string) (uid int64) {
 	user := sqlmodel.User{}
 	err := sqlSelf.db.Table(user.TableName()).Select("id").Where("name = ?", name).Find(&uid).Error
-	if !CheckError(err) {
-		return 0
+	CheckError(err)
+	if err != nil {
+		return constant.INVALID
 	}
 	return uid
 }
@@ -96,7 +97,8 @@ func (sqlSelf *SqlOrm) CheckLogin(name, password string) (uid int64, isSuccessfu
 	field := "id"
 	query := "`account` = ? and `password`=?"
 	err := sqlSelf.db.Table(user.TableName()).Select(field).Where(query, name, password).Find(&uid).Error
-	if CheckError(err) && uid != 0 {
+	CheckError(err)
+	if err == nil && uid != 0 {
 		isSuccessful = true
 	}
 	return uid, isSuccessful
@@ -160,7 +162,8 @@ func (sqlSelf *SqlOrm) GetRobotsInfo(count int) []*protoMsg.PlayerInfo {
 	fields := "`id`,`name`,`account`,`face`,`gender`, `platformid`,`age`,`vip`,`level`,`money`,`passport`,`realname`,`phone`,`email`, `address`,`identity`,`agentid`,`referralcode`,`clientaddr`,`serveraddr`,`machinecode`"
 	query := "`gender`=? AND `leavetime`>=`logintime`"
 	err := sqlSelf.db.Table(userM.TableName()).Select(fields).Where(query, 0x0F).Limit(count).Find(&userList).Error
-	if !CheckError(err) {
+	CheckError(err)
+	if err != nil {
 		return nil
 	}
 
@@ -190,9 +193,11 @@ func (sqlSelf *SqlOrm) CheckGoods(goodsId int64) *protoMsg.GoodsInfo {
 	goods := sqlmodel.Goods{}
 	fields := "`name`,`kind`,`level`,`price`,`store`,`sold`"
 	err := sqlSelf.db.Table(goods.TableName()).Select(fields).Where("id = ?", goodsId).Find(&goods).Error
-	if !CheckError(err) {
+	CheckError(err)
+	if err != nil {
 		return nil
 	}
+
 	return &protoMsg.GoodsInfo{
 		Name:  goods.Name,
 		ID:    goods.ID,
@@ -210,10 +215,11 @@ func (sqlSelf *SqlOrm) CheckAllGoods() (goodsInfoList map[int64]*protoMsg.GoodsI
 	goods := sqlmodel.Goods{}
 	fields := "*"
 	err := sqlSelf.db.Table(goods.TableName()).Select(fields).Find(&goodsList).Error
-	if !CheckError(err) {
+	CheckError(err)
+	if err != nil {
 		return nil
 	}
-	goodsInfoList = make(map[int64]*protoMsg.GoodsInfo, 0)
+	goodsInfoList = make(map[int64]*protoMsg.GoodsInfo)
 	for _, m := range goodsList {
 		goodsInfoList[m.ID] = &protoMsg.GoodsInfo{
 			Name:  m.Name,
@@ -234,7 +240,8 @@ func (sqlSelf *SqlOrm) CheckAssets(userID int64) *protoMsg.KnapsackInfo {
 	asset := sqlmodel.Assetgoods{}
 	fields := "`goodsid`, `amount`,`spending`"
 	err := sqlSelf.db.Table(asset.TableName()).Select(fields).Where("uid=?", userID).Find(&assetList).Error
-	if !CheckError(err) {
+	CheckError(err)
+	if err != nil {
 		return nil
 	}
 	allGoods := sqlSelf.CheckAllGoods()
@@ -426,7 +433,8 @@ func (sqlSelf *SqlOrm) CheckInnings(uid, gid int64) []*protoMsg.InningInfo {
 	record := sqlmodel.Record{}
 	fields := "`order`,`payment`,`time`,`code`,`success`,`remark`"
 	err := sqlSelf.db.Table(record.TableName()).Select(fields).Where("`uid`=? AND `byid`=? AND `gid`=?", uid, constant.SYSTEMID, gid).Find(&recordList).Error
-	if !CheckError(err) {
+	CheckError(err)
+	if err != nil {
 		return nil
 	}
 	infos := make([]*protoMsg.InningInfo, 0)
@@ -438,7 +446,7 @@ func (sqlSelf *SqlOrm) CheckInnings(uid, gid int64) []*protoMsg.InningInfo {
 			Payoff:    m.Payoff,
 			TimeStamp: m.Timestamp,
 		}
-		infos = utils.CopyInsert(infos, len(infos), info).([]*protoMsg.InningInfo)
+		infos = CopyInsert(infos, len(infos), info).([]*protoMsg.InningInfo)
 	}
 	return infos
 }
@@ -449,12 +457,13 @@ func (sqlSelf *SqlOrm) CheckRecharges(uid int64) []*protoMsg.RechargeResp {
 	recharge := sqlmodel.Recharge{}
 	fields := "`byid`,`premoney`,`payment`,`money`,`code`,`success`,`timestamp`,`order`,`remark`"
 	err := sqlSelf.db.Table(recharge.TableName()).Select(fields).Where("`uid`=?", uid).Find(&rechargeList).Error
-	if !CheckError(err) {
+	CheckError(err)
+	if err != nil {
 		return nil
 	}
 	infos := make([]*protoMsg.RechargeResp, 0)
 	for _, m := range rechargeList {
-		infos = utils.CopyInsert(infos, len(infos), &protoMsg.RechargeResp{
+		infos = CopyInsert(infos, len(infos), &protoMsg.RechargeResp{
 			UserID:    uid,
 			ByiD:      m.Byid,
 			PreMoney:  m.Premoney,
@@ -491,12 +500,13 @@ func (sqlSelf *SqlOrm) CheckRecords(uid, kindID int64, level int32, start, end i
 		query += " AND `kid`=? AND `level`=? "
 		err = sqlSelf.db.Table(record.TableName()).Select(fields).Where(query, uid, start, end, kindID, level).Find(&recordList).Error
 	}
-	if !CheckError(err) {
+	CheckError(err)
+	if err != nil {
 		return nil
 	}
 	infos := make([]*protoMsg.InningInfo, 0)
 	for _, m := range recordList {
-		infos = utils.CopyInsert(infos, len(infos), &protoMsg.InningInfo{
+		infos = CopyInsert(infos, len(infos), &protoMsg.InningInfo{
 			Number:    m.Inning,
 			WinnerID:  m.Winid,
 			LoserID:   m.Loseid,
@@ -514,13 +524,14 @@ func (sqlSelf *SqlOrm) CheckGetCheckIn(userID int64) []*protoMsg.CheckInResp {
 	fields := "`remark`,`timestamp`"
 	query := "`uid`=? "
 	err := sqlSelf.db.Table(checkin.TableName()).Select(fields).Where(query, userID).Find(&checkinList).Error
-	if !CheckError(err) {
+	CheckError(err)
+	if err != nil {
 		return nil
 	}
 
 	infos := make([]*protoMsg.CheckInResp, 0)
 	for _, m := range checkinList {
-		infos = utils.CopyInsert(infos, len(infos), &protoMsg.CheckInResp{
+		infos = CopyInsert(infos, len(infos), &protoMsg.CheckInResp{
 			UserID:    userID,
 			Remark:    m.Remark,
 			Timestamp: m.Timestamp,
@@ -535,7 +546,8 @@ func (sqlSelf *SqlOrm) CheckEmail(eid int64) (*protoMsg.EmailInfo, string) {
 	fields := "`sender`,`accepter`,`carboncopy`,`topic`,`content`,`goods`,`timestamp`,`isread`"
 	query := "`id`=? "
 	err := sqlSelf.db.Table(email.TableName()).Select(fields).Where(query, eid).Find(&email).Error
-	if !CheckError(err) {
+	CheckError(err)
+	if err != nil {
 		return nil, ""
 	}
 
@@ -558,7 +570,7 @@ func (sqlSelf *SqlOrm) CheckEmail(eid int64) (*protoMsg.EmailInfo, string) {
 			}
 		}
 		info.AwardList = &protoMsg.GoodsList{}
-		err = utils.BytesToPB(data, info.AwardList)
+		err = BytesToPB(data, info.AwardList)
 		CheckError(err)
 	}
 
@@ -573,7 +585,8 @@ func (sqlSelf *SqlOrm) CheckEmails(userID int64) []*protoMsg.EmailInfo {
 	fields := "`id`,`sender`,`carboncopy`,`topic`,`content`,`goods`,`timestamp`,`isread`"
 	query := "`accepter`=? "
 	err := sqlSelf.db.Table(emailM.TableName()).Select(fields).Where(query, accepter).Find(&emailList).Error
-	if !CheckError(err) {
+	CheckError(err)
+	if err != nil {
 		return nil
 	}
 	infos := make([]*protoMsg.EmailInfo, 0)
@@ -597,10 +610,10 @@ func (sqlSelf *SqlOrm) CheckEmails(userID int64) []*protoMsg.EmailInfo {
 				}
 			}
 			info.AwardList = &protoMsg.GoodsList{}
-			err = utils.BytesToPB(data, info.AwardList)
+			err = BytesToPB(data, info.AwardList)
 			CheckError(err)
 		}
-		infos = utils.CopyInsert(infos, len(infos), info).([]*protoMsg.EmailInfo)
+		infos = CopyInsert(infos, len(infos), info).([]*protoMsg.EmailInfo)
 	}
 	return infos
 }
@@ -612,7 +625,8 @@ func (sqlSelf *SqlOrm) CheckNotice(platID int64) []*protoMsg.NotifyNoticeResp {
 	fields := "`kindid`,`level`,`type`,`start`,`end`,`title`,`content`"
 	query := "`platid`=? "
 	err := sqlSelf.db.Table(noticeM.TableName()).Select(fields).Where(query, platID).Find(&noticeList).Error
-	if !CheckError(err) {
+	CheckError(err)
+	if err != nil {
 		return nil
 	}
 	timestamp := time.Now().Unix()
@@ -631,7 +645,7 @@ func (sqlSelf *SqlOrm) CheckNotice(platID int64) []*protoMsg.NotifyNoticeResp {
 				WaitTime:  int32(m.End - timestamp),
 			},
 		}
-		infos = utils.CopyInsert(infos, len(infos), notice).([]*protoMsg.NotifyNoticeResp)
+		infos = CopyInsert(infos, len(infos), notice).([]*protoMsg.NotifyNoticeResp)
 	}
 	return infos
 }
@@ -674,9 +688,11 @@ func (sqlSelf *SqlOrm) AddUser(user sqlmodel.User) (int64, error) {
 	user.Signintime = now.Unix()
 	user.CreatedAt = now
 	err := sqlSelf.db.Table(user.TableName()).Create(&user).Error
-	if !CheckError(err) {
+	CheckError(err)
+	if err != nil {
 		return 0, err
 	}
+
 	return user.ID, nil
 }
 
@@ -702,7 +718,8 @@ func (sqlSelf *SqlOrm) AddEmail(userID, toID int64, carboncopy, topic, content, 
 		CreatedAt:  now,
 	}
 	err := sqlSelf.db.Table(email.TableName()).Create(&email).Error
-	if !CheckError(err) {
+	CheckError(err)
+	if err != nil {
 		return constant.INVALID, err
 	}
 	return email.ID, nil
@@ -714,7 +731,8 @@ func (sqlSelf *SqlOrm) AddNotice(notice sqlmodel.Notice) (int64, error) {
 	defer sqlSelf.Unlock()
 	notice.CreatedAt = time.Now()
 	err := sqlSelf.db.Table(notice.TableName()).Create(&notice).Error
-	if !CheckError(err) {
+	CheckError(err)
+	if err != nil {
 		return constant.INVALID, err
 	}
 	return int64(notice.ID), nil

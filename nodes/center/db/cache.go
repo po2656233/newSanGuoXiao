@@ -2,6 +2,7 @@ package db
 
 import (
 	"github.com/goburrow/cache"
+	"math"
 	"time"
 )
 
@@ -9,14 +10,14 @@ var (
 
 	// uid缓存 key:uidKey, value:uid
 	uidCache = cache.New(
-		cache.WithMaximumSize(65535),
-		cache.WithExpireAfterAccess(120*time.Minute),
+		cache.WithMaximumSize(math.MaxUint16),
+		cache.WithExpireAfterAccess(2*time.Hour),
 	)
 
 	// 开发帐号缓存 key:accountName, value:DevAccountTable
 	devAccountCache = cache.New(
-		cache.WithMaximumSize(65535),
-		cache.WithExpireAfterAccess(60*time.Minute),
+		cache.WithMaximumSize(math.MaxUint16),
+		cache.WithExpireAfterAccess(time.Hour),
 	)
 )
 
