@@ -1,12 +1,15 @@
 package internal
 
 import (
+	"github.com/po2656233/goleaf/log"
 	clog "github.com/po2656233/superplace/logger"
 	"github.com/po2656233/superplace/net/parser/simple"
 	cproto "github.com/po2656233/superplace/net/proto"
 	event2 "superman/internal/event"
 	protoMsg "superman/internal/protocol/gofile"
+	"superman/internal/utils"
 	"superman/nodes/game/module/online"
+	"superman/nodes/leaf/jettengame/msg"
 )
 
 type (
@@ -17,6 +20,7 @@ type (
 		isOnline bool // 玩家是否在线
 		playerId int64
 		uid      int64
+		Session  *cproto.Session
 	}
 )
 
@@ -42,8 +46,20 @@ func (p *ActorPlayer) sessionClose() {
 }
 
 func (p *ActorPlayer) request(session *cproto.Session, req *protoMsg.Request) {
-	_ = req
-	p.Response(session, 2, &protoMsg.Response{})
+	// 派发给各个模块
+	msgData, err := msg.ProcessorProto.Unmarshal(req.Data)
+	if err != nil {
+		log.Debug("unmarshal message error: %v", err)
+		return
+	}
+	p.Session = session
+	err = msg.ProcessorProto.Route(msgData, p)
+	utils.CheckError(err)
+	//p.Call(session.AgentPath, "Response", &protoMsg.Response{})
+}
+
+func (p *ActorPlayer) Send(funName string, resp interface{}) {
+	p.Call(p.Session.AgentPath, funName, resp)
 }
 
 func (p *ActorPlayer) OnStop() {
