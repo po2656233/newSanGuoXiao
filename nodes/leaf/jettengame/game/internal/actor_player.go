@@ -5,6 +5,9 @@ import (
 	clog "github.com/po2656233/superplace/logger"
 	"github.com/po2656233/superplace/net/parser/simple"
 	cproto "github.com/po2656233/superplace/net/proto"
+	"golang.org/x/net/websocket"
+	"net"
+	"net/url"
 	event2 "superman/internal/event"
 	protoMsg "superman/internal/protocol/gofile"
 	"superman/internal/utils"
@@ -21,6 +24,7 @@ type (
 		playerId int64
 		uid      int64
 		Session  *cproto.Session
+		data     interface{}
 	}
 )
 
@@ -52,6 +56,7 @@ func (p *ActorPlayer) request(session *cproto.Session, req *protoMsg.Request) {
 		log.Debug("unmarshal message error: %v", err)
 		return
 	}
+	session.GetUid()
 	p.Session = session
 	err = msg.ProcessorProto.Route(msgData, p)
 	utils.CheckError(err)
@@ -62,8 +67,43 @@ func (p *ActorPlayer) Send(funName string, resp interface{}) {
 	p.Call(p.Session.AgentPath, funName, resp)
 }
 
+func (p *ActorPlayer) SendResult(state int32, hints string) {
+	p.Response(p.Session, &protoMsg.ResultResp{
+		State: state,
+		Hints: hints,
+	})
+}
+
 func (p *ActorPlayer) OnStop() {
 	clog.Infof("onlineCount = %d", online.Count())
+}
+
+//////////////////////////////实现Agent/////////////////////////////////////////////////////////
+
+func (p *ActorPlayer) WriteMsg(msg interface{}) {
+	p.Response(p.Session, msg)
+}
+func (p *ActorPlayer) LocalAddr() net.Addr {
+	return nil
+}
+func (p *ActorPlayer) RemoteAddr() net.Addr {
+	return &websocket.Addr{
+		URL: &url.URL{
+			Host: p.Session.GetIp(),
+		},
+	}
+}
+func (p *ActorPlayer) Close() {
+	p.sessionClose()
+}
+func (p *ActorPlayer) Destroy() {
+
+}
+func (p *ActorPlayer) UserData() interface{} {
+	return p.data
+}
+func (p *ActorPlayer) SetUserData(data interface{}) {
+	p.data = data
 }
 
 //// playerSelect 玩家查询角色列表

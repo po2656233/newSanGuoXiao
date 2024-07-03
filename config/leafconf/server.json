@@ -1,6 +1,6 @@
 {
 	"logLevel": "debug",
-	"logPath": "",
+	"logPath": "log",
 	"kcpAddr": ":9978",
 	"tcpAddr": ":9968",
 	"wsAddr": ":9950",

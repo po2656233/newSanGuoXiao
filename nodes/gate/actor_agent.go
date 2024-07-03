@@ -12,7 +12,7 @@ import (
 	"superman/internal/conf"
 	"superman/internal/constant"
 	"superman/internal/hints"
-	pb2 "superman/internal/protocol/gofile"
+	pb "superman/internal/protocol/gofile"
 	"superman/internal/rpc"
 	"superman/internal/session_key"
 	"superman/internal/token"
@@ -44,7 +44,7 @@ func (p *ActorAgent) OnInit() {
 
 ////////////////////////pomelo//////////////////////////////////////
 
-func (p *ActorAgent) setSession(req *pb2.StringKeyValue) {
+func (p *ActorAgent) setSession(req *pb.StringKeyValue) {
 	if req.Key == "" {
 		return
 	}
@@ -55,14 +55,14 @@ func (p *ActorAgent) setSession(req *pb2.StringKeyValue) {
 }
 
 // login 用户登录，验证帐号 (*pb.LoginResponse, int32)
-func (p *ActorAgent) login(session *cproto.Session, req *pb2.LoginRequest) {
+func (p *ActorAgent) login(session *cproto.Session, req *pb.LoginRequest) {
 	agent, found := pomelo.GetAgent(p.ActorID())
 	if !found {
 		return
 	}
 
 	// 验证token
-	userToken, errCode := p.validateToken(req.Token)
+	userToken, errCode := token.ValidateBase64(req.Token)
 	if code.IsFail(errCode) {
 		agent.Response(session, errCode)
 		return
@@ -75,13 +75,13 @@ func (p *ActorAgent) login(session *cproto.Session, req *pb2.LoginRequest) {
 		return
 	}
 	// 根据token带来的sdk参数，从中心节点获取uid
-	resp, errCode := rpc.SendData(p.App(), rpc.SourcePath, rpc.AccountActor, rpc.CenterType, &pb2.GetUserIDReq{
+	resp, errCode := rpc.SendData(p.App(), rpc.SourcePath, rpc.AccountActor, rpc.CenterType, &pb.GetUserIDReq{
 		SdkId:  sdkRow.SdkId,
 		Pid:    userToken.PID,
 		OpenId: userToken.OpenID,
 	})
 
-	rsp := resp.(*pb2.GetUserIDResp)
+	rsp := resp.(*pb.GetUserIDResp)
 	uid := rsp.Uid
 	if uid == 0 || code.IsFail(errCode) {
 		agent.ResponseCode(session, hints.Login07, true)
@@ -99,30 +99,11 @@ func (p *ActorAgent) login(session *cproto.Session, req *pb2.LoginRequest) {
 	agent.Session().Set(sessionKey.ServerID, cstring.ToString(req.ServerId))
 	agent.Session().Set(sessionKey.PID, cstring.ToString(userToken.PID))
 	agent.Session().Set(sessionKey.OpenID, userToken.OpenID)
-	agent.Response(session, &pb2.LoginResponse{
+	agent.Response(session, &pb.LoginResponse{
 		Uid:    uid,
 		Pid:    userToken.PID,
 		OpenId: userToken.OpenID,
 	})
-}
-
-func (p *ActorAgent) validateToken(base64Token string) (*token.Token, int32) {
-	userToken, ok := token.DecodeToken(base64Token)
-	if ok == false {
-		return nil, hints.Login15
-	}
-
-	platformRow := conf.SdkConfig.Get(userToken.PID)
-	if platformRow == nil {
-		return nil, hints.Login15
-	}
-
-	statusCode, ok := token.Validate(userToken, platformRow.Salt)
-	if ok == false {
-		return nil, statusCode
-	}
-
-	return userToken, code.OK
 }
 
 func (p *ActorAgent) checkSession(uid cfacade.UID) {
@@ -165,7 +146,7 @@ func (p *ActorAgent) onPomeloSessionClose(agent *pomelo.Agent) {
 }
 
 // ///////////////////////////simple/////////////////////////////////////////////
-func (p *ActorAgent) setSimpleSession(req *pb2.StringKeyValue) {
+func (p *ActorAgent) setSimpleSession(req *pb.StringKeyValue) {
 	if req.Key == "" {
 		return
 	}
@@ -175,16 +156,16 @@ func (p *ActorAgent) setSimpleSession(req *pb2.StringKeyValue) {
 	}
 }
 
-func (p *ActorAgent) simpleLogin(session *cproto.Session, req *pb2.LoginRequest) {
+func (p *ActorAgent) simpleLogin(session *cproto.Session, req *pb.LoginRequest) {
 	agent, found := simple.GetAgent(p.ActorID())
 	if !found {
 		return
 	}
 
 	// 验证token
-	userToken, errCode1 := p.validateToken(req.Token)
+	userToken, errCode1 := token.ValidateBase64(req.Token)
 	if code.IsFail(errCode1) {
-		agent.Response(session.Mid, &pb2.ResultResp{
+		agent.Response(session.Mid, &pb.ResultResp{
 			State: errCode1,
 			Hints: hints.StatusText[int(errCode1)],
 		})
@@ -194,23 +175,23 @@ func (p *ActorAgent) simpleLogin(session *cproto.Session, req *pb2.LoginRequest)
 	// 验证pid是否配置
 	sdkRow := conf.SdkConfig.Get(userToken.PID)
 	if sdkRow == nil {
-		agent.Response(session.Mid, &pb2.ResultResp{
+		agent.Response(session.Mid, &pb.ResultResp{
 			State: hints.Login15,
 			Hints: hints.StatusText[hints.Login15],
 		})
 		return
 	}
 	// 根据token带来的sdk参数，从中心节点获取uid
-	resp, errCode2 := rpc.SendData(p.App(), rpc.SourcePath, rpc.AccountActor, rpc.CenterType, &pb2.GetUserIDReq{
+	resp, errCode2 := rpc.SendData(p.App(), rpc.SourcePath, rpc.AccountActor, rpc.CenterType, &pb.GetUserIDReq{
 		SdkId:  sdkRow.SdkId,
 		Pid:    userToken.PID,
 		OpenId: userToken.OpenID,
 	})
 
-	rsp := resp.(*pb2.GetUserIDResp)
+	rsp := resp.(*pb.GetUserIDResp)
 	uid := rsp.Uid
 	if uid == 0 || code.IsFail(errCode2) {
-		agent.Response(session.Mid, &pb2.ResultResp{
+		agent.Response(session.Mid, &pb.ResultResp{
 			State: hints.Login07,
 			Hints: hints.StatusText[hints.Login07],
 		})
@@ -221,7 +202,7 @@ func (p *ActorAgent) simpleLogin(session *cproto.Session, req *pb2.LoginRequest)
 
 	if err := agent.Bind(uid); err != nil {
 		clog.Warn(err)
-		agent.Response(session.Mid, &pb2.ResultResp{
+		agent.Response(session.Mid, &pb.ResultResp{
 			State: hints.Flag0003,
 			Hints: hints.StatusText[hints.Flag0003],
 		})
@@ -231,7 +212,7 @@ func (p *ActorAgent) simpleLogin(session *cproto.Session, req *pb2.LoginRequest)
 	agent.Session().Set(sessionKey.ServerID, cstring.ToString(req.ServerId))
 	agent.Session().Set(sessionKey.PID, cstring.ToString(userToken.PID))
 	agent.Session().Set(sessionKey.OpenID, userToken.OpenID)
-	agent.Response(session.Mid, &pb2.LoginResponse{
+	agent.Response(session.Mid, &pb.LoginResponse{
 		Uid:    uid,
 		Pid:    userToken.PID,
 		OpenId: userToken.OpenID,
@@ -241,7 +222,7 @@ func (p *ActorAgent) simpleLogin(session *cproto.Session, req *pb2.LoginRequest)
 func (p *ActorAgent) checkSimpleSession(uid cfacade.UID) {
 	if agent, found := simple.GetAgentWithUID(uid); found {
 		session := agent.Session()
-		agent.Response(session.Mid, &pb2.ResultResp{
+		agent.Response(session.Mid, &pb.ResultResp{
 			State: hints.Login12,
 			Hints: hints.StatusText[hints.Login12],
 		})

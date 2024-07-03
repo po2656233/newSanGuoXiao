@@ -98,7 +98,7 @@ func buildSimpleParser(app *superplace.AppBuilder) cfacade.INetParser {
 	agentActor.AddNodeRoute(constant.MIDGame, &simple.NodeRoute{
 		NodeType: "leaf",
 		ActorID:  "game",
-		FuncName: "enter",
+		FuncName: "request",
 	})
 	agentActor.AddNodeRoute(constant.MIDPing, &simple.NodeRoute{
 		NodeType: "gate",

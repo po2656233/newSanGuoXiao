@@ -102,7 +102,7 @@ func (p *Controller) login(c *sgxGin.Context) {
 	params := c.GetParams(true)
 	params["pid"] = sgxString.ToString(pid)
 
-	// invoke login
+	// invoke login.
 	sdkInvoke.Login(config, params, func(statusCode int32, result sdk.Params, error ...error) {
 		if code.IsFail(statusCode) {
 			sgxLogger.Warnf("login validate fail. code = %d, params = %s", statusCode, c.GetParams())

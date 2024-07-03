@@ -86,7 +86,7 @@ func (c *Component) OnAfterInit() {
 			panic(err)
 		}
 		log.Export(logger)
-		defer logger.Close()
+		//defer logger.Close()
 	}
 	log.Release("Leaf :%v  starting up", version)
 

@@ -7,6 +7,7 @@ import (
 	extendCrypto "github.com/po2656233/superplace/extend/crypto"
 	sgxTime "github.com/po2656233/superplace/extend/time"
 	sgxLogger "github.com/po2656233/superplace/logger"
+	"superman/internal/conf"
 	"superman/internal/hints"
 )
 
@@ -57,6 +58,25 @@ func DecodeToken(base64Token string) (*Token, bool) {
 	}
 
 	return token, true
+}
+
+func ValidateBase64(base64Token string) (*Token, int32) {
+	userToken, ok := DecodeToken(base64Token)
+	if ok == false {
+		return nil, hints.Login15
+	}
+
+	platformRow := conf.SdkConfig.Get(userToken.PID)
+	if platformRow == nil {
+		return nil, hints.Login15
+	}
+
+	statusCode, ok := Validate(userToken, platformRow.Salt)
+	if ok == false {
+		return nil, statusCode
+	}
+
+	return userToken, code.OK
 }
 
 func Validate(token *Token, appKey string) (int32, bool) {

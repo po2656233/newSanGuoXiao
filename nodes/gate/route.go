@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/golang/protobuf/proto"
-	superConst "github.com/po2656233/superplace/const"
 	exReflect "github.com/po2656233/superplace/extend/reflect"
 	cslice "github.com/po2656233/superplace/extend/slice"
 	cstring "github.com/po2656233/superplace/extend/string"
@@ -21,7 +20,6 @@ import (
 	. "superman/internal/constant"
 	"superman/internal/hints"
 	"superman/internal/protocol/gofile"
-	pb2 "superman/internal/protocol/gofile"
 	"superman/internal/session_key"
 )
 
@@ -82,70 +80,7 @@ func GetProtoData(msg proto.Message) ([]byte, error) {
 	return data, nil
 }
 
-func onSimpleDataRoute(agent *simple.Agent, msg *simple.Message, route *simple.NodeRoute) {
-	session := agent.Session()
-	session.Mid = msg.MID
-
-	// 所有置空函数
-	//if route.FuncName == "" {
-	//	route.FuncName = exReflect.GetStructName(msg)
-	//	//bytesReader := bytes.NewReader(msg.Data[:4])
-	//	//var msgId uint32
-	//	//err := binary.Read(bytesReader, endian, &msgId)
-	//	//if err != nil {
-	//	//	clog.Warnf("[sid = %s,uid = %d] Session is not msgId err:%v.[route = %+v]", agent.SID(), agent.UID(), err, route)
-	//	//	return
-	//	//}
-	//	//strId := cstring.ToString(msgId)
-	//	//if funcName, ok := mapFuncs[strId]; ok {
-	//	//	route.FuncName = funcName
-	//	//}
-	//}
-	if session.Mid == MIDPing {
-		data, _ := GetProtoData(&pb2.PongResp{})
-		agent.Response(MIDPing, data)
-		return
-	}
-	// current node
-	if agent.NodeType() == route.NodeType {
-		targetPath := cfacade.NewChildPath(agent.NodeId(), route.ActorID, session.Sid)
-		simple.LocalDataRoute(agent, session, msg, route, targetPath)
-		return
-	}
-
-	if !session.IsBind() {
-		clog.Warnf("[sid = %s,uid = %d] Session is not bind with UID. failed to forward message.[route = %+v]",
-			agent.SID(),
-			agent.UID(),
-			route,
-		)
-		return
-	}
-
-	member, found := agent.Discovery().Random(route.NodeType)
-	if !found {
-		clog.Warnf("[sid = %s,uid = %d] discovery not found.[route = %+v]",
-			agent.SID(),
-			agent.UID(),
-			route,
-		)
-		return
-	}
-
-	targetPath := cfacade.NewPath(member.GetNodeId(), route.ActorID)
-	if route.FuncName != "" {
-		targetPath += superConst.DOT + route.FuncName
-	}
-	if err := simple.ClusterLocalDataRoute(agent, session, msg, route, member.GetNodeId(), targetPath); err != nil {
-		clog.Errorf("[sid = %s,uid = %d] Session post message err:%v.[route = %+v]",
-			agent.SID(),
-			agent.UID(),
-			err,
-			route,
-		)
-	}
-}
-
+// ///////////////////////////////pomelo////////////////////////////////////////////////////
 // onDataRoute 数据路由规则
 //
 // 登录逻辑:
@@ -203,4 +138,52 @@ func gameNodeRoute(agent *pomelo.Agent, session *cproto.Session, route *pmessage
 		clog.Errorf("[route][gameNodeRoute] ClusterLocalDataRoute err:%v", err)
 	}
 
+}
+
+// ///////////////////////////////simple////////////////////////////////////////////////////
+func onSimpleDataRoute(agent *simple.Agent, msg *simple.Message, route *simple.NodeRoute) {
+	session := agent.Session()
+	session.Mid = msg.MID
+
+	if session.Mid == MIDPing {
+		data, _ := GetProtoData(&pb.PongResp{})
+		agent.Response(MIDPing, data)
+		return
+	}
+	// current node
+	if agent.NodeType() == route.NodeType {
+		targetPath := cfacade.NewChildPath(agent.NodeId(), route.ActorID, session.Sid)
+		simple.LocalDataRoute(agent, session, msg, route, targetPath)
+		return
+	}
+
+	if !session.IsBind() {
+		clog.Warnf("[sid = %s,uid = %d] Session is not bind with UID. failed to forward message.[route = %+v]",
+			agent.SID(),
+			agent.UID(),
+			route,
+		)
+		return
+	}
+
+	serverId := session.GetString(sessionKey.ServerID)
+	if serverId == "" {
+		return
+	}
+
+	childId := cstring.ToString(session.Uid)
+	targetPath := cfacade.NewChildPath(serverId, route.ActorID, childId)
+
+	clusterPacket := cproto.GetClusterPacket()
+	clusterPacket.SourcePath = session.AgentPath
+	clusterPacket.TargetPath = targetPath
+	clusterPacket.FuncName = route.FuncName
+	clusterPacket.Session = session   // agent session
+	clusterPacket.ArgBytes = msg.Data // packet -> message -> data
+	if clusterPacket.FuncName == "" {
+		clusterPacket.FuncName = "request"
+	}
+	if err := agent.Cluster().PublishLocal(serverId, clusterPacket); err != nil {
+		clog.Errorf("[route][gameNodeRoute] ClusterLocalDataRoute err:%v", err)
+	}
 }

@@ -32,7 +32,7 @@ func (p *ActorGame) OnInit() {
 	p.Remote().Register(p.checkChild)
 
 	p.Timer().RemoveAll()
-	p.Timer().Add(1*time.Second, p.everySecondTimer)
+	//p.Timer().Add(1*time.Second, p.everySecondTimer)
 }
 
 func (p *ActorGame) OnFindChild(msg *cfacade.Message) (cfacade.IActor, bool) {

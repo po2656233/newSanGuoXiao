@@ -1,0 +1,72 @@
+2024/07/03 20:35:49 component.go:91: [release]	Leaf :1.1.4  starting up
+2024/07/03 20:36:12 client.go:59: [debug]	玩家:12 待绑定客户端
+2024/07/03 20:36:12 client.go:47: [debug]	新增一个客户端IP://::1 玩家:12
+2024/07/03 20:36:12 chanrpc.go:133: [error]	runtime error: invalid memory address or nil pointer dereference: goroutine 70 [running]:
+github.com/po2656233/goleaf/chanrpc.(*Server).exec.func1()
+	E:/GoPrj/src/pkg/mod/github.com/po2656233/goleaf@v0.0.0-20240617091014-ede6cdcd76b7/chanrpc/chanrpc.go:104 +0xc5
+panic({0x1fbd220, 0x1e98350})
+	D:/Go/go1.20/src/runtime/panic.go:890 +0x262
+superman/nodes/leaf/jettengame/game/internal.enter({0xc00068cf40, 0x2, 0x2})
+	E:/GoPrj/superman/nodes/leaf/jettengame/game/internal/handler.go:174 +0x329
+github.com/po2656233/goleaf/chanrpc.(*Server).exec(0xc0004f66a0, 0xc000681340)
+	E:/GoPrj/src/pkg/mod/github.com/po2656233/goleaf@v0.0.0-20240617091014-ede6cdcd76b7/chanrpc/chanrpc.go:117 +0x4c2
+github.com/po2656233/goleaf/chanrpc.(*Server).Exec(0xc0004f66a0, 0xc000681340)
+	E:/GoPrj/src/pkg/mod/github.com/po2656233/goleaf@v0.0.0-20240617091014-ede6cdcd76b7/chanrpc/chanrpc.go:131 +0x3b
+github.com/po2656233/goleaf/module.(*Skeleton).Run(0xc000416e60, 0xc0007303f0)
+	E:/GoPrj/src/pkg/mod/github.com/po2656233/goleaf@v0.0.0-20240617091014-ede6cdcd76b7/module/skeleton.go:59 +0x2fe
+github.com/po2656233/goleaf/module.run(0xc00001fe60)
+	E:/GoPrj/src/pkg/mod/github.com/po2656233/goleaf@v0.0.0-20240617091014-ede6cdcd76b7/module/module.go:54 +0x3a
+created by github.com/po2656233/goleaf/module.Init
+	E:/GoPrj/src/pkg/mod/github.com/po2656233/goleaf@v0.0.0-20240617091014-ede6cdcd76b7/module/module.go:40 +0x132
+2024/07/03 20:36:59 chanrpc.go:133: [error]	runtime error: invalid memory address or nil pointer dereference: goroutine 70 [running]:
+github.com/po2656233/goleaf/chanrpc.(*Server).exec.func1()
+	E:/GoPrj/src/pkg/mod/github.com/po2656233/goleaf@v0.0.0-20240617091014-ede6cdcd76b7/chanrpc/chanrpc.go:104 +0xc5
+panic({0x1fbd220, 0x1e98350})
+	D:/Go/go1.20/src/runtime/panic.go:890 +0x262
+superman/nodes/leaf/jettengame/game/internal.enter({0xc000116320, 0x2, 0x2})
+	E:/GoPrj/superman/nodes/leaf/jettengame/game/internal/handler.go:174 +0x329
+github.com/po2656233/goleaf/chanrpc.(*Server).exec(0xc0004f66a0, 0xc0006e2480)
+	E:/GoPrj/src/pkg/mod/github.com/po2656233/goleaf@v0.0.0-20240617091014-ede6cdcd76b7/chanrpc/chanrpc.go:117 +0x4c2
+github.com/po2656233/goleaf/chanrpc.(*Server).Exec(0xc0004f66a0, 0xc0006e2480)
+	E:/GoPrj/src/pkg/mod/github.com/po2656233/goleaf@v0.0.0-20240617091014-ede6cdcd76b7/chanrpc/chanrpc.go:131 +0x3b
+github.com/po2656233/goleaf/module.(*Skeleton).Run(0xc000416e60, 0xc0007303f0)
+	E:/GoPrj/src/pkg/mod/github.com/po2656233/goleaf@v0.0.0-20240617091014-ede6cdcd76b7/module/skeleton.go:59 +0x2fe
+github.com/po2656233/goleaf/module.run(0xc00001fe60)
+	E:/GoPrj/src/pkg/mod/github.com/po2656233/goleaf@v0.0.0-20240617091014-ede6cdcd76b7/module/module.go:54 +0x3a
+created by github.com/po2656233/goleaf/module.Init
+	E:/GoPrj/src/pkg/mod/github.com/po2656233/goleaf@v0.0.0-20240617091014-ede6cdcd76b7/module/module.go:40 +0x132
+2024/07/03 20:38:54 chanrpc.go:133: [error]	runtime error: invalid memory address or nil pointer dereference: goroutine 70 [running]:
+github.com/po2656233/goleaf/chanrpc.(*Server).exec.func1()
+	E:/GoPrj/src/pkg/mod/github.com/po2656233/goleaf@v0.0.0-20240617091014-ede6cdcd76b7/chanrpc/chanrpc.go:104 +0xc5
+panic({0x1fbd220, 0x1e98350})
+	D:/Go/go1.20/src/runtime/panic.go:890 +0x262
+superman/nodes/leaf/jettengame/game/internal.enter({0xc00068c200, 0x2, 0x2})
+	E:/GoPrj/superman/nodes/leaf/jettengame/game/internal/handler.go:174 +0x329
+github.com/po2656233/goleaf/chanrpc.(*Server).exec(0xc0004f66a0, 0xc000680300)
+	E:/GoPrj/src/pkg/mod/github.com/po2656233/goleaf@v0.0.0-20240617091014-ede6cdcd76b7/chanrpc/chanrpc.go:117 +0x4c2
+github.com/po2656233/goleaf/chanrpc.(*Server).Exec(0xc0004f66a0, 0xc000680300)
+	E:/GoPrj/src/pkg/mod/github.com/po2656233/goleaf@v0.0.0-20240617091014-ede6cdcd76b7/chanrpc/chanrpc.go:131 +0x3b
+github.com/po2656233/goleaf/module.(*Skeleton).Run(0xc000416e60, 0xc0007303f0)
+	E:/GoPrj/src/pkg/mod/github.com/po2656233/goleaf@v0.0.0-20240617091014-ede6cdcd76b7/module/skeleton.go:59 +0x2fe
+github.com/po2656233/goleaf/module.run(0xc00001fe60)
+	E:/GoPrj/src/pkg/mod/github.com/po2656233/goleaf@v0.0.0-20240617091014-ede6cdcd76b7/module/module.go:54 +0x3a
+created by github.com/po2656233/goleaf/module.Init
+	E:/GoPrj/src/pkg/mod/github.com/po2656233/goleaf@v0.0.0-20240617091014-ede6cdcd76b7/module/module.go:40 +0x132
+2024/07/03 20:44:37 chanrpc.go:133: [error]	runtime error: invalid memory address or nil pointer dereference: goroutine 70 [running]:
+github.com/po2656233/goleaf/chanrpc.(*Server).exec.func1()
+	E:/GoPrj/src/pkg/mod/github.com/po2656233/goleaf@v0.0.0-20240617091014-ede6cdcd76b7/chanrpc/chanrpc.go:104 +0xc5
+panic({0x1fbd220, 0x1e98350})
+	D:/Go/go1.20/src/runtime/panic.go:890 +0x262
+superman/nodes/leaf/jettengame/game/internal.enter({0xc00068c320, 0x2, 0x2})
+	E:/GoPrj/superman/nodes/leaf/jettengame/game/internal/handler.go:174 +0x329
+github.com/po2656233/goleaf/chanrpc.(*Server).exec(0xc0004f66a0, 0xc000680540)
+	E:/GoPrj/src/pkg/mod/github.com/po2656233/goleaf@v0.0.0-20240617091014-ede6cdcd76b7/chanrpc/chanrpc.go:117 +0x4c2
+github.com/po2656233/goleaf/chanrpc.(*Server).Exec(0xc0004f66a0, 0xc000680540)
+	E:/GoPrj/src/pkg/mod/github.com/po2656233/goleaf@v0.0.0-20240617091014-ede6cdcd76b7/chanrpc/chanrpc.go:131 +0x3b
+github.com/po2656233/goleaf/module.(*Skeleton).Run(0xc000416e60, 0xc0007303f0)
+	E:/GoPrj/src/pkg/mod/github.com/po2656233/goleaf@v0.0.0-20240617091014-ede6cdcd76b7/module/skeleton.go:59 +0x2fe
+github.com/po2656233/goleaf/module.run(0xc00001fe60)
+	E:/GoPrj/src/pkg/mod/github.com/po2656233/goleaf@v0.0.0-20240617091014-ede6cdcd76b7/module/module.go:54 +0x3a
+created by github.com/po2656233/goleaf/module.Init
+	E:/GoPrj/src/pkg/mod/github.com/po2656233/goleaf@v0.0.0-20240617091014-ede6cdcd76b7/module/module.go:40 +0x132
+2024/07/03 20:44:37 component.go:140: [release]	Leaf closing down!

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	protoMsg "superman/internal/protocol/gofile"
+	token2 "superman/internal/token"
 	. "superman/nodes/leaf/jettengame/base"
 	"superman/nodes/leaf/jettengame/game/internal/category/CardGame/sanguoxiao"
 	"superman/nodes/leaf/jettengame/game/internal/category/MahjongGame/mahjong"
@@ -12,7 +13,6 @@ import (
 	"superman/nodes/leaf/jettengame/sql/redis"
 	"time"
 
-	"github.com/po2656233/goleaf/gate"
 	"github.com/po2656233/goleaf/log"
 
 	"superman/nodes/leaf/jettengame/sql/mysql"
@@ -59,7 +59,7 @@ func handlerBehavior() {
 // 校验合法性
 func verifyMsg(args []interface{}) (*Player, IGameOperate, bool) {
 	_ = args[1]
-	agent := args[1].(gate.Agent)
+	agent := args[1].(*ActorPlayer)
 	if userData := agent.UserData(); userData != nil { //[0
 		person := userData.(*Player)
 		if game := person.PtrTable; nil != game && nil != game.Instance {
@@ -92,7 +92,7 @@ func productGame(game *Game) IGameOperate {
 // 意见反馈
 func handleSuggest(args []interface{}) {
 	_ = args[0].(*protoMsg.SuggestReq)
-	agent := args[1].(gate.Agent)
+	agent := args[1].(*ActorPlayer)
 	if userData := agent.UserData(); userData != nil { //[0
 		person := userData.(*Player)
 		msg := &protoMsg.SuggestResp{
@@ -112,7 +112,7 @@ func handleSuggest(args []interface{}) {
 }
 func handleNotifyNotice(args []interface{}) {
 	m := args[0].(*protoMsg.NotifyNoticeReq)
-	agent := args[1].(gate.Agent)
+	agent := args[1].(*ActorPlayer)
 	if userData := agent.UserData(); userData != nil { //[0
 		person := userData.(*Player)
 		if m.Timeout <= INVALID {
@@ -150,35 +150,35 @@ func enter(args []interface{}) {
 	//查找玩家
 	//_ = args[1]
 	m := args[0].(*protoMsg.EnterGameReq)
-	_ = m
-	var agent gate.Agent
+	agent := args[1].(*ActorPlayer)
+	//var agent gate.Agent
 
 	// 001 获取并解析token信息
-	c, err := ParseTokenHs256(m.Token)
-	if err != nil || c == nil {
-		GetClientManger().SendResult(agent, FAILED, StatusText[Room05])
-		return
-	}
-	token, err := redisClient.Get(GetToken(c.ID)).Bytes()
-	if err != nil {
-		GetClientManger().SendResult(agent, FAILED, StatusText[Game47])
+	tk, st := token2.ValidateBase64(m.Token)
+	if st != SUCCESS || tk == nil {
+		agent.SendResult(FAILED, StatusText[Room05])
 		return
 	}
 
-	userInfo := &protoMsg.PlayerInfo{}
-	if err = BytesToPB(token, userInfo); err != nil {
-		GetClientManger().SendResult(agent, FAILED, StatusText[Game47])
-		return
+	uid := agent.Session.GetUid()
+	if _, ok := GetClientManger().Get(uid); !ok {
+		GetClientManger().Append(uid, agent)
 	}
 
 	// 002 构建玩家实例 并添加保存
-	person := &Player{
-		PlayerInfo: userInfo,
+	person := GetPlayerManger().Get(uid)
+	if person == nil {
+		person = &Player{
+			PlayerInfo: &protoMsg.PlayerInfo{},
+			Knapsack:   &protoMsg.KnapsackInfo{},
+			PtrRoom:    &Room{},
+			PtrTable:   &Table{},
+		}
 	}
-	person.State = protoMsg.PlayerState_PlayerSitDown
-	if GetPlayerManger().Exist(person.UserID) {
-		person = GetPlayerManger().Get(person.UserID)
-	} else if info := mysql.SqlHandle().CheckUserInfo(person.UserID); info != nil {
+
+	if GetPlayerManger().Exist(uid) {
+		person = GetPlayerManger().Get(uid)
+	} else if info := mysql.SqlHandle().CheckUserInfo(uid); info != nil {
 		// 数据转换
 		person.Sex = info.Gender
 		person.Money = info.Money
@@ -191,31 +191,35 @@ func enter(args []interface{}) {
 
 	// 反推房间号
 	if person.RoomNum == 0 {
-		person.RoomNum, err = mysql.SqlHandle().CheckRoomNum(m.GameID)
+		num, err := mysql.SqlHandle().CheckRoomNum(m.GameID)
 		if err != nil {
-			GetClientManger().SendResult(agent, FAILED, StatusText[Game47])
+			agent.SendResult(FAILED, StatusText[Game47])
 			return
 		}
+		person.RoomNum = num
 	}
 
 	person.PtrRoom = &Room{
 		Num: person.RoomNum,
 	}
-	agent.SetUserData(person)
+	//agent.SetUserData(person)
+
 	GetPlayerManger().Append(person)
 
 	// 玩家是否存在没有结束的游戏
 	if person.PtrTable != nil && person.GameID != m.GameID && protoMsg.PlayerState_PlayerAgree < person.State {
 		hints := fmt.Sprintf("您所参与的游戏(ID:%v)本轮还没结束!", person.GameID)
 		GetClientManger().SendResult(agent, FAILED, hints)
+		//agent.SendResult(FAILED, hints)
 		return
 	}
 
 	//003 查找平台是否包含该房间
-	pid := mysql.SqlHandle().CheckPlatformInfo(person.UserID)
+	pid := mysql.SqlHandle().CheckPlatformInfo(uid)
 	platform := GetPlatformManger().Get(pid)
 	if platform == nil {
-		GetClientManger().SendResult(agent, FAILED, StatusText[Room12])
+		agent.SendResult(FAILED, StatusText[Room12])
+		//GetClientManger().SendResult(agent, FAILED, StatusText[Room12])
 		return
 	}
 	var isHaveRoom = false
@@ -226,31 +230,35 @@ func enter(args []interface{}) {
 		}
 	}
 	if !isHaveRoom {
-		GetClientManger().SendResult(agent, FAILED, StatusText[Room13])
+		agent.SendResult(FAILED, StatusText[Room13])
+		//GetClientManger().SendResult(agent, FAILED, StatusText[Room13])
 		return
 	}
 
 	//004 获取游戏
 	game, ok := GetGamesManger().GetGame(m.GameID)
 	if !ok {
-		GetClientManger().SendResult(agent, FAILED, StatusText[TableInfo04])
+		agent.SendResult(FAILED, StatusText[TableInfo04])
+		//GetClientManger().SendResult(agent, FAILED, StatusText[TableInfo04])
 		return
 	}
 
 	if game.T.HostID != SYSTEMID && game.T.Password != m.Password {
-		GetClientManger().SendResult(agent, FAILED, StatusText[Room01])
+		agent.SendResult(FAILED, StatusText[Room01])
+		//GetClientManger().SendResult(agent, FAILED, StatusText[Room01])
 		return
 	}
 
 	//005 进行配桌
 	_, code := GetGamesManger().Match(game, person, productGame)
 	if code != SUCCESS {
-		GetClientManger().SendResult(agent, FAILED, StatusText[code])
+		agent.SendResult(FAILED, StatusText[code])
+		//GetClientManger().SendResult(agent, FAILED, StatusText[code])
 		return
 	}
 
 	//006 进入游戏场景
-	log.Debug("[%v:%v]\t[配桌] 玩家:%v 成功配桌!!", game.G.Name, game.ID, person.UserID)
+	log.Debug("[%v:%v]\t[配桌] 玩家:%v 成功配桌!!", game.G.Name, game.ID, uid)
 	var enterArgs []interface{}
 	enterArgs = append(enterArgs, game, agent)
 	person.Enter(enterArgs)
@@ -262,7 +270,7 @@ func changeTable(args []interface{}) {
 	//查找玩家
 	_ = args[1]
 	m := args[0].(*protoMsg.ChangeTableReq)
-	agent := args[1].(gate.Agent)
+	agent := args[1].(*ActorPlayer)
 	if userData := agent.UserData(); userData != nil { //[0
 		person := userData.(*Player)
 		if table, code := GetGamesManger().ChangeTable(m.GameID, person, productGame); code == SUCCESS {
@@ -282,7 +290,7 @@ func changeTable(args []interface{}) {
 // 获取牌局信息
 func getInnings(args []interface{}) {
 	_ = args[1]
-	agent := args[1].(gate.Agent)
+	agent := args[1].(*ActorPlayer)
 	m := args[0].(*protoMsg.GetInningsInfoReq)
 	if userData := agent.UserData(); userData != nil { //[0
 		person := userData.(*Player)
@@ -331,7 +339,7 @@ func getGameRecords(args []interface{}) {
 // 获取牌局记录
 func getRecords(args []interface{}) {
 	_ = args[1]
-	agent := args[1].(gate.Agent)
+	agent := args[1].(*ActorPlayer)
 	m := args[0].(*protoMsg.GetRecordReq)
 	if userData := agent.UserData(); userData != nil { //[0
 		person := userData.(*Player)
@@ -371,7 +379,7 @@ func getRecords(args []interface{}) {
 
 // 取回游戏密码
 func getBackPassword(args []interface{}) {
-	agent := args[1].(gate.Agent)
+	agent := args[1].(*ActorPlayer)
 	m := args[0].(*protoMsg.GetBackPasswordReq)
 	if userData := agent.UserData(); userData != nil { //[0
 		if g, ok := GetGamesManger().GetGame(m.GameID); ok {
@@ -391,7 +399,7 @@ func getBackPassword(args []interface{}) {
 
 // / 更新金币
 func updateGold(args []interface{}) {
-	agent := args[1].(gate.Agent)
+	agent := args[1].(*ActorPlayer)
 	if userData := agent.UserData(); userData != nil { //[0
 		person := userData.(*Player)
 		person.Gold = mysql.SqlHandle().CheckMoney(person.UserID)
@@ -433,7 +441,7 @@ func over(args []interface{}) {
 func exit(args []interface{}) {
 	_ = args[1]
 	m := args[0].(*protoMsg.ExitGameReq)
-	agent := args[1].(gate.Agent)
+	agent := args[1].(*ActorPlayer)
 	if userData := agent.UserData(); userData != nil { //[0
 		person := userData.(*Player)
 		if game := person.PtrTable; nil != game && m.GameID != INVALID && nil != game.Instance {
@@ -455,7 +463,7 @@ func exit(args []interface{}) {
 func disbandedGame(args []interface{}) {
 	_ = args[1]
 	m := args[0].(*protoMsg.DisbandedGameReq)
-	agent := args[1].(gate.Agent)
+	agent := args[1].(*ActorPlayer)
 	if userData := agent.UserData(); userData != nil { //[0
 		person := userData.(*Player)
 		if game := person.PtrTable; nil != game && m.GameID != INVALID && nil != game.Instance && game.Info.HostID == person.UserID {
@@ -481,7 +489,7 @@ func disbandedGame(args []interface{}) {
 // 掷骰子
 func roll(args []interface{}) {
 	_ = args[1]
-	agent := args[1].(gate.Agent)
+	agent := args[1].(*ActorPlayer)
 	if person, _, ok := verifyMsg(args); ok {
 		person.State = protoMsg.PlayerState_PlayerPickUp
 		person.Roll(args)
