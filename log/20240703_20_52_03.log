@@ -1,4 +1,0 @@
-2024/07/03 20:52:03 component.go:91: [release]	Leaf :1.1.4  starting up
-2024/07/03 20:52:25 client.go:59: [debug]	玩家:12 待绑定客户端
-2024/07/03 20:52:25 client.go:47: [debug]	新增一个客户端IP://::1 玩家:12
-2024/07/03 20:57:56 component.go:140: [release]	Leaf closing down!
