@@ -2,25 +2,16 @@ syntax = "proto3";
 option go_package = "/pb";
 package pb;
 import "game.proto";
+import "home.proto";
 import "player.proto";
 enum Piece {
   NoPiece = 0;
-  Jin = 1;   //金
-  Mu = 2;    //木
-  Shui = 3;  //水
-  Huo = 4;   //火
-  Tu = 5;    //土
-  Yao = 6;   //药
-}
-// 武将
-message WujiangInfo {
-  int32 iD = 1;
-  int64 healthPoint = 2;        // 当前体力值
-  int64 healthPointLimit = 3;   // 体力值上限
-  int64 damagePoint = 4;        // 攻击力
-  int64 armorPoint = 5;         // 防御力
-  string name = 6;              // 武将名称
-//  int32 sex = 7;                // 武将性别
+  Jin = 1;   // 金
+  Mu = 2;    // 木
+  Shui = 3;  // 水
+  Huo = 4;   // 火
+  Tu = 5;    // 土
+  Yao = 6;   // 药
 }
 // 格子
 message Grid {
@@ -32,27 +23,46 @@ message Grid {
 message BoardInfo {
   repeated Grid  cells = 1; // 所有格子
 }
-//三国消玩家信息
+// 三国消玩家信息
 message SanguoxiaoPlayer {
-  PlayerInfo  myInfo = 1;               // 个人信息
-  repeated WujiangInfo all = 2;         // 所有武将
-  repeated WujiangInfo team = 3;        // 出场武将 至少一个
+  PlayerInfo  info = 1;                  // 个人信息
+  repeated HeroInfo arenaTeam = 2;         // 出场武将
+  int64 health = 3;    // 生命值
 }
+// 攻击
+message SanguoxiaoAttack {
+  int64  heroId = 1;         // 武将ID
+  int64  damage = 2;         // 攻击造成的伤害值
+  int64  therapy = 3;        // 治疗
+}
+// 游戏结果
+message SanguoxiaoResult {
+  int64 winID = 1;
+  int64 loseID = 2;
+  GoodsList awards = 3; // 奖品 对应商品(GoodsInfo)ID
+}
+////////////////////////////////////////////////////
+// [挑战]
+message ChallengeReq {
+}
+message ChallengeResp {
+  int64 firstID = 1;              // 首发者ID
+  SanguoxiaoPlayer myself = 2;    // 我方信息
+  SanguoxiaoPlayer enemy = 3;     // 敌方信息
+}
+/////////////////////////////////////////////////////
 //场景
 message SanguoxiaoSceneResp{
   int64 timeStamp = 1;              // 时间戳
   string inning = 2;                // 牌局号
   BoardInfo board = 3;              // 方格盘信息
-  SanguoxiaoPlayer allPlayers = 4;  // 玩家列表
-}
-// 状态-选择武将
-message SanguoxiaoStateChooseResp {
-  TimeInfo times = 1;
+  SanguoxiaoPlayer myself = 4;      // 己方
+  SanguoxiaoPlayer enemy = 5;       // 对方
 }
 // 状态-玩家操作
 message SanguoxiaoStatePlayingResp {
   TimeInfo times = 1;
-  int64 userID = 2;
+  int64 userID = 2;         // 当前操作方
 }
 // 状态-方格消除
 message SanguoxiaoStateEraseResp {
@@ -62,17 +72,7 @@ message SanguoxiaoStateEraseResp {
 // 状态-游戏结算
 message SanguoxiaoStateOverResp {
   TimeInfo times = 1;
-  int64 winID = 2;
-  int64 loseID = 3;
-  int64 awardId = 4; //奖品ID 对应商品(GoodsInfo)ID
-}
-// 选择武将
-message SanguoxiaoChooseReq{
-  repeated WujiangInfo team = 1;        // 出场武将 至少一个
-}
-message SanguoxiaoChooseResp{
-  int64 userID = 1;
-  repeated WujiangInfo team = 2;        // 出场武将 至少一个
+  SanguoxiaoResult result = 2;
 }
 // 交换
 message SanguoxiaoSwapReq{
@@ -83,4 +83,14 @@ message SanguoxiaoSwapResp{
   int64 userID = 1;
   Grid origin = 2;        //原先的格子
   Grid target = 3;        //移至的目标格子
+}
+// 触发消除
+message SanguoxiaoTriggerResp{
+  int64 userID = 1;
+  int64 myselfHealth  = 2;  // 消除后自己的血量 即UserID的血量
+  int64 enemyHealth  = 3;   // 敌方血量
+  BoardInfo perBoard = 4;   // 消除前
+  BoardInfo nowBoard = 5;   // 消除后
+  repeated Grid erase = 6;  // 被消除的格子
+  repeated SanguoxiaoAttack attacks = 7;//武将发起的伤害
 }

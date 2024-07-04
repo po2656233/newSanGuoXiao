@@ -13,8 +13,8 @@ import (
 	"strings"
 )
 
-const sqlModelDir = "internal/"
-const modelPkgPath = "sqlmodel"
+const sqlModelDir = "nodes/leaf/jettengame/sql/model/"
+const modelPkgPath = "model"
 
 // 请清空 [sqlmodel/model]目录下的文件,再执行
 func main() {
@@ -22,7 +22,7 @@ func main() {
 	password := "ko8899110"
 	address := "127.0.0.1"
 	port := "3306"
-	dbName := "superman"
+	dbName := "minigame"
 	dataSourceName := user + ":" + password + "@tcp(" + address + ":" + port + ")/" + dbName + "?charset=utf8"
 	//注意 注意 此处为移除gorm的日志自定义了相关结构。正式使用时 请放开
 	db, err1 := gorm.Open(gmysql.Open(dataSourceName), &gorm.Config{
@@ -60,7 +60,7 @@ func GenModel(outDir string, db *gorm.DB) {
 	// 生成model数据 	从当前数据库的所有表生成结构
 	g := gen.NewGenerator(gen.Config{
 		OutPath:      outDir,
-		ModelPkgPath: outDir + modelPkgPath,
+		ModelPkgPath: modelPkgPath,
 		Mode:         gen.WithDefaultQuery | gen.WithQueryInterface | gen.WithoutContext,
 		//FieldNullable:     false, // generate pointer when field is nullable
 		//FieldCoverable:    true,  // generate pointer when field has default value

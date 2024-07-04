@@ -46,3 +46,12 @@ MahjongER:
     over: 10     #结算时长
   minPerson: 2
   maxPerson: 2
+#三国消
+SanGuoXiao:
+  duration:
+    start: 5    #准备后等待开始的时长
+    play: 15    #移动时长
+    open: 3    #消除时长
+    over: 15   #结算时长
+  col: 8
+  row: 8

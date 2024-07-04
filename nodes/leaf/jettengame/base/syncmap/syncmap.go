@@ -295,6 +295,9 @@ func (m *Map) Delete(key interface{}) (res bool) {
 }
 
 func (m *Map) Length() int64 {
+	if m.counter == nil {
+		return 0
+	}
 	return atomic.LoadInt64(m.counter)
 }
 

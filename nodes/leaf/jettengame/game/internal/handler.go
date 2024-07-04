@@ -80,7 +80,7 @@ func productGame(game *Game) IGameOperate {
 	case Mahjong:
 		return mahjong.NewMahjong(game)
 	case Sanguoxiao:
-		return superman.NewGame(game)
+		return sanguoxiao.NewGame(game)
 	}
 
 	return nil
@@ -151,12 +151,11 @@ func enter(args []interface{}) {
 	//_ = args[1]
 	m := args[0].(*protoMsg.EnterGameReq)
 	agent := args[1].(*ActorPlayer)
-	//var agent gate.Agent
 
 	// 001 获取并解析token信息
 	tk, st := token2.ValidateBase64(m.Token)
 	if st != SUCCESS || tk == nil {
-		agent.SendResult(FAILED, StatusText[Room05])
+		GetClientManger().SendResult(agent, FAILED, StatusText[Room05])
 		return
 	}
 
@@ -175,7 +174,6 @@ func enter(args []interface{}) {
 			PtrTable:   &Table{},
 		}
 	}
-
 	if GetPlayerManger().Exist(uid) {
 		person = GetPlayerManger().Get(uid)
 	} else if info := mysql.SqlHandle().CheckUserInfo(uid); info != nil {
@@ -187,73 +185,67 @@ func enter(args []interface{}) {
 		person.FaceID = info.FaceID
 		person.Level = info.Level
 		person.Age = info.Age
+	} else {
+		GetClientManger().SendResult(agent, FAILED, StatusText[User03])
+		return
 	}
 
 	// 反推房间号
 	if person.RoomNum == 0 {
 		num, err := mysql.SqlHandle().CheckRoomNum(m.GameID)
 		if err != nil {
-			agent.SendResult(FAILED, StatusText[Game47])
+			GetClientManger().SendResult(agent, FAILED, StatusText[Game47])
 			return
 		}
 		person.RoomNum = num
 	}
-
 	person.PtrRoom = &Room{
 		Num: person.RoomNum,
 	}
-	//agent.SetUserData(person)
-
+	agent.SetUserData(person)
 	GetPlayerManger().Append(person)
 
 	// 玩家是否存在没有结束的游戏
 	if person.PtrTable != nil && person.GameID != m.GameID && protoMsg.PlayerState_PlayerAgree < person.State {
 		hints := fmt.Sprintf("您所参与的游戏(ID:%v)本轮还没结束!", person.GameID)
 		GetClientManger().SendResult(agent, FAILED, hints)
-		//agent.SendResult(FAILED, hints)
 		return
 	}
 
 	//003 查找平台是否包含该房间
-	pid := mysql.SqlHandle().CheckPlatformInfo(uid)
-	platform := GetPlatformManger().Get(pid)
-	if platform == nil {
-		agent.SendResult(FAILED, StatusText[Room12])
-		//GetClientManger().SendResult(agent, FAILED, StatusText[Room12])
-		return
-	}
-	var isHaveRoom = false
-	for _, v := range platform.ClassIDs {
-		if v == person.RoomNum {
-			isHaveRoom = true
-			break
-		}
-	}
-	if !isHaveRoom {
-		agent.SendResult(FAILED, StatusText[Room13])
-		//GetClientManger().SendResult(agent, FAILED, StatusText[Room13])
-		return
-	}
+	//pid := mysql.SqlHandle().CheckPlatformInfo(uid)
+	//platform := GetPlatformManger().Get(pid)
+	//if platform == nil {
+	//	GetClientManger().SendResult(agent, FAILED, StatusText[Room12])
+	//	return
+	//}
+	//var isHaveRoom = false
+	//for _, v := range platform.ClassIDs {
+	//	if v == person.RoomNum {
+	//		isHaveRoom = true
+	//		break
+	//	}
+	//}
+	//if !isHaveRoom {
+	//	GetClientManger().SendResult(agent, FAILED, StatusText[Room13])
+	//	return
+	//}
 
 	//004 获取游戏
 	game, ok := GetGamesManger().GetGame(m.GameID)
 	if !ok {
-		agent.SendResult(FAILED, StatusText[TableInfo04])
-		//GetClientManger().SendResult(agent, FAILED, StatusText[TableInfo04])
+		GetClientManger().SendResult(agent, FAILED, StatusText[TableInfo04])
 		return
 	}
 
 	if game.T.HostID != SYSTEMID && game.T.Password != m.Password {
-		agent.SendResult(FAILED, StatusText[Room01])
-		//GetClientManger().SendResult(agent, FAILED, StatusText[Room01])
+		GetClientManger().SendResult(agent, FAILED, StatusText[Room01])
 		return
 	}
 
 	//005 进行配桌
-	_, code := GetGamesManger().Match(game, person, productGame)
-	if code != SUCCESS {
-		agent.SendResult(FAILED, StatusText[code])
-		//GetClientManger().SendResult(agent, FAILED, StatusText[code])
+	if _, code := GetGamesManger().Match(game, person, productGame); code != SUCCESS {
+		GetClientManger().SendResult(agent, FAILED, StatusText[code])
 		return
 	}
 

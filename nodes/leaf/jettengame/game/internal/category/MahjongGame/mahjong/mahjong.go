@@ -563,7 +563,7 @@ func (self *MahjongGame) DispatchCard() {
 				msg.HandCards = make([]int32, size)
 				GlobalSender.NotifyButOne(self.PlayerList, msg.UserID, msg)
 
-				msg.HandCards = ToArray(self.wallHandle.ForwardDrawMulti(size), int32(0)).([]int32)
+				msg.HandCards = ToArray(self.wallHandle.ForwardDrawMulti(size), Int32Array).([]int32)
 				man.HandCards = append(man.HandCards, msg.HandCards...)
 				sort.Slice(man.HandCards, func(i, j int) bool {
 					return man.HandCards[i] < man.HandCards[j]

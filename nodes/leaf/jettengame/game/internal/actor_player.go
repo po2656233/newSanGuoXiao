@@ -24,7 +24,7 @@ type (
 		playerId int64
 		uid      int64
 		Session  *cproto.Session
-		data     interface{}
+		userData interface{}
 	}
 )
 
@@ -68,20 +68,28 @@ func (p *ActorPlayer) Send(funName string, resp interface{}) {
 }
 
 func (p *ActorPlayer) SendResult(state int32, hints string) {
-	p.Response(p.Session, &protoMsg.ResultResp{
+	p.WriteMsg(&protoMsg.ResultResp{
 		State: state,
 		Hints: hints,
 	})
 }
 
 func (p *ActorPlayer) OnStop() {
-	clog.Infof("onlineCount = %d", online.Count())
+	clog.Infof("OnStop onlineCount = %d", online.Count())
 }
 
 //////////////////////////////实现Agent/////////////////////////////////////////////////////////
 
-func (p *ActorPlayer) WriteMsg(msg interface{}) {
-	p.Response(p.Session, msg)
+func (p *ActorPlayer) WriteMsg(v interface{}) {
+	msgData, err := msg.ProcessorProto.Marshal(v)
+	if err != nil {
+		log.Debug("unmarshal message error: %v", err)
+		return
+	}
+	data := make([]byte, 0)
+	data = append(data, msgData[0]...)
+	data = append(data, msgData[1]...)
+	p.Response(p.Session, data)
 }
 func (p *ActorPlayer) LocalAddr() net.Addr {
 	return nil
@@ -100,10 +108,10 @@ func (p *ActorPlayer) Destroy() {
 
 }
 func (p *ActorPlayer) UserData() interface{} {
-	return p.data
+	return p.userData
 }
 func (p *ActorPlayer) SetUserData(data interface{}) {
-	p.data = data
+	p.userData = data
 }
 
 //// playerSelect 玩家查询角色列表

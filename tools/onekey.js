@@ -8,8 +8,8 @@ const helputil = require("./helputil");
 //--------------------------------------------------------------
 var protoDir = "../internal/protocol"
 //server begin
-var outServerMsg =  "../internal/component/jettengame/msg/msg.go";
-var outRouter = "../internal/component/jettengame/gate/router.go";
+var outServerMsg =  "../nodes/leaf/jettengame/msg/msg.go";
+var outRouter = "../nodes/leaf/jettengame/gate/router.go";
 
 var all_protos = {};
 var all_message = {};
@@ -108,9 +108,9 @@ function genServer() {
     msgStr += "package msg\n\n"
     msgStr += "import (\n"
     msgStr += '    "github.com/golang/protobuf/proto"\n'
-    msgStr += '    "sanguoxiao/internal/component/jettengame/base"\n'
-    msgStr += '    "sanguoxiao/internal/component/jettengame/msg/process"\n'
-    msgStr += '    protoMsg "sanguoxiao/internal/protocol/gofile"\n'
+    msgStr += '    "superman/nodes/leaf/jettengame/base"\n'
+    msgStr += '    "superman/nodes/leaf/jettengame/msg/process"\n'
+    msgStr += '    protoMsg "superman/internal/protocol/gofile"\n'
     msgStr += ')\n\n'
 	msgStr += "// 使用默认的 JSON 消息处理器（默认还提供了 protobuf 消息处理器）\n"
 	msgStr += "// var ProcessorJson = json.NewProcessor()\n"
@@ -130,11 +130,11 @@ function genServer() {
 	routerStr += "//---------------------------------\n";
 	routerStr += "package gate\n\n";
 	routerStr += 'import (\n';
-	routerStr += '    "sanguoxiao/internal/component/jettengame/game"\n';
-	routerStr += '    "sanguoxiao/internal/component/jettengame/login"\n';
-	routerStr += '    "sanguoxiao/internal/component/jettengame/msg"\n';
+	routerStr += '    "superman/nodes/leaf/jettengame/game"\n';
+	// routerStr += '    "superman/nodes/leaf/jettengame/login"\n';
+	routerStr += '    "superman/nodes/leaf/jettengame/msg"\n';
 	// routerStr += '    "server/robot"\n';
-	routerStr += '    protoMsg "sanguoxiao/internal/protocol/gofile"\n';
+	routerStr += '    protoMsg "superman/internal/protocol/gofile"\n';
 	routerStr += ')\n\n';
 	routerStr += '//路由模块分发消息【模块间使用 ChanRPC 通讯，消息路由也不例外】\n';
 	routerStr += '//注:需要解析的结构体才进行路由分派，即用客户端主动发起的)\n';
@@ -163,7 +163,7 @@ function genServer() {
     }
 
     routerStr += "}\n\n"
-	msgStr += '  \n\tbase.ToJsonFile("conf/leafconf/message_id.json", msgMap, "", "\\t") \n'
+	msgStr += '  \n\tbase.ToJsonFile("../../../config/leafconf/message_id.json", msgMap, "", "\\t") \n'
 	msgStr += "\tmsgMap = nil\n"
 	msgStr += "}\n"
 

@@ -190,7 +190,16 @@ var StatusText = map[int]string{
 	Game46: "您的金币过低无法上庄",
 	Game47: "进入游戏失败",
 	Game48: "稍等",
-	//Game49: "无效的场景操作",
+	Game49: "等待匹配",
+	Game50: "匹配成功",
+	Game51: "匹配失败",
+	Game52: "玩家未选择武将!",
+	Game53: "本局已有玩家,正在重新匹配!",
+	Game54: "玩家断线,正在重新匹配!",
+	Game55: "敌方未选择武将,正在重新匹配!",
+	Game56: "您所参与的游戏 本轮已结束!",
+	Game57: "您还未选择武将,不能进行匹配",
+	Game58: "该武将已在阵列,不可重复使用",
 }
 
 const (
@@ -386,6 +395,16 @@ const (
 	Game47
 	Game48
 	Game49
+	Game50
+	Game51
+	Game52
+	Game53
+	Game54
+	Game55
+	Game56
+	Game57
+	Game58
+	Game59
 )
 
 /* 主要用于求取某位上是否 是1值

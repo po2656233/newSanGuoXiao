@@ -1039,6 +1039,7 @@ func (self *GamesManger) Match(game *Game, person *Player, product ProductCallba
 		}
 	}
 
+	game.InningInfo = &Inning{}
 	table := &Table{}
 	table.GameID = game.ID
 	table.Num = int32(self.GetTableSize(game.G.KindID, game.G.Level))

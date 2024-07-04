@@ -308,6 +308,17 @@ type Yaml struct {
 		MinPerson int32 `yaml:"minPerson"`
 		MaxPerson int32 `yaml:"maxPerson"`
 	} ` yaml:"MahjongXZDD"`
+	// 三国消
+	SanGuoXiao struct {
+		Duration struct {
+			StartTime int32 `yaml:"start"`
+			PlayTime  int32 `yaml:"play"`
+			OpenTime  int32 `yaml:"open"`
+			OverTime  int32 `yaml:"over"`
+		} ` yaml:"duration"`
+		Col int32 `yaml:"col"`
+		Row int32 `yaml:"row"`
+	} ` yaml:"SanGuoXiao"`
 }
 
 var YamlObj = new(Yaml)

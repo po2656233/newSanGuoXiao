@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.25.0
 // 	protoc        v3.7.0
-// source: superman.proto
+// source: sanguoxiao.proto
 
 package pb
 
@@ -29,12 +29,12 @@ type Piece int32
 
 const (
 	Piece_NoPiece Piece = 0
-	Piece_Jin     Piece = 1 //金
-	Piece_Mu      Piece = 2 //木
-	Piece_Shui    Piece = 3 //水
-	Piece_Huo     Piece = 4 //火
-	Piece_Tu      Piece = 5 //土
-	Piece_Yao     Piece = 6 //药
+	Piece_Jin     Piece = 1 // 金
+	Piece_Mu      Piece = 2 // 木
+	Piece_Shui    Piece = 3 // 水
+	Piece_Huo     Piece = 4 // 火
+	Piece_Tu      Piece = 5 // 土
+	Piece_Yao     Piece = 6 // 药
 )
 
 // Enum value maps for Piece.
@@ -70,11 +70,11 @@ func (x Piece) String() string {
 }
 
 func (Piece) Descriptor() protoreflect.EnumDescriptor {
-	return file_superman_proto_enumTypes[0].Descriptor()
+	return file_sanguoxiao_proto_enumTypes[0].Descriptor()
 }
 
 func (Piece) Type() protoreflect.EnumType {
-	return &file_superman_proto_enumTypes[0]
+	return &file_sanguoxiao_proto_enumTypes[0]
 }
 
 func (x Piece) Number() protoreflect.EnumNumber {
@@ -83,95 +83,7 @@ func (x Piece) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Piece.Descriptor instead.
 func (Piece) EnumDescriptor() ([]byte, []int) {
-	return file_superman_proto_rawDescGZIP(), []int{0}
-}
-
-// 武将
-type WujiangInfo struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	ID               int32  `protobuf:"varint,1,opt,name=iD,proto3" json:"iD,omitempty"`
-	HealthPoint      int64  `protobuf:"varint,2,opt,name=healthPoint,proto3" json:"healthPoint,omitempty"`           // 当前体力值
-	HealthPointLimit int64  `protobuf:"varint,3,opt,name=healthPointLimit,proto3" json:"healthPointLimit,omitempty"` // 体力值上限
-	DamagePoint      int64  `protobuf:"varint,4,opt,name=damagePoint,proto3" json:"damagePoint,omitempty"`           // 攻击力
-	ArmorPoint       int64  `protobuf:"varint,5,opt,name=armorPoint,proto3" json:"armorPoint,omitempty"`             // 防御力
-	Name             string `protobuf:"bytes,6,opt,name=name,proto3" json:"name,omitempty"`                          // 武将名称
-}
-
-func (x *WujiangInfo) Reset() {
-	*x = WujiangInfo{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_superman_proto_msgTypes[0]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *WujiangInfo) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*WujiangInfo) ProtoMessage() {}
-
-func (x *WujiangInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_superman_proto_msgTypes[0]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use WujiangInfo.ProtoReflect.Descriptor instead.
-func (*WujiangInfo) Descriptor() ([]byte, []int) {
-	return file_superman_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *WujiangInfo) GetID() int32 {
-	if x != nil {
-		return x.ID
-	}
-	return 0
-}
-
-func (x *WujiangInfo) GetHealthPoint() int64 {
-	if x != nil {
-		return x.HealthPoint
-	}
-	return 0
-}
-
-func (x *WujiangInfo) GetHealthPointLimit() int64 {
-	if x != nil {
-		return x.HealthPointLimit
-	}
-	return 0
-}
-
-func (x *WujiangInfo) GetDamagePoint() int64 {
-	if x != nil {
-		return x.DamagePoint
-	}
-	return 0
-}
-
-func (x *WujiangInfo) GetArmorPoint() int64 {
-	if x != nil {
-		return x.ArmorPoint
-	}
-	return 0
-}
-
-func (x *WujiangInfo) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
+	return file_sanguoxiao_proto_rawDescGZIP(), []int{0}
 }
 
 // 格子
@@ -188,7 +100,7 @@ type Grid struct {
 func (x *Grid) Reset() {
 	*x = Grid{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_superman_proto_msgTypes[1]
+		mi := &file_sanguoxiao_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -201,7 +113,7 @@ func (x *Grid) String() string {
 func (*Grid) ProtoMessage() {}
 
 func (x *Grid) ProtoReflect() protoreflect.Message {
-	mi := &file_superman_proto_msgTypes[1]
+	mi := &file_sanguoxiao_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -214,7 +126,7 @@ func (x *Grid) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Grid.ProtoReflect.Descriptor instead.
 func (*Grid) Descriptor() ([]byte, []int) {
-	return file_superman_proto_rawDescGZIP(), []int{1}
+	return file_sanguoxiao_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Grid) GetRow() int32 {
@@ -250,7 +162,7 @@ type BoardInfo struct {
 func (x *BoardInfo) Reset() {
 	*x = BoardInfo{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_superman_proto_msgTypes[2]
+		mi := &file_sanguoxiao_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -263,7 +175,7 @@ func (x *BoardInfo) String() string {
 func (*BoardInfo) ProtoMessage() {}
 
 func (x *BoardInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_superman_proto_msgTypes[2]
+	mi := &file_sanguoxiao_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -276,7 +188,7 @@ func (x *BoardInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BoardInfo.ProtoReflect.Descriptor instead.
 func (*BoardInfo) Descriptor() ([]byte, []int) {
-	return file_superman_proto_rawDescGZIP(), []int{2}
+	return file_sanguoxiao_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *BoardInfo) GetCells() []*Grid {
@@ -286,21 +198,21 @@ func (x *BoardInfo) GetCells() []*Grid {
 	return nil
 }
 
-//三国消玩家信息
+// 三国消玩家信息
 type SanguoxiaoPlayer struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	MyInfo *PlayerInfo    `protobuf:"bytes,1,opt,name=myInfo,proto3" json:"myInfo,omitempty"` // 个人信息
-	All    []*WujiangInfo `protobuf:"bytes,2,rep,name=all,proto3" json:"all,omitempty"`       // 所有武将
-	Team   []*WujiangInfo `protobuf:"bytes,3,rep,name=team,proto3" json:"team,omitempty"`     // 出场武将 至少一个
+	Info      *PlayerInfo `protobuf:"bytes,1,opt,name=info,proto3" json:"info,omitempty"`           // 个人信息
+	ArenaTeam []*HeroInfo `protobuf:"bytes,2,rep,name=arenaTeam,proto3" json:"arenaTeam,omitempty"` // 出场武将
+	Health    int64       `protobuf:"varint,3,opt,name=health,proto3" json:"health,omitempty"`      // 生命值
 }
 
 func (x *SanguoxiaoPlayer) Reset() {
 	*x = SanguoxiaoPlayer{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_superman_proto_msgTypes[3]
+		mi := &file_sanguoxiao_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -313,7 +225,7 @@ func (x *SanguoxiaoPlayer) String() string {
 func (*SanguoxiaoPlayer) ProtoMessage() {}
 
 func (x *SanguoxiaoPlayer) ProtoReflect() protoreflect.Message {
-	mi := &file_superman_proto_msgTypes[3]
+	mi := &file_sanguoxiao_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -326,46 +238,279 @@ func (x *SanguoxiaoPlayer) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SanguoxiaoPlayer.ProtoReflect.Descriptor instead.
 func (*SanguoxiaoPlayer) Descriptor() ([]byte, []int) {
-	return file_superman_proto_rawDescGZIP(), []int{3}
+	return file_sanguoxiao_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *SanguoxiaoPlayer) GetMyInfo() *PlayerInfo {
+func (x *SanguoxiaoPlayer) GetInfo() *PlayerInfo {
 	if x != nil {
-		return x.MyInfo
+		return x.Info
 	}
 	return nil
 }
 
-func (x *SanguoxiaoPlayer) GetAll() []*WujiangInfo {
+func (x *SanguoxiaoPlayer) GetArenaTeam() []*HeroInfo {
 	if x != nil {
-		return x.All
+		return x.ArenaTeam
 	}
 	return nil
 }
 
-func (x *SanguoxiaoPlayer) GetTeam() []*WujiangInfo {
+func (x *SanguoxiaoPlayer) GetHealth() int64 {
 	if x != nil {
-		return x.Team
+		return x.Health
+	}
+	return 0
+}
+
+// 攻击
+type SanguoxiaoAttack struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	HeroId  int64 `protobuf:"varint,1,opt,name=heroId,proto3" json:"heroId,omitempty"`   // 武将ID
+	Damage  int64 `protobuf:"varint,2,opt,name=damage,proto3" json:"damage,omitempty"`   // 攻击造成的伤害值
+	Therapy int64 `protobuf:"varint,3,opt,name=therapy,proto3" json:"therapy,omitempty"` // 治疗
+}
+
+func (x *SanguoxiaoAttack) Reset() {
+	*x = SanguoxiaoAttack{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_sanguoxiao_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SanguoxiaoAttack) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SanguoxiaoAttack) ProtoMessage() {}
+
+func (x *SanguoxiaoAttack) ProtoReflect() protoreflect.Message {
+	mi := &file_sanguoxiao_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SanguoxiaoAttack.ProtoReflect.Descriptor instead.
+func (*SanguoxiaoAttack) Descriptor() ([]byte, []int) {
+	return file_sanguoxiao_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *SanguoxiaoAttack) GetHeroId() int64 {
+	if x != nil {
+		return x.HeroId
+	}
+	return 0
+}
+
+func (x *SanguoxiaoAttack) GetDamage() int64 {
+	if x != nil {
+		return x.Damage
+	}
+	return 0
+}
+
+func (x *SanguoxiaoAttack) GetTherapy() int64 {
+	if x != nil {
+		return x.Therapy
+	}
+	return 0
+}
+
+// 游戏结果
+type SanguoxiaoResult struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	WinID  int64      `protobuf:"varint,1,opt,name=winID,proto3" json:"winID,omitempty"`
+	LoseID int64      `protobuf:"varint,2,opt,name=loseID,proto3" json:"loseID,omitempty"`
+	Awards *GoodsList `protobuf:"bytes,3,opt,name=awards,proto3" json:"awards,omitempty"` // 奖品 对应商品(GoodsInfo)ID
+}
+
+func (x *SanguoxiaoResult) Reset() {
+	*x = SanguoxiaoResult{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_sanguoxiao_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SanguoxiaoResult) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SanguoxiaoResult) ProtoMessage() {}
+
+func (x *SanguoxiaoResult) ProtoReflect() protoreflect.Message {
+	mi := &file_sanguoxiao_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SanguoxiaoResult.ProtoReflect.Descriptor instead.
+func (*SanguoxiaoResult) Descriptor() ([]byte, []int) {
+	return file_sanguoxiao_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *SanguoxiaoResult) GetWinID() int64 {
+	if x != nil {
+		return x.WinID
+	}
+	return 0
+}
+
+func (x *SanguoxiaoResult) GetLoseID() int64 {
+	if x != nil {
+		return x.LoseID
+	}
+	return 0
+}
+
+func (x *SanguoxiaoResult) GetAwards() *GoodsList {
+	if x != nil {
+		return x.Awards
 	}
 	return nil
 }
 
+////////////////////////////////////////////////////
+// [挑战]
+type ChallengeReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *ChallengeReq) Reset() {
+	*x = ChallengeReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_sanguoxiao_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ChallengeReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChallengeReq) ProtoMessage() {}
+
+func (x *ChallengeReq) ProtoReflect() protoreflect.Message {
+	mi := &file_sanguoxiao_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChallengeReq.ProtoReflect.Descriptor instead.
+func (*ChallengeReq) Descriptor() ([]byte, []int) {
+	return file_sanguoxiao_proto_rawDescGZIP(), []int{5}
+}
+
+type ChallengeResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	FirstID int64             `protobuf:"varint,1,opt,name=firstID,proto3" json:"firstID,omitempty"` // 首发者ID
+	Myself  *SanguoxiaoPlayer `protobuf:"bytes,2,opt,name=myself,proto3" json:"myself,omitempty"`    // 我方信息
+	Enemy   *SanguoxiaoPlayer `protobuf:"bytes,3,opt,name=enemy,proto3" json:"enemy,omitempty"`      // 敌方信息
+}
+
+func (x *ChallengeResp) Reset() {
+	*x = ChallengeResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_sanguoxiao_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ChallengeResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChallengeResp) ProtoMessage() {}
+
+func (x *ChallengeResp) ProtoReflect() protoreflect.Message {
+	mi := &file_sanguoxiao_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChallengeResp.ProtoReflect.Descriptor instead.
+func (*ChallengeResp) Descriptor() ([]byte, []int) {
+	return file_sanguoxiao_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *ChallengeResp) GetFirstID() int64 {
+	if x != nil {
+		return x.FirstID
+	}
+	return 0
+}
+
+func (x *ChallengeResp) GetMyself() *SanguoxiaoPlayer {
+	if x != nil {
+		return x.Myself
+	}
+	return nil
+}
+
+func (x *ChallengeResp) GetEnemy() *SanguoxiaoPlayer {
+	if x != nil {
+		return x.Enemy
+	}
+	return nil
+}
+
+/////////////////////////////////////////////////////
 //场景
 type SanguoxiaoSceneResp struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	TimeStamp  int64             `protobuf:"varint,1,opt,name=timeStamp,proto3" json:"timeStamp,omitempty"`  // 时间戳
-	Inning     string            `protobuf:"bytes,2,opt,name=inning,proto3" json:"inning,omitempty"`         // 牌局号
-	Board      *BoardInfo        `protobuf:"bytes,3,opt,name=board,proto3" json:"board,omitempty"`           // 方格盘信息
-	AllPlayers *SanguoxiaoPlayer `protobuf:"bytes,4,opt,name=allPlayers,proto3" json:"allPlayers,omitempty"` // 玩家列表
+	TimeStamp int64             `protobuf:"varint,1,opt,name=timeStamp,proto3" json:"timeStamp,omitempty"` // 时间戳
+	Inning    string            `protobuf:"bytes,2,opt,name=inning,proto3" json:"inning,omitempty"`        // 牌局号
+	Board     *BoardInfo        `protobuf:"bytes,3,opt,name=board,proto3" json:"board,omitempty"`          // 方格盘信息
+	Myself    *SanguoxiaoPlayer `protobuf:"bytes,4,opt,name=myself,proto3" json:"myself,omitempty"`        // 己方
+	Enemy     *SanguoxiaoPlayer `protobuf:"bytes,5,opt,name=enemy,proto3" json:"enemy,omitempty"`          // 对方
 }
 
 func (x *SanguoxiaoSceneResp) Reset() {
 	*x = SanguoxiaoSceneResp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_superman_proto_msgTypes[4]
+		mi := &file_sanguoxiao_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -378,7 +523,7 @@ func (x *SanguoxiaoSceneResp) String() string {
 func (*SanguoxiaoSceneResp) ProtoMessage() {}
 
 func (x *SanguoxiaoSceneResp) ProtoReflect() protoreflect.Message {
-	mi := &file_superman_proto_msgTypes[4]
+	mi := &file_sanguoxiao_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -391,7 +536,7 @@ func (x *SanguoxiaoSceneResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SanguoxiaoSceneResp.ProtoReflect.Descriptor instead.
 func (*SanguoxiaoSceneResp) Descriptor() ([]byte, []int) {
-	return file_superman_proto_rawDescGZIP(), []int{4}
+	return file_sanguoxiao_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *SanguoxiaoSceneResp) GetTimeStamp() int64 {
@@ -415,57 +560,16 @@ func (x *SanguoxiaoSceneResp) GetBoard() *BoardInfo {
 	return nil
 }
 
-func (x *SanguoxiaoSceneResp) GetAllPlayers() *SanguoxiaoPlayer {
+func (x *SanguoxiaoSceneResp) GetMyself() *SanguoxiaoPlayer {
 	if x != nil {
-		return x.AllPlayers
+		return x.Myself
 	}
 	return nil
 }
 
-// 状态-选择武将
-type SanguoxiaoStateChooseResp struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Times *TimeInfo `protobuf:"bytes,1,opt,name=times,proto3" json:"times,omitempty"`
-}
-
-func (x *SanguoxiaoStateChooseResp) Reset() {
-	*x = SanguoxiaoStateChooseResp{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_superman_proto_msgTypes[5]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *SanguoxiaoStateChooseResp) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SanguoxiaoStateChooseResp) ProtoMessage() {}
-
-func (x *SanguoxiaoStateChooseResp) ProtoReflect() protoreflect.Message {
-	mi := &file_superman_proto_msgTypes[5]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SanguoxiaoStateChooseResp.ProtoReflect.Descriptor instead.
-func (*SanguoxiaoStateChooseResp) Descriptor() ([]byte, []int) {
-	return file_superman_proto_rawDescGZIP(), []int{5}
-}
-
-func (x *SanguoxiaoStateChooseResp) GetTimes() *TimeInfo {
+func (x *SanguoxiaoSceneResp) GetEnemy() *SanguoxiaoPlayer {
 	if x != nil {
-		return x.Times
+		return x.Enemy
 	}
 	return nil
 }
@@ -477,13 +581,13 @@ type SanguoxiaoStatePlayingResp struct {
 	unknownFields protoimpl.UnknownFields
 
 	Times  *TimeInfo `protobuf:"bytes,1,opt,name=times,proto3" json:"times,omitempty"`
-	UserID int64     `protobuf:"varint,2,opt,name=userID,proto3" json:"userID,omitempty"`
+	UserID int64     `protobuf:"varint,2,opt,name=userID,proto3" json:"userID,omitempty"` // 当前操作方
 }
 
 func (x *SanguoxiaoStatePlayingResp) Reset() {
 	*x = SanguoxiaoStatePlayingResp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_superman_proto_msgTypes[6]
+		mi := &file_sanguoxiao_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -496,7 +600,7 @@ func (x *SanguoxiaoStatePlayingResp) String() string {
 func (*SanguoxiaoStatePlayingResp) ProtoMessage() {}
 
 func (x *SanguoxiaoStatePlayingResp) ProtoReflect() protoreflect.Message {
-	mi := &file_superman_proto_msgTypes[6]
+	mi := &file_sanguoxiao_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -509,7 +613,7 @@ func (x *SanguoxiaoStatePlayingResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SanguoxiaoStatePlayingResp.ProtoReflect.Descriptor instead.
 func (*SanguoxiaoStatePlayingResp) Descriptor() ([]byte, []int) {
-	return file_superman_proto_rawDescGZIP(), []int{6}
+	return file_sanguoxiao_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *SanguoxiaoStatePlayingResp) GetTimes() *TimeInfo {
@@ -539,7 +643,7 @@ type SanguoxiaoStateEraseResp struct {
 func (x *SanguoxiaoStateEraseResp) Reset() {
 	*x = SanguoxiaoStateEraseResp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_superman_proto_msgTypes[7]
+		mi := &file_sanguoxiao_proto_msgTypes[9]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -552,7 +656,7 @@ func (x *SanguoxiaoStateEraseResp) String() string {
 func (*SanguoxiaoStateEraseResp) ProtoMessage() {}
 
 func (x *SanguoxiaoStateEraseResp) ProtoReflect() protoreflect.Message {
-	mi := &file_superman_proto_msgTypes[7]
+	mi := &file_sanguoxiao_proto_msgTypes[9]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -565,7 +669,7 @@ func (x *SanguoxiaoStateEraseResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SanguoxiaoStateEraseResp.ProtoReflect.Descriptor instead.
 func (*SanguoxiaoStateEraseResp) Descriptor() ([]byte, []int) {
-	return file_superman_proto_rawDescGZIP(), []int{7}
+	return file_sanguoxiao_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *SanguoxiaoStateEraseResp) GetTimes() *TimeInfo {
@@ -588,16 +692,14 @@ type SanguoxiaoStateOverResp struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Times   *TimeInfo `protobuf:"bytes,1,opt,name=times,proto3" json:"times,omitempty"`
-	WinID   int64     `protobuf:"varint,2,opt,name=winID,proto3" json:"winID,omitempty"`
-	LoseID  int64     `protobuf:"varint,3,opt,name=loseID,proto3" json:"loseID,omitempty"`
-	AwardId int64     `protobuf:"varint,4,opt,name=awardId,proto3" json:"awardId,omitempty"` //奖品ID 对应商品(GoodsInfo)ID
+	Times  *TimeInfo         `protobuf:"bytes,1,opt,name=times,proto3" json:"times,omitempty"`
+	Result *SanguoxiaoResult `protobuf:"bytes,2,opt,name=result,proto3" json:"result,omitempty"`
 }
 
 func (x *SanguoxiaoStateOverResp) Reset() {
 	*x = SanguoxiaoStateOverResp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_superman_proto_msgTypes[8]
+		mi := &file_sanguoxiao_proto_msgTypes[10]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -610,7 +712,7 @@ func (x *SanguoxiaoStateOverResp) String() string {
 func (*SanguoxiaoStateOverResp) ProtoMessage() {}
 
 func (x *SanguoxiaoStateOverResp) ProtoReflect() protoreflect.Message {
-	mi := &file_superman_proto_msgTypes[8]
+	mi := &file_sanguoxiao_proto_msgTypes[10]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -623,7 +725,7 @@ func (x *SanguoxiaoStateOverResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SanguoxiaoStateOverResp.ProtoReflect.Descriptor instead.
 func (*SanguoxiaoStateOverResp) Descriptor() ([]byte, []int) {
-	return file_superman_proto_rawDescGZIP(), []int{8}
+	return file_sanguoxiao_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *SanguoxiaoStateOverResp) GetTimes() *TimeInfo {
@@ -633,126 +735,9 @@ func (x *SanguoxiaoStateOverResp) GetTimes() *TimeInfo {
 	return nil
 }
 
-func (x *SanguoxiaoStateOverResp) GetWinID() int64 {
+func (x *SanguoxiaoStateOverResp) GetResult() *SanguoxiaoResult {
 	if x != nil {
-		return x.WinID
-	}
-	return 0
-}
-
-func (x *SanguoxiaoStateOverResp) GetLoseID() int64 {
-	if x != nil {
-		return x.LoseID
-	}
-	return 0
-}
-
-func (x *SanguoxiaoStateOverResp) GetAwardId() int64 {
-	if x != nil {
-		return x.AwardId
-	}
-	return 0
-}
-
-// 选择武将
-type SanguoxiaoChooseReq struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Team []*WujiangInfo `protobuf:"bytes,1,rep,name=team,proto3" json:"team,omitempty"` // 出场武将 至少一个
-}
-
-func (x *SanguoxiaoChooseReq) Reset() {
-	*x = SanguoxiaoChooseReq{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_superman_proto_msgTypes[9]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *SanguoxiaoChooseReq) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SanguoxiaoChooseReq) ProtoMessage() {}
-
-func (x *SanguoxiaoChooseReq) ProtoReflect() protoreflect.Message {
-	mi := &file_superman_proto_msgTypes[9]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SanguoxiaoChooseReq.ProtoReflect.Descriptor instead.
-func (*SanguoxiaoChooseReq) Descriptor() ([]byte, []int) {
-	return file_superman_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *SanguoxiaoChooseReq) GetTeam() []*WujiangInfo {
-	if x != nil {
-		return x.Team
-	}
-	return nil
-}
-
-type SanguoxiaoChooseResp struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	UserID int64          `protobuf:"varint,1,opt,name=userID,proto3" json:"userID,omitempty"`
-	Team   []*WujiangInfo `protobuf:"bytes,2,rep,name=team,proto3" json:"team,omitempty"` // 出场武将 至少一个
-}
-
-func (x *SanguoxiaoChooseResp) Reset() {
-	*x = SanguoxiaoChooseResp{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_superman_proto_msgTypes[10]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *SanguoxiaoChooseResp) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SanguoxiaoChooseResp) ProtoMessage() {}
-
-func (x *SanguoxiaoChooseResp) ProtoReflect() protoreflect.Message {
-	mi := &file_superman_proto_msgTypes[10]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SanguoxiaoChooseResp.ProtoReflect.Descriptor instead.
-func (*SanguoxiaoChooseResp) Descriptor() ([]byte, []int) {
-	return file_superman_proto_rawDescGZIP(), []int{10}
-}
-
-func (x *SanguoxiaoChooseResp) GetUserID() int64 {
-	if x != nil {
-		return x.UserID
-	}
-	return 0
-}
-
-func (x *SanguoxiaoChooseResp) GetTeam() []*WujiangInfo {
-	if x != nil {
-		return x.Team
+		return x.Result
 	}
 	return nil
 }
@@ -770,7 +755,7 @@ type SanguoxiaoSwapReq struct {
 func (x *SanguoxiaoSwapReq) Reset() {
 	*x = SanguoxiaoSwapReq{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_superman_proto_msgTypes[11]
+		mi := &file_sanguoxiao_proto_msgTypes[11]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -783,7 +768,7 @@ func (x *SanguoxiaoSwapReq) String() string {
 func (*SanguoxiaoSwapReq) ProtoMessage() {}
 
 func (x *SanguoxiaoSwapReq) ProtoReflect() protoreflect.Message {
-	mi := &file_superman_proto_msgTypes[11]
+	mi := &file_sanguoxiao_proto_msgTypes[11]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -796,7 +781,7 @@ func (x *SanguoxiaoSwapReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SanguoxiaoSwapReq.ProtoReflect.Descriptor instead.
 func (*SanguoxiaoSwapReq) Descriptor() ([]byte, []int) {
-	return file_superman_proto_rawDescGZIP(), []int{11}
+	return file_sanguoxiao_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *SanguoxiaoSwapReq) GetOrigin() *Grid {
@@ -826,7 +811,7 @@ type SanguoxiaoSwapResp struct {
 func (x *SanguoxiaoSwapResp) Reset() {
 	*x = SanguoxiaoSwapResp{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_superman_proto_msgTypes[12]
+		mi := &file_sanguoxiao_proto_msgTypes[12]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -839,7 +824,7 @@ func (x *SanguoxiaoSwapResp) String() string {
 func (*SanguoxiaoSwapResp) ProtoMessage() {}
 
 func (x *SanguoxiaoSwapResp) ProtoReflect() protoreflect.Message {
-	mi := &file_superman_proto_msgTypes[12]
+	mi := &file_sanguoxiao_proto_msgTypes[12]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -852,7 +837,7 @@ func (x *SanguoxiaoSwapResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SanguoxiaoSwapResp.ProtoReflect.Descriptor instead.
 func (*SanguoxiaoSwapResp) Descriptor() ([]byte, []int) {
-	return file_superman_proto_rawDescGZIP(), []int{12}
+	return file_sanguoxiao_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *SanguoxiaoSwapResp) GetUserID() int64 {
@@ -876,184 +861,292 @@ func (x *SanguoxiaoSwapResp) GetTarget() *Grid {
 	return nil
 }
 
-var File_superman_proto protoreflect.FileDescriptor
+// 触发消除
+type SanguoxiaoTriggerResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
 
-var file_superman_proto_rawDesc = []byte{
+	UserID       int64               `protobuf:"varint,1,opt,name=userID,proto3" json:"userID,omitempty"`
+	MyselfHealth int64               `protobuf:"varint,2,opt,name=myselfHealth,proto3" json:"myselfHealth,omitempty"` // 消除后自己的血量 即UserID的血量
+	EnemyHealth  int64               `protobuf:"varint,3,opt,name=enemyHealth,proto3" json:"enemyHealth,omitempty"`   // 敌方血量
+	PerBoard     *BoardInfo          `protobuf:"bytes,4,opt,name=perBoard,proto3" json:"perBoard,omitempty"`          // 消除前
+	NowBoard     *BoardInfo          `protobuf:"bytes,5,opt,name=nowBoard,proto3" json:"nowBoard,omitempty"`          // 消除后
+	Erase        []*Grid             `protobuf:"bytes,6,rep,name=erase,proto3" json:"erase,omitempty"`                // 被消除的格子
+	Attacks      []*SanguoxiaoAttack `protobuf:"bytes,7,rep,name=attacks,proto3" json:"attacks,omitempty"`            //武将发起的伤害
+}
+
+func (x *SanguoxiaoTriggerResp) Reset() {
+	*x = SanguoxiaoTriggerResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_sanguoxiao_proto_msgTypes[13]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SanguoxiaoTriggerResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SanguoxiaoTriggerResp) ProtoMessage() {}
+
+func (x *SanguoxiaoTriggerResp) ProtoReflect() protoreflect.Message {
+	mi := &file_sanguoxiao_proto_msgTypes[13]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SanguoxiaoTriggerResp.ProtoReflect.Descriptor instead.
+func (*SanguoxiaoTriggerResp) Descriptor() ([]byte, []int) {
+	return file_sanguoxiao_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *SanguoxiaoTriggerResp) GetUserID() int64 {
+	if x != nil {
+		return x.UserID
+	}
+	return 0
+}
+
+func (x *SanguoxiaoTriggerResp) GetMyselfHealth() int64 {
+	if x != nil {
+		return x.MyselfHealth
+	}
+	return 0
+}
+
+func (x *SanguoxiaoTriggerResp) GetEnemyHealth() int64 {
+	if x != nil {
+		return x.EnemyHealth
+	}
+	return 0
+}
+
+func (x *SanguoxiaoTriggerResp) GetPerBoard() *BoardInfo {
+	if x != nil {
+		return x.PerBoard
+	}
+	return nil
+}
+
+func (x *SanguoxiaoTriggerResp) GetNowBoard() *BoardInfo {
+	if x != nil {
+		return x.NowBoard
+	}
+	return nil
+}
+
+func (x *SanguoxiaoTriggerResp) GetErase() []*Grid {
+	if x != nil {
+		return x.Erase
+	}
+	return nil
+}
+
+func (x *SanguoxiaoTriggerResp) GetAttacks() []*SanguoxiaoAttack {
+	if x != nil {
+		return x.Attacks
+	}
+	return nil
+}
+
+var File_sanguoxiao_proto protoreflect.FileDescriptor
+
+var file_sanguoxiao_proto_rawDesc = []byte{
 	0x0a, 0x10, 0x73, 0x61, 0x6e, 0x67, 0x75, 0x6f, 0x78, 0x69, 0x61, 0x6f, 0x2e, 0x70, 0x72, 0x6f,
 	0x74, 0x6f, 0x12, 0x02, 0x70, 0x62, 0x1a, 0x0a, 0x67, 0x61, 0x6d, 0x65, 0x2e, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x1a, 0x0c, 0x70, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f,
-	0x22, 0xc1, 0x01, 0x0a, 0x0b, 0x57, 0x75, 0x6a, 0x69, 0x61, 0x6e, 0x67, 0x49, 0x6e, 0x66, 0x6f,
-	0x12, 0x0e, 0x0a, 0x02, 0x69, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x02, 0x69, 0x44,
-	0x12, 0x20, 0x0a, 0x0b, 0x68, 0x65, 0x61, 0x6c, 0x74, 0x68, 0x50, 0x6f, 0x69, 0x6e, 0x74, 0x18,
-	0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0b, 0x68, 0x65, 0x61, 0x6c, 0x74, 0x68, 0x50, 0x6f, 0x69,
-	0x6e, 0x74, 0x12, 0x2a, 0x0a, 0x10, 0x68, 0x65, 0x61, 0x6c, 0x74, 0x68, 0x50, 0x6f, 0x69, 0x6e,
-	0x74, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x10, 0x68, 0x65,
-	0x61, 0x6c, 0x74, 0x68, 0x50, 0x6f, 0x69, 0x6e, 0x74, 0x4c, 0x69, 0x6d, 0x69, 0x74, 0x12, 0x20,
-	0x0a, 0x0b, 0x64, 0x61, 0x6d, 0x61, 0x67, 0x65, 0x50, 0x6f, 0x69, 0x6e, 0x74, 0x18, 0x04, 0x20,
-	0x01, 0x28, 0x03, 0x52, 0x0b, 0x64, 0x61, 0x6d, 0x61, 0x67, 0x65, 0x50, 0x6f, 0x69, 0x6e, 0x74,
-	0x12, 0x1e, 0x0a, 0x0a, 0x61, 0x72, 0x6d, 0x6f, 0x72, 0x50, 0x6f, 0x69, 0x6e, 0x74, 0x18, 0x05,
-	0x20, 0x01, 0x28, 0x03, 0x52, 0x0a, 0x61, 0x72, 0x6d, 0x6f, 0x72, 0x50, 0x6f, 0x69, 0x6e, 0x74,
-	0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04,
-	0x6e, 0x61, 0x6d, 0x65, 0x22, 0x49, 0x0a, 0x04, 0x47, 0x72, 0x69, 0x64, 0x12, 0x10, 0x0a, 0x03,
-	0x72, 0x6f, 0x77, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x03, 0x72, 0x6f, 0x77, 0x12, 0x10,
-	0x0a, 0x03, 0x63, 0x6f, 0x6c, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x03, 0x63, 0x6f, 0x6c,
-	0x12, 0x1d, 0x0a, 0x04, 0x63, 0x6f, 0x72, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x09,
-	0x2e, 0x70, 0x62, 0x2e, 0x50, 0x69, 0x65, 0x63, 0x65, 0x52, 0x04, 0x63, 0x6f, 0x72, 0x65, 0x22,
-	0x2b, 0x0a, 0x09, 0x42, 0x6f, 0x61, 0x72, 0x64, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x1e, 0x0a, 0x05,
-	0x63, 0x65, 0x6c, 0x6c, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x08, 0x2e, 0x70, 0x62,
-	0x2e, 0x47, 0x72, 0x69, 0x64, 0x52, 0x05, 0x63, 0x65, 0x6c, 0x6c, 0x73, 0x22, 0x82, 0x01, 0x0a,
-	0x10, 0x53, 0x61, 0x6e, 0x67, 0x75, 0x6f, 0x78, 0x69, 0x61, 0x6f, 0x50, 0x6c, 0x61, 0x79, 0x65,
-	0x72, 0x12, 0x26, 0x0a, 0x06, 0x6d, 0x79, 0x49, 0x6e, 0x66, 0x6f, 0x18, 0x01, 0x20, 0x01, 0x28,
-	0x0b, 0x32, 0x0e, 0x2e, 0x70, 0x62, 0x2e, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x49, 0x6e, 0x66,
-	0x6f, 0x52, 0x06, 0x6d, 0x79, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x21, 0x0a, 0x03, 0x61, 0x6c, 0x6c,
-	0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0f, 0x2e, 0x70, 0x62, 0x2e, 0x57, 0x75, 0x6a, 0x69,
-	0x61, 0x6e, 0x67, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x03, 0x61, 0x6c, 0x6c, 0x12, 0x23, 0x0a, 0x04,
-	0x74, 0x65, 0x61, 0x6d, 0x18, 0x03, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0f, 0x2e, 0x70, 0x62, 0x2e,
-	0x57, 0x75, 0x6a, 0x69, 0x61, 0x6e, 0x67, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x04, 0x74, 0x65, 0x61,
-	0x6d, 0x22, 0xa6, 0x01, 0x0a, 0x13, 0x53, 0x61, 0x6e, 0x67, 0x75, 0x6f, 0x78, 0x69, 0x61, 0x6f,
-	0x53, 0x63, 0x65, 0x6e, 0x65, 0x52, 0x65, 0x73, 0x70, 0x12, 0x1c, 0x0a, 0x09, 0x74, 0x69, 0x6d,
-	0x65, 0x53, 0x74, 0x61, 0x6d, 0x70, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x74, 0x69,
-	0x6d, 0x65, 0x53, 0x74, 0x61, 0x6d, 0x70, 0x12, 0x16, 0x0a, 0x06, 0x69, 0x6e, 0x6e, 0x69, 0x6e,
-	0x67, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x69, 0x6e, 0x6e, 0x69, 0x6e, 0x67, 0x12,
-	0x23, 0x0a, 0x05, 0x62, 0x6f, 0x61, 0x72, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0d,
-	0x2e, 0x70, 0x62, 0x2e, 0x42, 0x6f, 0x61, 0x72, 0x64, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x05, 0x62,
-	0x6f, 0x61, 0x72, 0x64, 0x12, 0x34, 0x0a, 0x0a, 0x61, 0x6c, 0x6c, 0x50, 0x6c, 0x61, 0x79, 0x65,
-	0x72, 0x73, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x70, 0x62, 0x2e, 0x53, 0x61,
-	0x6e, 0x67, 0x75, 0x6f, 0x78, 0x69, 0x61, 0x6f, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x52, 0x0a,
-	0x61, 0x6c, 0x6c, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x73, 0x22, 0x3f, 0x0a, 0x19, 0x53, 0x61,
-	0x6e, 0x67, 0x75, 0x6f, 0x78, 0x69, 0x61, 0x6f, 0x53, 0x74, 0x61, 0x74, 0x65, 0x43, 0x68, 0x6f,
-	0x6f, 0x73, 0x65, 0x52, 0x65, 0x73, 0x70, 0x12, 0x22, 0x0a, 0x05, 0x74, 0x69, 0x6d, 0x65, 0x73,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0c, 0x2e, 0x70, 0x62, 0x2e, 0x54, 0x69, 0x6d, 0x65,
-	0x49, 0x6e, 0x66, 0x6f, 0x52, 0x05, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x22, 0x58, 0x0a, 0x1a, 0x53,
-	0x61, 0x6e, 0x67, 0x75, 0x6f, 0x78, 0x69, 0x61, 0x6f, 0x53, 0x74, 0x61, 0x74, 0x65, 0x50, 0x6c,
-	0x61, 0x79, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x73, 0x70, 0x12, 0x22, 0x0a, 0x05, 0x74, 0x69, 0x6d,
-	0x65, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0c, 0x2e, 0x70, 0x62, 0x2e, 0x54, 0x69,
-	0x6d, 0x65, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x05, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x12, 0x16, 0x0a,
-	0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x44, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x75,
-	0x73, 0x65, 0x72, 0x49, 0x44, 0x22, 0x69, 0x0a, 0x18, 0x53, 0x61, 0x6e, 0x67, 0x75, 0x6f, 0x78,
-	0x69, 0x61, 0x6f, 0x53, 0x74, 0x61, 0x74, 0x65, 0x45, 0x72, 0x61, 0x73, 0x65, 0x52, 0x65, 0x73,
-	0x70, 0x12, 0x22, 0x0a, 0x05, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b,
-	0x32, 0x0c, 0x2e, 0x70, 0x62, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x05,
-	0x74, 0x69, 0x6d, 0x65, 0x73, 0x12, 0x29, 0x0a, 0x08, 0x6e, 0x6f, 0x77, 0x42, 0x6f, 0x61, 0x72,
-	0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x70, 0x62, 0x2e, 0x42, 0x6f, 0x61,
-	0x72, 0x64, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x08, 0x6e, 0x6f, 0x77, 0x42, 0x6f, 0x61, 0x72, 0x64,
-	0x22, 0x85, 0x01, 0x0a, 0x17, 0x53, 0x61, 0x6e, 0x67, 0x75, 0x6f, 0x78, 0x69, 0x61, 0x6f, 0x53,
-	0x74, 0x61, 0x74, 0x65, 0x4f, 0x76, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x12, 0x22, 0x0a, 0x05,
-	0x74, 0x69, 0x6d, 0x65, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0c, 0x2e, 0x70, 0x62,
-	0x2e, 0x54, 0x69, 0x6d, 0x65, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x05, 0x74, 0x69, 0x6d, 0x65, 0x73,
-	0x12, 0x14, 0x0a, 0x05, 0x77, 0x69, 0x6e, 0x49, 0x44, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52,
-	0x05, 0x77, 0x69, 0x6e, 0x49, 0x44, 0x12, 0x16, 0x0a, 0x06, 0x6c, 0x6f, 0x73, 0x65, 0x49, 0x44,
-	0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x6c, 0x6f, 0x73, 0x65, 0x49, 0x44, 0x12, 0x18,
-	0x0a, 0x07, 0x61, 0x77, 0x61, 0x72, 0x64, 0x49, 0x64, 0x18, 0x04, 0x20, 0x01, 0x28, 0x03, 0x52,
-	0x07, 0x61, 0x77, 0x61, 0x72, 0x64, 0x49, 0x64, 0x22, 0x3a, 0x0a, 0x13, 0x53, 0x61, 0x6e, 0x67,
-	0x75, 0x6f, 0x78, 0x69, 0x61, 0x6f, 0x43, 0x68, 0x6f, 0x6f, 0x73, 0x65, 0x52, 0x65, 0x71, 0x12,
-	0x23, 0x0a, 0x04, 0x74, 0x65, 0x61, 0x6d, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0f, 0x2e,
-	0x70, 0x62, 0x2e, 0x57, 0x75, 0x6a, 0x69, 0x61, 0x6e, 0x67, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x04,
-	0x74, 0x65, 0x61, 0x6d, 0x22, 0x53, 0x0a, 0x14, 0x53, 0x61, 0x6e, 0x67, 0x75, 0x6f, 0x78, 0x69,
-	0x61, 0x6f, 0x43, 0x68, 0x6f, 0x6f, 0x73, 0x65, 0x52, 0x65, 0x73, 0x70, 0x12, 0x16, 0x0a, 0x06,
-	0x75, 0x73, 0x65, 0x72, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x75, 0x73,
-	0x65, 0x72, 0x49, 0x44, 0x12, 0x23, 0x0a, 0x04, 0x74, 0x65, 0x61, 0x6d, 0x18, 0x02, 0x20, 0x03,
-	0x28, 0x0b, 0x32, 0x0f, 0x2e, 0x70, 0x62, 0x2e, 0x57, 0x75, 0x6a, 0x69, 0x61, 0x6e, 0x67, 0x49,
-	0x6e, 0x66, 0x6f, 0x52, 0x04, 0x74, 0x65, 0x61, 0x6d, 0x22, 0x57, 0x0a, 0x11, 0x53, 0x61, 0x6e,
-	0x67, 0x75, 0x6f, 0x78, 0x69, 0x61, 0x6f, 0x53, 0x77, 0x61, 0x70, 0x52, 0x65, 0x71, 0x12, 0x20,
-	0x0a, 0x06, 0x6f, 0x72, 0x69, 0x67, 0x69, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x08,
-	0x2e, 0x70, 0x62, 0x2e, 0x47, 0x72, 0x69, 0x64, 0x52, 0x06, 0x6f, 0x72, 0x69, 0x67, 0x69, 0x6e,
-	0x12, 0x20, 0x0a, 0x06, 0x74, 0x61, 0x72, 0x67, 0x65, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b,
-	0x32, 0x08, 0x2e, 0x70, 0x62, 0x2e, 0x47, 0x72, 0x69, 0x64, 0x52, 0x06, 0x74, 0x61, 0x72, 0x67,
-	0x65, 0x74, 0x22, 0x70, 0x0a, 0x12, 0x53, 0x61, 0x6e, 0x67, 0x75, 0x6f, 0x78, 0x69, 0x61, 0x6f,
-	0x53, 0x77, 0x61, 0x70, 0x52, 0x65, 0x73, 0x70, 0x12, 0x16, 0x0a, 0x06, 0x75, 0x73, 0x65, 0x72,
-	0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x44,
-	0x12, 0x20, 0x0a, 0x06, 0x6f, 0x72, 0x69, 0x67, 0x69, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b,
-	0x32, 0x08, 0x2e, 0x70, 0x62, 0x2e, 0x47, 0x72, 0x69, 0x64, 0x52, 0x06, 0x6f, 0x72, 0x69, 0x67,
-	0x69, 0x6e, 0x12, 0x20, 0x0a, 0x06, 0x74, 0x61, 0x72, 0x67, 0x65, 0x74, 0x18, 0x03, 0x20, 0x01,
-	0x28, 0x0b, 0x32, 0x08, 0x2e, 0x70, 0x62, 0x2e, 0x47, 0x72, 0x69, 0x64, 0x52, 0x06, 0x74, 0x61,
-	0x72, 0x67, 0x65, 0x74, 0x2a, 0x49, 0x0a, 0x05, 0x50, 0x69, 0x65, 0x63, 0x65, 0x12, 0x0b, 0x0a,
-	0x07, 0x4e, 0x6f, 0x50, 0x69, 0x65, 0x63, 0x65, 0x10, 0x00, 0x12, 0x07, 0x0a, 0x03, 0x4a, 0x69,
-	0x6e, 0x10, 0x01, 0x12, 0x06, 0x0a, 0x02, 0x4d, 0x75, 0x10, 0x02, 0x12, 0x08, 0x0a, 0x04, 0x53,
-	0x68, 0x75, 0x69, 0x10, 0x03, 0x12, 0x07, 0x0a, 0x03, 0x48, 0x75, 0x6f, 0x10, 0x04, 0x12, 0x06,
-	0x0a, 0x02, 0x54, 0x75, 0x10, 0x05, 0x12, 0x07, 0x0a, 0x03, 0x59, 0x61, 0x6f, 0x10, 0x06, 0x42,
-	0x05, 0x5a, 0x03, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x74, 0x6f, 0x1a, 0x0a, 0x68, 0x6f, 0x6d, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x1a, 0x0c,
+	0x70, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x49, 0x0a, 0x04,
+	0x47, 0x72, 0x69, 0x64, 0x12, 0x10, 0x0a, 0x03, 0x72, 0x6f, 0x77, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x05, 0x52, 0x03, 0x72, 0x6f, 0x77, 0x12, 0x10, 0x0a, 0x03, 0x63, 0x6f, 0x6c, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x05, 0x52, 0x03, 0x63, 0x6f, 0x6c, 0x12, 0x1d, 0x0a, 0x04, 0x63, 0x6f, 0x72, 0x65,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x09, 0x2e, 0x70, 0x62, 0x2e, 0x50, 0x69, 0x65, 0x63,
+	0x65, 0x52, 0x04, 0x63, 0x6f, 0x72, 0x65, 0x22, 0x2b, 0x0a, 0x09, 0x42, 0x6f, 0x61, 0x72, 0x64,
+	0x49, 0x6e, 0x66, 0x6f, 0x12, 0x1e, 0x0a, 0x05, 0x63, 0x65, 0x6c, 0x6c, 0x73, 0x18, 0x01, 0x20,
+	0x03, 0x28, 0x0b, 0x32, 0x08, 0x2e, 0x70, 0x62, 0x2e, 0x47, 0x72, 0x69, 0x64, 0x52, 0x05, 0x63,
+	0x65, 0x6c, 0x6c, 0x73, 0x22, 0x7a, 0x0a, 0x10, 0x53, 0x61, 0x6e, 0x67, 0x75, 0x6f, 0x78, 0x69,
+	0x61, 0x6f, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x12, 0x22, 0x0a, 0x04, 0x69, 0x6e, 0x66, 0x6f,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0e, 0x2e, 0x70, 0x62, 0x2e, 0x50, 0x6c, 0x61, 0x79,
+	0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x04, 0x69, 0x6e, 0x66, 0x6f, 0x12, 0x2a, 0x0a, 0x09,
+	0x61, 0x72, 0x65, 0x6e, 0x61, 0x54, 0x65, 0x61, 0x6d, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32,
+	0x0c, 0x2e, 0x70, 0x62, 0x2e, 0x48, 0x65, 0x72, 0x6f, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x09, 0x61,
+	0x72, 0x65, 0x6e, 0x61, 0x54, 0x65, 0x61, 0x6d, 0x12, 0x16, 0x0a, 0x06, 0x68, 0x65, 0x61, 0x6c,
+	0x74, 0x68, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x68, 0x65, 0x61, 0x6c, 0x74, 0x68,
+	0x22, 0x5c, 0x0a, 0x10, 0x53, 0x61, 0x6e, 0x67, 0x75, 0x6f, 0x78, 0x69, 0x61, 0x6f, 0x41, 0x74,
+	0x74, 0x61, 0x63, 0x6b, 0x12, 0x16, 0x0a, 0x06, 0x68, 0x65, 0x72, 0x6f, 0x49, 0x64, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x68, 0x65, 0x72, 0x6f, 0x49, 0x64, 0x12, 0x16, 0x0a, 0x06,
+	0x64, 0x61, 0x6d, 0x61, 0x67, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x64, 0x61,
+	0x6d, 0x61, 0x67, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x74, 0x68, 0x65, 0x72, 0x61, 0x70, 0x79, 0x18,
+	0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x07, 0x74, 0x68, 0x65, 0x72, 0x61, 0x70, 0x79, 0x22, 0x67,
+	0x0a, 0x10, 0x53, 0x61, 0x6e, 0x67, 0x75, 0x6f, 0x78, 0x69, 0x61, 0x6f, 0x52, 0x65, 0x73, 0x75,
+	0x6c, 0x74, 0x12, 0x14, 0x0a, 0x05, 0x77, 0x69, 0x6e, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x03, 0x52, 0x05, 0x77, 0x69, 0x6e, 0x49, 0x44, 0x12, 0x16, 0x0a, 0x06, 0x6c, 0x6f, 0x73, 0x65,
+	0x49, 0x44, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x6c, 0x6f, 0x73, 0x65, 0x49, 0x44,
+	0x12, 0x25, 0x0a, 0x06, 0x61, 0x77, 0x61, 0x72, 0x64, 0x73, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b,
+	0x32, 0x0d, 0x2e, 0x70, 0x62, 0x2e, 0x47, 0x6f, 0x6f, 0x64, 0x73, 0x4c, 0x69, 0x73, 0x74, 0x52,
+	0x06, 0x61, 0x77, 0x61, 0x72, 0x64, 0x73, 0x22, 0x0e, 0x0a, 0x0c, 0x43, 0x68, 0x61, 0x6c, 0x6c,
+	0x65, 0x6e, 0x67, 0x65, 0x52, 0x65, 0x71, 0x22, 0x83, 0x01, 0x0a, 0x0d, 0x43, 0x68, 0x61, 0x6c,
+	0x6c, 0x65, 0x6e, 0x67, 0x65, 0x52, 0x65, 0x73, 0x70, 0x12, 0x18, 0x0a, 0x07, 0x66, 0x69, 0x72,
+	0x73, 0x74, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x07, 0x66, 0x69, 0x72, 0x73,
+	0x74, 0x49, 0x44, 0x12, 0x2c, 0x0a, 0x06, 0x6d, 0x79, 0x73, 0x65, 0x6c, 0x66, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x70, 0x62, 0x2e, 0x53, 0x61, 0x6e, 0x67, 0x75, 0x6f, 0x78,
+	0x69, 0x61, 0x6f, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x52, 0x06, 0x6d, 0x79, 0x73, 0x65, 0x6c,
+	0x66, 0x12, 0x2a, 0x0a, 0x05, 0x65, 0x6e, 0x65, 0x6d, 0x79, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b,
+	0x32, 0x14, 0x2e, 0x70, 0x62, 0x2e, 0x53, 0x61, 0x6e, 0x67, 0x75, 0x6f, 0x78, 0x69, 0x61, 0x6f,
+	0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x52, 0x05, 0x65, 0x6e, 0x65, 0x6d, 0x79, 0x22, 0xca, 0x01,
+	0x0a, 0x13, 0x53, 0x61, 0x6e, 0x67, 0x75, 0x6f, 0x78, 0x69, 0x61, 0x6f, 0x53, 0x63, 0x65, 0x6e,
+	0x65, 0x52, 0x65, 0x73, 0x70, 0x12, 0x1c, 0x0a, 0x09, 0x74, 0x69, 0x6d, 0x65, 0x53, 0x74, 0x61,
+	0x6d, 0x70, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x74, 0x69, 0x6d, 0x65, 0x53, 0x74,
+	0x61, 0x6d, 0x70, 0x12, 0x16, 0x0a, 0x06, 0x69, 0x6e, 0x6e, 0x69, 0x6e, 0x67, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x06, 0x69, 0x6e, 0x6e, 0x69, 0x6e, 0x67, 0x12, 0x23, 0x0a, 0x05, 0x62,
+	0x6f, 0x61, 0x72, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x70, 0x62, 0x2e,
+	0x42, 0x6f, 0x61, 0x72, 0x64, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x05, 0x62, 0x6f, 0x61, 0x72, 0x64,
+	0x12, 0x2c, 0x0a, 0x06, 0x6d, 0x79, 0x73, 0x65, 0x6c, 0x66, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b,
+	0x32, 0x14, 0x2e, 0x70, 0x62, 0x2e, 0x53, 0x61, 0x6e, 0x67, 0x75, 0x6f, 0x78, 0x69, 0x61, 0x6f,
+	0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x52, 0x06, 0x6d, 0x79, 0x73, 0x65, 0x6c, 0x66, 0x12, 0x2a,
+	0x0a, 0x05, 0x65, 0x6e, 0x65, 0x6d, 0x79, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x14, 0x2e,
+	0x70, 0x62, 0x2e, 0x53, 0x61, 0x6e, 0x67, 0x75, 0x6f, 0x78, 0x69, 0x61, 0x6f, 0x50, 0x6c, 0x61,
+	0x79, 0x65, 0x72, 0x52, 0x05, 0x65, 0x6e, 0x65, 0x6d, 0x79, 0x22, 0x58, 0x0a, 0x1a, 0x53, 0x61,
+	0x6e, 0x67, 0x75, 0x6f, 0x78, 0x69, 0x61, 0x6f, 0x53, 0x74, 0x61, 0x74, 0x65, 0x50, 0x6c, 0x61,
+	0x79, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x73, 0x70, 0x12, 0x22, 0x0a, 0x05, 0x74, 0x69, 0x6d, 0x65,
+	0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0c, 0x2e, 0x70, 0x62, 0x2e, 0x54, 0x69, 0x6d,
+	0x65, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x05, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x12, 0x16, 0x0a, 0x06,
+	0x75, 0x73, 0x65, 0x72, 0x49, 0x44, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x75, 0x73,
+	0x65, 0x72, 0x49, 0x44, 0x22, 0x69, 0x0a, 0x18, 0x53, 0x61, 0x6e, 0x67, 0x75, 0x6f, 0x78, 0x69,
+	0x61, 0x6f, 0x53, 0x74, 0x61, 0x74, 0x65, 0x45, 0x72, 0x61, 0x73, 0x65, 0x52, 0x65, 0x73, 0x70,
+	0x12, 0x22, 0x0a, 0x05, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32,
+	0x0c, 0x2e, 0x70, 0x62, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x05, 0x74,
+	0x69, 0x6d, 0x65, 0x73, 0x12, 0x29, 0x0a, 0x08, 0x6e, 0x6f, 0x77, 0x42, 0x6f, 0x61, 0x72, 0x64,
+	0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x70, 0x62, 0x2e, 0x42, 0x6f, 0x61, 0x72,
+	0x64, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x08, 0x6e, 0x6f, 0x77, 0x42, 0x6f, 0x61, 0x72, 0x64, 0x22,
+	0x6b, 0x0a, 0x17, 0x53, 0x61, 0x6e, 0x67, 0x75, 0x6f, 0x78, 0x69, 0x61, 0x6f, 0x53, 0x74, 0x61,
+	0x74, 0x65, 0x4f, 0x76, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x12, 0x22, 0x0a, 0x05, 0x74, 0x69,
+	0x6d, 0x65, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0c, 0x2e, 0x70, 0x62, 0x2e, 0x54,
+	0x69, 0x6d, 0x65, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x05, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x12, 0x2c,
+	0x0a, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x14,
+	0x2e, 0x70, 0x62, 0x2e, 0x53, 0x61, 0x6e, 0x67, 0x75, 0x6f, 0x78, 0x69, 0x61, 0x6f, 0x52, 0x65,
+	0x73, 0x75, 0x6c, 0x74, 0x52, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x22, 0x57, 0x0a, 0x11,
+	0x53, 0x61, 0x6e, 0x67, 0x75, 0x6f, 0x78, 0x69, 0x61, 0x6f, 0x53, 0x77, 0x61, 0x70, 0x52, 0x65,
+	0x71, 0x12, 0x20, 0x0a, 0x06, 0x6f, 0x72, 0x69, 0x67, 0x69, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x0b, 0x32, 0x08, 0x2e, 0x70, 0x62, 0x2e, 0x47, 0x72, 0x69, 0x64, 0x52, 0x06, 0x6f, 0x72, 0x69,
+	0x67, 0x69, 0x6e, 0x12, 0x20, 0x0a, 0x06, 0x74, 0x61, 0x72, 0x67, 0x65, 0x74, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x08, 0x2e, 0x70, 0x62, 0x2e, 0x47, 0x72, 0x69, 0x64, 0x52, 0x06, 0x74,
+	0x61, 0x72, 0x67, 0x65, 0x74, 0x22, 0x70, 0x0a, 0x12, 0x53, 0x61, 0x6e, 0x67, 0x75, 0x6f, 0x78,
+	0x69, 0x61, 0x6f, 0x53, 0x77, 0x61, 0x70, 0x52, 0x65, 0x73, 0x70, 0x12, 0x16, 0x0a, 0x06, 0x75,
+	0x73, 0x65, 0x72, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x75, 0x73, 0x65,
+	0x72, 0x49, 0x44, 0x12, 0x20, 0x0a, 0x06, 0x6f, 0x72, 0x69, 0x67, 0x69, 0x6e, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x08, 0x2e, 0x70, 0x62, 0x2e, 0x47, 0x72, 0x69, 0x64, 0x52, 0x06, 0x6f,
+	0x72, 0x69, 0x67, 0x69, 0x6e, 0x12, 0x20, 0x0a, 0x06, 0x74, 0x61, 0x72, 0x67, 0x65, 0x74, 0x18,
+	0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x08, 0x2e, 0x70, 0x62, 0x2e, 0x47, 0x72, 0x69, 0x64, 0x52,
+	0x06, 0x74, 0x61, 0x72, 0x67, 0x65, 0x74, 0x22, 0x9b, 0x02, 0x0a, 0x15, 0x53, 0x61, 0x6e, 0x67,
+	0x75, 0x6f, 0x78, 0x69, 0x61, 0x6f, 0x54, 0x72, 0x69, 0x67, 0x67, 0x65, 0x72, 0x52, 0x65, 0x73,
+	0x70, 0x12, 0x16, 0x0a, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x03, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x44, 0x12, 0x22, 0x0a, 0x0c, 0x6d, 0x79, 0x73,
+	0x65, 0x6c, 0x66, 0x48, 0x65, 0x61, 0x6c, 0x74, 0x68, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52,
+	0x0c, 0x6d, 0x79, 0x73, 0x65, 0x6c, 0x66, 0x48, 0x65, 0x61, 0x6c, 0x74, 0x68, 0x12, 0x20, 0x0a,
+	0x0b, 0x65, 0x6e, 0x65, 0x6d, 0x79, 0x48, 0x65, 0x61, 0x6c, 0x74, 0x68, 0x18, 0x03, 0x20, 0x01,
+	0x28, 0x03, 0x52, 0x0b, 0x65, 0x6e, 0x65, 0x6d, 0x79, 0x48, 0x65, 0x61, 0x6c, 0x74, 0x68, 0x12,
+	0x29, 0x0a, 0x08, 0x70, 0x65, 0x72, 0x42, 0x6f, 0x61, 0x72, 0x64, 0x18, 0x04, 0x20, 0x01, 0x28,
+	0x0b, 0x32, 0x0d, 0x2e, 0x70, 0x62, 0x2e, 0x42, 0x6f, 0x61, 0x72, 0x64, 0x49, 0x6e, 0x66, 0x6f,
+	0x52, 0x08, 0x70, 0x65, 0x72, 0x42, 0x6f, 0x61, 0x72, 0x64, 0x12, 0x29, 0x0a, 0x08, 0x6e, 0x6f,
+	0x77, 0x42, 0x6f, 0x61, 0x72, 0x64, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x70,
+	0x62, 0x2e, 0x42, 0x6f, 0x61, 0x72, 0x64, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x08, 0x6e, 0x6f, 0x77,
+	0x42, 0x6f, 0x61, 0x72, 0x64, 0x12, 0x1e, 0x0a, 0x05, 0x65, 0x72, 0x61, 0x73, 0x65, 0x18, 0x06,
+	0x20, 0x03, 0x28, 0x0b, 0x32, 0x08, 0x2e, 0x70, 0x62, 0x2e, 0x47, 0x72, 0x69, 0x64, 0x52, 0x05,
+	0x65, 0x72, 0x61, 0x73, 0x65, 0x12, 0x2e, 0x0a, 0x07, 0x61, 0x74, 0x74, 0x61, 0x63, 0x6b, 0x73,
+	0x18, 0x07, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x14, 0x2e, 0x70, 0x62, 0x2e, 0x53, 0x61, 0x6e, 0x67,
+	0x75, 0x6f, 0x78, 0x69, 0x61, 0x6f, 0x41, 0x74, 0x74, 0x61, 0x63, 0x6b, 0x52, 0x07, 0x61, 0x74,
+	0x74, 0x61, 0x63, 0x6b, 0x73, 0x2a, 0x49, 0x0a, 0x05, 0x50, 0x69, 0x65, 0x63, 0x65, 0x12, 0x0b,
+	0x0a, 0x07, 0x4e, 0x6f, 0x50, 0x69, 0x65, 0x63, 0x65, 0x10, 0x00, 0x12, 0x07, 0x0a, 0x03, 0x4a,
+	0x69, 0x6e, 0x10, 0x01, 0x12, 0x06, 0x0a, 0x02, 0x4d, 0x75, 0x10, 0x02, 0x12, 0x08, 0x0a, 0x04,
+	0x53, 0x68, 0x75, 0x69, 0x10, 0x03, 0x12, 0x07, 0x0a, 0x03, 0x48, 0x75, 0x6f, 0x10, 0x04, 0x12,
+	0x06, 0x0a, 0x02, 0x54, 0x75, 0x10, 0x05, 0x12, 0x07, 0x0a, 0x03, 0x59, 0x61, 0x6f, 0x10, 0x06,
+	0x42, 0x05, 0x5a, 0x03, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
-	file_superman_proto_rawDescOnce sync.Once
-	file_superman_proto_rawDescData = file_superman_proto_rawDesc
+	file_sanguoxiao_proto_rawDescOnce sync.Once
+	file_sanguoxiao_proto_rawDescData = file_sanguoxiao_proto_rawDesc
 )
 
-func file_superman_proto_rawDescGZIP() []byte {
-	file_superman_proto_rawDescOnce.Do(func() {
-		file_superman_proto_rawDescData = protoimpl.X.CompressGZIP(file_superman_proto_rawDescData)
+func file_sanguoxiao_proto_rawDescGZIP() []byte {
+	file_sanguoxiao_proto_rawDescOnce.Do(func() {
+		file_sanguoxiao_proto_rawDescData = protoimpl.X.CompressGZIP(file_sanguoxiao_proto_rawDescData)
 	})
-	return file_superman_proto_rawDescData
+	return file_sanguoxiao_proto_rawDescData
 }
 
-var file_superman_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_superman_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
-var file_superman_proto_goTypes = []interface{}{
+var file_sanguoxiao_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_sanguoxiao_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_sanguoxiao_proto_goTypes = []interface{}{
 	(Piece)(0),                         // 0: pb.Piece
-	(*WujiangInfo)(nil),                // 1: pb.WujiangInfo
-	(*Grid)(nil),                       // 2: pb.Grid
-	(*BoardInfo)(nil),                  // 3: pb.BoardInfo
-	(*SanguoxiaoPlayer)(nil),           // 4: pb.SanguoxiaoPlayer
-	(*SanguoxiaoSceneResp)(nil),        // 5: pb.SanguoxiaoSceneResp
-	(*SanguoxiaoStateChooseResp)(nil),  // 6: pb.SanguoxiaoStateChooseResp
-	(*SanguoxiaoStatePlayingResp)(nil), // 7: pb.SanguoxiaoStatePlayingResp
-	(*SanguoxiaoStateEraseResp)(nil),   // 8: pb.SanguoxiaoStateEraseResp
-	(*SanguoxiaoStateOverResp)(nil),    // 9: pb.SanguoxiaoStateOverResp
-	(*SanguoxiaoChooseReq)(nil),        // 10: pb.SanguoxiaoChooseReq
-	(*SanguoxiaoChooseResp)(nil),       // 11: pb.SanguoxiaoChooseResp
+	(*Grid)(nil),                       // 1: pb.Grid
+	(*BoardInfo)(nil),                  // 2: pb.BoardInfo
+	(*SanguoxiaoPlayer)(nil),           // 3: pb.SanguoxiaoPlayer
+	(*SanguoxiaoAttack)(nil),           // 4: pb.SanguoxiaoAttack
+	(*SanguoxiaoResult)(nil),           // 5: pb.SanguoxiaoResult
+	(*ChallengeReq)(nil),               // 6: pb.ChallengeReq
+	(*ChallengeResp)(nil),              // 7: pb.ChallengeResp
+	(*SanguoxiaoSceneResp)(nil),        // 8: pb.SanguoxiaoSceneResp
+	(*SanguoxiaoStatePlayingResp)(nil), // 9: pb.SanguoxiaoStatePlayingResp
+	(*SanguoxiaoStateEraseResp)(nil),   // 10: pb.SanguoxiaoStateEraseResp
+	(*SanguoxiaoStateOverResp)(nil),    // 11: pb.SanguoxiaoStateOverResp
 	(*SanguoxiaoSwapReq)(nil),          // 12: pb.SanguoxiaoSwapReq
 	(*SanguoxiaoSwapResp)(nil),         // 13: pb.SanguoxiaoSwapResp
-	(*PlayerInfo)(nil),                 // 14: pb.PlayerInfo
-	(*TimeInfo)(nil),                   // 15: pb.TimeInfo
+	(*SanguoxiaoTriggerResp)(nil),      // 14: pb.SanguoxiaoTriggerResp
+	(*PlayerInfo)(nil),                 // 15: pb.PlayerInfo
+	(*HeroInfo)(nil),                   // 16: pb.HeroInfo
+	(*GoodsList)(nil),                  // 17: pb.GoodsList
+	(*TimeInfo)(nil),                   // 18: pb.TimeInfo
 }
-var file_superman_proto_depIdxs = []int32{
+var file_sanguoxiao_proto_depIdxs = []int32{
 	0,  // 0: pb.Grid.core:type_name -> pb.Piece
-	2,  // 1: pb.BoardInfo.cells:type_name -> pb.Grid
-	14, // 2: pb.SanguoxiaoPlayer.myInfo:type_name -> pb.PlayerInfo
-	1,  // 3: pb.SanguoxiaoPlayer.all:type_name -> pb.WujiangInfo
-	1,  // 4: pb.SanguoxiaoPlayer.team:type_name -> pb.WujiangInfo
-	3,  // 5: pb.SanguoxiaoSceneResp.board:type_name -> pb.BoardInfo
-	4,  // 6: pb.SanguoxiaoSceneResp.allPlayers:type_name -> pb.SanguoxiaoPlayer
-	15, // 7: pb.SanguoxiaoStateChooseResp.times:type_name -> pb.TimeInfo
-	15, // 8: pb.SanguoxiaoStatePlayingResp.times:type_name -> pb.TimeInfo
-	15, // 9: pb.SanguoxiaoStateEraseResp.times:type_name -> pb.TimeInfo
-	3,  // 10: pb.SanguoxiaoStateEraseResp.nowBoard:type_name -> pb.BoardInfo
-	15, // 11: pb.SanguoxiaoStateOverResp.times:type_name -> pb.TimeInfo
-	1,  // 12: pb.SanguoxiaoChooseReq.team:type_name -> pb.WujiangInfo
-	1,  // 13: pb.SanguoxiaoChooseResp.team:type_name -> pb.WujiangInfo
-	2,  // 14: pb.SanguoxiaoSwapReq.origin:type_name -> pb.Grid
-	2,  // 15: pb.SanguoxiaoSwapReq.target:type_name -> pb.Grid
-	2,  // 16: pb.SanguoxiaoSwapResp.origin:type_name -> pb.Grid
-	2,  // 17: pb.SanguoxiaoSwapResp.target:type_name -> pb.Grid
-	18, // [18:18] is the sub-list for method output_type
-	18, // [18:18] is the sub-list for method input_type
-	18, // [18:18] is the sub-list for extension type_name
-	18, // [18:18] is the sub-list for extension extendee
-	0,  // [0:18] is the sub-list for field type_name
+	1,  // 1: pb.BoardInfo.cells:type_name -> pb.Grid
+	15, // 2: pb.SanguoxiaoPlayer.info:type_name -> pb.PlayerInfo
+	16, // 3: pb.SanguoxiaoPlayer.arenaTeam:type_name -> pb.HeroInfo
+	17, // 4: pb.SanguoxiaoResult.awards:type_name -> pb.GoodsList
+	3,  // 5: pb.ChallengeResp.myself:type_name -> pb.SanguoxiaoPlayer
+	3,  // 6: pb.ChallengeResp.enemy:type_name -> pb.SanguoxiaoPlayer
+	2,  // 7: pb.SanguoxiaoSceneResp.board:type_name -> pb.BoardInfo
+	3,  // 8: pb.SanguoxiaoSceneResp.myself:type_name -> pb.SanguoxiaoPlayer
+	3,  // 9: pb.SanguoxiaoSceneResp.enemy:type_name -> pb.SanguoxiaoPlayer
+	18, // 10: pb.SanguoxiaoStatePlayingResp.times:type_name -> pb.TimeInfo
+	18, // 11: pb.SanguoxiaoStateEraseResp.times:type_name -> pb.TimeInfo
+	2,  // 12: pb.SanguoxiaoStateEraseResp.nowBoard:type_name -> pb.BoardInfo
+	18, // 13: pb.SanguoxiaoStateOverResp.times:type_name -> pb.TimeInfo
+	5,  // 14: pb.SanguoxiaoStateOverResp.result:type_name -> pb.SanguoxiaoResult
+	1,  // 15: pb.SanguoxiaoSwapReq.origin:type_name -> pb.Grid
+	1,  // 16: pb.SanguoxiaoSwapReq.target:type_name -> pb.Grid
+	1,  // 17: pb.SanguoxiaoSwapResp.origin:type_name -> pb.Grid
+	1,  // 18: pb.SanguoxiaoSwapResp.target:type_name -> pb.Grid
+	2,  // 19: pb.SanguoxiaoTriggerResp.perBoard:type_name -> pb.BoardInfo
+	2,  // 20: pb.SanguoxiaoTriggerResp.nowBoard:type_name -> pb.BoardInfo
+	1,  // 21: pb.SanguoxiaoTriggerResp.erase:type_name -> pb.Grid
+	4,  // 22: pb.SanguoxiaoTriggerResp.attacks:type_name -> pb.SanguoxiaoAttack
+	23, // [23:23] is the sub-list for method output_type
+	23, // [23:23] is the sub-list for method input_type
+	23, // [23:23] is the sub-list for extension type_name
+	23, // [23:23] is the sub-list for extension extendee
+	0,  // [0:23] is the sub-list for field type_name
 }
 
-func init() { file_superman_proto_init() }
-func file_superman_proto_init() {
-	if File_superman_proto != nil {
+func init() { file_sanguoxiao_proto_init() }
+func file_sanguoxiao_proto_init() {
+	if File_sanguoxiao_proto != nil {
 		return
 	}
 	file_game_proto_init()
+	file_home_proto_init()
 	file_player_proto_init()
 	if !protoimpl.UnsafeEnabled {
-		file_superman_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*WujiangInfo); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_superman_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+		file_sanguoxiao_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*Grid); i {
 			case 0:
 				return &v.state
@@ -1065,7 +1158,7 @@ func file_superman_proto_init() {
 				return nil
 			}
 		}
-		file_superman_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+		file_sanguoxiao_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*BoardInfo); i {
 			case 0:
 				return &v.state
@@ -1077,7 +1170,7 @@ func file_superman_proto_init() {
 				return nil
 			}
 		}
-		file_superman_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+		file_sanguoxiao_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SanguoxiaoPlayer); i {
 			case 0:
 				return &v.state
@@ -1089,7 +1182,55 @@ func file_superman_proto_init() {
 				return nil
 			}
 		}
-		file_superman_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+		file_sanguoxiao_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SanguoxiaoAttack); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_sanguoxiao_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SanguoxiaoResult); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_sanguoxiao_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ChallengeReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_sanguoxiao_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ChallengeResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_sanguoxiao_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SanguoxiaoSceneResp); i {
 			case 0:
 				return &v.state
@@ -1101,19 +1242,7 @@ func file_superman_proto_init() {
 				return nil
 			}
 		}
-		file_superman_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SanguoxiaoStateChooseResp); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_superman_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+		file_sanguoxiao_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SanguoxiaoStatePlayingResp); i {
 			case 0:
 				return &v.state
@@ -1125,7 +1254,7 @@ func file_superman_proto_init() {
 				return nil
 			}
 		}
-		file_superman_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+		file_sanguoxiao_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SanguoxiaoStateEraseResp); i {
 			case 0:
 				return &v.state
@@ -1137,7 +1266,7 @@ func file_superman_proto_init() {
 				return nil
 			}
 		}
-		file_superman_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+		file_sanguoxiao_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SanguoxiaoStateOverResp); i {
 			case 0:
 				return &v.state
@@ -1149,31 +1278,7 @@ func file_superman_proto_init() {
 				return nil
 			}
 		}
-		file_superman_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SanguoxiaoChooseReq); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_superman_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SanguoxiaoChooseResp); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_superman_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+		file_sanguoxiao_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SanguoxiaoSwapReq); i {
 			case 0:
 				return &v.state
@@ -1185,8 +1290,20 @@ func file_superman_proto_init() {
 				return nil
 			}
 		}
-		file_superman_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
+		file_sanguoxiao_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*SanguoxiaoSwapResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_sanguoxiao_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*SanguoxiaoTriggerResp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1202,19 +1319,19 @@ func file_superman_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: file_superman_proto_rawDesc,
+			RawDescriptor: file_sanguoxiao_proto_rawDesc,
 			NumEnums:      1,
-			NumMessages:   13,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_superman_proto_goTypes,
-		DependencyIndexes: file_superman_proto_depIdxs,
-		EnumInfos:         file_superman_proto_enumTypes,
-		MessageInfos:      file_superman_proto_msgTypes,
+		GoTypes:           file_sanguoxiao_proto_goTypes,
+		DependencyIndexes: file_sanguoxiao_proto_depIdxs,
+		EnumInfos:         file_sanguoxiao_proto_enumTypes,
+		MessageInfos:      file_sanguoxiao_proto_msgTypes,
 	}.Build()
-	File_superman_proto = out.File
-	file_superman_proto_rawDesc = nil
-	file_superman_proto_goTypes = nil
-	file_superman_proto_depIdxs = nil
+	File_sanguoxiao_proto = out.File
+	file_sanguoxiao_proto_rawDesc = nil
+	file_sanguoxiao_proto_goTypes = nil
+	file_sanguoxiao_proto_depIdxs = nil
 }

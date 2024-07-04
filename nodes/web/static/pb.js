@@ -5231,7 +5231,7 @@ proto.pb.StringKeyValue.prototype.setValue = function(value) {
 goog.object.extend(exports, proto.pb);
 
 },{"google-protobuf":4}],7:[function(require,module,exports){
-// source: login.proto
+// source: home.proto
 /**
  * @fileoverview
  * @enhanceable

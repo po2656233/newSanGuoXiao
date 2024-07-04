@@ -105,6 +105,6 @@ func buildSimpleParser(app *superplace.AppBuilder) cfacade.INetParser {
 		ActorID:  "user",
 		//FuncName: "ping",
 	})
-	GetMsgFunc("internal/component/jettengame/conf/leafconf/message_id.json")
+	GetMsgFunc("config/leafconf/message_id.json")
 	return agentActor
 }

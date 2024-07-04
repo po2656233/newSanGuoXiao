@@ -233,8 +233,8 @@ func (sqlSelf *SqlOrm) CheckAllGoods() (goodsInfoList map[int64]*protoMsg.GoodsI
 
 // CheckAssets 获取玩家资产信息 [放入背包]
 func (sqlSelf *SqlOrm) CheckAssets(userID int64) *protoMsg.KnapsackInfo {
-	assetList := make([]model.Asset, 0)
-	asset := model.Asset{}
+	assetList := make([]model.Assetgoods, 0)
+	asset := model.Assetgoods{}
 	fields := "`goodsid`, `amount`,`spending`"
 	err := sqlSelf.db.Table(asset.TableName()).Select(fields).Where("uid=?", userID).Find(&assetList).Error
 	if !CheckError(err) {
@@ -418,6 +418,127 @@ func (sqlSelf *SqlOrm) CheckClassList(userID int64, platRooms []int64) (roomsInf
 func (sqlSelf *SqlOrm) CheckTaskList(userID int64) (tasks []int32) {
 	_ = userID
 	return tasks
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
+
+// CheckAllHero 获取所有武将 [可放置缓存]
+func (sqlSelf *SqlOrm) CheckAllHero() map[int64]*protoMsg.HeroInfo {
+	HeroList := make([]*model.Hero, 0)
+	goods := model.Hero{}
+	fields := "*"
+	err := sqlSelf.db.Table(goods.TableName()).Select(fields).Find(&HeroList).Error
+	if !CheckError(err) {
+		return nil
+	}
+	HeroAll := make(map[int64]*protoMsg.HeroInfo, 0)
+	for _, m := range HeroList {
+		skills := strings.Split(m.Skills, "|")
+
+		HeroAll[m.ID] = &protoMsg.HeroInfo{
+			ID:              m.ID,
+			HeadId:          m.Headid,
+			Name:            m.Name,
+			Sex:             m.Sex,
+			Faction:         protoMsg.HeroType(m.Faction),
+			HealthPoint:     m.Health,
+			HealthPointFull: m.Health,
+			AttackPoint:     m.Attack,
+			ArmorPoint:      m.Armor,
+			Strength:        m.Strength,
+			Agility:         m.Agility,
+			Intelligence:    m.Intelligence,
+			SpellPower:      m.Spellpower,
+			Skills:          ToArray(skills, Int64Array).([]int64),
+		}
+	}
+	return HeroAll
+}
+
+// CheckHeroList 根据武将id获取武将信息
+func (sqlSelf *SqlOrm) CheckHeroList(heroIDs []int64) []*protoMsg.HeroInfo {
+	sqlSelf.RLock()
+	defer sqlSelf.RUnlock()
+	HeroList := make([]*model.Hero, 0)
+	heroMD := model.Hero{}
+	fields := "*"
+	err := sqlSelf.db.Table(heroMD.TableName()).Select(fields).Where("id", heroIDs).Find(&HeroList).Error
+	if !CheckError(err) {
+		return nil
+	}
+	HeroAll := make([]*protoMsg.HeroInfo, 0)
+	for _, m := range HeroList {
+		heroInfo := &protoMsg.HeroInfo{
+			ID:              m.ID,
+			HeadId:          m.Headid,
+			Name:            m.Name,
+			Sex:             m.Sex,
+			Faction:         protoMsg.HeroType(m.Faction),
+			HealthPoint:     m.Health,
+			HealthPointFull: m.Health,
+			AttackPoint:     m.Attack,
+			ArmorPoint:      m.Armor,
+			Strength:        m.Strength,
+			Agility:         m.Agility,
+			Intelligence:    m.Intelligence,
+			SpellPower:      m.Spellpower,
+		}
+		if 0 < len(m.Skills) {
+			skills := strings.Split(m.Skills, "|")
+			heroInfo.Skills = ToArray(skills, Int64Array).([]int64)
+		}
+		HeroAll = append(HeroAll, heroInfo)
+	}
+	return HeroAll
+}
+
+// HasHeroList 根据武将id获取武将信息
+func (sqlSelf *SqlOrm) HasHeroList(uid int64, heroIDs []int64) bool {
+	heroMD := model.Assethero{}
+	count := int64(0)
+	err := sqlSelf.db.Table(heroMD.TableName()).Where("`uid` = ? AND `heroid` in(?)", uid, heroIDs).Count(&count).Error
+	if !CheckError(err) {
+		return false
+	}
+	return count == int64(len(heroIDs))
+}
+
+// IsHeroChoosed 武将是否被选了
+func (sqlSelf *SqlOrm) IsHeroChoosed(uid int64, heroIDs []int64) bool {
+	heroMD := model.Assethero{}
+	count := int64(0)
+	err := sqlSelf.db.Table(heroMD.TableName()).Where("`uid` = ? AND `heroid` in(?) AND `choose`=1", uid, heroIDs).Count(&count).Error
+	if !CheckError(err) {
+		return false
+	}
+	return 0 < count
+}
+
+// ChooseHeros 选则武将
+func (sqlSelf *SqlOrm) ChooseHeros(uid int64, heroIDs []int64, isChoose bool) error {
+	heroMD := model.Assethero{}
+	val := int32(0)
+	if isChoose {
+		val = 1
+	}
+	err := sqlSelf.db.Table(heroMD.TableName()).Where("`uid` = ? AND `heroid` in(?) ", uid, heroIDs).UpdateColumn("`choose`", val).Error
+	if !CheckError(err) {
+		return nil
+	}
+	return err
+}
+
+// CheckUserHeroList 获取玩家的英雄列表
+func (sqlSelf *SqlOrm) CheckUserHeroList(userID int64) []*protoMsg.HeroInfo {
+	myHeroList := make([]int64, 0)
+	assetheroMD := model.Assethero{}
+	fields := "`heroid`"
+	err := sqlSelf.db.Table(assetheroMD.TableName()).Select(fields).Where("uid=?", userID).Find(&myHeroList).Error
+	if !CheckError(err) {
+		return nil
+	}
+	// 根据武将id获取信息
+	return sqlSelf.CheckHeroList(myHeroList)
 }
 
 /////////////////////////////////////////////////////////////////
@@ -1011,8 +1132,8 @@ func (sqlSelf *SqlOrm) UpdateRobotCount(gameID, hostId int64, count int32) error
 func (sqlSelf *SqlOrm) UpdateAsset(uid, goodsID int64, payment int64, buyCount, code int32, remark string) error {
 	sqlSelf.Lock()
 	defer sqlSelf.Unlock()
-	assetList := make([]*model.Asset, 0)
-	asset := model.Asset{}
+	assetList := make([]*model.Assetgoods, 0)
+	asset := model.Assetgoods{}
 	field := "`uid`,`goodsid`,`id`,`amount`,`spending`,`count`,`totalprice`"
 	query := "`uid`in (?) and `goodsid`in(?)"
 	err := sqlSelf.db.Table(asset.TableName()).Select(field).Where(query, uid, goodsID).Find(&assetList).Error

@@ -29,6 +29,24 @@ const (
 	letter    = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 )
 
+const (
+	IntArray = Array + iota
+	Int8Array
+	Int16Array
+	Int32Array
+	Int64Array
+	UintArray
+	Uint8Array
+	Uint16Array
+	Uint32Array
+	Uint64Array
+	Float32Array
+	Float64Array
+	StringArray
+	SliceArray
+)
+const Array = reflect.UnsafePointer + 1
+
 // RandomStr 随机生成字符
 func RandomStr(count int) string {
 	rand.Seed(time.Now().UnixNano())
@@ -47,6 +65,58 @@ func RandomStrLetter(count int) string {
 		b[i] = letter[rand.Intn(len(letter))]
 	}
 	return string(b)
+}
+
+func GenRandNum(min, max int) int {
+	mus := max - min
+	if mus < 0 {
+		return min
+	}
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	return min + r.Intn(mus+1)
+}
+func GenRandNum32(min, max int32) int32 {
+	mus := max - min
+	if mus < 0 {
+		return min
+	}
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	return min + r.Int31n(mus+1)
+}
+func GenRandNum64(min, max int64) int64 {
+	mus := max - min
+	if mus < 0 {
+		return min
+	}
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	return min + r.Int63n(mus+1)
+}
+
+// GetRandList64 从指定的列表中获取随机元素
+func GetRandList64(src []int64, count int, canRepeat bool) []int64 {
+	size := len(src)
+	if size < 2 {
+		return src
+	}
+	dest := make([]int64, size)
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	// 可重复
+	if canRepeat {
+		for i := 0; i < count; i++ {
+			dest = append(dest, src[r.Int()%size])
+		}
+		return dest
+	}
+
+	// 不重复
+	if size <= count {
+		return src
+	}
+	copy(dest, src)
+	r.Shuffle(count, func(i, j int) {
+		dest[i], dest[j] = dest[j], dest[i]
+	})
+	return dest[:count]
 }
 
 // CheckError 异常处理
@@ -445,17 +515,19 @@ func GenerateRobotNum(tableID int64) string {
 
 /////////////////////////////////////////////////////////////
 
-// ToArray slice转为数组结构体
-func ToArray(slice interface{}, dataType interface{}) interface{} {
+// ToArray slice转为数组结构体  使用示例 ToArray([]string{"iii","kkk"}, reflect.Int64).([]int64)
+func ToArray(slice interface{}, toType reflect.Kind) interface{} {
 	value := reflect.ValueOf(slice)
-	if value.Kind() != reflect.Slice {
-		return nil
+	sliceType := value.Kind()
+	if sliceType != reflect.Slice && sliceType != reflect.String {
+		return slice
 	}
 	sliceLen := value.Len()
-	typeValue := reflect.ValueOf(dataType)
-
+	if sliceType != reflect.String {
+		sliceType = value.Index(0).Kind()
+	}
 	code := 0
-	switch value.Index(0).Kind() {
+	switch sliceType {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		code = 1
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
@@ -470,8 +542,8 @@ func ToArray(slice interface{}, dataType interface{}) interface{} {
 		return value.Interface()
 	}
 
-	switch typeValue.Kind() {
-	case reflect.Int:
+	switch toType {
+	case IntArray:
 		r := make([]int, sliceLen)
 		for i := 0; i < sliceLen; i++ {
 			switch code {
@@ -482,15 +554,18 @@ func ToArray(slice interface{}, dataType interface{}) interface{} {
 			case 3:
 				r[i] = int(value.Index(i).Float())
 			case 4:
-				if v, err := strconv.Atoi(value.Index(i).String()); err == nil {
-					r[i] = v
+				vals := []int32(value.String())
+				r = make([]int, len(vals))
+				for i2, val := range vals {
+					r[i2] = int(val)
 				}
+				break
 			case 5:
 				r[i] = value.Index(i).Interface().(int)
 			}
 		}
 		return r
-	case reflect.Int8:
+	case Int8Array:
 		r := make([]int8, sliceLen)
 		for i := 0; i < sliceLen; i++ {
 			switch code {
@@ -501,15 +576,18 @@ func ToArray(slice interface{}, dataType interface{}) interface{} {
 			case 3:
 				r[i] = int8(value.Index(i).Float())
 			case 4:
-				if v, err := strconv.ParseInt(value.Index(i).String(), 10, 64); err == nil {
-					r[i] = int8(v)
+				vals := []int32(value.String())
+				r = make([]int8, len(vals))
+				for i2, val := range vals {
+					r[i2] = int8(val)
 				}
+				break
 			case 5:
 				r[i] = value.Index(i).Interface().(int8)
 			}
 		}
 		return r
-	case reflect.Int16:
+	case Int16Array:
 		r := make([]int16, sliceLen)
 		for i := 0; i < sliceLen; i++ {
 			switch code {
@@ -520,15 +598,18 @@ func ToArray(slice interface{}, dataType interface{}) interface{} {
 			case 3:
 				r[i] = int16(value.Index(i).Float())
 			case 4:
-				if v, err := strconv.ParseInt(value.Index(i).String(), 10, 64); err == nil {
-					r[i] = int16(v)
+				vals := []int32(value.String())
+				r = make([]int16, len(vals))
+				for i2, val := range vals {
+					r[i2] = int16(val)
 				}
+				break
 			case 5:
 				r[i] = value.Index(i).Interface().(int16)
 			}
 		}
 		return r
-	case reflect.Int32:
+	case Int32Array:
 		r := make([]int32, sliceLen)
 		for i := 0; i < sliceLen; i++ {
 			switch code {
@@ -539,15 +620,14 @@ func ToArray(slice interface{}, dataType interface{}) interface{} {
 			case 3:
 				r[i] = int32(value.Index(i).Float())
 			case 4:
-				if v, err := strconv.ParseInt(value.Index(i).String(), 10, 64); err == nil {
-					r[i] = int32(v)
-				}
+				r = []int32(value.String())
+				break
 			case 5:
 				r[i] = value.Index(i).Interface().(int32)
 			}
 		}
 		return r
-	case reflect.Int64:
+	case Int64Array:
 		r := make([]int64, sliceLen)
 		for i := 0; i < sliceLen; i++ {
 			switch code {
@@ -558,15 +638,18 @@ func ToArray(slice interface{}, dataType interface{}) interface{} {
 			case 3:
 				r[i] = int64(value.Index(i).Float())
 			case 4:
-				if v, err := strconv.ParseInt(value.Index(i).String(), 10, 64); err == nil {
-					r[i] = v
+				vals := []int32(value.String())
+				r = make([]int64, len(vals))
+				for i2, val := range vals {
+					r[i2] = int64(val)
 				}
+				break
 			case 5:
 				r[i] = value.Index(i).Interface().(int64)
 			}
 		}
 		return r
-	case reflect.Uint:
+	case UintArray:
 		r := make([]uint, sliceLen)
 		for i := 0; i < sliceLen; i++ {
 			switch code {
@@ -577,15 +660,18 @@ func ToArray(slice interface{}, dataType interface{}) interface{} {
 			case 3:
 				r[i] = uint(value.Index(i).Float())
 			case 4:
-				if v, err := strconv.ParseUint(value.Index(i).String(), 10, 64); err == nil {
-					r[i] = uint(v)
+				vals := []int32(value.String())
+				r = make([]uint, len(vals))
+				for i2, val := range vals {
+					r[i2] = uint(val)
 				}
+				break
 			case 5:
 				r[i] = value.Index(i).Interface().(uint)
 			}
 		}
 		return r
-	case reflect.Uint8:
+	case Uint8Array:
 		r := make([]uint8, sliceLen)
 		for i := 0; i < sliceLen; i++ {
 			switch code {
@@ -596,15 +682,18 @@ func ToArray(slice interface{}, dataType interface{}) interface{} {
 			case 3:
 				r[i] = uint8(value.Index(i).Float())
 			case 4:
-				if v, err := strconv.ParseUint(value.Index(i).String(), 10, 64); err == nil {
-					r[i] = uint8(v)
+				vals := []int32(value.String())
+				r = make([]uint8, len(vals))
+				for i2, val := range vals {
+					r[i2] = uint8(val)
 				}
+				break
 			case 5:
 				r[i] = value.Index(i).Interface().(uint8)
 			}
 		}
 		return r
-	case reflect.Uint16:
+	case Uint16Array:
 		r := make([]uint16, sliceLen)
 		for i := 0; i < sliceLen; i++ {
 			switch code {
@@ -615,53 +704,62 @@ func ToArray(slice interface{}, dataType interface{}) interface{} {
 			case 3:
 				r[i] = uint16(value.Index(i).Float())
 			case 4:
-				if v, err := strconv.ParseUint(value.Index(i).String(), 10, 64); err == nil {
-					r[i] = uint16(v)
+				vals := []int32(value.String())
+				r = make([]uint16, len(vals))
+				for i2, val := range vals {
+					r[i2] = uint16(val)
 				}
+				break
 			case 5:
 				r[i] = value.Index(i).Interface().(uint16)
 			}
 		}
 		return r
-	case reflect.Uint32:
-		r := make([]int32, sliceLen)
+	case Uint32Array:
+		r := make([]uint32, sliceLen)
 		for i := 0; i < sliceLen; i++ {
 			switch code {
 			case 1:
-				r[i] = int32(value.Index(i).Int())
+				r[i] = uint32(value.Index(i).Int())
 			case 2:
-				r[i] = int32(value.Index(i).Uint())
+				r[i] = uint32(value.Index(i).Uint())
 			case 3:
-				r[i] = int32(value.Index(i).Float())
+				r[i] = uint32(value.Index(i).Float())
 			case 4:
-				if v, err := strconv.ParseUint(value.Index(i).String(), 10, 64); err == nil {
-					r[i] = int32(v)
+				vals := []int32(value.String())
+				r = make([]uint32, len(vals))
+				for i2, val := range vals {
+					r[i2] = uint32(val)
 				}
+				break
 			case 5:
-				r[i] = value.Index(i).Interface().(int32)
+				r[i] = value.Index(i).Interface().(uint32)
 			}
 		}
 		return r
-	case reflect.Uint64:
-		r := make([]int64, sliceLen)
+	case Uint64Array:
+		r := make([]uint64, sliceLen)
 		for i := 0; i < sliceLen; i++ {
 			switch code {
 			case 1:
-				r[i] = value.Index(i).Int()
+				r[i] = uint64(value.Index(i).Int())
 			case 2:
-				r[i] = int64(value.Index(i).Uint())
+				r[i] = value.Index(i).Uint()
 			case 3:
-				r[i] = int64(value.Index(i).Float())
+				r[i] = uint64(value.Index(i).Float())
 			case 4:
-				if v, err := strconv.ParseUint(value.Index(i).String(), 10, 64); err == nil {
-					r[i] = int64(v)
+				vals := []int32(value.String())
+				r = make([]uint64, len(vals))
+				for i2, val := range vals {
+					r[i2] = uint64(val)
 				}
+				break
 			case 5:
-				r[i] = value.Index(i).Interface().(int64)
+				r[i] = value.Index(i).Interface().(uint64)
 			}
 		}
 		return r
-	case reflect.Float32:
+	case Float32Array:
 		r := make([]float32, sliceLen)
 		for i := 0; i < sliceLen; i++ {
 			switch code {
@@ -672,15 +770,18 @@ func ToArray(slice interface{}, dataType interface{}) interface{} {
 			case 3:
 				r[i] = float32(value.Index(i).Float())
 			case 4:
-				if f, err := strconv.ParseFloat(value.Index(i).String(), 32); err == nil {
-					r[i] = float32(f)
+				vals := []int32(value.String())
+				r = make([]float32, len(vals))
+				for i2, val := range vals {
+					r[i2] = float32(val)
 				}
+				break
 			case 5:
 				r[i] = value.Index(i).Interface().(float32)
 			}
 		}
 		return r
-	case reflect.Float64:
+	case Float64Array:
 		r := make([]float64, sliceLen)
 		for i := 0; i < sliceLen; i++ {
 			switch code {
@@ -691,14 +792,18 @@ func ToArray(slice interface{}, dataType interface{}) interface{} {
 			case 3:
 				r[i] = value.Index(i).Float()
 			case 4:
-				r[i], _ = strconv.ParseFloat(value.Index(i).String(), 64)
-
+				vals := []int32(value.String())
+				r = make([]float64, len(vals))
+				for i2, val := range vals {
+					r[i2] = float64(val)
+				}
+				break
 			case 5:
 				r[i] = value.Index(i).Interface().(float64)
 			}
 		}
 		return r
-	case reflect.String:
+	case StringArray:
 		r := make([]string, sliceLen)
 		for i := 0; i < sliceLen; i++ {
 			switch code {
@@ -715,6 +820,17 @@ func ToArray(slice interface{}, dataType interface{}) interface{} {
 			}
 		}
 		return r
+	case SliceArray:
+		r := make([]interface{}, sliceLen)
+		for i := 0; i < sliceLen; i++ {
+			r[i] = value.Index(i).Interface()
+		}
+	case reflect.String:
+		r := make([]rune, 0)
+		for i := 0; i < sliceLen; i++ {
+			r = append(r, rune(value.Index(i).Int()))
+		}
+		return string(r)
 	}
 	return value.Interface()
 }
