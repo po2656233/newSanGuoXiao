@@ -1,7 +1,7 @@
 package online
 
 import (
-	sgxFacade "github.com/po2656233/superplace/facade"
+	"github.com/po2656233/superplace/facade"
 	clog "github.com/po2656233/superplace/logger"
 	"sync"
 )
@@ -28,7 +28,7 @@ func BindPlayer(playerId int64, uid int64, agentActorPath string) {
 	uidMap[uid] = playerId
 }
 
-func UnBindPlayer(uid sgxFacade.UID) int64 {
+func UnBindPlayer(uid facade.UID) int64 {
 	if uid < 1 {
 		return 0
 	}
@@ -54,7 +54,7 @@ func UnBindPlayer(uid sgxFacade.UID) int64 {
 	return playerId
 }
 
-func GetPlayerId(uid sgxFacade.UID) int64 {
+func GetPlayerId(uid facade.UID) int64 {
 	if uid < 1 {
 		return 0
 	}

@@ -10,7 +10,6 @@ import (
 	"superman/internal/component/check_center"
 	"superman/internal/conf"
 	"superman/nodes/game/db"
-	"superman/nodes/game/module/player"
 	"superman/nodes/game/module/sanguoxiao"
 )
 
@@ -38,8 +37,8 @@ func Run(profileFilePath, nodeId string) {
 	app.Register(db.New())
 
 	app.AddActors(
-		&player.ActorPlayers{},
-		&superman.ActorSanGuoXiao{},
+		//&player.ActorPlayers{},
+		&sanguoxiao.ActorGame{},
 	)
 
 	app.Startup()

@@ -1017,7 +1017,7 @@ func (self *GamesManger) Match(game *Game, person *Player, product ProductCallba
 		// 是否是房主
 		//isHost := game.T.HostID == person.UserID
 		if game.T.State == protoMsg.TableState_InitTB || game.T.State == protoMsg.TableState_OpenTB { //[1
-			if game.T.EnterScore <= int32(person.Gold) && game.T.LessScore < int32(person.Gold) { //[2
+			if game.T.EnterScore <= int32(person.Gold) && game.T.LessScore <= int32(person.Gold) { //[2
 				person.GameID = table.GameID
 				person.PtrTable = table
 
@@ -1032,22 +1032,25 @@ func (self *GamesManger) Match(game *Game, person *Player, product ProductCallba
 	}
 
 	//查找现有桌子
-	for _, table := range self.Tables {
-		if table.GameID == game.ID {
+	var table *Table = nil
+	for _, tableItem := range self.Tables {
+		if tableItem.GameID == game.ID {
 			//进入场景
-			return enterScene(table)
+			table = tableItem
+			break
 		}
 	}
+	if table == nil {
+		game.InningInfo = &Inning{}
+		table = &Table{}
+		table.GameID = game.ID
+		table.Num = int32(self.GetTableSize(game.G.KindID, game.G.Level))
+		table.Info = game.T
+		table.Instance = product(game)
+		table.Instance.Start(nil)
+		self.Tables = CopyInsert(self.Tables, len(self.Tables), table).([]*Table)
+	}
 
-	game.InningInfo = &Inning{}
-	table := &Table{}
-	table.GameID = game.ID
-	table.Num = int32(self.GetTableSize(game.G.KindID, game.G.Level))
-	table.Info = game.T
-	table.Instance = product(game)
-	table.Instance.Start(nil)
-
-	self.Tables = CopyInsert(self.Tables, len(self.Tables), table).([]*Table)
 	return enterScene(table)
 }
 

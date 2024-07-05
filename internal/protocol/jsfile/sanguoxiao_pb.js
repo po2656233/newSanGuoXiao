@@ -1395,8 +1395,8 @@ proto.pb.ChallengeResp.prototype.toObject = function(opt_includeInstance) {
 proto.pb.ChallengeResp.toObject = function(includeInstance, msg) {
   var obj = {
     firstid: jspb.Message.getFieldWithDefault(msg, 1, 0),
-    myself: (f = msg.getMyself()) && proto.pb.SanguoxiaoPlayer.toObject(includeInstance, f),
-    enemy: (f = msg.getEnemy()) && proto.pb.SanguoxiaoPlayer.toObject(includeInstance, f)
+    redcamp: (f = msg.getRedcamp()) && proto.pb.SanguoxiaoPlayer.toObject(includeInstance, f),
+    bluecamp: (f = msg.getBluecamp()) && proto.pb.SanguoxiaoPlayer.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -1440,12 +1440,12 @@ proto.pb.ChallengeResp.deserializeBinaryFromReader = function(msg, reader) {
     case 2:
       var value = new proto.pb.SanguoxiaoPlayer;
       reader.readMessage(value,proto.pb.SanguoxiaoPlayer.deserializeBinaryFromReader);
-      msg.setMyself(value);
+      msg.setRedcamp(value);
       break;
     case 3:
       var value = new proto.pb.SanguoxiaoPlayer;
       reader.readMessage(value,proto.pb.SanguoxiaoPlayer.deserializeBinaryFromReader);
-      msg.setEnemy(value);
+      msg.setBluecamp(value);
       break;
     default:
       reader.skipField();
@@ -1483,7 +1483,7 @@ proto.pb.ChallengeResp.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getMyself();
+  f = message.getRedcamp();
   if (f != null) {
     writer.writeMessage(
       2,
@@ -1491,7 +1491,7 @@ proto.pb.ChallengeResp.serializeBinaryToWriter = function(message, writer) {
       proto.pb.SanguoxiaoPlayer.serializeBinaryToWriter
     );
   }
-  f = message.getEnemy();
+  f = message.getBluecamp();
   if (f != null) {
     writer.writeMessage(
       3,
@@ -1518,17 +1518,17 @@ proto.pb.ChallengeResp.prototype.setFirstid = function(value) {
 
 
 /**
- * optional SanguoxiaoPlayer myself = 2;
+ * optional SanguoxiaoPlayer redCamp = 2;
  * @return {?proto.pb.SanguoxiaoPlayer}
  */
-proto.pb.ChallengeResp.prototype.getMyself = function() {
+proto.pb.ChallengeResp.prototype.getRedcamp = function() {
   return /** @type{?proto.pb.SanguoxiaoPlayer} */ (
     jspb.Message.getWrapperField(this, proto.pb.SanguoxiaoPlayer, 2));
 };
 
 
 /** @param {?proto.pb.SanguoxiaoPlayer|undefined} value */
-proto.pb.ChallengeResp.prototype.setMyself = function(value) {
+proto.pb.ChallengeResp.prototype.setRedcamp = function(value) {
   jspb.Message.setWrapperField(this, 2, value);
 };
 
@@ -1536,8 +1536,8 @@ proto.pb.ChallengeResp.prototype.setMyself = function(value) {
 /**
  * Clears the message field making it undefined.
  */
-proto.pb.ChallengeResp.prototype.clearMyself = function() {
-  this.setMyself(undefined);
+proto.pb.ChallengeResp.prototype.clearRedcamp = function() {
+  this.setRedcamp(undefined);
 };
 
 
@@ -1545,23 +1545,23 @@ proto.pb.ChallengeResp.prototype.clearMyself = function() {
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.pb.ChallengeResp.prototype.hasMyself = function() {
+proto.pb.ChallengeResp.prototype.hasRedcamp = function() {
   return jspb.Message.getField(this, 2) != null;
 };
 
 
 /**
- * optional SanguoxiaoPlayer enemy = 3;
+ * optional SanguoxiaoPlayer blueCamp = 3;
  * @return {?proto.pb.SanguoxiaoPlayer}
  */
-proto.pb.ChallengeResp.prototype.getEnemy = function() {
+proto.pb.ChallengeResp.prototype.getBluecamp = function() {
   return /** @type{?proto.pb.SanguoxiaoPlayer} */ (
     jspb.Message.getWrapperField(this, proto.pb.SanguoxiaoPlayer, 3));
 };
 
 
 /** @param {?proto.pb.SanguoxiaoPlayer|undefined} value */
-proto.pb.ChallengeResp.prototype.setEnemy = function(value) {
+proto.pb.ChallengeResp.prototype.setBluecamp = function(value) {
   jspb.Message.setWrapperField(this, 3, value);
 };
 
@@ -1569,8 +1569,8 @@ proto.pb.ChallengeResp.prototype.setEnemy = function(value) {
 /**
  * Clears the message field making it undefined.
  */
-proto.pb.ChallengeResp.prototype.clearEnemy = function() {
-  this.setEnemy(undefined);
+proto.pb.ChallengeResp.prototype.clearBluecamp = function() {
+  this.setBluecamp(undefined);
 };
 
 
@@ -1578,7 +1578,7 @@ proto.pb.ChallengeResp.prototype.clearEnemy = function() {
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.pb.ChallengeResp.prototype.hasEnemy = function() {
+proto.pb.ChallengeResp.prototype.hasBluecamp = function() {
   return jspb.Message.getField(this, 3) != null;
 };
 
@@ -1616,8 +1616,8 @@ proto.pb.SanguoxiaoSceneResp.toObject = function(includeInstance, msg) {
     timestamp: jspb.Message.getFieldWithDefault(msg, 1, 0),
     inning: jspb.Message.getFieldWithDefault(msg, 2, ""),
     board: (f = msg.getBoard()) && proto.pb.BoardInfo.toObject(includeInstance, f),
-    myself: (f = msg.getMyself()) && proto.pb.SanguoxiaoPlayer.toObject(includeInstance, f),
-    enemy: (f = msg.getEnemy()) && proto.pb.SanguoxiaoPlayer.toObject(includeInstance, f)
+    redcamp: (f = msg.getRedcamp()) && proto.pb.SanguoxiaoPlayer.toObject(includeInstance, f),
+    bluecamp: (f = msg.getBluecamp()) && proto.pb.SanguoxiaoPlayer.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -1670,12 +1670,12 @@ proto.pb.SanguoxiaoSceneResp.deserializeBinaryFromReader = function(msg, reader)
     case 4:
       var value = new proto.pb.SanguoxiaoPlayer;
       reader.readMessage(value,proto.pb.SanguoxiaoPlayer.deserializeBinaryFromReader);
-      msg.setMyself(value);
+      msg.setRedcamp(value);
       break;
     case 5:
       var value = new proto.pb.SanguoxiaoPlayer;
       reader.readMessage(value,proto.pb.SanguoxiaoPlayer.deserializeBinaryFromReader);
-      msg.setEnemy(value);
+      msg.setBluecamp(value);
       break;
     default:
       reader.skipField();
@@ -1728,7 +1728,7 @@ proto.pb.SanguoxiaoSceneResp.serializeBinaryToWriter = function(message, writer)
       proto.pb.BoardInfo.serializeBinaryToWriter
     );
   }
-  f = message.getMyself();
+  f = message.getRedcamp();
   if (f != null) {
     writer.writeMessage(
       4,
@@ -1736,7 +1736,7 @@ proto.pb.SanguoxiaoSceneResp.serializeBinaryToWriter = function(message, writer)
       proto.pb.SanguoxiaoPlayer.serializeBinaryToWriter
     );
   }
-  f = message.getEnemy();
+  f = message.getBluecamp();
   if (f != null) {
     writer.writeMessage(
       5,
@@ -1811,17 +1811,17 @@ proto.pb.SanguoxiaoSceneResp.prototype.hasBoard = function() {
 
 
 /**
- * optional SanguoxiaoPlayer myself = 4;
+ * optional SanguoxiaoPlayer redCamp = 4;
  * @return {?proto.pb.SanguoxiaoPlayer}
  */
-proto.pb.SanguoxiaoSceneResp.prototype.getMyself = function() {
+proto.pb.SanguoxiaoSceneResp.prototype.getRedcamp = function() {
   return /** @type{?proto.pb.SanguoxiaoPlayer} */ (
     jspb.Message.getWrapperField(this, proto.pb.SanguoxiaoPlayer, 4));
 };
 
 
 /** @param {?proto.pb.SanguoxiaoPlayer|undefined} value */
-proto.pb.SanguoxiaoSceneResp.prototype.setMyself = function(value) {
+proto.pb.SanguoxiaoSceneResp.prototype.setRedcamp = function(value) {
   jspb.Message.setWrapperField(this, 4, value);
 };
 
@@ -1829,8 +1829,8 @@ proto.pb.SanguoxiaoSceneResp.prototype.setMyself = function(value) {
 /**
  * Clears the message field making it undefined.
  */
-proto.pb.SanguoxiaoSceneResp.prototype.clearMyself = function() {
-  this.setMyself(undefined);
+proto.pb.SanguoxiaoSceneResp.prototype.clearRedcamp = function() {
+  this.setRedcamp(undefined);
 };
 
 
@@ -1838,23 +1838,23 @@ proto.pb.SanguoxiaoSceneResp.prototype.clearMyself = function() {
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.pb.SanguoxiaoSceneResp.prototype.hasMyself = function() {
+proto.pb.SanguoxiaoSceneResp.prototype.hasRedcamp = function() {
   return jspb.Message.getField(this, 4) != null;
 };
 
 
 /**
- * optional SanguoxiaoPlayer enemy = 5;
+ * optional SanguoxiaoPlayer blueCamp = 5;
  * @return {?proto.pb.SanguoxiaoPlayer}
  */
-proto.pb.SanguoxiaoSceneResp.prototype.getEnemy = function() {
+proto.pb.SanguoxiaoSceneResp.prototype.getBluecamp = function() {
   return /** @type{?proto.pb.SanguoxiaoPlayer} */ (
     jspb.Message.getWrapperField(this, proto.pb.SanguoxiaoPlayer, 5));
 };
 
 
 /** @param {?proto.pb.SanguoxiaoPlayer|undefined} value */
-proto.pb.SanguoxiaoSceneResp.prototype.setEnemy = function(value) {
+proto.pb.SanguoxiaoSceneResp.prototype.setBluecamp = function(value) {
   jspb.Message.setWrapperField(this, 5, value);
 };
 
@@ -1862,8 +1862,8 @@ proto.pb.SanguoxiaoSceneResp.prototype.setEnemy = function(value) {
 /**
  * Clears the message field making it undefined.
  */
-proto.pb.SanguoxiaoSceneResp.prototype.clearEnemy = function() {
-  this.setEnemy(undefined);
+proto.pb.SanguoxiaoSceneResp.prototype.clearBluecamp = function() {
+  this.setBluecamp(undefined);
 };
 
 
@@ -1871,7 +1871,7 @@ proto.pb.SanguoxiaoSceneResp.prototype.clearEnemy = function() {
  * Returns whether this field is set.
  * @return {boolean}
  */
-proto.pb.SanguoxiaoSceneResp.prototype.hasEnemy = function() {
+proto.pb.SanguoxiaoSceneResp.prototype.hasBluecamp = function() {
   return jspb.Message.getField(this, 5) != null;
 };
 
@@ -2881,8 +2881,8 @@ proto.pb.SanguoxiaoTriggerResp.prototype.toObject = function(opt_includeInstance
 proto.pb.SanguoxiaoTriggerResp.toObject = function(includeInstance, msg) {
   var obj = {
     userid: jspb.Message.getFieldWithDefault(msg, 1, 0),
-    myselfhealth: jspb.Message.getFieldWithDefault(msg, 2, 0),
-    enemyhealth: jspb.Message.getFieldWithDefault(msg, 3, 0),
+    redcamphealth: jspb.Message.getFieldWithDefault(msg, 2, 0),
+    bluecamphealth: jspb.Message.getFieldWithDefault(msg, 3, 0),
     perboard: (f = msg.getPerboard()) && proto.pb.BoardInfo.toObject(includeInstance, f),
     nowboard: (f = msg.getNowboard()) && proto.pb.BoardInfo.toObject(includeInstance, f),
     eraseList: jspb.Message.toObjectList(msg.getEraseList(),
@@ -2931,11 +2931,11 @@ proto.pb.SanguoxiaoTriggerResp.deserializeBinaryFromReader = function(msg, reade
       break;
     case 2:
       var value = /** @type {number} */ (reader.readInt64());
-      msg.setMyselfhealth(value);
+      msg.setRedcamphealth(value);
       break;
     case 3:
       var value = /** @type {number} */ (reader.readInt64());
-      msg.setEnemyhealth(value);
+      msg.setBluecamphealth(value);
       break;
     case 4:
       var value = new proto.pb.BoardInfo;
@@ -2993,14 +2993,14 @@ proto.pb.SanguoxiaoTriggerResp.serializeBinaryToWriter = function(message, write
       f
     );
   }
-  f = message.getMyselfhealth();
+  f = message.getRedcamphealth();
   if (f !== 0) {
     writer.writeInt64(
       2,
       f
     );
   }
-  f = message.getEnemyhealth();
+  f = message.getBluecamphealth();
   if (f !== 0) {
     writer.writeInt64(
       3,
@@ -3058,31 +3058,31 @@ proto.pb.SanguoxiaoTriggerResp.prototype.setUserid = function(value) {
 
 
 /**
- * optional int64 myselfHealth = 2;
+ * optional int64 redCampHealth = 2;
  * @return {number}
  */
-proto.pb.SanguoxiaoTriggerResp.prototype.getMyselfhealth = function() {
+proto.pb.SanguoxiaoTriggerResp.prototype.getRedcamphealth = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 2, 0));
 };
 
 
 /** @param {number} value */
-proto.pb.SanguoxiaoTriggerResp.prototype.setMyselfhealth = function(value) {
+proto.pb.SanguoxiaoTriggerResp.prototype.setRedcamphealth = function(value) {
   jspb.Message.setProto3IntField(this, 2, value);
 };
 
 
 /**
- * optional int64 enemyHealth = 3;
+ * optional int64 blueCampHealth = 3;
  * @return {number}
  */
-proto.pb.SanguoxiaoTriggerResp.prototype.getEnemyhealth = function() {
+proto.pb.SanguoxiaoTriggerResp.prototype.getBluecamphealth = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
 };
 
 
 /** @param {number} value */
-proto.pb.SanguoxiaoTriggerResp.prototype.setEnemyhealth = function(value) {
+proto.pb.SanguoxiaoTriggerResp.prototype.setBluecamphealth = function(value) {
   jspb.Message.setProto3IntField(this, 3, value);
 };
 

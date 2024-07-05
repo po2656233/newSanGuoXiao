@@ -40,8 +40,8 @@ type SanguoxiaoGame struct {
 	arrayBoard [][]protoMsg.Piece  // 和board等同,游戏主要操作该棋盘
 	result     *protoMsg.SanguoxiaoResult
 
-	play1    *protoMsg.SanguoxiaoPlayer // 玩家1
-	play2    *protoMsg.SanguoxiaoPlayer // 玩家2
+	redPlay  *protoMsg.SanguoxiaoPlayer // 玩家1
+	bluePlay *protoMsg.SanguoxiaoPlayer // 玩家2
 	playList []int64
 }
 
@@ -67,21 +67,18 @@ func (self *SanguoxiaoGame) Init() {
 
 // Scene 场 景
 func (self *SanguoxiaoGame) Scene(args []interface{}) {
-	uid := args[0].(int64)
+	//level := args[0].(int32)
+	agent := args[1].(gate.Agent)
+	userData := agent.UserData()
+	person := userData.(*mgr.Player)
 	now := time.Now().Unix()
-	myself := self.play1
-	enemy := self.play2
-	if self.play2.Info.UserID == uid {
-		myself = self.play2
-		enemy = self.play1
-	}
-	mgr.GetClientManger().SendTo(uid,
+	mgr.GetClientManger().SendTo(person.UserID,
 		&protoMsg.SanguoxiaoSceneResp{
 			TimeStamp: time.Now().Unix(),
 			Inning:    self.InningInfo.Number,
 			Board:     self.board,
-			Myself:    myself,
-			Enemy:     enemy,
+			RedCamp:   self.redPlay,
+			BlueCamp:  self.bluePlay,
 		})
 	switch self.status {
 	case protoMsg.GameScene_Start:
@@ -96,7 +93,7 @@ func (self *SanguoxiaoGame) Scene(args []interface{}) {
 					TotalTime: self.Config.SanGuoXiao.Duration.PlayTime,
 				},
 			}
-			mgr.GetClientManger().SendTo(uid, msg)
+			mgr.GetClientManger().SendTo(person.UserID, msg)
 		}
 	case protoMsg.GameScene_Opening: // 消除
 		{
@@ -109,7 +106,7 @@ func (self *SanguoxiaoGame) Scene(args []interface{}) {
 					TotalTime: self.Config.SanGuoXiao.Duration.OpenTime,
 				},
 			}
-			mgr.GetClientManger().SendTo(uid, msg)
+			mgr.GetClientManger().SendTo(person.UserID, msg)
 		}
 	case protoMsg.GameScene_Over: // 结算
 		{
@@ -122,7 +119,7 @@ func (self *SanguoxiaoGame) Scene(args []interface{}) {
 					TotalTime: self.Config.SanGuoXiao.Duration.OverTime,
 				},
 			}
-			mgr.GetClientManger().SendTo(uid, msg)
+			mgr.GetClientManger().SendTo(person.UserID, msg)
 		}
 
 	}
@@ -131,12 +128,16 @@ func (self *SanguoxiaoGame) Scene(args []interface{}) {
 
 // Start 开 始
 func (self *SanguoxiaoGame) Start(args []interface{}) {
+	if args == nil {
+		log.Error("[Sanguoxiao][Start]无效参数")
+		return
+	}
 	m := args[0].(*protoMsg.ChallengeResp)
-	if self.play1 != nil || self.play2 != nil { // 已经有人在游戏里了
+	if self.redPlay != nil || self.bluePlay != nil { // 已经有人在游戏里了
 		log.Error("[Sanguoxiao][Start] 匹配失败")
 		mgr.GetClientManger().NotifyOthers([]int64{
-			m.Myself.Info.UserID,
-			m.Enemy.Info.UserID,
+			m.RedCamp.Info.UserID,
+			m.BlueCamp.Info.UserID,
 		}, &protoMsg.ResultPopResp{
 			Flag:  FAILED,
 			Title: StatusText[Title009],
@@ -146,10 +147,10 @@ func (self *SanguoxiaoGame) Start(args []interface{}) {
 		return
 	}
 
-	if 0 == len(m.Myself.ArenaTeam) || 0 == len(m.Enemy.ArenaTeam) {
+	if 0 == len(m.RedCamp.ArenaTeam) || 0 == len(m.BlueCamp.ArenaTeam) {
 		mgr.GetClientManger().NotifyOthers([]int64{
-			m.Myself.Info.UserID,
-			m.Enemy.Info.UserID,
+			m.RedCamp.Info.UserID,
+			m.BlueCamp.Info.UserID,
 		}, &protoMsg.ResultPopResp{
 			Flag:  FAILED,
 			Title: StatusText[Title009],
@@ -162,19 +163,19 @@ func (self *SanguoxiaoGame) Start(args []interface{}) {
 	log.Release("[Sanguoxiao] START 匹配成功:%v", m)
 	self.status = protoMsg.GameScene_Start
 
-	self.play1 = m.Myself
-	self.play2 = m.Enemy
-	self.curUID = self.play1.Info.UserID
-	if self.play1.Info.UserID == self.play2.Info.UserID {
+	self.redPlay = m.RedCamp
+	self.bluePlay = m.BlueCamp
+	self.curUID = self.redPlay.Info.UserID
+	if self.redPlay.Info.UserID == self.bluePlay.Info.UserID {
 		// 不能给自己玩
 		mgr.GetClientManger().SendResultX(m.FirstID, FAILED, StatusText[Game51])
 		log.Error("[Sanguoxiao][Start] uid:%v err:%v", m.FirstID, StatusText[Game51])
 		return
 	}
-	mgr.GetClientManger().SendTo(self.play1.Info.UserID, m)
-	m.FirstID = self.play2.Info.UserID
-	mgr.GetClientManger().SendTo(self.play2.Info.UserID, m)
-	self.playList = append(self.playList, self.play1.Info.UserID, self.play2.Info.UserID)
+	mgr.GetClientManger().SendTo(self.redPlay.Info.UserID, m)
+	m.FirstID = self.bluePlay.Info.UserID
+	mgr.GetClientManger().SendTo(self.bluePlay.Info.UserID, m)
+	self.playList = append(self.playList, self.redPlay.Info.UserID, self.bluePlay.Info.UserID)
 	mgr.GetClientManger().NotifyOthers(self.playList,
 		&protoMsg.SanguoxiaoStatePlayingResp{
 			Times: &protoMsg.TimeInfo{
@@ -241,12 +242,12 @@ func (self *SanguoxiaoGame) Over(args []interface{}) {
 	}
 
 	// 玩家1 胜
-	winId := self.play1.Info.UserID
-	loseId := self.play2.Info.UserID
-	if self.play1.Health < self.play2.Health {
+	winId := self.redPlay.Info.UserID
+	loseId := self.bluePlay.Info.UserID
+	if self.redPlay.Health < self.bluePlay.Health {
 		// 玩家2 胜
-		winId = self.play2.Info.UserID
-		loseId = self.play1.Info.UserID
+		winId = self.bluePlay.Info.UserID
+		loseId = self.redPlay.Info.UserID
 	}
 
 	// 奖励  todo 待商榷
@@ -264,16 +265,16 @@ func (self *SanguoxiaoGame) Over(args []interface{}) {
 	}
 	// 取消选中状态
 	heroIds := make([]int64, 0)
-	for _, info := range self.play1.ArenaTeam {
+	for _, info := range self.redPlay.ArenaTeam {
 		heroIds = append(heroIds, info.ID)
 	}
-	mysql.SqlHandle().ChooseHeros(self.play1.Info.UserID, heroIds, false)
+	mysql.SqlHandle().ChooseHeros(self.redPlay.Info.UserID, heroIds, false)
 	// 取消选中状态
 	heroIds = make([]int64, 0)
-	for _, info := range self.play2.ArenaTeam {
+	for _, info := range self.bluePlay.ArenaTeam {
 		heroIds = append(heroIds, info.ID)
 	}
-	mysql.SqlHandle().ChooseHeros(self.play2.Info.UserID, heroIds, false)
+	mysql.SqlHandle().ChooseHeros(self.bluePlay.Info.UserID, heroIds, false)
 }
 
 // UpdateInfo 更新信息
@@ -299,10 +300,10 @@ func (self *SanguoxiaoGame) OnNext() {
 	}
 
 	self.TimeStamp = time.Now().Unix()
-	if self.play1.Info.UserID == self.curUID {
-		self.curUID = self.play2.Info.UserID
-	} else if self.play2.Info.UserID == self.curUID {
-		self.curUID = self.play1.Info.UserID
+	if self.redPlay.Info.UserID == self.curUID {
+		self.curUID = self.bluePlay.Info.UserID
+	} else if self.bluePlay.Info.UserID == self.curUID {
+		self.curUID = self.redPlay.Info.UserID
 	}
 
 	mgr.GetClientManger().NotifyOthers(self.playList,
@@ -336,7 +337,7 @@ func (self *SanguoxiaoGame) OnOpen() {
 	}
 
 	// 检测双方血量
-	if self.play1.Health <= 0 || self.play2.Health <= 0 {
+	if self.redPlay.Health <= 0 || self.bluePlay.Health <= 0 {
 		self.toState(protoMsg.GameScene_Over, self.OnOver)
 		return
 	}
@@ -417,7 +418,7 @@ func (self *SanguoxiaoGame) initBord(row, col int32) {
 					}
 				}
 			}
-			self.arrayBoard[row][col] = item.Core
+			self.arrayBoard[i][j] = item.Core
 			self.board.Cells = append(self.board.Cells, item)
 		}
 	}
@@ -528,32 +529,32 @@ func (self *SanguoxiaoGame) eraseGrid() bool {
 	/////////////////////////////////////////////////////////////////////
 
 	// 获取玩家伤害或治疗 统计玩家当前生命值
-	myHealth := self.play1.Health
-	enemyHealth := self.play2.Health
-	heros := self.play1.ArenaTeam
-	if self.curUID == self.play2.Info.UserID {
-		myHealth = self.play2.Health
-		enemyHealth = self.play1.Health
-		heros = self.play2.ArenaTeam
+	myHealth := self.redPlay.Health
+	BlueCampHealth := self.bluePlay.Health
+	heros := self.redPlay.ArenaTeam
+	if self.curUID == self.bluePlay.Info.UserID {
+		myHealth = self.bluePlay.Health
+		BlueCampHealth = self.redPlay.Health
+		heros = self.bluePlay.ArenaTeam
 	}
 	allDamage := int64(0)
 	allTherapy := int64(0)
 	msg.Attacks, allDamage, allTherapy = self.getAttacks(msg.Erase, heros)
-	msg.MyselfHealth = myHealth + allTherapy
-	msg.EnemyHealth = enemyHealth - allDamage
-	if msg.EnemyHealth < 0 {
-		msg.EnemyHealth = 0
+	msg.RedCampHealth = myHealth + allTherapy
+	msg.BlueCampHealth = BlueCampHealth - allDamage
+	if msg.BlueCampHealth < 0 {
+		msg.BlueCampHealth = 0
 	}
 
 	msg.NowBoard = self.board
 	mgr.GetClientManger().NotifyOthers(self.playList, msg)
 
 	// 当前各玩家生命值
-	self.play1.Health = msg.MyselfHealth
-	self.play2.Health = msg.EnemyHealth
-	if self.curUID == self.play2.Info.UserID {
-		self.play1.Health = msg.EnemyHealth
-		self.play2.Health = msg.MyselfHealth
+	self.redPlay.Health = msg.RedCampHealth
+	self.bluePlay.Health = msg.BlueCampHealth
+	if self.curUID == self.bluePlay.Info.UserID {
+		self.redPlay.Health = msg.BlueCampHealth
+		self.bluePlay.Health = msg.RedCampHealth
 	}
 	return 0 < len(msg.Erase)
 }

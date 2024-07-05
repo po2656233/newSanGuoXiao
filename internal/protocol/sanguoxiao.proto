@@ -47,8 +47,8 @@ message ChallengeReq {
 }
 message ChallengeResp {
   int64 firstID = 1;              // 首发者ID
-  SanguoxiaoPlayer myself = 2;    // 我方信息
-  SanguoxiaoPlayer enemy = 3;     // 敌方信息
+  SanguoxiaoPlayer redCamp = 2;    // 红方信息
+  SanguoxiaoPlayer blueCamp = 3;     // 蓝方信息
 }
 /////////////////////////////////////////////////////
 //场景
@@ -56,8 +56,8 @@ message SanguoxiaoSceneResp{
   int64 timeStamp = 1;              // 时间戳
   string inning = 2;                // 牌局号
   BoardInfo board = 3;              // 方格盘信息
-  SanguoxiaoPlayer myself = 4;      // 己方
-  SanguoxiaoPlayer enemy = 5;       // 对方
+  SanguoxiaoPlayer redCamp = 4;      // 红方
+  SanguoxiaoPlayer blueCamp = 5;       // 蓝方
 }
 // 状态-玩家操作
 message SanguoxiaoStatePlayingResp {
@@ -87,8 +87,8 @@ message SanguoxiaoSwapResp{
 // 触发消除
 message SanguoxiaoTriggerResp{
   int64 userID = 1;
-  int64 myselfHealth  = 2;  // 消除后自己的血量 即UserID的血量
-  int64 enemyHealth  = 3;   // 敌方血量
+  int64 redCampHealth  = 2;  // 消除后自己的血量 即UserID的血量
+  int64 blueCampHealth  = 3;   // 敌方血量
   BoardInfo perBoard = 4;   // 消除前
   BoardInfo nowBoard = 5;   // 消除后
   repeated Grid erase = 6;  // 被消除的格子
