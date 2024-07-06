@@ -95,16 +95,25 @@ func buildSimpleParser(app *superplace.AppBuilder) cfacade.INetParser {
 		//FuncName: constant.FuncLogin,
 		FuncName: "simpleLogin",
 	})
-	agentActor.AddNodeRoute(constant.MIDGame, &simple.NodeRoute{
-		NodeType: "leaf",
-		ActorID:  "game",
-		FuncName: "enterGame",
-	})
+
 	agentActor.AddNodeRoute(constant.MIDPing, &simple.NodeRoute{
-		NodeType: "gate",
-		ActorID:  "user",
+		NodeType: constant.NodeTypeGate,
+		ActorID:  constant.ActorGate,
 		//FuncName: "ping",
 	})
+
+	agentActor.AddNodeRoute(constant.MIDLeaf, &simple.NodeRoute{
+		NodeType: constant.NodeTypeLeaf,
+		ActorID:  constant.ActorGame,
+		FuncName: "request",
+	})
+
+	agentActor.AddNodeRoute(constant.MIDGame, &simple.NodeRoute{
+		NodeType: constant.NodeTypeGame,
+		ActorID:  constant.ActorGame,
+		FuncName: "enterGame",
+	})
+
 	GetMsgFunc("config/leafconf/message_id.json")
 	return agentActor
 }

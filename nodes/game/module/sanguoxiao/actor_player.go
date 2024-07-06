@@ -51,6 +51,18 @@ func (p *ActorPlayer) sessionClose() {
 func (p *ActorPlayer) enterGame(session *cproto.Session, req *protoMsg.EnterGameReq) {
 	// 派发给各个模块
 	clog.Debugf("game:ID:%v req:%+v", session.GetUid(), req)
+	// 查找游戏
+
+	// 校验进入权限
+
+	// 校验准入条件
+
+	// 安排座椅
+
+	// 进入游戏场景
+
+	// 开始游戏
+
 	//p.Call(session.AgentPath, "Response", &protoMsg.Response{})
 }
 

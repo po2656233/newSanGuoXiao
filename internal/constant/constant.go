@@ -4,8 +4,9 @@ import superConst "github.com/po2656233/superplace/const"
 
 const (
 	MIDGate = 1
-	MIDGame = 2
-	MIDPing = 3
+	MIDLeaf = 2
+	MIDGame = 3
+	MIDPing = 4
 )
 const (
 	NodeTypeGate = "gate"
