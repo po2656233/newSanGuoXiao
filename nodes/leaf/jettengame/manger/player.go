@@ -1,7 +1,8 @@
 package manger
 
 import (
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
+	"strconv"
 	protoMsg "superman/internal/protocol/gofile"
 	. "superman/nodes/leaf/jettengame/base"
 	"superman/nodes/leaf/jettengame/sql/redis"
@@ -34,11 +35,10 @@ type CalculateInfo struct {
 	Order    string // 订单号
 	Remark   string // 备注
 	/////////////////操作记录////////////////////////
-	Gid    int64             // 具体游戏
-	HostID int64             // 房主
-	TypeID protoMsg.GameType // 什么类型的游戏
-	Kid    int32             // 类型ID
-	Level  int32             // 级别
+	Gid    int64 // 具体游戏
+	HostID int64 // 房主
+	Kid    int32 // 类型ID
+	Level  int32 // 级别
 }
 
 // Rule 规则信息
@@ -97,8 +97,11 @@ func (itself *Player) GetToken() (string, bool) {
 		ID:      itself.UserID,
 		Account: itself.Account,
 		PlatId:  itself.PlatformID,
-		StandardClaims: &jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Hour).Unix(),
+		RegisteredClaims: jwt.RegisteredClaims{
+			ID:        strconv.FormatInt(itself.UserID, 10),
+			NotBefore: jwt.NewNumericDate(time.Now()),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
 		},
 	})
 	//cc, err := ParseTokenHs256(token)

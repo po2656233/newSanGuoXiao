@@ -220,7 +220,7 @@ func (sqlSelf *SqlOrm) CheckAllGoods() (goodsInfoList map[int64]*protoMsg.GoodsI
 	for _, m := range goodsList {
 		goodsInfoList[m.ID] = &protoMsg.GoodsInfo{
 			Name:  m.Name,
-			ID:    m.ID,
+			Id:    m.ID,
 			Kind:  m.Kind,
 			Level: m.Level,
 			Price: m.Price,

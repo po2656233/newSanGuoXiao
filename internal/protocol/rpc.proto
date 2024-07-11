@@ -1,31 +1,12 @@
 syntax = "proto3";
 option go_package = "/pb";
 package pb;
-// 节点状态
-enum NodeState {
-  Open = 0;     // 开放状态,所有角色可以进入
-  Maintain = 1; // 维护状态,白名单角色可以进入
-  Closed = 2;   // 关闭状态,所有角色不可进入(同时踢除所有角色)
-}
 //// 注册开发帐号
 //message RegisterDevReq {
 //  string accountName = 1; // 帐号名
 //  string password = 2;    // 密码
 //  string ip = 3;          // ip地址
 //}
-// 登陆请求(建立连接后的第一条消息，验证通过后则进行后续流程)
-message LoginRequest {
-  int32              serverId = 1;   // 当前登陆的服务器id
-  string             token = 2;      // 登陆token(web login api生成的base64字符串)
-  map<int32, string> params = 3;     // 登陆时上传的参数 key: LoginParams
-}
-// 登陆响应
-message LoginResponse {
-  int64              uid = 1;      // 游戏内的用户唯一id
-  int32              pid = 2;      // 平台id
-  string             openId = 3;   // 平台openId(平台的帐号唯一id)
-  map<int32, string> params = 4;   // 登陆后的扩展参数，按需增加
-}
 // 用户信息
 message GetUserIDReq {
   int32  sdkId = 1;    // sdk id
@@ -42,11 +23,11 @@ message Request {
   bytes data = 3;
 }
 message Response {
-  int32 code = 1;
-  string message = 2;
-  bytes data = 3;
-  string sid = 4;
-  string route = 5;
+  string sid = 1;
+  string route = 2;
+  int32 code = 3;
+  string message = 4;
+  bytes data = 5;
 }
 message ErrorResponse {
   int32  code = 1;      // 错误码

@@ -44,7 +44,7 @@ func (p *ActorAccount) RegisterReq(req *pb.RegisterReq) (*pb.RegisterResp, int32
 		return nil, hints.Register02
 	}
 
-	db2.DevAccountRegister(accountName, password, req.Address)
+	//db2.DevAccountRegister(accountName, password, req.Address)
 	app := p.App()
 	target := rpc.GetTargetPath(app, ".db", rpc.CenterType)
 	resp := &pb.RegisterResp{}
@@ -59,15 +59,19 @@ func (p *ActorAccount) LoginReq(req *pb.LoginReq) (*pb.LoginResp, int32) {
 	password := req.Password
 
 	devAccount, _ := db2.DevAccountWithName(accountName)
-	if devAccount == nil || devAccount.Password != password {
+	resp := &pb.LoginResp{}
+	if devAccount == nil {
+		app := p.App()
+		target := rpc.GetTargetPath(app, ".db", rpc.CenterType)
+		if errCode := p.App().ActorSystem().CallWait(rpc.SourcePath, target, "Login", req, resp); errCode != code.OK {
+			return nil, errCode
+		}
+		//db2.DevAccountRegister(accountName, resp.MainInfo.UserInfo.Password,resp.MainInfo.UserInfo.ClientAddr)
+		return resp, code.OK
+	} else if devAccount.Password != password {
 		return nil, hints.Login07
 	}
-
-	return &pb.LoginResp{
-		MainInfo: &pb.MasterInfo{
-			UserInfo: &pb.UserInfo{UserID: devAccount.AccountId},
-		},
-	}, code.OK
+	return resp, code.OK
 }
 
 // GetUserIDReq 获取uid

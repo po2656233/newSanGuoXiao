@@ -11,10 +11,8 @@ var jspb = require('google-protobuf');
 var goog = jspb;
 var global = Function('return this')();
 
-var game_pb = require('./game_pb.js');
-goog.object.extend(proto, game_pb);
-var player_pb = require('./player_pb.js');
-goog.object.extend(proto, player_pb);
+var baseinfo_pb = require('./baseinfo_pb.js');
+goog.object.extend(proto, baseinfo_pb);
 goog.exportSymbol('proto.pb.BrcowcowBetReq', null, global);
 goog.exportSymbol('proto.pb.BrcowcowBetResp', null, global);
 goog.exportSymbol('proto.pb.BrcowcowHostListReq', null, global);
@@ -366,7 +364,7 @@ proto.pb.BrcowcowSceneResp.toObject = function(includeInstance, msg) {
     areabetsList: jspb.Message.getRepeatedField(msg, 4),
     mybetsList: jspb.Message.getRepeatedField(msg, 5),
     inning: jspb.Message.getFieldWithDefault(msg, 6, ""),
-    allplayers: (f = msg.getAllplayers()) && player_pb.PlayerListInfo.toObject(includeInstance, f),
+    allplayers: (f = msg.getAllplayers()) && baseinfo_pb.PlayerList.toObject(includeInstance, f),
     hostid: jspb.Message.getFieldWithDefault(msg, 8, 0)
   };
 
@@ -429,8 +427,8 @@ proto.pb.BrcowcowSceneResp.deserializeBinaryFromReader = function(msg, reader) {
       msg.setInning(value);
       break;
     case 7:
-      var value = new player_pb.PlayerListInfo;
-      reader.readMessage(value,player_pb.PlayerListInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.PlayerList;
+      reader.readMessage(value,baseinfo_pb.PlayerList.deserializeBinaryFromReader);
       msg.setAllplayers(value);
       break;
     case 8:
@@ -513,7 +511,7 @@ proto.pb.BrcowcowSceneResp.serializeBinaryToWriter = function(message, writer) {
     writer.writeMessage(
       7,
       f,
-      player_pb.PlayerListInfo.serializeBinaryToWriter
+      baseinfo_pb.PlayerList.serializeBinaryToWriter
     );
   }
   f = message.getHostid();
@@ -709,16 +707,16 @@ proto.pb.BrcowcowSceneResp.prototype.setInning = function(value) {
 
 
 /**
- * optional PlayerListInfo allPlayers = 7;
- * @return {?proto.pb.PlayerListInfo}
+ * optional PlayerList allPlayers = 7;
+ * @return {?proto.pb.PlayerList}
  */
 proto.pb.BrcowcowSceneResp.prototype.getAllplayers = function() {
-  return /** @type{?proto.pb.PlayerListInfo} */ (
-    jspb.Message.getWrapperField(this, player_pb.PlayerListInfo, 7));
+  return /** @type{?proto.pb.PlayerList} */ (
+    jspb.Message.getWrapperField(this, baseinfo_pb.PlayerList, 7));
 };
 
 
-/** @param {?proto.pb.PlayerListInfo|undefined} value */
+/** @param {?proto.pb.PlayerList|undefined} value */
 proto.pb.BrcowcowSceneResp.prototype.setAllplayers = function(value) {
   jspb.Message.setWrapperField(this, 7, value);
 };
@@ -786,7 +784,7 @@ proto.pb.BrcowcowStateFreeResp.prototype.toObject = function(opt_includeInstance
  */
 proto.pb.BrcowcowStateFreeResp.toObject = function(includeInstance, msg) {
   var obj = {
-    times: (f = msg.getTimes()) && game_pb.TimeInfo.toObject(includeInstance, f)
+    times: (f = msg.getTimes()) && baseinfo_pb.TimeInfo.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -824,8 +822,8 @@ proto.pb.BrcowcowStateFreeResp.deserializeBinaryFromReader = function(msg, reade
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new game_pb.TimeInfo;
-      reader.readMessage(value,game_pb.TimeInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.TimeInfo;
+      reader.readMessage(value,baseinfo_pb.TimeInfo.deserializeBinaryFromReader);
       msg.setTimes(value);
       break;
     default:
@@ -862,7 +860,7 @@ proto.pb.BrcowcowStateFreeResp.serializeBinaryToWriter = function(message, write
     writer.writeMessage(
       1,
       f,
-      game_pb.TimeInfo.serializeBinaryToWriter
+      baseinfo_pb.TimeInfo.serializeBinaryToWriter
     );
   }
 };
@@ -874,7 +872,7 @@ proto.pb.BrcowcowStateFreeResp.serializeBinaryToWriter = function(message, write
  */
 proto.pb.BrcowcowStateFreeResp.prototype.getTimes = function() {
   return /** @type{?proto.pb.TimeInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.TimeInfo, 1));
+    jspb.Message.getWrapperField(this, baseinfo_pb.TimeInfo, 1));
 };
 
 
@@ -931,7 +929,7 @@ proto.pb.BrcowcowStateStartResp.prototype.toObject = function(opt_includeInstanc
  */
 proto.pb.BrcowcowStateStartResp.toObject = function(includeInstance, msg) {
   var obj = {
-    times: (f = msg.getTimes()) && game_pb.TimeInfo.toObject(includeInstance, f),
+    times: (f = msg.getTimes()) && baseinfo_pb.TimeInfo.toObject(includeInstance, f),
     hostid: jspb.Message.getFieldWithDefault(msg, 2, 0),
     inning: jspb.Message.getFieldWithDefault(msg, 3, "")
   };
@@ -971,8 +969,8 @@ proto.pb.BrcowcowStateStartResp.deserializeBinaryFromReader = function(msg, read
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new game_pb.TimeInfo;
-      reader.readMessage(value,game_pb.TimeInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.TimeInfo;
+      reader.readMessage(value,baseinfo_pb.TimeInfo.deserializeBinaryFromReader);
       msg.setTimes(value);
       break;
     case 2:
@@ -1017,7 +1015,7 @@ proto.pb.BrcowcowStateStartResp.serializeBinaryToWriter = function(message, writ
     writer.writeMessage(
       1,
       f,
-      game_pb.TimeInfo.serializeBinaryToWriter
+      baseinfo_pb.TimeInfo.serializeBinaryToWriter
     );
   }
   f = message.getHostid();
@@ -1043,7 +1041,7 @@ proto.pb.BrcowcowStateStartResp.serializeBinaryToWriter = function(message, writ
  */
 proto.pb.BrcowcowStateStartResp.prototype.getTimes = function() {
   return /** @type{?proto.pb.TimeInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.TimeInfo, 1));
+    jspb.Message.getWrapperField(this, baseinfo_pb.TimeInfo, 1));
 };
 
 
@@ -1130,7 +1128,7 @@ proto.pb.BrcowcowStatePlayingResp.prototype.toObject = function(opt_includeInsta
  */
 proto.pb.BrcowcowStatePlayingResp.toObject = function(includeInstance, msg) {
   var obj = {
-    times: (f = msg.getTimes()) && game_pb.TimeInfo.toObject(includeInstance, f)
+    times: (f = msg.getTimes()) && baseinfo_pb.TimeInfo.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -1168,8 +1166,8 @@ proto.pb.BrcowcowStatePlayingResp.deserializeBinaryFromReader = function(msg, re
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new game_pb.TimeInfo;
-      reader.readMessage(value,game_pb.TimeInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.TimeInfo;
+      reader.readMessage(value,baseinfo_pb.TimeInfo.deserializeBinaryFromReader);
       msg.setTimes(value);
       break;
     default:
@@ -1206,7 +1204,7 @@ proto.pb.BrcowcowStatePlayingResp.serializeBinaryToWriter = function(message, wr
     writer.writeMessage(
       1,
       f,
-      game_pb.TimeInfo.serializeBinaryToWriter
+      baseinfo_pb.TimeInfo.serializeBinaryToWriter
     );
   }
 };
@@ -1218,7 +1216,7 @@ proto.pb.BrcowcowStatePlayingResp.serializeBinaryToWriter = function(message, wr
  */
 proto.pb.BrcowcowStatePlayingResp.prototype.getTimes = function() {
   return /** @type{?proto.pb.TimeInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.TimeInfo, 1));
+    jspb.Message.getWrapperField(this, baseinfo_pb.TimeInfo, 1));
 };
 
 
@@ -1275,7 +1273,7 @@ proto.pb.BrcowcowStateOpenResp.prototype.toObject = function(opt_includeInstance
  */
 proto.pb.BrcowcowStateOpenResp.toObject = function(includeInstance, msg) {
   var obj = {
-    times: (f = msg.getTimes()) && game_pb.TimeInfo.toObject(includeInstance, f),
+    times: (f = msg.getTimes()) && baseinfo_pb.TimeInfo.toObject(includeInstance, f),
     openinfo: (f = msg.getOpeninfo()) && proto.pb.BrcowcowOpenResp.toObject(includeInstance, f)
   };
 
@@ -1314,8 +1312,8 @@ proto.pb.BrcowcowStateOpenResp.deserializeBinaryFromReader = function(msg, reade
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new game_pb.TimeInfo;
-      reader.readMessage(value,game_pb.TimeInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.TimeInfo;
+      reader.readMessage(value,baseinfo_pb.TimeInfo.deserializeBinaryFromReader);
       msg.setTimes(value);
       break;
     case 2:
@@ -1357,7 +1355,7 @@ proto.pb.BrcowcowStateOpenResp.serializeBinaryToWriter = function(message, write
     writer.writeMessage(
       1,
       f,
-      game_pb.TimeInfo.serializeBinaryToWriter
+      baseinfo_pb.TimeInfo.serializeBinaryToWriter
     );
   }
   f = message.getOpeninfo();
@@ -1377,7 +1375,7 @@ proto.pb.BrcowcowStateOpenResp.serializeBinaryToWriter = function(message, write
  */
 proto.pb.BrcowcowStateOpenResp.prototype.getTimes = function() {
   return /** @type{?proto.pb.TimeInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.TimeInfo, 1));
+    jspb.Message.getWrapperField(this, baseinfo_pb.TimeInfo, 1));
 };
 
 
@@ -1467,7 +1465,7 @@ proto.pb.BrcowcowStateOverResp.prototype.toObject = function(opt_includeInstance
  */
 proto.pb.BrcowcowStateOverResp.toObject = function(includeInstance, msg) {
   var obj = {
-    times: (f = msg.getTimes()) && game_pb.TimeInfo.toObject(includeInstance, f)
+    times: (f = msg.getTimes()) && baseinfo_pb.TimeInfo.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -1505,8 +1503,8 @@ proto.pb.BrcowcowStateOverResp.deserializeBinaryFromReader = function(msg, reade
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new game_pb.TimeInfo;
-      reader.readMessage(value,game_pb.TimeInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.TimeInfo;
+      reader.readMessage(value,baseinfo_pb.TimeInfo.deserializeBinaryFromReader);
       msg.setTimes(value);
       break;
     default:
@@ -1543,7 +1541,7 @@ proto.pb.BrcowcowStateOverResp.serializeBinaryToWriter = function(message, write
     writer.writeMessage(
       1,
       f,
-      game_pb.TimeInfo.serializeBinaryToWriter
+      baseinfo_pb.TimeInfo.serializeBinaryToWriter
     );
   }
 };
@@ -1555,7 +1553,7 @@ proto.pb.BrcowcowStateOverResp.serializeBinaryToWriter = function(message, write
  */
 proto.pb.BrcowcowStateOverResp.prototype.getTimes = function() {
   return /** @type{?proto.pb.TimeInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.TimeInfo, 1));
+    jspb.Message.getWrapperField(this, baseinfo_pb.TimeInfo, 1));
 };
 
 
@@ -1944,11 +1942,11 @@ proto.pb.BrcowcowOpenResp.prototype.toObject = function(opt_includeInstance) {
 proto.pb.BrcowcowOpenResp.toObject = function(includeInstance, msg) {
   var obj = {
     awardarea: msg.getAwardarea_asB64(),
-    bankercard: (f = msg.getBankercard()) && game_pb.CardInfo.toObject(includeInstance, f),
-    tiancard: (f = msg.getTiancard()) && game_pb.CardInfo.toObject(includeInstance, f),
-    xuancard: (f = msg.getXuancard()) && game_pb.CardInfo.toObject(includeInstance, f),
-    dicard: (f = msg.getDicard()) && game_pb.CardInfo.toObject(includeInstance, f),
-    huangcard: (f = msg.getHuangcard()) && game_pb.CardInfo.toObject(includeInstance, f)
+    bankercard: (f = msg.getBankercard()) && baseinfo_pb.CardInfo.toObject(includeInstance, f),
+    tiancard: (f = msg.getTiancard()) && baseinfo_pb.CardInfo.toObject(includeInstance, f),
+    xuancard: (f = msg.getXuancard()) && baseinfo_pb.CardInfo.toObject(includeInstance, f),
+    dicard: (f = msg.getDicard()) && baseinfo_pb.CardInfo.toObject(includeInstance, f),
+    huangcard: (f = msg.getHuangcard()) && baseinfo_pb.CardInfo.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -1990,28 +1988,28 @@ proto.pb.BrcowcowOpenResp.deserializeBinaryFromReader = function(msg, reader) {
       msg.setAwardarea(value);
       break;
     case 2:
-      var value = new game_pb.CardInfo;
-      reader.readMessage(value,game_pb.CardInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.CardInfo;
+      reader.readMessage(value,baseinfo_pb.CardInfo.deserializeBinaryFromReader);
       msg.setBankercard(value);
       break;
     case 3:
-      var value = new game_pb.CardInfo;
-      reader.readMessage(value,game_pb.CardInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.CardInfo;
+      reader.readMessage(value,baseinfo_pb.CardInfo.deserializeBinaryFromReader);
       msg.setTiancard(value);
       break;
     case 4:
-      var value = new game_pb.CardInfo;
-      reader.readMessage(value,game_pb.CardInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.CardInfo;
+      reader.readMessage(value,baseinfo_pb.CardInfo.deserializeBinaryFromReader);
       msg.setXuancard(value);
       break;
     case 5:
-      var value = new game_pb.CardInfo;
-      reader.readMessage(value,game_pb.CardInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.CardInfo;
+      reader.readMessage(value,baseinfo_pb.CardInfo.deserializeBinaryFromReader);
       msg.setDicard(value);
       break;
     case 6:
-      var value = new game_pb.CardInfo;
-      reader.readMessage(value,game_pb.CardInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.CardInfo;
+      reader.readMessage(value,baseinfo_pb.CardInfo.deserializeBinaryFromReader);
       msg.setHuangcard(value);
       break;
     default:
@@ -2055,7 +2053,7 @@ proto.pb.BrcowcowOpenResp.serializeBinaryToWriter = function(message, writer) {
     writer.writeMessage(
       2,
       f,
-      game_pb.CardInfo.serializeBinaryToWriter
+      baseinfo_pb.CardInfo.serializeBinaryToWriter
     );
   }
   f = message.getTiancard();
@@ -2063,7 +2061,7 @@ proto.pb.BrcowcowOpenResp.serializeBinaryToWriter = function(message, writer) {
     writer.writeMessage(
       3,
       f,
-      game_pb.CardInfo.serializeBinaryToWriter
+      baseinfo_pb.CardInfo.serializeBinaryToWriter
     );
   }
   f = message.getXuancard();
@@ -2071,7 +2069,7 @@ proto.pb.BrcowcowOpenResp.serializeBinaryToWriter = function(message, writer) {
     writer.writeMessage(
       4,
       f,
-      game_pb.CardInfo.serializeBinaryToWriter
+      baseinfo_pb.CardInfo.serializeBinaryToWriter
     );
   }
   f = message.getDicard();
@@ -2079,7 +2077,7 @@ proto.pb.BrcowcowOpenResp.serializeBinaryToWriter = function(message, writer) {
     writer.writeMessage(
       5,
       f,
-      game_pb.CardInfo.serializeBinaryToWriter
+      baseinfo_pb.CardInfo.serializeBinaryToWriter
     );
   }
   f = message.getHuangcard();
@@ -2087,7 +2085,7 @@ proto.pb.BrcowcowOpenResp.serializeBinaryToWriter = function(message, writer) {
     writer.writeMessage(
       6,
       f,
-      game_pb.CardInfo.serializeBinaryToWriter
+      baseinfo_pb.CardInfo.serializeBinaryToWriter
     );
   }
 };
@@ -2138,7 +2136,7 @@ proto.pb.BrcowcowOpenResp.prototype.setAwardarea = function(value) {
  */
 proto.pb.BrcowcowOpenResp.prototype.getBankercard = function() {
   return /** @type{?proto.pb.CardInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.CardInfo, 2));
+    jspb.Message.getWrapperField(this, baseinfo_pb.CardInfo, 2));
 };
 
 
@@ -2171,7 +2169,7 @@ proto.pb.BrcowcowOpenResp.prototype.hasBankercard = function() {
  */
 proto.pb.BrcowcowOpenResp.prototype.getTiancard = function() {
   return /** @type{?proto.pb.CardInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.CardInfo, 3));
+    jspb.Message.getWrapperField(this, baseinfo_pb.CardInfo, 3));
 };
 
 
@@ -2204,7 +2202,7 @@ proto.pb.BrcowcowOpenResp.prototype.hasTiancard = function() {
  */
 proto.pb.BrcowcowOpenResp.prototype.getXuancard = function() {
   return /** @type{?proto.pb.CardInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.CardInfo, 4));
+    jspb.Message.getWrapperField(this, baseinfo_pb.CardInfo, 4));
 };
 
 
@@ -2237,7 +2235,7 @@ proto.pb.BrcowcowOpenResp.prototype.hasXuancard = function() {
  */
 proto.pb.BrcowcowOpenResp.prototype.getDicard = function() {
   return /** @type{?proto.pb.CardInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.CardInfo, 5));
+    jspb.Message.getWrapperField(this, baseinfo_pb.CardInfo, 5));
 };
 
 
@@ -2270,7 +2268,7 @@ proto.pb.BrcowcowOpenResp.prototype.hasDicard = function() {
  */
 proto.pb.BrcowcowOpenResp.prototype.getHuangcard = function() {
   return /** @type{?proto.pb.CardInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.CardInfo, 6));
+    jspb.Message.getWrapperField(this, baseinfo_pb.CardInfo, 6));
 };
 
 
@@ -2890,7 +2888,7 @@ proto.pb.BrcowcowHostListResp.prototype.toObject = function(opt_includeInstance)
  */
 proto.pb.BrcowcowHostListResp.toObject = function(includeInstance, msg) {
   var obj = {
-    curhost: (f = msg.getCurhost()) && player_pb.PlayerInfo.toObject(includeInstance, f),
+    curhost: (f = msg.getCurhost()) && baseinfo_pb.PlayerInfo.toObject(includeInstance, f),
     waitlistList: jspb.Message.getRepeatedField(msg, 2)
   };
 
@@ -2929,8 +2927,8 @@ proto.pb.BrcowcowHostListResp.deserializeBinaryFromReader = function(msg, reader
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new player_pb.PlayerInfo;
-      reader.readMessage(value,player_pb.PlayerInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.PlayerInfo;
+      reader.readMessage(value,baseinfo_pb.PlayerInfo.deserializeBinaryFromReader);
       msg.setCurhost(value);
       break;
     case 2:
@@ -2971,7 +2969,7 @@ proto.pb.BrcowcowHostListResp.serializeBinaryToWriter = function(message, writer
     writer.writeMessage(
       1,
       f,
-      player_pb.PlayerInfo.serializeBinaryToWriter
+      baseinfo_pb.PlayerInfo.serializeBinaryToWriter
     );
   }
   f = message.getWaitlistList();
@@ -2990,7 +2988,7 @@ proto.pb.BrcowcowHostListResp.serializeBinaryToWriter = function(message, writer
  */
 proto.pb.BrcowcowHostListResp.prototype.getCurhost = function() {
   return /** @type{?proto.pb.PlayerInfo} */ (
-    jspb.Message.getWrapperField(this, player_pb.PlayerInfo, 1));
+    jspb.Message.getWrapperField(this, baseinfo_pb.PlayerInfo, 1));
 };
 
 

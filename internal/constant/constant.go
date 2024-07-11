@@ -3,6 +3,19 @@ package constant
 import superConst "github.com/po2656233/superplace/const"
 
 const (
+	Username = "username"
+	Password = "password"
+
+	ProcessId = "pid" //包id 用于控制客户端
+	ServerId  = "sid"
+	RoomId    = "rid"
+	TableId   = "tid"
+	GameId    = "gid"
+	UserId    = "uid"
+	openId    = "openid" //开发者ID
+)
+
+const (
 	MIDGate = 1
 	MIDLeaf = 2
 	MIDGame = 3
@@ -28,6 +41,12 @@ const (
 	CenterDb     = "center_db_id"
 	TcpAddr      = ":10011"
 	SessionClose = "sessionClose"
+)
+
+// sdk平台类型
+const (
+	DevMode  int32 = 1 // 开发模式，注册开发帐号登陆(开发时使用)
+	QuickSDK int32 = 2 // quick sdk
 )
 
 // 源码中重要标识

@@ -1,8 +1,7 @@
 syntax = "proto3";
 option go_package = "/pb";
 package pb;
-import "game.proto";
-import "player.proto";
+import "baseinfo.proto";
 // kindID 2001
 //场景
 message BaccaratSceneResp{
@@ -12,7 +11,7 @@ message BaccaratSceneResp{
   repeated bytes awardAreas = 4;  //开奖记录(路单)
   repeated int64 areaBets = 5;    //各下注区当前总下注额
   repeated int64 myBets = 6;      //个人在各下注区的总下注额
-  PlayerListInfo allPlayers = 7;  //玩家列表
+  PlayerList allPlayers = 7;  //玩家列表
 }
 //状态
 // 服务端推送

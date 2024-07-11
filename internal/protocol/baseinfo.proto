@@ -1,0 +1,358 @@
+syntax = "proto3";
+option go_package = "/pb";
+package pb;
+//该协议文件不提供 req 和 resp 注:如需使用,请在子游戏协议中嵌套相关协议.
+//////////////////////////////enum////////////////////////////////////////////////////
+// 节点状态
+enum NodeState {
+  Open = 0;     // 开放状态,所有角色可以进入
+  Maintain = 1; // 维护状态,白名单角色可以进入
+  Closed = 2;   // 关闭状态,所有角色不可进入(同时踢除所有角色)
+}
+// 公告级别
+enum NTFLevel{
+  //系统公告
+  GeneralNTF = 0;//普通公告
+  UrgencyNTF = 1;//紧急公告
+  NTMaintainNTF = 2;//维护公告
+  ServeStopNTF = 3;//停服公告
+  PraiseNTF = 4;    //表扬公告
+  //个人公告
+  STrumpetNTF = 5;  // 小喇叭
+  MTrumpetNTF = 6;  // 银喇叭
+  BTrumpetNTF = 7;  // 金喇叭
+}
+// 玩家状态
+enum PlayerState {
+  PlayerLookOn = 0;         //旁观(可作为刚入场时的初始状态)
+  PlayerSitDown = 1;        //坐下(此状态下，才能参与游戏)
+  PlayerAgree = 2;          //同意(可作为准备状态)
+  PlayerPlaying = 3;        //游戏中
+  PlayerPickUp = 4;         //托管
+  PlayerCall = 5;           //叫分
+  PlayerFollow = 6;         //跟牌
+  PlayerRaise = 7;          //加注
+  PlayerLook = 8;           //看牌
+  PlayerCompare = 9;        //比牌
+  PlayerCompareLose = 10;   //比牌失败
+  PlayerOutCard = 11;       //出牌|摊牌
+  PlayerPass = 12;          //过牌|要不起
+  PlayerChi = 13;           //吃
+  PlayerPong = 14;          //碰
+  PlayerMingGang = 15;      //明杠
+  PlayerAnGang = 16;        //暗杠
+  PlayerTing = 17;          //听
+  PlayerHu = 18;            //胡
+  PlayerZiMo = 19;          //自摸
+  PlayerTrustee = 97;       //托管
+  PlayerGiveUp = 98;        //弃牌
+  PlayerStandUp = 99;       //站起(可作为结束状态)
+}
+////游戏类型
+//enum GameType {
+//  General = 0;        //常规
+//  Fight = 1;          //对战类(两个或两个以上玩家同桌博弈)
+//  MultiPerson = 2;    //百人类型
+//  TableCard = 3;      //房卡类型
+//  Guess = 4;          //竞猜类型
+//  GamesCity = 5;      //电玩城类型
+//  DualMeet = 6;       //电竞类型
+//  Sport = 7;          //体育类型
+//  Smart = 8;          //益智休闲
+//  RPG = 9;            //RPG类型
+//}
+//游戏状态
+enum GameState {
+  InitTB = 0;     //初始化
+  OpenTB = 1;     //开启
+  RepairTB = 2;   //维护
+  ClearTB = 3;    //清场(当前局结束后,清空所有场景信息)
+  StopTB = 4;     //停运(再次启动时，以当前局的场景信息继续运作)
+  CloseTB = 5;    //关闭
+}
+//游戏场景
+enum GameScene {
+  Free = 0;           //空闲
+  Start = 1;          //开始
+  Call = 2;           //叫分
+  Decide = 3;         //定庄
+  Playing = 4;        //游戏中
+  Opening = 5;        //开奖
+  Over = 6;           //结算
+  Closing = 7;        //关闭
+  SitDirect = 8;      //决定方位
+  RollDice = 9;       //掷骰子
+  WaitOperate = 10;   //等待操作
+  ChangeThree = 11;   //换三张
+  DingQue = 12;       //定缺门
+  CheckTing = 13;     //查听
+  CheckHuaZHu = 14;   //查花猪
+}
+// 方位
+enum Direct {
+  Centre = 0;
+  EAST = 1;
+  South = 2;
+  West = 3;
+  North = 4;
+  EASTSouth = 5;
+  WestSouth = 6;
+  EASTNorth = 7;
+  WestNorth = 8;
+}
+// 麻将操作
+enum MJOperate {
+  NULL = 0;       //用于校验
+  Pass = 1;       // 过牌
+  Chi = 2;        // 吃
+  Pong = 3;       // 碰
+  Gang = 4;       // 杠 自己手上三个,杠别家一个。和MingGang效果一样,显示不同
+  MingGang = 5;   // 明杠(同杠)或碰后,抓牌起杠
+  AnGang = 6;     // 暗杠
+  BuHua = 7;      // 补花
+  Ting = 8;       // 听
+  Hu = 9;         // 胡牌
+  ZiMo = 10;      // 自摸
+}
+//跑胡子
+enum PHZOperate {
+  PhzNull = 0;       //用于校验
+  PhzTi = 1;         // 提
+  PhzWei = 2;        // 偎
+  PhzHe = 3;         // 和
+  PhzPao = 4;        // 跑
+  PhzPong = 5;       // 碰
+  PhzChi = 6;        // 吃
+}
+/////////////基础信息/////////////////[重要的INFO]///////////////////////////////////////////////////////
+//用户个人信息
+message UserInfo{
+  int64 userID = 1;      //ID
+  string name = 2;        //用户
+  string account = 3;     //帐号
+  string password = 4;    //密码
+  int32 faceID = 5;      //头像
+  int32 gender = 6;      //性别
+  int32 age = 7;         //年龄
+  int32 vIP = 8;         //VIP级别
+  int32 level = 9;       //级别
+  int64  yuanBao = 10;      //元宝
+  int64  coin = 11;      //铜钱
+  int64  money = 12;      //金钱(余额)
+  string passPortID = 13;   //证件号
+  string realName = 14;     //真实名字
+  string phoneNum = 15;     //手机
+  string email = 16;        //邮箱
+  string address = 17;      //住址
+  string iDentity = 18;     //识别码(平台生成)
+  int64 agentID = 19;        //代理标识(上级代理人)
+  string referralCode = 20;   //推荐标识(推荐码,由邀请码生成)
+  string clientAddr = 21;     //连接地址(当前实际IP)
+  string serverAddr = 22;     //(跳转至该地址 由登录服务返回的真实服务器地址)
+  string machineCode = 23;    //机器序列
+}
+//玩家信息
+message PlayerInfo {
+  int64 userID = 1;       // ID
+  string account = 2;     // 账号
+  string name = 3;        // 名称
+  int32 faceID = 4;       // 头像
+  int32 age = 5;          // 年龄
+  int32 sex = 6;          // 性别
+  int64 yuanBao = 7;      // 元宝 *100
+  int64 coin = 8;         // 铜钱
+  int32 level = 9;        // 游戏级别
+  int32 ranking = 10;      // 排名
+  PlayerState state = 11; // 状态
+  int64 gold = 12; //金币 *100
+  int64 money = 13;//钱
+  string bindInfo = 14; // 绑定信息
+  int32 gameState = 15; //游戏级别
+  int64 platformID = 16; // 平台ID 0:无效
+  int64 roomNum = 17; // 房间号 0:无效
+  int64 gameID = 18; // 所在游戏ID 0:无效
+  int32 tableID = 19; // 所在桌号ID 0:不提供
+  int32 chairID = 20; // 所在椅子ID 0:不提供
+}
+// 武将信息
+message HeroInfo {
+  int64 id = 1;
+  int32 headId = 2;             // 头像ID
+  string name = 3;              // 武将名称
+  int32 sex = 4;                // 武将性别
+  int32 rarity = 5;             // 稀有度
+  int32 faction = 6;            // 所属阵营==类型
+  int64 healthPoint = 7;        // 当前生命值
+  int64 healthPointFull = 8;    // 满血值
+  int64 strength = 9;           // 力量
+  int64 agility = 10;           // 敏捷
+  int64 intelligence = 11;      // 智力
+  int64 attackPoint = 12;       // 攻击力
+  int64 armorPoint = 13;        // 防御力
+  int64 spellPower = 14;        // 法强
+  repeated int64 skills = 15;   // 所包含的技能
+}
+// 武器信息
+message WeaponInfo{
+  int64 id = 1;    //标识
+  string name = 2;  //名称
+  int32 type = 3;   //种类
+  int32 level = 4;  //级别
+  int64 damage = 5; //伤害值
+  int64 prob = 6;   //掉落几率
+  int32 count = 7;  //总数 -1:表示数量无限制
+}
+// 商品信息
+message GoodsInfo{
+  int64 id = 1;    //标识
+  string name = 2;  //名称
+  int32 kind = 3;   //种类
+  int32 level = 4;  //级别
+  int64 price = 5;  //价格
+  int64 store = 6;  //库存
+  int64 sold = 7;   //已售 (玩家单次购得的数量)
+  int32 amount = 8; //总数 (玩家已购得的总数量)
+}
+// 背包信息(单个)
+message KnapsackInfo{
+  int64 id = 1;    //标识
+  int64 uid = 2;   //玩家ID
+  string name = 3;  //背包名称
+  repeated WeaponInfo weaponryList = 4; // 武器列表
+  repeated GoodsInfo goodsList = 5;     // 商品列表
+  repeated HeroInfo heroList = 6;       // 我的武将列表
+}
+//邮箱信息
+message EmailInfo {
+  int64 emailID = 1; //邮箱ID
+  string acceptName = 2; //接收者
+  string sender = 3;//发送者
+  string cc = 4;//抄送给
+  string topic = 5;//主题
+  string content = 6;//内容 300字(最多)
+  bool  isRead = 7;
+  GoodsList awardList = 8;//奖励商品列表
+  int64 timeStamp = 9; //时间戳
+}
+//房间信息
+message RoomInfo{
+  int64  id = 1;          // 房间ID
+  int64  hostId = 2;      // 房主ID
+  int32  level = 3;       // 房间级别
+  string name = 4;        // 房间名称
+  string roomKey = 5;     // 房间密钥
+  int64  enterScore = 6;  // 进场分
+  int32  onlineCount = 7; // 在线人数
+  int32  robotCount = 8;  // 机器人数量
+  int32  maxCount = 9;    // 最大人数 -1:表示无限制[一级房5人 二级房10人 三级房100人 4级房1000人 5级房10000人]
+}
+//桌子信息
+message TableInfo{
+  int64    id = 1;
+  int32    num = 2;         // 桌台编号(在房间内的编号)
+  int64    rid = 3;         // 房间ID
+  int64    gid = 4;         // 绑定的游戏ID
+  int64    openTime = 5;    // 开启时间
+  int64    taxation = 6;    // 固定税收
+  int32    commission = 7;  // 每局税收
+  int32    amount = 8;      // 总共场数
+  int64    playScore = 9;   // 初始积分(携带的积分)
+  int32    sitterCount = 10;     // 客人数量(即:当前玩家数量)
+}
+//////////////////////////////////[游戏信息]/////////////////////////////////////////
+//时间信息
+message TimeInfo {
+  int64 timeStamp = 1; //时间戳（起始时间戳）
+  int32 waitTime = 2;  //仍需等待时长
+  int32 outTime = 3;   //服务器已过时长
+  int32 totalTime = 4; //总时长
+}
+//牌局信息
+message InningInfo{
+  int64 gameID = 1; //游戏ID
+  string gameName = 2;  // 游戏名称
+  string number = 3;    // 牌局编号
+  int64 winnerID = 4;   // 赢家
+  int64 loserID = 5;    // 输家
+  int64 payoff = 6;     // 结算
+  int64 timeStamp = 7;  // 时间戳
+  string result = 8;    // 牌局结果奖励
+}
+//牌信息
+message CardInfo {
+  bytes cards = 1;        //牌
+  int32 cardType = 2;     //牌型
+  int32 cardValue = 3;    //牌值
+}
+//区域信息
+message AreaInfo {
+  int32 id = 1;           //区域ID
+  int64 myGold = 2;       //my
+  int64 totalGold = 3;    //总
+  int64 awardGold = 4;  //输赢情况
+}
+//游戏信息
+message GameInfo{
+  int64 id = 1;           // 游戏ID
+  int32 kindID = 2;       // 游戏种类(类型)
+  string  name = 3;       // 游戏名称
+  int32 level = 4;        // 游戏类别 0:普通 1:中级 2:高级 3:积分排位 4:淘汰制排位
+  int64 lessScore = 5;    // 底分
+  GameScene scene = 6;    // 游戏场景
+  GameState state = 7;    // 游戏状态
+  int32 maxCount = 8;     // 最大人数
+}
+////////////////////主页信息(起始信息,优先获取)///////////////////////////////////////
+//主页信息
+message MasterInfo{
+  UserInfo userInfo = 1;          //用户信息
+  ClassList classes = 2;          //分类列表
+  TaskList tasks = 3;             //任务列表
+}
+/////////////////item/////////////////////////////////
+//任务项
+message TaskItem{
+  int32 id = 1;
+  int32 twice = 2;    // 实现次数
+  string hints = 3;   // 提示语 “恭喜 祝贺”之类
+}
+//分类项
+message ClassItem{
+  int64 id = 1;       // 标识[必要项]
+  string name = 2;    // 分类名称
+  string enName = 3;  // 英文
+}
+/////////////list//////////////////////////////////
+//任务列表
+message TaskList{
+  repeated TaskItem task = 1;
+}
+//分类列表
+message ClassList{
+  repeated ClassItem classify = 1;
+}
+/////////////////[常用列表]/////////////////////////////
+//玩家列表
+message PlayerList{
+  repeated PlayerInfo items = 1;
+}
+//商品列表
+message GoodsList{
+  repeated GoodsInfo items = 1;//奖励商品列表
+}
+//房间列表
+message RoomList{
+  repeated RoomInfo items = 1;
+}
+//桌子列表
+message TableList{
+  repeated TableInfo items = 1;
+}
+//游戏列表
+message GameList{
+  repeated GameInfo items = 1;
+}
+// 牌局记录
+message InningList{
+  repeated InningInfo items = 1;
+}

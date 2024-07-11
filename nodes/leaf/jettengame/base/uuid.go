@@ -8,8 +8,7 @@ package base
 # @Software: GoLand
 */
 import (
-	"fmt"
-	"github.com/satori/go.uuid"
+	"github.com/google/uuid"
 	"sync/atomic"
 	"time"
 )
@@ -66,14 +65,8 @@ func (u UUID) String() string {
 //}
 
 func GetGoogleUUID() string {
-	uid := uuid.NewV4()
+	uid := uuid.New()
 	println(`生成的UUID v4：`, uid.String())
-	u2, err := uuid.FromString("f5394eef-e576-4709-9e4b-a7c231bd34a4")
-	if err != nil {
-		fmt.Printf("Something gone wrong: %s", err)
-
-	}
-	fmt.Printf("Successfully parsed: %s", u2)
 	return uid.String()
 	//
 	//// 创建可以进行错误处理的 UUID v4

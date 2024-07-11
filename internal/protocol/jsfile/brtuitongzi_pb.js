@@ -11,10 +11,8 @@ var jspb = require('google-protobuf');
 var goog = jspb;
 var global = Function('return this')();
 
-var game_pb = require('./game_pb.js');
-goog.object.extend(proto, game_pb);
-var player_pb = require('./player_pb.js');
-goog.object.extend(proto, player_pb);
+var baseinfo_pb = require('./baseinfo_pb.js');
+goog.object.extend(proto, baseinfo_pb);
 goog.exportSymbol('proto.pb.BrTuitongziBetReq', null, global);
 goog.exportSymbol('proto.pb.BrTuitongziBetResp', null, global);
 goog.exportSymbol('proto.pb.BrTuitongziCheckoutResp', null, global);
@@ -344,7 +342,7 @@ proto.pb.BrTuitongziSceneResp.toObject = function(includeInstance, msg) {
     awardareasList: msg.getAwardareasList_asB64(),
     areabetsList: jspb.Message.getRepeatedField(msg, 5),
     mybetsList: jspb.Message.getRepeatedField(msg, 6),
-    allplayers: (f = msg.getAllplayers()) && player_pb.PlayerListInfo.toObject(includeInstance, f),
+    allplayers: (f = msg.getAllplayers()) && baseinfo_pb.PlayerList.toObject(includeInstance, f),
     remaincount: jspb.Message.getFieldWithDefault(msg, 8, 0),
     startarea: jspb.Message.getFieldWithDefault(msg, 9, 0)
   };
@@ -408,8 +406,8 @@ proto.pb.BrTuitongziSceneResp.deserializeBinaryFromReader = function(msg, reader
       msg.setMybetsList(value);
       break;
     case 7:
-      var value = new player_pb.PlayerListInfo;
-      reader.readMessage(value,player_pb.PlayerListInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.PlayerList;
+      reader.readMessage(value,baseinfo_pb.PlayerList.deserializeBinaryFromReader);
       msg.setAllplayers(value);
       break;
     case 8:
@@ -496,7 +494,7 @@ proto.pb.BrTuitongziSceneResp.serializeBinaryToWriter = function(message, writer
     writer.writeMessage(
       7,
       f,
-      player_pb.PlayerListInfo.serializeBinaryToWriter
+      baseinfo_pb.PlayerList.serializeBinaryToWriter
     );
   }
   f = message.getRemaincount();
@@ -699,16 +697,16 @@ proto.pb.BrTuitongziSceneResp.prototype.clearMybetsList = function() {
 
 
 /**
- * optional PlayerListInfo allPlayers = 7;
- * @return {?proto.pb.PlayerListInfo}
+ * optional PlayerList allPlayers = 7;
+ * @return {?proto.pb.PlayerList}
  */
 proto.pb.BrTuitongziSceneResp.prototype.getAllplayers = function() {
-  return /** @type{?proto.pb.PlayerListInfo} */ (
-    jspb.Message.getWrapperField(this, player_pb.PlayerListInfo, 7));
+  return /** @type{?proto.pb.PlayerList} */ (
+    jspb.Message.getWrapperField(this, baseinfo_pb.PlayerList, 7));
 };
 
 
-/** @param {?proto.pb.PlayerListInfo|undefined} value */
+/** @param {?proto.pb.PlayerList|undefined} value */
 proto.pb.BrTuitongziSceneResp.prototype.setAllplayers = function(value) {
   jspb.Message.setWrapperField(this, 7, value);
 };
@@ -791,7 +789,7 @@ proto.pb.BrTuitongziStateStartResp.prototype.toObject = function(opt_includeInst
  */
 proto.pb.BrTuitongziStateStartResp.toObject = function(includeInstance, msg) {
   var obj = {
-    times: (f = msg.getTimes()) && game_pb.TimeInfo.toObject(includeInstance, f),
+    times: (f = msg.getTimes()) && baseinfo_pb.TimeInfo.toObject(includeInstance, f),
     startarea: jspb.Message.getFieldWithDefault(msg, 2, 0),
     dice: msg.getDice_asB64(),
     inning: jspb.Message.getFieldWithDefault(msg, 4, "")
@@ -832,8 +830,8 @@ proto.pb.BrTuitongziStateStartResp.deserializeBinaryFromReader = function(msg, r
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new game_pb.TimeInfo;
-      reader.readMessage(value,game_pb.TimeInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.TimeInfo;
+      reader.readMessage(value,baseinfo_pb.TimeInfo.deserializeBinaryFromReader);
       msg.setTimes(value);
       break;
     case 2:
@@ -882,7 +880,7 @@ proto.pb.BrTuitongziStateStartResp.serializeBinaryToWriter = function(message, w
     writer.writeMessage(
       1,
       f,
-      game_pb.TimeInfo.serializeBinaryToWriter
+      baseinfo_pb.TimeInfo.serializeBinaryToWriter
     );
   }
   f = message.getStartarea();
@@ -915,7 +913,7 @@ proto.pb.BrTuitongziStateStartResp.serializeBinaryToWriter = function(message, w
  */
 proto.pb.BrTuitongziStateStartResp.prototype.getTimes = function() {
   return /** @type{?proto.pb.TimeInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.TimeInfo, 1));
+    jspb.Message.getWrapperField(this, baseinfo_pb.TimeInfo, 1));
 };
 
 
@@ -1041,7 +1039,7 @@ proto.pb.BrTuitongziStatePlayingResp.prototype.toObject = function(opt_includeIn
  */
 proto.pb.BrTuitongziStatePlayingResp.toObject = function(includeInstance, msg) {
   var obj = {
-    times: (f = msg.getTimes()) && game_pb.TimeInfo.toObject(includeInstance, f)
+    times: (f = msg.getTimes()) && baseinfo_pb.TimeInfo.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -1079,8 +1077,8 @@ proto.pb.BrTuitongziStatePlayingResp.deserializeBinaryFromReader = function(msg,
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new game_pb.TimeInfo;
-      reader.readMessage(value,game_pb.TimeInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.TimeInfo;
+      reader.readMessage(value,baseinfo_pb.TimeInfo.deserializeBinaryFromReader);
       msg.setTimes(value);
       break;
     default:
@@ -1117,7 +1115,7 @@ proto.pb.BrTuitongziStatePlayingResp.serializeBinaryToWriter = function(message,
     writer.writeMessage(
       1,
       f,
-      game_pb.TimeInfo.serializeBinaryToWriter
+      baseinfo_pb.TimeInfo.serializeBinaryToWriter
     );
   }
 };
@@ -1129,7 +1127,7 @@ proto.pb.BrTuitongziStatePlayingResp.serializeBinaryToWriter = function(message,
  */
 proto.pb.BrTuitongziStatePlayingResp.prototype.getTimes = function() {
   return /** @type{?proto.pb.TimeInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.TimeInfo, 1));
+    jspb.Message.getWrapperField(this, baseinfo_pb.TimeInfo, 1));
 };
 
 
@@ -1186,7 +1184,7 @@ proto.pb.BrTuitongziStateOpenResp.prototype.toObject = function(opt_includeInsta
  */
 proto.pb.BrTuitongziStateOpenResp.toObject = function(includeInstance, msg) {
   var obj = {
-    times: (f = msg.getTimes()) && game_pb.TimeInfo.toObject(includeInstance, f),
+    times: (f = msg.getTimes()) && baseinfo_pb.TimeInfo.toObject(includeInstance, f),
     openinfo: (f = msg.getOpeninfo()) && proto.pb.BrTuitongziOpenResp.toObject(includeInstance, f)
   };
 
@@ -1225,8 +1223,8 @@ proto.pb.BrTuitongziStateOpenResp.deserializeBinaryFromReader = function(msg, re
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new game_pb.TimeInfo;
-      reader.readMessage(value,game_pb.TimeInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.TimeInfo;
+      reader.readMessage(value,baseinfo_pb.TimeInfo.deserializeBinaryFromReader);
       msg.setTimes(value);
       break;
     case 2:
@@ -1268,7 +1266,7 @@ proto.pb.BrTuitongziStateOpenResp.serializeBinaryToWriter = function(message, wr
     writer.writeMessage(
       1,
       f,
-      game_pb.TimeInfo.serializeBinaryToWriter
+      baseinfo_pb.TimeInfo.serializeBinaryToWriter
     );
   }
   f = message.getOpeninfo();
@@ -1288,7 +1286,7 @@ proto.pb.BrTuitongziStateOpenResp.serializeBinaryToWriter = function(message, wr
  */
 proto.pb.BrTuitongziStateOpenResp.prototype.getTimes = function() {
   return /** @type{?proto.pb.TimeInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.TimeInfo, 1));
+    jspb.Message.getWrapperField(this, baseinfo_pb.TimeInfo, 1));
 };
 
 
@@ -1378,7 +1376,7 @@ proto.pb.BrTuitongziStateOverResp.prototype.toObject = function(opt_includeInsta
  */
 proto.pb.BrTuitongziStateOverResp.toObject = function(includeInstance, msg) {
   var obj = {
-    times: (f = msg.getTimes()) && game_pb.TimeInfo.toObject(includeInstance, f)
+    times: (f = msg.getTimes()) && baseinfo_pb.TimeInfo.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -1416,8 +1414,8 @@ proto.pb.BrTuitongziStateOverResp.deserializeBinaryFromReader = function(msg, re
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new game_pb.TimeInfo;
-      reader.readMessage(value,game_pb.TimeInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.TimeInfo;
+      reader.readMessage(value,baseinfo_pb.TimeInfo.deserializeBinaryFromReader);
       msg.setTimes(value);
       break;
     default:
@@ -1454,7 +1452,7 @@ proto.pb.BrTuitongziStateOverResp.serializeBinaryToWriter = function(message, wr
     writer.writeMessage(
       1,
       f,
-      game_pb.TimeInfo.serializeBinaryToWriter
+      baseinfo_pb.TimeInfo.serializeBinaryToWriter
     );
   }
 };
@@ -1466,7 +1464,7 @@ proto.pb.BrTuitongziStateOverResp.serializeBinaryToWriter = function(message, wr
  */
 proto.pb.BrTuitongziStateOverResp.prototype.getTimes = function() {
   return /** @type{?proto.pb.TimeInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.TimeInfo, 1));
+    jspb.Message.getWrapperField(this, baseinfo_pb.TimeInfo, 1));
 };
 
 
@@ -1855,10 +1853,10 @@ proto.pb.BrTuitongziOpenResp.prototype.toObject = function(opt_includeInstance) 
 proto.pb.BrTuitongziOpenResp.toObject = function(includeInstance, msg) {
   var obj = {
     awardarea: msg.getAwardarea_asB64(),
-    bankercard: (f = msg.getBankercard()) && game_pb.CardInfo.toObject(includeInstance, f),
-    shuncard: (f = msg.getShuncard()) && game_pb.CardInfo.toObject(includeInstance, f),
-    tiancard: (f = msg.getTiancard()) && game_pb.CardInfo.toObject(includeInstance, f),
-    dicard: (f = msg.getDicard()) && game_pb.CardInfo.toObject(includeInstance, f)
+    bankercard: (f = msg.getBankercard()) && baseinfo_pb.CardInfo.toObject(includeInstance, f),
+    shuncard: (f = msg.getShuncard()) && baseinfo_pb.CardInfo.toObject(includeInstance, f),
+    tiancard: (f = msg.getTiancard()) && baseinfo_pb.CardInfo.toObject(includeInstance, f),
+    dicard: (f = msg.getDicard()) && baseinfo_pb.CardInfo.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -1900,23 +1898,23 @@ proto.pb.BrTuitongziOpenResp.deserializeBinaryFromReader = function(msg, reader)
       msg.setAwardarea(value);
       break;
     case 2:
-      var value = new game_pb.CardInfo;
-      reader.readMessage(value,game_pb.CardInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.CardInfo;
+      reader.readMessage(value,baseinfo_pb.CardInfo.deserializeBinaryFromReader);
       msg.setBankercard(value);
       break;
     case 3:
-      var value = new game_pb.CardInfo;
-      reader.readMessage(value,game_pb.CardInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.CardInfo;
+      reader.readMessage(value,baseinfo_pb.CardInfo.deserializeBinaryFromReader);
       msg.setShuncard(value);
       break;
     case 4:
-      var value = new game_pb.CardInfo;
-      reader.readMessage(value,game_pb.CardInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.CardInfo;
+      reader.readMessage(value,baseinfo_pb.CardInfo.deserializeBinaryFromReader);
       msg.setTiancard(value);
       break;
     case 5:
-      var value = new game_pb.CardInfo;
-      reader.readMessage(value,game_pb.CardInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.CardInfo;
+      reader.readMessage(value,baseinfo_pb.CardInfo.deserializeBinaryFromReader);
       msg.setDicard(value);
       break;
     default:
@@ -1960,7 +1958,7 @@ proto.pb.BrTuitongziOpenResp.serializeBinaryToWriter = function(message, writer)
     writer.writeMessage(
       2,
       f,
-      game_pb.CardInfo.serializeBinaryToWriter
+      baseinfo_pb.CardInfo.serializeBinaryToWriter
     );
   }
   f = message.getShuncard();
@@ -1968,7 +1966,7 @@ proto.pb.BrTuitongziOpenResp.serializeBinaryToWriter = function(message, writer)
     writer.writeMessage(
       3,
       f,
-      game_pb.CardInfo.serializeBinaryToWriter
+      baseinfo_pb.CardInfo.serializeBinaryToWriter
     );
   }
   f = message.getTiancard();
@@ -1976,7 +1974,7 @@ proto.pb.BrTuitongziOpenResp.serializeBinaryToWriter = function(message, writer)
     writer.writeMessage(
       4,
       f,
-      game_pb.CardInfo.serializeBinaryToWriter
+      baseinfo_pb.CardInfo.serializeBinaryToWriter
     );
   }
   f = message.getDicard();
@@ -1984,7 +1982,7 @@ proto.pb.BrTuitongziOpenResp.serializeBinaryToWriter = function(message, writer)
     writer.writeMessage(
       5,
       f,
-      game_pb.CardInfo.serializeBinaryToWriter
+      baseinfo_pb.CardInfo.serializeBinaryToWriter
     );
   }
 };
@@ -2035,7 +2033,7 @@ proto.pb.BrTuitongziOpenResp.prototype.setAwardarea = function(value) {
  */
 proto.pb.BrTuitongziOpenResp.prototype.getBankercard = function() {
   return /** @type{?proto.pb.CardInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.CardInfo, 2));
+    jspb.Message.getWrapperField(this, baseinfo_pb.CardInfo, 2));
 };
 
 
@@ -2068,7 +2066,7 @@ proto.pb.BrTuitongziOpenResp.prototype.hasBankercard = function() {
  */
 proto.pb.BrTuitongziOpenResp.prototype.getShuncard = function() {
   return /** @type{?proto.pb.CardInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.CardInfo, 3));
+    jspb.Message.getWrapperField(this, baseinfo_pb.CardInfo, 3));
 };
 
 
@@ -2101,7 +2099,7 @@ proto.pb.BrTuitongziOpenResp.prototype.hasShuncard = function() {
  */
 proto.pb.BrTuitongziOpenResp.prototype.getTiancard = function() {
   return /** @type{?proto.pb.CardInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.CardInfo, 4));
+    jspb.Message.getWrapperField(this, baseinfo_pb.CardInfo, 4));
 };
 
 
@@ -2134,7 +2132,7 @@ proto.pb.BrTuitongziOpenResp.prototype.hasTiancard = function() {
  */
 proto.pb.BrTuitongziOpenResp.prototype.getDicard = function() {
   return /** @type{?proto.pb.CardInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.CardInfo, 5));
+    jspb.Message.getWrapperField(this, baseinfo_pb.CardInfo, 5));
 };
 
 

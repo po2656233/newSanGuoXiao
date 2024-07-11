@@ -6,9 +6,9 @@ import (
 	clog "github.com/po2656233/superplace/logger"
 	cproto "github.com/po2656233/superplace/net/proto"
 	"superman/internal/conf"
+	"superman/internal/constant"
 	"superman/internal/guid"
 	"superman/internal/hints"
-	"superman/internal/session_key"
 )
 
 // PlayerTable 角色基础表
@@ -46,8 +46,8 @@ func CreatePlayer(session *cproto.Session, name string, serverId int32, playerIn
 	}
 
 	playerId := guid.Next() // new player id
-	pid := session.GetInt32(sessionKey.PID)
-	openId := session.GetString(sessionKey.OpenID)
+	pid := session.GetInt32(constant.PID)
+	openId := session.GetString(constant.OpenID)
 
 	if session.Uid < 1 || pid < 1 || openId == "" {
 		clog.Warnf("create playerTable fail. pid or openId is error. [name = %s, pid = %v, openId = %v]",

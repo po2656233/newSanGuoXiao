@@ -14,7 +14,6 @@ import (
 	"superman/internal/hints"
 	pb "superman/internal/protocol/gofile"
 	"superman/internal/rpc"
-	"superman/internal/session_key"
 	"superman/internal/token"
 )
 
@@ -96,9 +95,9 @@ func (p *ActorAgent) login(session *cproto.Session, req *pb.LoginRequest) {
 		return
 	}
 
-	agent.Session().Set(sessionKey.ServerID, cstring.ToString(req.ServerId))
-	agent.Session().Set(sessionKey.PID, cstring.ToString(userToken.PID))
-	agent.Session().Set(sessionKey.OpenID, userToken.OpenID)
+	agent.Session().Set(constant.ServerID, cstring.ToString(req.ServerId))
+	agent.Session().Set(constant.PID, cstring.ToString(userToken.PID))
+	agent.Session().Set(constant.OpenID, userToken.OpenID)
 	agent.Response(session, &pb.LoginResponse{
 		Uid:    uid,
 		Pid:    userToken.PID,
@@ -128,7 +127,7 @@ func (p *ActorAgent) checkSession(uid cfacade.UID) {
 // onSessionClose  当agent断开时，关闭对应的ActorAgent
 func (p *ActorAgent) onPomeloSessionClose(agent *pomelo.Agent) {
 	session := agent.Session()
-	serverId := session.GetString(sessionKey.ServerID)
+	serverId := session.GetString(constant.ServerID)
 	if serverId == "" {
 		return
 	}
@@ -209,9 +208,9 @@ func (p *ActorAgent) simpleLogin(session *cproto.Session, req *pb.LoginRequest) 
 		return
 	}
 
-	agent.Session().Set(sessionKey.ServerID, cstring.ToString(req.ServerId))
-	agent.Session().Set(sessionKey.PID, cstring.ToString(userToken.PID))
-	agent.Session().Set(sessionKey.OpenID, userToken.OpenID)
+	agent.Session().Set(constant.ServerID, cstring.ToString(req.ServerId))
+	agent.Session().Set(constant.PID, cstring.ToString(userToken.PID))
+	agent.Session().Set(constant.OpenID, userToken.OpenID)
 	agent.Response(session.Mid, &pb.LoginResponse{
 		Uid:    uid,
 		Pid:    userToken.PID,
@@ -245,7 +244,7 @@ func (p *ActorAgent) checkSimpleSession(uid cfacade.UID) {
 // onSessionClose  当agent断开时，关闭对应的ActorAgent
 func (p *ActorAgent) onSimpleSessionClose(agent *simple.Agent) {
 	session := agent.Session()
-	serverId := session.GetString(sessionKey.ServerID)
+	serverId := session.GetString(constant.ServerID)
 	if serverId == "" {
 		return
 	}

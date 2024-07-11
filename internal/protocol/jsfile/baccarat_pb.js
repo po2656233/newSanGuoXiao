@@ -11,10 +11,8 @@ var jspb = require('google-protobuf');
 var goog = jspb;
 var global = Function('return this')();
 
-var game_pb = require('./game_pb.js');
-goog.object.extend(proto, game_pb);
-var player_pb = require('./player_pb.js');
-goog.object.extend(proto, player_pb);
+var baseinfo_pb = require('./baseinfo_pb.js');
+goog.object.extend(proto, baseinfo_pb);
 goog.exportSymbol('proto.pb.BaccaratBetReq', null, global);
 goog.exportSymbol('proto.pb.BaccaratBetResp', null, global);
 goog.exportSymbol('proto.pb.BaccaratCheckoutResp', null, global);
@@ -344,7 +342,7 @@ proto.pb.BaccaratSceneResp.toObject = function(includeInstance, msg) {
     awardareasList: msg.getAwardareasList_asB64(),
     areabetsList: jspb.Message.getRepeatedField(msg, 5),
     mybetsList: jspb.Message.getRepeatedField(msg, 6),
-    allplayers: (f = msg.getAllplayers()) && player_pb.PlayerListInfo.toObject(includeInstance, f)
+    allplayers: (f = msg.getAllplayers()) && baseinfo_pb.PlayerList.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -406,8 +404,8 @@ proto.pb.BaccaratSceneResp.deserializeBinaryFromReader = function(msg, reader) {
       msg.setMybetsList(value);
       break;
     case 7:
-      var value = new player_pb.PlayerListInfo;
-      reader.readMessage(value,player_pb.PlayerListInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.PlayerList;
+      reader.readMessage(value,baseinfo_pb.PlayerList.deserializeBinaryFromReader);
       msg.setAllplayers(value);
       break;
     default:
@@ -486,7 +484,7 @@ proto.pb.BaccaratSceneResp.serializeBinaryToWriter = function(message, writer) {
     writer.writeMessage(
       7,
       f,
-      player_pb.PlayerListInfo.serializeBinaryToWriter
+      baseinfo_pb.PlayerList.serializeBinaryToWriter
     );
   }
 };
@@ -675,16 +673,16 @@ proto.pb.BaccaratSceneResp.prototype.clearMybetsList = function() {
 
 
 /**
- * optional PlayerListInfo allPlayers = 7;
- * @return {?proto.pb.PlayerListInfo}
+ * optional PlayerList allPlayers = 7;
+ * @return {?proto.pb.PlayerList}
  */
 proto.pb.BaccaratSceneResp.prototype.getAllplayers = function() {
-  return /** @type{?proto.pb.PlayerListInfo} */ (
-    jspb.Message.getWrapperField(this, player_pb.PlayerListInfo, 7));
+  return /** @type{?proto.pb.PlayerList} */ (
+    jspb.Message.getWrapperField(this, baseinfo_pb.PlayerList, 7));
 };
 
 
-/** @param {?proto.pb.PlayerListInfo|undefined} value */
+/** @param {?proto.pb.PlayerList|undefined} value */
 proto.pb.BaccaratSceneResp.prototype.setAllplayers = function(value) {
   jspb.Message.setWrapperField(this, 7, value);
 };
@@ -737,7 +735,7 @@ proto.pb.BaccaratStateStartResp.prototype.toObject = function(opt_includeInstanc
  */
 proto.pb.BaccaratStateStartResp.toObject = function(includeInstance, msg) {
   var obj = {
-    times: (f = msg.getTimes()) && game_pb.TimeInfo.toObject(includeInstance, f),
+    times: (f = msg.getTimes()) && baseinfo_pb.TimeInfo.toObject(includeInstance, f),
     inning: jspb.Message.getFieldWithDefault(msg, 2, "")
   };
 
@@ -776,8 +774,8 @@ proto.pb.BaccaratStateStartResp.deserializeBinaryFromReader = function(msg, read
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new game_pb.TimeInfo;
-      reader.readMessage(value,game_pb.TimeInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.TimeInfo;
+      reader.readMessage(value,baseinfo_pb.TimeInfo.deserializeBinaryFromReader);
       msg.setTimes(value);
       break;
     case 2:
@@ -818,7 +816,7 @@ proto.pb.BaccaratStateStartResp.serializeBinaryToWriter = function(message, writ
     writer.writeMessage(
       1,
       f,
-      game_pb.TimeInfo.serializeBinaryToWriter
+      baseinfo_pb.TimeInfo.serializeBinaryToWriter
     );
   }
   f = message.getInning();
@@ -837,7 +835,7 @@ proto.pb.BaccaratStateStartResp.serializeBinaryToWriter = function(message, writ
  */
 proto.pb.BaccaratStateStartResp.prototype.getTimes = function() {
   return /** @type{?proto.pb.TimeInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.TimeInfo, 1));
+    jspb.Message.getWrapperField(this, baseinfo_pb.TimeInfo, 1));
 };
 
 
@@ -909,7 +907,7 @@ proto.pb.BaccaratStatePlayingResp.prototype.toObject = function(opt_includeInsta
  */
 proto.pb.BaccaratStatePlayingResp.toObject = function(includeInstance, msg) {
   var obj = {
-    times: (f = msg.getTimes()) && game_pb.TimeInfo.toObject(includeInstance, f)
+    times: (f = msg.getTimes()) && baseinfo_pb.TimeInfo.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -947,8 +945,8 @@ proto.pb.BaccaratStatePlayingResp.deserializeBinaryFromReader = function(msg, re
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new game_pb.TimeInfo;
-      reader.readMessage(value,game_pb.TimeInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.TimeInfo;
+      reader.readMessage(value,baseinfo_pb.TimeInfo.deserializeBinaryFromReader);
       msg.setTimes(value);
       break;
     default:
@@ -985,7 +983,7 @@ proto.pb.BaccaratStatePlayingResp.serializeBinaryToWriter = function(message, wr
     writer.writeMessage(
       1,
       f,
-      game_pb.TimeInfo.serializeBinaryToWriter
+      baseinfo_pb.TimeInfo.serializeBinaryToWriter
     );
   }
 };
@@ -997,7 +995,7 @@ proto.pb.BaccaratStatePlayingResp.serializeBinaryToWriter = function(message, wr
  */
 proto.pb.BaccaratStatePlayingResp.prototype.getTimes = function() {
   return /** @type{?proto.pb.TimeInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.TimeInfo, 1));
+    jspb.Message.getWrapperField(this, baseinfo_pb.TimeInfo, 1));
 };
 
 
@@ -1054,7 +1052,7 @@ proto.pb.BaccaratStateOpenResp.prototype.toObject = function(opt_includeInstance
  */
 proto.pb.BaccaratStateOpenResp.toObject = function(includeInstance, msg) {
   var obj = {
-    times: (f = msg.getTimes()) && game_pb.TimeInfo.toObject(includeInstance, f),
+    times: (f = msg.getTimes()) && baseinfo_pb.TimeInfo.toObject(includeInstance, f),
     openinfo: (f = msg.getOpeninfo()) && proto.pb.BaccaratOpenResp.toObject(includeInstance, f)
   };
 
@@ -1093,8 +1091,8 @@ proto.pb.BaccaratStateOpenResp.deserializeBinaryFromReader = function(msg, reade
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new game_pb.TimeInfo;
-      reader.readMessage(value,game_pb.TimeInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.TimeInfo;
+      reader.readMessage(value,baseinfo_pb.TimeInfo.deserializeBinaryFromReader);
       msg.setTimes(value);
       break;
     case 2:
@@ -1136,7 +1134,7 @@ proto.pb.BaccaratStateOpenResp.serializeBinaryToWriter = function(message, write
     writer.writeMessage(
       1,
       f,
-      game_pb.TimeInfo.serializeBinaryToWriter
+      baseinfo_pb.TimeInfo.serializeBinaryToWriter
     );
   }
   f = message.getOpeninfo();
@@ -1156,7 +1154,7 @@ proto.pb.BaccaratStateOpenResp.serializeBinaryToWriter = function(message, write
  */
 proto.pb.BaccaratStateOpenResp.prototype.getTimes = function() {
   return /** @type{?proto.pb.TimeInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.TimeInfo, 1));
+    jspb.Message.getWrapperField(this, baseinfo_pb.TimeInfo, 1));
 };
 
 
@@ -1246,7 +1244,7 @@ proto.pb.BaccaratStateOverResp.prototype.toObject = function(opt_includeInstance
  */
 proto.pb.BaccaratStateOverResp.toObject = function(includeInstance, msg) {
   var obj = {
-    times: (f = msg.getTimes()) && game_pb.TimeInfo.toObject(includeInstance, f)
+    times: (f = msg.getTimes()) && baseinfo_pb.TimeInfo.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -1284,8 +1282,8 @@ proto.pb.BaccaratStateOverResp.deserializeBinaryFromReader = function(msg, reade
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new game_pb.TimeInfo;
-      reader.readMessage(value,game_pb.TimeInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.TimeInfo;
+      reader.readMessage(value,baseinfo_pb.TimeInfo.deserializeBinaryFromReader);
       msg.setTimes(value);
       break;
     default:
@@ -1322,7 +1320,7 @@ proto.pb.BaccaratStateOverResp.serializeBinaryToWriter = function(message, write
     writer.writeMessage(
       1,
       f,
-      game_pb.TimeInfo.serializeBinaryToWriter
+      baseinfo_pb.TimeInfo.serializeBinaryToWriter
     );
   }
 };
@@ -1334,7 +1332,7 @@ proto.pb.BaccaratStateOverResp.serializeBinaryToWriter = function(message, write
  */
 proto.pb.BaccaratStateOverResp.prototype.getTimes = function() {
   return /** @type{?proto.pb.TimeInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.TimeInfo, 1));
+    jspb.Message.getWrapperField(this, baseinfo_pb.TimeInfo, 1));
 };
 
 
@@ -2285,8 +2283,8 @@ proto.pb.BaccaratOpenResp.prototype.toObject = function(opt_includeInstance) {
 proto.pb.BaccaratOpenResp.toObject = function(includeInstance, msg) {
   var obj = {
     awardarea: msg.getAwardarea_asB64(),
-    playercard: (f = msg.getPlayercard()) && game_pb.CardInfo.toObject(includeInstance, f),
-    bankercard: (f = msg.getBankercard()) && game_pb.CardInfo.toObject(includeInstance, f)
+    playercard: (f = msg.getPlayercard()) && baseinfo_pb.CardInfo.toObject(includeInstance, f),
+    bankercard: (f = msg.getBankercard()) && baseinfo_pb.CardInfo.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -2328,13 +2326,13 @@ proto.pb.BaccaratOpenResp.deserializeBinaryFromReader = function(msg, reader) {
       msg.setAwardarea(value);
       break;
     case 2:
-      var value = new game_pb.CardInfo;
-      reader.readMessage(value,game_pb.CardInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.CardInfo;
+      reader.readMessage(value,baseinfo_pb.CardInfo.deserializeBinaryFromReader);
       msg.setPlayercard(value);
       break;
     case 3:
-      var value = new game_pb.CardInfo;
-      reader.readMessage(value,game_pb.CardInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.CardInfo;
+      reader.readMessage(value,baseinfo_pb.CardInfo.deserializeBinaryFromReader);
       msg.setBankercard(value);
       break;
     default:
@@ -2378,7 +2376,7 @@ proto.pb.BaccaratOpenResp.serializeBinaryToWriter = function(message, writer) {
     writer.writeMessage(
       2,
       f,
-      game_pb.CardInfo.serializeBinaryToWriter
+      baseinfo_pb.CardInfo.serializeBinaryToWriter
     );
   }
   f = message.getBankercard();
@@ -2386,7 +2384,7 @@ proto.pb.BaccaratOpenResp.serializeBinaryToWriter = function(message, writer) {
     writer.writeMessage(
       3,
       f,
-      game_pb.CardInfo.serializeBinaryToWriter
+      baseinfo_pb.CardInfo.serializeBinaryToWriter
     );
   }
 };
@@ -2437,7 +2435,7 @@ proto.pb.BaccaratOpenResp.prototype.setAwardarea = function(value) {
  */
 proto.pb.BaccaratOpenResp.prototype.getPlayercard = function() {
   return /** @type{?proto.pb.CardInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.CardInfo, 2));
+    jspb.Message.getWrapperField(this, baseinfo_pb.CardInfo, 2));
 };
 
 
@@ -2470,7 +2468,7 @@ proto.pb.BaccaratOpenResp.prototype.hasPlayercard = function() {
  */
 proto.pb.BaccaratOpenResp.prototype.getBankercard = function() {
   return /** @type{?proto.pb.CardInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.CardInfo, 3));
+    jspb.Message.getWrapperField(this, baseinfo_pb.CardInfo, 3));
 };
 
 

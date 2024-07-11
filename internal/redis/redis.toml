@@ -1,0 +1,4 @@
+[redis]
+addrs = [":6379",":6380"]
+username = ""
+password = ""

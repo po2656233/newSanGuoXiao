@@ -3,15 +3,15 @@ package actors
 import (
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	superGorm "github.com/po2656233/superplace/components/gorm"
 	clog "github.com/po2656233/superplace/logger"
 	cactor "github.com/po2656233/superplace/net/actor"
-	uuid "github.com/satori/go.uuid"
 	"gorm.io/gorm"
 	"strconv"
 	. "superman/internal/constant"
 	pb "superman/internal/protocol/gofile"
-	"superman/internal/sqlmodel"
+	sqlmodel "superman/internal/sql_model"
 	. "superman/internal/utils"
 	"sync"
 	"time"
@@ -56,14 +56,14 @@ func (self *ActorDB) OnInit() {
 	component := superGorm.NewComponent()
 	name := component.Name()
 	// 获取gorm组件
-	gorm := self.App().Find(name).(*superGorm.Component)
-	if gorm == nil {
+	gormCpt := self.App().Find(name).(*superGorm.Component)
+	if gormCpt == nil {
 		clog.DPanicf("[component = %s] not found.", name)
+		return
 	}
-
 	// 获取 db_id = "center_db_1" 的配置
 	centerDbID := self.App().Settings().GetConfig(DbList).GetString(CenterDb)
-	self.db = gorm.GetDb(centerDbID)
+	self.db = gormCpt.GetDb(centerDbID)
 	if self.db == nil {
 		clog.Panic("center_db_1 not found")
 	}
@@ -72,6 +72,7 @@ func (self *ActorDB) OnInit() {
 	//// 1秒后进行一次分页查询
 	//p.Timer().AddOnce(1*time.Second, p.selectPagination)
 	self.Remote().Register(self.Register)
+	self.Remote().Register(self.Login)
 }
 
 func (self *ActorDB) selectDB() {
@@ -140,19 +141,44 @@ func (self *ActorDB) AddUser(user sqlmodel.User) (int64, error) {
 }
 
 // CheckUser 获取玩家ID
-func (self *ActorDB) CheckUser(name string) (uid int64) {
+func (self *ActorDB) CheckUser(account string) (uid int64) {
 	user := sqlmodel.User{}
-	err := self.db.Table(user.TableName()).Select("id").Where("name = ?", name).Find(&uid).Error
+	err := self.db.Table(user.TableName()).Select("id").Where("account = ?", account).Find(&uid).Error
 	if !CheckError(err) {
 		return 0
 	}
 	return uid
 }
 
-// /////////////////////////////////////////////////////////
+// GetUserInfo 获取玩家信息
+func (self *ActorDB) GetUserInfo(account, password string) (*sqlmodel.User, error) {
+	user := &sqlmodel.User{}
+	query := "`account`= ? AND `password` = ?"
+	err := self.db.Table(user.TableName()).Select("*").Where(query, account, password).Find(user).Error
+	CheckError(err)
+	return user, err
+}
+
+// GetUserID 获取玩家ID
+func (self *ActorDB) GetUserID(account, password string) (uid int64, err error) {
+	user := &sqlmodel.User{}
+	query := "`account`= ? AND `password` = ?"
+	err = self.db.Table(user.TableName()).Select("id").Where(query, account, password).Find(&uid).Error
+	CheckError(err)
+	return
+}
+
+// BindUser 获取玩家ID
+func (self *ActorDB) BindUser(user sqlmodel.UserBind) error {
+	err := self.db.Table(user.TableName()).Create(&user).Error
+	CheckError(err)
+	return err
+}
+
+// Register /////////////////////////////////////////////////////////
 func (self *ActorDB) Register(req *pb.RegisterReq) (*pb.RegisterResp, error) {
 	m := req
-	identity := uuid.NewV4().String()
+	identity := uuid.New().String()
 	user := sqlmodel.User{
 		Name:     m.Name,
 		Account:  m.Name,
@@ -172,13 +198,13 @@ func (self *ActorDB) Register(req *pb.RegisterReq) (*pb.RegisterResp, error) {
 		Age:    m.Age,
 		//Vip:          LessVIP,
 		//Level:        LessLevel,
-		Agentid: m.PlatformID,
+		//Agentid: m.PlatformID,
 		//Agentid:      agentID,
 		//Withdraw:     INVALID,
 		//Deposit:      LessMoney,
 		//Money:        LessMoney,
 	}
-	clog.Warnf("ooook req:%v", req)
+	clog.Warnf("actorDB register req:%v", req)
 	uid, err := self.AddUser(user)
 	if err != nil {
 		uid = -1
@@ -186,6 +212,43 @@ func (self *ActorDB) Register(req *pb.RegisterReq) (*pb.RegisterResp, error) {
 	}
 	resp := &pb.RegisterResp{
 		OpenId: fmt.Sprintf("%d", uid),
+	}
+
+	return resp, err
+}
+
+func (self *ActorDB) Login(req *pb.LoginReq) (*pb.LoginResp, error) {
+	psw := Md5Sum(req.Password + strconv.FormatInt(int64(len(req.Password)), 10))
+	userInfo, err := self.GetUserInfo(req.Account, psw)
+	resp := &pb.LoginResp{}
+	if userInfo != nil {
+		resp.MainInfo = &pb.MasterInfo{
+			UserInfo: &pb.UserInfo{
+				UserID:       userInfo.ID,
+				Name:         userInfo.Name,
+				Account:      userInfo.Account,
+				Password:     userInfo.Password,
+				Money:        userInfo.Money,
+				Coin:         userInfo.Coin,
+				YuanBao:      userInfo.Yuanbao,
+				FaceID:       userInfo.Face,
+				Gender:       userInfo.Gender,
+				Age:          userInfo.Age,
+				VIP:          userInfo.Vip,
+				Level:        userInfo.Level,
+				PassPortID:   userInfo.Passport,
+				Address:      userInfo.Address,
+				AgentID:      userInfo.Agentid,
+				ServerAddr:   userInfo.Serveraddr,
+				MachineCode:  userInfo.Machinecode,
+				RealName:     userInfo.Realname,
+				PhoneNum:     userInfo.Phone,
+				Email:        userInfo.Email,
+				ReferralCode: userInfo.Referralcode,
+				IDentity:     userInfo.Identity,
+				ClientAddr:   userInfo.Clientaddr,
+			},
+		}
 	}
 
 	return resp, err

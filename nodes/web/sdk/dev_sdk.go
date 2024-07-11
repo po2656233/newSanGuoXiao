@@ -7,6 +7,7 @@ import (
 	cfacade "github.com/po2656233/superplace/facade"
 	sgxError "github.com/po2656233/superplace/logger/error"
 	"superman/internal/conf"
+	. "superman/internal/constant"
 	"superman/internal/hints"
 	pb "superman/internal/protocol/gofile"
 	"superman/internal/rpc"
@@ -21,8 +22,8 @@ func (devSdk) SdkId() int32 {
 }
 
 func (p devSdk) Login(_ *conf.SdkRow, params Params, callback Callback) {
-	accountName, _ := params.GetString("account")
-	password, _ := params.GetString("password")
+	accountName, _ := params.GetString(Username)
+	password, _ := params.GetString(Password)
 
 	if accountName == "" || password == "" {
 		err := sgxError.Errorf("account or password params is empty.")

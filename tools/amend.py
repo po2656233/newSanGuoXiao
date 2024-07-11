@@ -156,6 +156,7 @@ def main():
                 if len(content) > 0 and content[0] == 'package':
                     f.write("package pb;\n")
                 else:
+                    line = line.replace(' iD =',' id =')
                     f.write(line + '\n')
         f.close()
 

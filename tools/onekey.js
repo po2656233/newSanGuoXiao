@@ -3,6 +3,12 @@ const path = require("path");
 const { exec } = require('child_process');
 const helputil = require("./helputil");
 
+// 定义要搜索的目录
+const directory = '../internal/protocol/gofile';
+// 定义要替换的文本
+const searchFor = 'proto "github.com/golang/protobuf/proto"';
+const searchFor1 = 'const _ = proto.ProtoPackageIsVersion4';
+const replaceWith = '';
 
 
 //--------------------------------------------------------------
@@ -107,7 +113,7 @@ function genServer() {
 	msgStr += "//---------------------------------\n";
     msgStr += "package msg\n\n"
     msgStr += "import (\n"
-    msgStr += '    "github.com/golang/protobuf/proto"\n'
+    msgStr += '    "google.golang.org/protobuf/proto"\n'
     msgStr += '    "superman/nodes/leaf/jettengame/base"\n'
     msgStr += '    "superman/nodes/leaf/jettengame/msg/process"\n'
     msgStr += '    protoMsg "superman/internal/protocol/gofile"\n'
@@ -173,6 +179,43 @@ function genServer() {
 	helputil.write2file(outServerMsg, msgStr);
 	helputil.write2file(outRouter, routerStr);
 }
+
+
+
+// 遍历目录
+fs.readdir(directory, (err, files) => {
+    if (err) {
+        console.error('Error reading directory:', err);
+        return;
+    }
+
+    files.forEach(file => {
+        // 检查文件扩展名是否为 .go
+        if (path.extname(file) === '.go' && file.includes('pb.go') ) {
+            // 构建完整的文件路径
+            const filePath = path.join(directory, file);
+            // 读取文件内容
+            fs.readFile(filePath, 'utf8', (err, content) => {
+                if (err) {
+                    console.error('Error reading file:', err);
+                    return;
+                }
+
+                // 替换文件内容
+                let newContent = content.replace(new RegExp(searchFor, 'g'), replaceWith);
+                newContent = newContent.replace(new RegExp(searchFor1, 'g'), replaceWith);
+                // 写回文件
+                fs.writeFile(filePath, newContent, 'utf8', err => {
+                    if (err) {
+                        console.error('Error writing file:', err);
+                        return;
+                    }
+                    console.log(`File ${file} has been updated.`);
+                });
+            });
+        }
+    });
+});
 
 genCode();
 

@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"errors"
-	"github.com/golang/protobuf/proto"
 	exReflect "github.com/po2656233/superplace/extend/reflect"
 	cslice "github.com/po2656233/superplace/extend/slice"
 	cstring "github.com/po2656233/superplace/extend/string"
@@ -15,12 +14,12 @@ import (
 	pmessage "github.com/po2656233/superplace/net/parser/pomelo/message"
 	"github.com/po2656233/superplace/net/parser/simple"
 	cproto "github.com/po2656233/superplace/net/proto"
+	"google.golang.org/protobuf/proto"
 	"os"
 	"strconv"
 	. "superman/internal/constant"
 	"superman/internal/hints"
 	"superman/internal/protocol/gofile"
-	"superman/internal/session_key"
 )
 
 var (
@@ -111,7 +110,7 @@ func gameNodeRoute(agent *pomelo.Agent, session *cproto.Session, route *pmessage
 	}
 
 	// 如果agent没有完成"角色登录",则禁止转发到game节点
-	if !session.Contains(sessionKey.PlayerID) {
+	if !session.Contains(PlayerID) {
 		// 如果不是角色登录协议则踢掉agent
 		if found := cslice.StringInSlice(msg.Route, beforeLoginRoutes); !found {
 			agent.Kick(notLoginRsp, true)
@@ -119,7 +118,7 @@ func gameNodeRoute(agent *pomelo.Agent, session *cproto.Session, route *pmessage
 		}
 	}
 
-	serverId := session.GetString(sessionKey.ServerID)
+	serverId := session.GetString(ServerID)
 	if serverId == "" {
 		return
 	}
@@ -166,7 +165,7 @@ func onSimpleDataRoute(agent *simple.Agent, msg *simple.Message, route *simple.N
 		return
 	}
 
-	serverId := session.GetString(sessionKey.ServerID)
+	serverId := session.GetString(ServerID)
 	if serverId == "" {
 		return
 	}

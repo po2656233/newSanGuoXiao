@@ -2,8 +2,7 @@
 syntax = "proto3";
 option go_package = "/pb";
 package pb;
-import "game.proto";
-import "player.proto";
+import "baseinfo.proto";
 //场景
 message ZhaocaimiaoSceneResp{
   int64 timeStamp = 1;              // 时间戳

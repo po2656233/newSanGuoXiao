@@ -13,8 +13,9 @@ import (
 	"strings"
 )
 
-const sqlModelDir = "nodes/leaf/jettengame/sql/model/"
-const modelPkgPath = "model"
+const sqlModelDir = "internal/sql_model/"
+
+const modelPkgPath = "sql_model"
 
 // 请清空 [sqlmodel/model]目录下的文件,再执行
 func main() {

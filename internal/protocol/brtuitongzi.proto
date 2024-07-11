@@ -1,8 +1,7 @@
 syntax = "proto3";
 option go_package = "/pb";
 package pb;
-import "game.proto";
-import "player.proto";
+import "baseinfo.proto";
 // kindID 2005
 //36个筒子加4个白板 白板算半点
 //白板 = 10 
@@ -15,7 +14,7 @@ message BrTuitongziSceneResp{
   repeated bytes awardAreas = 4;  //开奖记录(路单)
   repeated int64 areaBets = 5;    //各下注区当前总下注额
   repeated int64 myBets = 6;      //个人在各下注区的总下注额
-  PlayerListInfo allPlayers = 7;  //玩家列表
+  PlayerList allPlayers = 7;  //玩家列表
   int32  remainCount = 8;		  //剩余张数
   int32 startArea = 9;
 }

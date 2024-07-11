@@ -9,7 +9,7 @@ package base
 */
 import (
 	"errors"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
 	"time"
 )
 
@@ -30,7 +30,7 @@ type CustomClaims struct {
 	ID      int64  `json:"userId"` //用户ID
 	Account string `json:"account"`
 	PlatId  int64  `json:"platId"`
-	*jwt.StandardClaims
+	jwt.RegisteredClaims
 }
 
 // 创建token
@@ -67,9 +67,9 @@ func ParseTokenHs256(tokenString string) (*CustomClaims, error) {
 
 // RefreshToken 更新token
 func RefreshToken(tokenString string) (string, error) {
-	jwt.TimeFunc = func() time.Time {
+	jwt.WithTimeFunc(func() time.Time {
 		return time.Unix(0, 0)
-	}
+	})
 
 	token, err := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return SignKey, nil
@@ -80,8 +80,9 @@ func RefreshToken(tokenString string) (string, error) {
 	}
 
 	if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid {
-		jwt.TimeFunc = time.Now
-		claims.StandardClaims.ExpiresAt = time.Now().Add(1 * time.Hour).Unix()
+		claims.NotBefore = jwt.NewNumericDate(time.Now())
+		claims.IssuedAt = jwt.NewNumericDate(time.Now())
+		claims.RegisteredClaims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Hour))
 		return CreateTokenHs256(*claims)
 	}
 

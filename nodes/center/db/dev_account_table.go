@@ -21,12 +21,14 @@ func (*DevAccountTable) TableName() string {
 	return "dev_account"
 }
 
+func SaveUserInfo() {
+
+}
 func DevAccountRegister(accountName, password, ip string) int32 {
 	devAccount, _ := DevAccountWithName(accountName)
 	if devAccount != nil {
 		return hints.Register05
 	}
-
 	devAccountTable := &DevAccountTable{
 		AccountId:   guid.Next(),
 		AccountName: accountName,

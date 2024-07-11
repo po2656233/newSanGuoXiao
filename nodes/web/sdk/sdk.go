@@ -8,12 +8,6 @@ import (
 	"superman/internal/conf"
 )
 
-// sdk平台类型
-const (
-	DevMode  int32 = 1 // 开发模式，注册开发帐号登陆(开发时使用)
-	QuickSDK int32 = 2 // quick sdk
-)
-
 var (
 	invokeMaps = make(map[int32]Invoke)
 )
@@ -58,12 +52,11 @@ func register(invoke Invoke) {
 	invokeMaps[invoke.SdkId()] = invoke
 }
 
-func GetInvoke(sdkId int32) (invoke Invoke, error error) {
+func GetInvoke(sdkId int32) (Invoke, error) {
 	invoke, found := invokeMaps[sdkId]
 	if found == false {
 		return nil, sgxError.Errorf("[sdkId = %d] not found.", sdkId)
 	}
-
 	return invoke, nil
 }
 

@@ -1,10 +1,28 @@
 syntax = "proto3";
 option go_package = "/pb";
 package pb;
-import "game.proto";
-import "home.proto";
-import "player.proto";
-enum Piece {
+import "baseinfo.proto";
+//次序说明(流程):
+//1、个人信息登录
+//2、招募武将
+//3、选择武将
+//4、匹配挑战对手
+//5、生命值小的一方优先消除,相同则随机一方开始
+//6、开始消除属性触发技能
+//7、15秒轮流消除
+//8、一方总生命值归零则游戏结束
+//9、游戏结束,分配奖励
+//10、退出游戏
+//游戏类型
+enum SgxHeroType {
+  HeroNull = 0;
+  JIN = 1;        //金
+  MU = 2;         //木
+  SHUI = 3;       //水
+  HUO = 4;        //火
+  TU = 5;         //土
+}
+enum SgxPiece {
   NoPiece = 0;
   Jin = 1;   // 金
   Mu = 2;    // 木
@@ -17,7 +35,7 @@ enum Piece {
 message Grid {
   int32 row = 1;    // 所在排
   int32 col = 2;    // 所在列
-  Piece core = 3;   // 实际子项
+  SgxPiece core = 3;   // 实际子项
 }
 // 棋盘
 message BoardInfo {

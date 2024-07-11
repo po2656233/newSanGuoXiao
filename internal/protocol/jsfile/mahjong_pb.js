@@ -11,10 +11,8 @@ var jspb = require('google-protobuf');
 var goog = jspb;
 var global = Function('return this')();
 
-var game_pb = require('./game_pb.js');
-goog.object.extend(proto, game_pb);
-var player_pb = require('./player_pb.js');
-goog.object.extend(proto, player_pb);
+var baseinfo_pb = require('./baseinfo_pb.js');
+goog.object.extend(proto, baseinfo_pb);
 goog.exportSymbol('proto.pb.EnterGameMJResp', null, global);
 goog.exportSymbol('proto.pb.Fan_t', null, global);
 goog.exportSymbol('proto.pb.MahjongDealResp', null, global);
@@ -987,7 +985,7 @@ proto.pb.MahjongPlayer.prototype.toObject = function(opt_includeInstance) {
  */
 proto.pb.MahjongPlayer.toObject = function(includeInstance, msg) {
   var obj = {
-    myinfo: (f = msg.getMyinfo()) && player_pb.PlayerInfo.toObject(includeInstance, f),
+    myinfo: (f = msg.getMyinfo()) && baseinfo_pb.PlayerInfo.toObject(includeInstance, f),
     handcardsList: jspb.Message.getRepeatedField(msg, 2),
     kezicardsList: jspb.Message.toObjectList(msg.getKezicardsList(),
     proto.pb.MahjongKeZi.toObject, includeInstance),
@@ -1036,8 +1034,8 @@ proto.pb.MahjongPlayer.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new player_pb.PlayerInfo;
-      reader.readMessage(value,player_pb.PlayerInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.PlayerInfo;
+      reader.readMessage(value,baseinfo_pb.PlayerInfo.deserializeBinaryFromReader);
       msg.setMyinfo(value);
       break;
     case 2:
@@ -1112,7 +1110,7 @@ proto.pb.MahjongPlayer.serializeBinaryToWriter = function(message, writer) {
     writer.writeMessage(
       1,
       f,
-      player_pb.PlayerInfo.serializeBinaryToWriter
+      baseinfo_pb.PlayerInfo.serializeBinaryToWriter
     );
   }
   f = message.getHandcardsList();
@@ -1189,7 +1187,7 @@ proto.pb.MahjongPlayer.serializeBinaryToWriter = function(message, writer) {
  */
 proto.pb.MahjongPlayer.prototype.getMyinfo = function() {
   return /** @type{?proto.pb.PlayerInfo} */ (
-    jspb.Message.getWrapperField(this, player_pb.PlayerInfo, 1));
+    jspb.Message.getWrapperField(this, baseinfo_pb.PlayerInfo, 1));
 };
 
 
@@ -2051,7 +2049,7 @@ proto.pb.MahjongStateFreeResp.prototype.toObject = function(opt_includeInstance)
  */
 proto.pb.MahjongStateFreeResp.toObject = function(includeInstance, msg) {
   var obj = {
-    times: (f = msg.getTimes()) && game_pb.TimeInfo.toObject(includeInstance, f),
+    times: (f = msg.getTimes()) && baseinfo_pb.TimeInfo.toObject(includeInstance, f),
     inning: jspb.Message.getFieldWithDefault(msg, 2, "")
   };
 
@@ -2090,8 +2088,8 @@ proto.pb.MahjongStateFreeResp.deserializeBinaryFromReader = function(msg, reader
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new game_pb.TimeInfo;
-      reader.readMessage(value,game_pb.TimeInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.TimeInfo;
+      reader.readMessage(value,baseinfo_pb.TimeInfo.deserializeBinaryFromReader);
       msg.setTimes(value);
       break;
     case 2:
@@ -2132,7 +2130,7 @@ proto.pb.MahjongStateFreeResp.serializeBinaryToWriter = function(message, writer
     writer.writeMessage(
       1,
       f,
-      game_pb.TimeInfo.serializeBinaryToWriter
+      baseinfo_pb.TimeInfo.serializeBinaryToWriter
     );
   }
   f = message.getInning();
@@ -2151,7 +2149,7 @@ proto.pb.MahjongStateFreeResp.serializeBinaryToWriter = function(message, writer
  */
 proto.pb.MahjongStateFreeResp.prototype.getTimes = function() {
   return /** @type{?proto.pb.TimeInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.TimeInfo, 1));
+    jspb.Message.getWrapperField(this, baseinfo_pb.TimeInfo, 1));
 };
 
 
@@ -2223,7 +2221,7 @@ proto.pb.MahjongStateDirectResp.prototype.toObject = function(opt_includeInstanc
  */
 proto.pb.MahjongStateDirectResp.toObject = function(includeInstance, msg) {
   var obj = {
-    times: (f = msg.getTimes()) && game_pb.TimeInfo.toObject(includeInstance, f),
+    times: (f = msg.getTimes()) && baseinfo_pb.TimeInfo.toObject(includeInstance, f),
     mydirect: jspb.Message.getFieldWithDefault(msg, 2, 0)
   };
 
@@ -2262,8 +2260,8 @@ proto.pb.MahjongStateDirectResp.deserializeBinaryFromReader = function(msg, read
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new game_pb.TimeInfo;
-      reader.readMessage(value,game_pb.TimeInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.TimeInfo;
+      reader.readMessage(value,baseinfo_pb.TimeInfo.deserializeBinaryFromReader);
       msg.setTimes(value);
       break;
     case 2:
@@ -2304,7 +2302,7 @@ proto.pb.MahjongStateDirectResp.serializeBinaryToWriter = function(message, writ
     writer.writeMessage(
       1,
       f,
-      game_pb.TimeInfo.serializeBinaryToWriter
+      baseinfo_pb.TimeInfo.serializeBinaryToWriter
     );
   }
   f = message.getMydirect();
@@ -2323,7 +2321,7 @@ proto.pb.MahjongStateDirectResp.serializeBinaryToWriter = function(message, writ
  */
 proto.pb.MahjongStateDirectResp.prototype.getTimes = function() {
   return /** @type{?proto.pb.TimeInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.TimeInfo, 1));
+    jspb.Message.getWrapperField(this, baseinfo_pb.TimeInfo, 1));
 };
 
 
@@ -2395,7 +2393,7 @@ proto.pb.MahjongStateDecideResp.prototype.toObject = function(opt_includeInstanc
  */
 proto.pb.MahjongStateDecideResp.toObject = function(includeInstance, msg) {
   var obj = {
-    times: (f = msg.getTimes()) && game_pb.TimeInfo.toObject(includeInstance, f),
+    times: (f = msg.getTimes()) && baseinfo_pb.TimeInfo.toObject(includeInstance, f),
     bankerid: jspb.Message.getFieldWithDefault(msg, 2, 0),
     quanfeng: jspb.Message.getFieldWithDefault(msg, 3, 0),
     menfeng: jspb.Message.getFieldWithDefault(msg, 4, 0)
@@ -2436,8 +2434,8 @@ proto.pb.MahjongStateDecideResp.deserializeBinaryFromReader = function(msg, read
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new game_pb.TimeInfo;
-      reader.readMessage(value,game_pb.TimeInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.TimeInfo;
+      reader.readMessage(value,baseinfo_pb.TimeInfo.deserializeBinaryFromReader);
       msg.setTimes(value);
       break;
     case 2:
@@ -2486,7 +2484,7 @@ proto.pb.MahjongStateDecideResp.serializeBinaryToWriter = function(message, writ
     writer.writeMessage(
       1,
       f,
-      game_pb.TimeInfo.serializeBinaryToWriter
+      baseinfo_pb.TimeInfo.serializeBinaryToWriter
     );
   }
   f = message.getBankerid();
@@ -2519,7 +2517,7 @@ proto.pb.MahjongStateDecideResp.serializeBinaryToWriter = function(message, writ
  */
 proto.pb.MahjongStateDecideResp.prototype.getTimes = function() {
   return /** @type{?proto.pb.TimeInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.TimeInfo, 1));
+    jspb.Message.getWrapperField(this, baseinfo_pb.TimeInfo, 1));
 };
 
 
@@ -2621,7 +2619,7 @@ proto.pb.MahjongStateRollDiceResp.prototype.toObject = function(opt_includeInsta
  */
 proto.pb.MahjongStateRollDiceResp.toObject = function(includeInstance, msg) {
   var obj = {
-    times: (f = msg.getTimes()) && game_pb.TimeInfo.toObject(includeInstance, f)
+    times: (f = msg.getTimes()) && baseinfo_pb.TimeInfo.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -2659,8 +2657,8 @@ proto.pb.MahjongStateRollDiceResp.deserializeBinaryFromReader = function(msg, re
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new game_pb.TimeInfo;
-      reader.readMessage(value,game_pb.TimeInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.TimeInfo;
+      reader.readMessage(value,baseinfo_pb.TimeInfo.deserializeBinaryFromReader);
       msg.setTimes(value);
       break;
     default:
@@ -2697,7 +2695,7 @@ proto.pb.MahjongStateRollDiceResp.serializeBinaryToWriter = function(message, wr
     writer.writeMessage(
       1,
       f,
-      game_pb.TimeInfo.serializeBinaryToWriter
+      baseinfo_pb.TimeInfo.serializeBinaryToWriter
     );
   }
 };
@@ -2709,7 +2707,7 @@ proto.pb.MahjongStateRollDiceResp.serializeBinaryToWriter = function(message, wr
  */
 proto.pb.MahjongStateRollDiceResp.prototype.getTimes = function() {
   return /** @type{?proto.pb.TimeInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.TimeInfo, 1));
+    jspb.Message.getWrapperField(this, baseinfo_pb.TimeInfo, 1));
 };
 
 
@@ -2766,7 +2764,7 @@ proto.pb.MahjongStateStartResp.prototype.toObject = function(opt_includeInstance
  */
 proto.pb.MahjongStateStartResp.toObject = function(includeInstance, msg) {
   var obj = {
-    times: (f = msg.getTimes()) && game_pb.TimeInfo.toObject(includeInstance, f),
+    times: (f = msg.getTimes()) && baseinfo_pb.TimeInfo.toObject(includeInstance, f),
     startpos: jspb.Message.getFieldWithDefault(msg, 2, 0)
   };
 
@@ -2805,8 +2803,8 @@ proto.pb.MahjongStateStartResp.deserializeBinaryFromReader = function(msg, reade
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new game_pb.TimeInfo;
-      reader.readMessage(value,game_pb.TimeInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.TimeInfo;
+      reader.readMessage(value,baseinfo_pb.TimeInfo.deserializeBinaryFromReader);
       msg.setTimes(value);
       break;
     case 2:
@@ -2847,7 +2845,7 @@ proto.pb.MahjongStateStartResp.serializeBinaryToWriter = function(message, write
     writer.writeMessage(
       1,
       f,
-      game_pb.TimeInfo.serializeBinaryToWriter
+      baseinfo_pb.TimeInfo.serializeBinaryToWriter
     );
   }
   f = message.getStartpos();
@@ -2866,7 +2864,7 @@ proto.pb.MahjongStateStartResp.serializeBinaryToWriter = function(message, write
  */
 proto.pb.MahjongStateStartResp.prototype.getTimes = function() {
   return /** @type{?proto.pb.TimeInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.TimeInfo, 1));
+    jspb.Message.getWrapperField(this, baseinfo_pb.TimeInfo, 1));
 };
 
 
@@ -2938,7 +2936,7 @@ proto.pb.MahjongStatePlayingResp.prototype.toObject = function(opt_includeInstan
  */
 proto.pb.MahjongStatePlayingResp.toObject = function(includeInstance, msg) {
   var obj = {
-    times: (f = msg.getTimes()) && game_pb.TimeInfo.toObject(includeInstance, f),
+    times: (f = msg.getTimes()) && baseinfo_pb.TimeInfo.toObject(includeInstance, f),
     userid: jspb.Message.getFieldWithDefault(msg, 2, 0),
     card: jspb.Message.getFieldWithDefault(msg, 3, 0)
   };
@@ -2978,8 +2976,8 @@ proto.pb.MahjongStatePlayingResp.deserializeBinaryFromReader = function(msg, rea
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new game_pb.TimeInfo;
-      reader.readMessage(value,game_pb.TimeInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.TimeInfo;
+      reader.readMessage(value,baseinfo_pb.TimeInfo.deserializeBinaryFromReader);
       msg.setTimes(value);
       break;
     case 2:
@@ -3024,7 +3022,7 @@ proto.pb.MahjongStatePlayingResp.serializeBinaryToWriter = function(message, wri
     writer.writeMessage(
       1,
       f,
-      game_pb.TimeInfo.serializeBinaryToWriter
+      baseinfo_pb.TimeInfo.serializeBinaryToWriter
     );
   }
   f = message.getUserid();
@@ -3050,7 +3048,7 @@ proto.pb.MahjongStatePlayingResp.serializeBinaryToWriter = function(message, wri
  */
 proto.pb.MahjongStatePlayingResp.prototype.getTimes = function() {
   return /** @type{?proto.pb.TimeInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.TimeInfo, 1));
+    jspb.Message.getWrapperField(this, baseinfo_pb.TimeInfo, 1));
 };
 
 
@@ -3137,7 +3135,7 @@ proto.pb.MahjongStateWaitOperateResp.prototype.toObject = function(opt_includeIn
  */
 proto.pb.MahjongStateWaitOperateResp.toObject = function(includeInstance, msg) {
   var obj = {
-    times: (f = msg.getTimes()) && game_pb.TimeInfo.toObject(includeInstance, f)
+    times: (f = msg.getTimes()) && baseinfo_pb.TimeInfo.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -3175,8 +3173,8 @@ proto.pb.MahjongStateWaitOperateResp.deserializeBinaryFromReader = function(msg,
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new game_pb.TimeInfo;
-      reader.readMessage(value,game_pb.TimeInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.TimeInfo;
+      reader.readMessage(value,baseinfo_pb.TimeInfo.deserializeBinaryFromReader);
       msg.setTimes(value);
       break;
     default:
@@ -3213,7 +3211,7 @@ proto.pb.MahjongStateWaitOperateResp.serializeBinaryToWriter = function(message,
     writer.writeMessage(
       1,
       f,
-      game_pb.TimeInfo.serializeBinaryToWriter
+      baseinfo_pb.TimeInfo.serializeBinaryToWriter
     );
   }
 };
@@ -3225,7 +3223,7 @@ proto.pb.MahjongStateWaitOperateResp.serializeBinaryToWriter = function(message,
  */
 proto.pb.MahjongStateWaitOperateResp.prototype.getTimes = function() {
   return /** @type{?proto.pb.TimeInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.TimeInfo, 1));
+    jspb.Message.getWrapperField(this, baseinfo_pb.TimeInfo, 1));
 };
 
 
@@ -3289,7 +3287,7 @@ proto.pb.MahjongStateOpenResp.prototype.toObject = function(opt_includeInstance)
  */
 proto.pb.MahjongStateOpenResp.toObject = function(includeInstance, msg) {
   var obj = {
-    times: (f = msg.getTimes()) && game_pb.TimeInfo.toObject(includeInstance, f),
+    times: (f = msg.getTimes()) && baseinfo_pb.TimeInfo.toObject(includeInstance, f),
     isflow: jspb.Message.getFieldWithDefault(msg, 2, false),
     hucard: jspb.Message.getFieldWithDefault(msg, 3, 0),
     winnerid: jspb.Message.getFieldWithDefault(msg, 4, 0),
@@ -3334,8 +3332,8 @@ proto.pb.MahjongStateOpenResp.deserializeBinaryFromReader = function(msg, reader
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new game_pb.TimeInfo;
-      reader.readMessage(value,game_pb.TimeInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.TimeInfo;
+      reader.readMessage(value,baseinfo_pb.TimeInfo.deserializeBinaryFromReader);
       msg.setTimes(value);
       break;
     case 2:
@@ -3397,7 +3395,7 @@ proto.pb.MahjongStateOpenResp.serializeBinaryToWriter = function(message, writer
     writer.writeMessage(
       1,
       f,
-      game_pb.TimeInfo.serializeBinaryToWriter
+      baseinfo_pb.TimeInfo.serializeBinaryToWriter
     );
   }
   f = message.getIsflow();
@@ -3452,7 +3450,7 @@ proto.pb.MahjongStateOpenResp.serializeBinaryToWriter = function(message, writer
  */
 proto.pb.MahjongStateOpenResp.prototype.getTimes = function() {
   return /** @type{?proto.pb.TimeInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.TimeInfo, 1));
+    jspb.Message.getWrapperField(this, baseinfo_pb.TimeInfo, 1));
 };
 
 
@@ -3644,7 +3642,7 @@ proto.pb.MahjongStateOverResp.prototype.toObject = function(opt_includeInstance)
  */
 proto.pb.MahjongStateOverResp.toObject = function(includeInstance, msg) {
   var obj = {
-    times: (f = msg.getTimes()) && game_pb.TimeInfo.toObject(includeInstance, f)
+    times: (f = msg.getTimes()) && baseinfo_pb.TimeInfo.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -3682,8 +3680,8 @@ proto.pb.MahjongStateOverResp.deserializeBinaryFromReader = function(msg, reader
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new game_pb.TimeInfo;
-      reader.readMessage(value,game_pb.TimeInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.TimeInfo;
+      reader.readMessage(value,baseinfo_pb.TimeInfo.deserializeBinaryFromReader);
       msg.setTimes(value);
       break;
     default:
@@ -3720,7 +3718,7 @@ proto.pb.MahjongStateOverResp.serializeBinaryToWriter = function(message, writer
     writer.writeMessage(
       1,
       f,
-      game_pb.TimeInfo.serializeBinaryToWriter
+      baseinfo_pb.TimeInfo.serializeBinaryToWriter
     );
   }
 };
@@ -3732,7 +3730,7 @@ proto.pb.MahjongStateOverResp.serializeBinaryToWriter = function(message, writer
  */
 proto.pb.MahjongStateOverResp.prototype.getTimes = function() {
   return /** @type{?proto.pb.TimeInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.TimeInfo, 1));
+    jspb.Message.getWrapperField(this, baseinfo_pb.TimeInfo, 1));
 };
 
 

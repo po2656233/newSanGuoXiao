@@ -62,7 +62,7 @@ type Chair struct {
 
 // Table 桌子
 type Table struct {
-	protoMsg.TableItem
+	protoMsg.TableInfo
 	Instance IGameOperate //游戏实例
 }
 
@@ -191,9 +191,9 @@ func (self *Game) AddPlayer(userID int64) {
 	defer self.lock.Unlock()
 	self.PlayerList = CopyInsert(self.PlayerList, len(self.PlayerList), userID).([]int64)
 	self.PlayerList = SliceRemoveDuplicate(self.PlayerList).([]int64)
-	self.T.MaxOnline = int32(len(self.PlayerList))
-	redis.RedisHandle().Set(GetGameKey(self.ID), self.T.MaxOnline, 0)
-	log.Release("[%v:%v]\t[新增]玩家ID:%v 当前玩家数:%v ", self.G.Name, self.ID, userID, self.T.MaxOnline)
+	self.T.SitterCount = int32(len(self.PlayerList))
+	redis.RedisHandle().Set(GetGameKey(self.ID), self.T.SitterCount, 0)
+	log.Release("[%v:%v]\t[新增]玩家ID:%v 当前玩家数:%v ", self.G.Name, self.ID, userID, self.T.SitterCount)
 }
 
 // DeletePlayer 从玩家列表中踢出
@@ -202,12 +202,12 @@ func (self *Game) DeletePlayer(userID int64) {
 	defer self.lock.Unlock()
 	self.PlayerList = SliceRemoveDuplicate(self.PlayerList).([]int64)
 	self.PlayerList = DeleteValue(self.PlayerList, userID).([]int64)
-	self.T.MaxOnline = int32(len(self.PlayerList))
-	//if self.T.MaxOnline < INVALID {
-	//	self.T.MaxOnline = INVALID
+	self.T.SitterCount = int32(len(self.PlayerList))
+	//if self.T.SitterCount < INVALID {
+	//	self.T.SitterCount = INVALID
 	//}
-	redis.RedisHandle().Set(GetGameKey(self.ID), self.T.MaxOnline, 0)
-	log.Release("[%v:%v]\t[剔除]玩家ID:%v 当前玩家数:%v ", self.G.Name, self.ID, userID, self.T.MaxOnline)
+	redis.RedisHandle().Set(GetGameKey(self.ID), self.T.SitterCount, 0)
+	log.Release("[%v:%v]\t[剔除]玩家ID:%v 当前玩家数:%v ", self.G.Name, self.ID, userID, self.T.SitterCount)
 
 }
 
@@ -241,7 +241,7 @@ func (self *Game) AddChair(person *Player) bool {
 		return true
 	}
 	size := self.Sitter.Length() + 1
-	if self.T.MaxChair != INVALID && self.T.MaxChair < int32(size) {
+	if self.G.MaxCount != INVALID && self.G.MaxCount < int32(size) {
 		return false
 	}
 	//添加桌子号
@@ -891,17 +891,17 @@ func (self *GamesManger) GetTables(kindID int32, level int32) (tables *protoMsg.
 				GameID: game.ID,
 				//Info:&info,
 				Info: &protoMsg.TableInfo{
-					HostID:     game.T.HostID,
-					Name:       game.T.Name,
-					Password:   "",
-					State:      game.T.State,
-					EnterScore: game.T.EnterScore,
-					LessScore:  game.T.LessScore,
-					PlayScore:  game.T.PlayScore,
-					Commission: 100 - game.T.Commission,
-					MaxChair:   game.T.MaxChair,
-					Amount:     game.T.Amount,
-					MaxOnline:  game.T.MaxOnline,
+					HostID:      game.T.HostID,
+					Name:        game.T.Name,
+					Password:    "",
+					State:       game.T.State,
+					EnterScore:  game.T.EnterScore,
+					LessScore:   game.T.LessScore,
+					PlayScore:   game.T.PlayScore,
+					Commission:  100 - game.T.Commission,
+					MaxChair:    game.G.MaxCount,
+					Amount:      game.T.Amount,
+					SitterCount: game.T.SitterCount,
 				},
 			}
 			tables.Items = CopyInsert(tables.Items, len(tables.Items), item).([]*protoMsg.TableItem)
@@ -999,6 +999,8 @@ func (self *GamesManger) Match(game *Game, person *Player, product ProductCallba
 	// 非电玩城类的,则为其添加座位
 	if game.G.Type != protoMsg.GameType_GamesCity && !game.AddChair(person) {
 		log.Debug("[配桌]\t GID%v UID:%v 无法新增座位(已满员)", game.ID, person.UserID)
+		// 新增游戏 游戏ID为0,并安排新座位
+
 		return nil, Game39
 	}
 
@@ -1151,7 +1153,7 @@ func (self *GamesManger) UpdateTableList(gInfo *protoMsg.GameInfo, butID int64, 
 			PageNum: INVALID,
 		}
 		//仅记录最后一页数据
-		if tables != nil && MaxPage < len(tables.Items) {
+		if MaxPage < len(tables.Items) {
 			items := make([]*protoMsg.TableItem, 0)
 			maxPage = IndexStart
 			for i := 0; i < len(tables.Items); i++ {

@@ -2,7 +2,6 @@ package internal
 
 import (
 	"fmt"
-	"math/rand"
 	"reflect"
 	"sort"
 	"strconv"
@@ -15,9 +14,9 @@ import (
 	"superman/nodes/leaf/jettengame/sql/redis"
 	"time"
 
+	uuid "github.com/google/uuid"
 	"github.com/po2656233/goleaf/gate"
 	"github.com/po2656233/goleaf/log"
-	uuid "github.com/satori/go.uuid"
 	"superman/nodes/leaf/jettengame/gamedata/goclib/util"
 )
 
@@ -95,8 +94,7 @@ func handleRegister(args []interface{}) {
 	}
 
 	//由平台生成唯一标识
-	identity := uuid.NewV4().String()
-	rand.Seed(time.Now().Unix())
+	identity := uuid.New().String()
 	strconv.FormatInt(int64(len(m.Password)), 10)
 	//数据库新增用户信息
 	user := model.User{

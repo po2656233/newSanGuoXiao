@@ -8,8 +8,8 @@ import (
 	sgxLogger "github.com/po2656233/superplace/logger"
 	cerror "github.com/po2656233/superplace/logger/error"
 	"superman/internal/conf"
+	"superman/internal/constant"
 	"superman/internal/hints"
-	"superman/internal/session_key"
 )
 
 type (
@@ -18,7 +18,7 @@ type (
 )
 
 func (quickSdk) SdkId() int32 {
-	return QuickSDK
+	return constant.QuickSDK
 }
 
 func (quickSdk) Login(config *conf.SdkRow, params Params, callback Callback) {
@@ -55,11 +55,11 @@ func (quickSdk) Login(config *conf.SdkRow, params Params, callback Callback) {
 	}
 
 	callback(code.OK, map[string]string{
-		sessionKey.OpenID: uid, //返回 quick的uid做为 open id
+		constant.OpenID: uid, //返回 quick的uid做为 open id
 	})
 }
 
-func (s quickSdk) PayCallback(config *conf.SdkRow, c *sgxGin.Context) {
+func (s quickSdk) PayCallback(_ *conf.SdkRow, c *sgxGin.Context) {
 	// TODO 这里实现quick sdk 支付回调的逻辑
 	c.RenderHTML("FAIL")
 }

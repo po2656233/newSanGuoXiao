@@ -11,10 +11,8 @@ var jspb = require('google-protobuf');
 var goog = jspb;
 var global = Function('return this')();
 
-var game_pb = require('./game_pb.js');
-goog.object.extend(proto, game_pb);
-var player_pb = require('./player_pb.js');
-goog.object.extend(proto, player_pb);
+var baseinfo_pb = require('./baseinfo_pb.js');
+goog.object.extend(proto, baseinfo_pb);
 goog.exportSymbol('proto.pb.TigerXdragonBetReq', null, global);
 goog.exportSymbol('proto.pb.TigerXdragonBetResp', null, global);
 goog.exportSymbol('proto.pb.TigerXdragonCheckoutResp', null, global);
@@ -344,7 +342,7 @@ proto.pb.TigerXdragonSceneResp.toObject = function(includeInstance, msg) {
     awardareasList: msg.getAwardareasList_asB64(),
     areabetsList: jspb.Message.getRepeatedField(msg, 5),
     mybetsList: jspb.Message.getRepeatedField(msg, 6),
-    allplayers: (f = msg.getAllplayers()) && player_pb.PlayerListInfo.toObject(includeInstance, f)
+    allplayers: (f = msg.getAllplayers()) && baseinfo_pb.PlayerList.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -406,8 +404,8 @@ proto.pb.TigerXdragonSceneResp.deserializeBinaryFromReader = function(msg, reade
       msg.setMybetsList(value);
       break;
     case 7:
-      var value = new player_pb.PlayerListInfo;
-      reader.readMessage(value,player_pb.PlayerListInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.PlayerList;
+      reader.readMessage(value,baseinfo_pb.PlayerList.deserializeBinaryFromReader);
       msg.setAllplayers(value);
       break;
     default:
@@ -486,7 +484,7 @@ proto.pb.TigerXdragonSceneResp.serializeBinaryToWriter = function(message, write
     writer.writeMessage(
       7,
       f,
-      player_pb.PlayerListInfo.serializeBinaryToWriter
+      baseinfo_pb.PlayerList.serializeBinaryToWriter
     );
   }
 };
@@ -675,16 +673,16 @@ proto.pb.TigerXdragonSceneResp.prototype.clearMybetsList = function() {
 
 
 /**
- * optional PlayerListInfo allPlayers = 7;
- * @return {?proto.pb.PlayerListInfo}
+ * optional PlayerList allPlayers = 7;
+ * @return {?proto.pb.PlayerList}
  */
 proto.pb.TigerXdragonSceneResp.prototype.getAllplayers = function() {
-  return /** @type{?proto.pb.PlayerListInfo} */ (
-    jspb.Message.getWrapperField(this, player_pb.PlayerListInfo, 7));
+  return /** @type{?proto.pb.PlayerList} */ (
+    jspb.Message.getWrapperField(this, baseinfo_pb.PlayerList, 7));
 };
 
 
-/** @param {?proto.pb.PlayerListInfo|undefined} value */
+/** @param {?proto.pb.PlayerList|undefined} value */
 proto.pb.TigerXdragonSceneResp.prototype.setAllplayers = function(value) {
   jspb.Message.setWrapperField(this, 7, value);
 };
@@ -737,7 +735,7 @@ proto.pb.TigerXdragonStateStartResp.prototype.toObject = function(opt_includeIns
  */
 proto.pb.TigerXdragonStateStartResp.toObject = function(includeInstance, msg) {
   var obj = {
-    times: (f = msg.getTimes()) && game_pb.TimeInfo.toObject(includeInstance, f),
+    times: (f = msg.getTimes()) && baseinfo_pb.TimeInfo.toObject(includeInstance, f),
     inning: jspb.Message.getFieldWithDefault(msg, 2, "")
   };
 
@@ -776,8 +774,8 @@ proto.pb.TigerXdragonStateStartResp.deserializeBinaryFromReader = function(msg, 
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new game_pb.TimeInfo;
-      reader.readMessage(value,game_pb.TimeInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.TimeInfo;
+      reader.readMessage(value,baseinfo_pb.TimeInfo.deserializeBinaryFromReader);
       msg.setTimes(value);
       break;
     case 2:
@@ -818,7 +816,7 @@ proto.pb.TigerXdragonStateStartResp.serializeBinaryToWriter = function(message, 
     writer.writeMessage(
       1,
       f,
-      game_pb.TimeInfo.serializeBinaryToWriter
+      baseinfo_pb.TimeInfo.serializeBinaryToWriter
     );
   }
   f = message.getInning();
@@ -837,7 +835,7 @@ proto.pb.TigerXdragonStateStartResp.serializeBinaryToWriter = function(message, 
  */
 proto.pb.TigerXdragonStateStartResp.prototype.getTimes = function() {
   return /** @type{?proto.pb.TimeInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.TimeInfo, 1));
+    jspb.Message.getWrapperField(this, baseinfo_pb.TimeInfo, 1));
 };
 
 
@@ -909,7 +907,7 @@ proto.pb.TigerXdragonStatePlayingResp.prototype.toObject = function(opt_includeI
  */
 proto.pb.TigerXdragonStatePlayingResp.toObject = function(includeInstance, msg) {
   var obj = {
-    times: (f = msg.getTimes()) && game_pb.TimeInfo.toObject(includeInstance, f)
+    times: (f = msg.getTimes()) && baseinfo_pb.TimeInfo.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -947,8 +945,8 @@ proto.pb.TigerXdragonStatePlayingResp.deserializeBinaryFromReader = function(msg
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new game_pb.TimeInfo;
-      reader.readMessage(value,game_pb.TimeInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.TimeInfo;
+      reader.readMessage(value,baseinfo_pb.TimeInfo.deserializeBinaryFromReader);
       msg.setTimes(value);
       break;
     default:
@@ -985,7 +983,7 @@ proto.pb.TigerXdragonStatePlayingResp.serializeBinaryToWriter = function(message
     writer.writeMessage(
       1,
       f,
-      game_pb.TimeInfo.serializeBinaryToWriter
+      baseinfo_pb.TimeInfo.serializeBinaryToWriter
     );
   }
 };
@@ -997,7 +995,7 @@ proto.pb.TigerXdragonStatePlayingResp.serializeBinaryToWriter = function(message
  */
 proto.pb.TigerXdragonStatePlayingResp.prototype.getTimes = function() {
   return /** @type{?proto.pb.TimeInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.TimeInfo, 1));
+    jspb.Message.getWrapperField(this, baseinfo_pb.TimeInfo, 1));
 };
 
 
@@ -1054,7 +1052,7 @@ proto.pb.TigerXdragonStateOpenResp.prototype.toObject = function(opt_includeInst
  */
 proto.pb.TigerXdragonStateOpenResp.toObject = function(includeInstance, msg) {
   var obj = {
-    times: (f = msg.getTimes()) && game_pb.TimeInfo.toObject(includeInstance, f),
+    times: (f = msg.getTimes()) && baseinfo_pb.TimeInfo.toObject(includeInstance, f),
     openinfo: (f = msg.getOpeninfo()) && proto.pb.TigerXdragonOpenResp.toObject(includeInstance, f)
   };
 
@@ -1093,8 +1091,8 @@ proto.pb.TigerXdragonStateOpenResp.deserializeBinaryFromReader = function(msg, r
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new game_pb.TimeInfo;
-      reader.readMessage(value,game_pb.TimeInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.TimeInfo;
+      reader.readMessage(value,baseinfo_pb.TimeInfo.deserializeBinaryFromReader);
       msg.setTimes(value);
       break;
     case 2:
@@ -1136,7 +1134,7 @@ proto.pb.TigerXdragonStateOpenResp.serializeBinaryToWriter = function(message, w
     writer.writeMessage(
       1,
       f,
-      game_pb.TimeInfo.serializeBinaryToWriter
+      baseinfo_pb.TimeInfo.serializeBinaryToWriter
     );
   }
   f = message.getOpeninfo();
@@ -1156,7 +1154,7 @@ proto.pb.TigerXdragonStateOpenResp.serializeBinaryToWriter = function(message, w
  */
 proto.pb.TigerXdragonStateOpenResp.prototype.getTimes = function() {
   return /** @type{?proto.pb.TimeInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.TimeInfo, 1));
+    jspb.Message.getWrapperField(this, baseinfo_pb.TimeInfo, 1));
 };
 
 
@@ -1246,7 +1244,7 @@ proto.pb.TigerXdragonStateOverResp.prototype.toObject = function(opt_includeInst
  */
 proto.pb.TigerXdragonStateOverResp.toObject = function(includeInstance, msg) {
   var obj = {
-    times: (f = msg.getTimes()) && game_pb.TimeInfo.toObject(includeInstance, f)
+    times: (f = msg.getTimes()) && baseinfo_pb.TimeInfo.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -1284,8 +1282,8 @@ proto.pb.TigerXdragonStateOverResp.deserializeBinaryFromReader = function(msg, r
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new game_pb.TimeInfo;
-      reader.readMessage(value,game_pb.TimeInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.TimeInfo;
+      reader.readMessage(value,baseinfo_pb.TimeInfo.deserializeBinaryFromReader);
       msg.setTimes(value);
       break;
     default:
@@ -1322,7 +1320,7 @@ proto.pb.TigerXdragonStateOverResp.serializeBinaryToWriter = function(message, w
     writer.writeMessage(
       1,
       f,
-      game_pb.TimeInfo.serializeBinaryToWriter
+      baseinfo_pb.TimeInfo.serializeBinaryToWriter
     );
   }
 };
@@ -1334,7 +1332,7 @@ proto.pb.TigerXdragonStateOverResp.serializeBinaryToWriter = function(message, w
  */
 proto.pb.TigerXdragonStateOverResp.prototype.getTimes = function() {
   return /** @type{?proto.pb.TimeInfo} */ (
-    jspb.Message.getWrapperField(this, game_pb.TimeInfo, 1));
+    jspb.Message.getWrapperField(this, baseinfo_pb.TimeInfo, 1));
 };
 
 

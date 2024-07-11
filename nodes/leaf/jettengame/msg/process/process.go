@@ -4,9 +4,9 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"github.com/golang/protobuf/proto"
 	"github.com/po2656233/goleaf/chanrpc"
 	"github.com/po2656233/goleaf/log"
+	"google.golang.org/protobuf/proto"
 	"math"
 	"reflect"
 	"strings"
@@ -186,7 +186,7 @@ func (p *Processor) Unmarshal(data []byte) (interface{}, error) {
 		return MsgRaw{id, data[2:]}, nil
 	} else {
 		msg := reflect.New(i.msgType.Elem()).Interface()
-		return msg, proto.UnmarshalMerge(data[2:], msg.(proto.Message))
+		return msg, proto.Unmarshal(data[2:], msg.(proto.Message))
 	}
 }
 

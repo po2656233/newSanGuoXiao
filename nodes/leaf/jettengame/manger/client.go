@@ -3,9 +3,9 @@ package manger
 import (
 	"encoding/binary"
 	"errors"
-	"github.com/golang/protobuf/proto"
 	"github.com/po2656233/goleaf/gate"
 	"github.com/po2656233/goleaf/log"
+	"google.golang.org/protobuf/proto"
 	"math/rand"
 	"strconv"
 	protoMsg "superman/internal/protocol/gofile"
@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-// userID agent
+// ClientManger
 type ClientManger struct {
 	sync.Map
 }
@@ -24,7 +24,7 @@ type ClientManger struct {
 var clientManger *ClientManger = nil
 var clientOnce sync.Once
 
-// 玩家管理对象(单例模式)//manger.persons = make(map[int64]*Person)
+// GetClientManger 玩家管理对象(单例模式)//manger.persons = make(map[int64]*Person)
 func GetClientManger() *ClientManger {
 	clientOnce.Do(func() {
 		clientManger = &ClientManger{
