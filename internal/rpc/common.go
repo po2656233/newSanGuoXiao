@@ -14,10 +14,13 @@ import (
 )
 
 const (
+	SourcePath   = ".system"
 	OpsActor     = ".ops"
 	AccountActor = ".account"
-	SourcePath   = ".system"
+	HomeActor    = ".home"
 	CenterType   = "center"
+	GameType     = "game"
+	WebType      = "web"
 )
 
 const (
@@ -78,11 +81,14 @@ func SendData(app facade.IApplication, source, actorID, nodeType string, req pro
 	r1Size := len(Request1)
 	r2Size := len(Request1)
 	if funcName == "PingReq" {
+		funcName = "Ping"
 		respTypeName = strings.Replace(fullName, "PingReq", "PongResp", -1)
 	} else if r1Size < fSize && fullName[fSize-r1Size:] == Request1 {
 		respTypeName = fullName[:fSize-r1Size] + Response1
+		funcName = strings.TrimSuffix(funcName, Request1)
 	} else if r2Size < fSize && fullName[fSize-r2Size:] == Request2 {
 		respTypeName = fullName[:fSize-r2Size] + Response2
+		funcName = strings.TrimSuffix(funcName, Request2)
 	}
 
 	target := GetTargetPath(app, actorID, nodeType)

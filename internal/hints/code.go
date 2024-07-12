@@ -216,6 +216,7 @@ var StatusText = map[int]string{
 
 	Service001: "SDK无效",
 	Service002: "PID无效",
+	Service003: "CID无效",
 }
 
 // 标题
@@ -479,6 +480,7 @@ const (
 	_ = 30000 + iota //游戏清场
 	Service001
 	Service002
+	Service003
 )
 
 /* 主要用于求取某位上是否 是1值

@@ -8,6 +8,7 @@ import (
 	"superman/internal/component/check_center"
 	"superman/internal/conf"
 	"superman/nodes/web/controller"
+	"superman/nodes/web/middleware"
 	"superman/nodes/web/sdk"
 )
 
@@ -40,7 +41,7 @@ func httpServerComponent(addr string) *superGin.Component {
 	// new http server
 	httpServer := superGin.NewHttp("http_server", addr)
 	httpServer.Use(superGin.Cors())
-	httpServer.Use(controller.AuthRequired())
+	httpServer.Use(middleware.AuthRequired())
 	// http server使用gin组件搭建，这里增加一个RecoveryWithZap中间件
 	httpServer.Use(superGin.RecoveryWithZap(true))
 

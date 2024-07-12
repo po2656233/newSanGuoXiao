@@ -22,10 +22,10 @@ func (p *ActorOps) AliasID() string {
 
 // OnInit 注册remote函数
 func (p *ActorOps) OnInit() {
-	p.Remote().Register(p.PingReq)
+	p.Remote().Register(p.Ping)
 }
 
 // Ping 请求center是否响应
-func (p *ActorOps) PingReq() (*pb.Bool, int32) {
+func (p *ActorOps) Ping() (*pb.Bool, int32) {
 	return pingReturn, code.OK
 }

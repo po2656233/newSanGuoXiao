@@ -176,6 +176,8 @@
 	"268": "HowPlayReq",
 	"269": "HowPlayResp",
 	"27": "Int32Map",
+	"270": "GetClassListReq",
+	"271": "GetClassListResp",
 	"28": "Int32Int64Map",
 	"29": "StringKeyValue",
 	"3": "BaccaratStatePlayingResp",

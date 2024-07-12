@@ -24,7 +24,6 @@ func (devSdk) SdkId() int32 {
 func (p devSdk) Login(_ *conf.SdkRow, params Params, callback Callback) {
 	accountName, _ := params.GetString(Username)
 	password, _ := params.GetString(Password)
-
 	if accountName == "" || password == "" {
 		err := sgxError.Errorf("account or password params is empty.")
 		callback(hints.Login08, nil, err)

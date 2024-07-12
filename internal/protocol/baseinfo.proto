@@ -318,7 +318,7 @@ message TaskItem{
 }
 //分类项
 message ClassItem{
-  int64 id = 1;       // 标识[必要项]
+  int32 id = 1;       // 标识[必要项]
   string name = 2;    // 分类名称
   string enName = 3;  // 英文
 }

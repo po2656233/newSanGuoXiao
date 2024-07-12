@@ -8,6 +8,7 @@ import (
 	"superman/internal/conf"
 	"superman/nodes/center/db"
 	"superman/nodes/center/module/account"
+	"superman/nodes/center/module/home"
 	"superman/nodes/center/module/ops"
 )
 
@@ -27,6 +28,7 @@ func Run(profileFilePath, nodeId string) {
 	app.AddActors(
 		&actors.ActorDB{},
 		&account.ActorAccount{},
+		&home.ActorHome{},
 		&ops.ActorOps{},
 	)
 	app.Startup()

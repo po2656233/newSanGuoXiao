@@ -252,7 +252,6 @@ func (x *RegisterResp) GetIp() string {
 	return ""
 }
 
-// 走web服时,该项忽略
 // 登陆请求(建立连接后的第一条消息，验证通过后则进行后续流程)
 type LoginRequest struct {
 	state         protoimpl.MessageState

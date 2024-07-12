@@ -22,13 +22,13 @@ func (p *ActorAccount) AliasID() string {
 
 // OnInit center为后端节点，不直接与客户端通信，所以了一些remote函数，供RPC调用
 func (p *ActorAccount) OnInit() {
-	p.Remote().Register(p.RegisterReq)
-	p.Remote().Register(p.LoginReq)
-	p.Remote().Register(p.GetUserIDReq)
+	p.Remote().Register(p.Register)
+	p.Remote().Register(p.Login)
+	p.Remote().Register(p.GetUserID)
 }
 
-// RegisterReq 注册开发者帐号
-func (p *ActorAccount) RegisterReq(req *pb.RegisterReq) (*pb.RegisterResp, int32) {
+// Register 注册开发者帐号
+func (p *ActorAccount) Register(req *pb.RegisterReq) (*pb.RegisterResp, int32) {
 	accountName := req.Name
 	password := req.Password
 
@@ -53,8 +53,8 @@ func (p *ActorAccount) RegisterReq(req *pb.RegisterReq) (*pb.RegisterResp, int32
 	return resp, code.OK
 }
 
-// LoginReq 根据帐号名获取开发者帐号表
-func (p *ActorAccount) LoginReq(req *pb.LoginReq) (*pb.LoginResp, int32) {
+// Login 根据帐号名获取开发者帐号表
+func (p *ActorAccount) Login(req *pb.LoginReq) (*pb.LoginResp, int32) {
 	accountName := req.Account
 	password := req.Password
 
@@ -74,8 +74,8 @@ func (p *ActorAccount) LoginReq(req *pb.LoginReq) (*pb.LoginResp, int32) {
 	return resp, code.OK
 }
 
-// GetUserIDReq 获取uid
-func (p *ActorAccount) GetUserIDReq(req *pb.GetUserIDReq) (*pb.GetUserIDResp, int32) {
+// GetUserID 获取uid
+func (p *ActorAccount) GetUserID(req *pb.GetUserIDReq) (*pb.GetUserIDResp, int32) {
 	uid, ok := db2.BindUID(req.SdkId, req.Pid, req.OpenId)
 	if uid == 0 || ok == false {
 		return nil, hints.Login07

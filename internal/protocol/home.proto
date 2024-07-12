@@ -7,6 +7,41 @@ import "baseinfo.proto";
 /////////////[优秀如你]-->Req:请求 Resp:反馈<--[交互专用]///////////////////////////////////
 /////////////[优秀如你]-->Req:请求 Resp:反馈<--[交互专用]///////////////////////////////////
 /////////////////选择操作///////////////////////////////////
+//获取分类
+message GetClassListReq{
+}
+message GetClassListResp{
+  ClassList items = 1;
+}
+//获取房间列表
+message GetRoomListReq{
+  int64 uid = 1;
+}
+message GetRoomListResp{
+  RoomList items = 1;
+}
+//获取牌桌列表(同获取游戏列表)
+message GetTableListReq{
+  int64 rid = 1;
+}
+message GetTableListResp{
+  TableList items = 1;
+}
+//获取游戏列表
+message GetGameListReq{
+  int64 rid = 1;
+}
+message GetGameListResp{
+  GameList items = 1;
+}
+//获取游戏列表
+message GetTaskListReq{
+  int64 uid = 1;
+}
+message GetTaskListResp{
+  TaskList items = 1;
+}
+//////////////////////////////////////////////////////
 //选择分类
 message ChooseClassReq{
   int32 id = 1;             //分类编号
@@ -34,6 +69,24 @@ message ChooseTableResp{
   int64 tableId = 1;          // 桌台ID
   int64 tableNum = 2;         // 桌台编号
   GameInfo info = 3;          // 游戏信息
+}
+//创建房间
+message CreateRoomReq {
+  int64  hostId = 1;  // 房主ID
+  int32  level = 2;   // 房间级别(类型)
+  string  name = 3;   // 房间名称
+  string  roomKey = 4;// 房间钥匙
+  int64  enterScore = 5;// 准入分数
+  int32  onlineCount = 6;// 当前在线人数
+  int32  robotCount = 7;// 机器人数量
+  int32  maxCount = 8;// 人数上限
+  string  mark = 9;//备注
+}
+message CreateRoomResp {
+  int64 roomId = 1;   // 房间ID
+  int64  hostId = 2;  // 房主ID
+  string  name = 3;   // 房间名称
+  string  roomKey = 4;// 房间钥匙
 }
 //配置游戏(房卡模式)
 message SettingRoomReq {

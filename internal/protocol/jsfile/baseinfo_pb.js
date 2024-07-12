@@ -6190,7 +6190,7 @@ proto.pb.ClassItem.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {number} */ (reader.readInt64());
+      var value = /** @type {number} */ (reader.readInt32());
       msg.setId(value);
       break;
     case 2:
@@ -6232,7 +6232,7 @@ proto.pb.ClassItem.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
   f = message.getId();
   if (f !== 0) {
-    writer.writeInt64(
+    writer.writeInt32(
       1,
       f
     );
@@ -6255,7 +6255,7 @@ proto.pb.ClassItem.serializeBinaryToWriter = function(message, writer) {
 
 
 /**
- * optional int64 id = 1;
+ * optional int32 id = 1;
  * @return {number}
  */
 proto.pb.ClassItem.prototype.getId = function() {

@@ -29,7 +29,6 @@ message RegisterResp{
   int32  serverId = 5; // 所在游戏服id
   string ip = 6;       // 请求ip
 }
-
 // 登陆请求(建立连接后的第一条消息，验证通过后则进行后续流程)
 message LoginRequest {
   int32              serverId = 1;   // 当前登陆的服务器id
