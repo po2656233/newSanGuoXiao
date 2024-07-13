@@ -250,14 +250,15 @@ message RoomInfo{
 message TableInfo{
   int64    id = 1;
   int32    num = 2;         // 桌台编号(在房间内的编号)
-  int64    rid = 3;         // 房间ID
-  int64    gid = 4;         // 绑定的游戏ID
-  int64    openTime = 5;    // 开启时间
-  int64    taxation = 6;    // 固定税收
-  int32    commission = 7;  // 每局税收
-  int32    amount = 8;      // 总共场数
-  int64    playScore = 9;   // 初始积分(携带的积分)
-  int32    sitterCount = 10;     // 客人数量(即:当前玩家数量)
+  string   name = 3;        // 桌牌名称
+  int64    rid = 4;         // 房间ID
+  int64    gid = 5;         // 绑定的游戏ID
+  int64    openTime = 6;    // 开启时间
+  int64    taxation = 7;    // 固定税收
+  int32    commission = 8;  // 每局税收
+  int32    amount = 9;      // 总共场数
+  int64    playScore = 10;   // 初始积分(携带的积分)
+  int32    sitterCount = 11;     // 客人数量(即:当前玩家数量)
 }
 //////////////////////////////////[游戏信息]/////////////////////////////////////////
 //时间信息
@@ -294,13 +295,14 @@ message AreaInfo {
 //游戏信息
 message GameInfo{
   int64 id = 1;           // 游戏ID
-  int32 kindID = 2;       // 游戏种类(类型)
+  int32 kid = 2;          // 游戏种类(类型)
   string  name = 3;       // 游戏名称
-  int32 level = 4;        // 游戏类别 0:普通 1:中级 2:高级 3:积分排位 4:淘汰制排位
-  int64 lessScore = 5;    // 底分
+//  int32 level = 4;        // 游戏类别 0:普通 1:中级 2:高级 3:积分排位 4:淘汰制排位
+  int64 lessscore = 5;    // 底分
   GameScene scene = 6;    // 游戏场景
   GameState state = 7;    // 游戏状态
   int32 maxCount = 8;     // 最大人数
+  string howToPlay = 9;
 }
 ////////////////////主页信息(起始信息,优先获取)///////////////////////////////////////
 //主页信息

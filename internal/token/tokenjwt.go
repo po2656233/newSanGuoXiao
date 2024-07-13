@@ -38,12 +38,13 @@ func VerifyToken(ctx *superGin.Context, tokenString string) (int, string) {
 	return http.StatusOK, ""
 }
 
-func CreateToken(username string, timeout time.Duration) (string, error) {
+func CreateToken(uid int64, username string, timeout time.Duration) (string, error) {
 	// 生成一个JWT Token
 	tokenObj := jwt.New(jwt.SigningMethodHS256)
 	claims := tokenObj.Claims.(jwt.MapClaims)
 	claims["sub"] = "UserLogin"                    // subject
 	claims["iss"] = username                       // name
+	claims["jti"] = fmt.Sprintf("%d", uid)         // ID
 	claims["iat"] = time.Now().Unix()              // issued at
 	claims["exp"] = time.Now().Add(timeout).Unix() // expiration time
 	// 签名Token

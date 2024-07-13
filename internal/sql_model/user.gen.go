@@ -43,8 +43,6 @@ type User struct {
 	Signintime   int64          `gorm:"column:signintime;comment:注册时间" json:"signintime"`               // 注册时间
 	Logintime    int64          `gorm:"column:logintime;comment:登陆时间" json:"logintime"`                 // 登陆时间
 	Leavetime    int64          `gorm:"column:leavetime;comment:离开时间" json:"leavetime"`                 // 离开时间
-	Friends      string         `gorm:"column:friends;comment:朋友列表" json:"friends"`                     // 朋友列表
-	Applylist    string         `gorm:"column:applylist;comment:请求通过的好友列表" json:"applylist"`            // 请求通过的好友列表
 	Remark       string         `gorm:"column:remark;comment:备注" json:"remark"`                         // 备注
 	CreatedAt    time.Time      `gorm:"column:created_at" json:"created_at"`
 	UpdatedAt    time.Time      `gorm:"column:updated_at" json:"updated_at"`

@@ -10,6 +10,7 @@ const TableNameTable = "table"
 type Table struct {
 	ID          int64  `gorm:"column:id;primaryKey;autoIncrement:true;comment:桌子ID" json:"id"` // 桌子ID
 	Num         int32  `gorm:"column:num;not null;comment:编号" json:"num"`                      // 编号
+	Name        string `gorm:"column:name;comment:名称" json:"name"`                             // 名称
 	Rid         int64  `gorm:"column:rid;not null;comment:房间ID" json:"rid"`                    // 房间ID
 	Gid         int64  `gorm:"column:gid;not null;comment:游戏ID" json:"gid"`                    // 游戏ID
 	Opentime    int64  `gorm:"column:opentime;comment:开桌时间" json:"opentime"`                   // 开桌时间

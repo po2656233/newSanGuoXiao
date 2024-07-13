@@ -28,13 +28,19 @@ func (self *ActorDB) AliasID() string {
 func (self *ActorDB) OnInit() {
 	self.Remote().Register(self.Register)
 	self.Remote().Register(self.Login)
-	self.Remote().Register(self.ClassList)
+	self.Remote().Register(self.GetClassList)
+	self.Remote().Register(self.GetRoomList)
+	self.Remote().Register(self.GetTableList)
+	self.Remote().Register(self.GetGameList)
+
+	self.Remote().Register(self.CreateRoom)
+	self.Remote().Register(self.CreateTable)
+
 	self.changeDB(CenterDb)
 	//// 每秒查询一次db
 	//p.Timer().Add(5*time.Second, p.selectDB)
 	//// 1秒后进行一次分页查询
 	//p.Timer().AddOnce(1*time.Second, p.selectPagination)
-
 }
 func (self *ActorDB) changeDB(dbNode string) {
 	if self.curDB == dbNode {
@@ -60,7 +66,7 @@ func (self *ActorDB) changeDB(dbNode string) {
 	dbID := self.App().Settings().GetConfig(DbList).GetString(dbNode)
 	if self.db != nil {
 		dbObj, _ := self.db.DB()
-		dbObj.Close()
+		_ = dbObj.Close()
 		self.db = nil
 	}
 	self.db = gormCpt.GetDb(dbID)
@@ -77,7 +83,8 @@ func (self *ActorDB) changeDB(dbNode string) {
 func (self *ActorDB) AddUser(user sqlmodel.User) (int64, error) {
 	self.Lock()
 	defer self.Unlock()
-	if 0 < self.CheckUser(user.Account) {
+	uid := self.CheckUser(user.Account)
+	if 0 < uid {
 		return 0, errors.New("用户已经存在")
 	}
 	// SignInTime
@@ -91,6 +98,57 @@ func (self *ActorDB) AddUser(user sqlmodel.User) (int64, error) {
 	return user.ID, nil
 }
 
+// AddRoom 新增房间
+func (self *ActorDB) AddRoom(room sqlmodel.Room) (int64, error) {
+	self.Lock()
+	defer self.Unlock()
+	rid := self.CheckRoom(room.Hostid, room.Name)
+	if 0 < rid {
+		return 0, errors.New("房间已经存在")
+	}
+	room.CreatedAt = time.Now()
+	err := self.db.Table(room.TableName()).Create(&room).Error
+	if !CheckError(err) {
+		return 0, err
+	}
+	return room.ID, nil
+}
+
+// AddTable 新增桌牌
+func (self *ActorDB) AddTable(table sqlmodel.Table) (int64, int32, error) {
+	// 开始事务
+	tx := self.db.Begin()
+
+	// 查询特定的gid和rid组合
+	if err := tx.Where("gid = ? AND rid = ?", table.Gid, table.Rid).First(&table).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			// 如果记录不存在，则创建新记录，num从1开始
+			table.Num = 1
+			if err = tx.Create(&table).Error; err != nil {
+				tx.Rollback()
+				return 0, 0, err
+				//panic("failed to create new record")
+			}
+		} else {
+			tx.Rollback()
+			return 0, 0, err
+		}
+	} else {
+		// 如果记录存在，则递增num字段
+		table.Num++
+		if err := tx.Save(&table).Error; err != nil {
+			tx.Rollback()
+			return 0, 0, err
+		}
+	}
+
+	// 提交事务
+	tx.Commit()
+	return table.ID, table.Num, nil
+}
+
+///////////////////////Check//////////////////////////////////////////////
+
 // CheckUser 获取玩家ID
 func (self *ActorDB) CheckUser(account string) (uid int64) {
 	user := sqlmodel.User{}
@@ -101,10 +159,18 @@ func (self *ActorDB) CheckUser(account string) (uid int64) {
 	return uid
 }
 
-// CheckRoom 获取玩家ID
-func (self *ActorDB) CheckRoom(hostid int64, name string) (count int64, err error) {
+// CheckRoom 检测房间是否包含
+func (self *ActorDB) CheckRoom(hostid int64, name string) (rid int64) {
 	room := sqlmodel.Room{}
-	err = self.db.Table(room.TableName()).Where("hostid = ? AND name = ?", hostid, name).Count(&count).Error
+	err := self.db.Table(room.TableName()).Select("id").Where("hostid = ? AND name = ?", hostid, name).Find(&rid).Error
+	CheckError(err)
+	return
+}
+
+// CheckTable 检测桌牌是否包含
+func (self *ActorDB) CheckTable(hostid int64, name string) (tid int64) {
+	room := sqlmodel.Table{}
+	err := self.db.Table(room.TableName()).Select("id").Where("hostid = ? AND name = ?", hostid, name).Find(&tid).Error
 	CheckError(err)
 	return
 }
@@ -118,6 +184,14 @@ func (self *ActorDB) GetUserInfo(account, password string) (*sqlmodel.User, erro
 	return user, err
 }
 
+// GetRoomInfo 获取玩家信息
+func (self *ActorDB) GetRoomInfo(rid int64) (*sqlmodel.Room, error) {
+	user := &sqlmodel.Room{}
+	err := self.db.Table(user.TableName()).Select("*").Where("id=?", rid).Find(user).Error
+	CheckError(err)
+	return user, err
+}
+
 // GetUserID 获取玩家ID
 func (self *ActorDB) GetUserID(account, password string) (uid int64, err error) {
 	user := &sqlmodel.User{}
@@ -126,6 +200,9 @@ func (self *ActorDB) GetUserID(account, password string) (uid int64, err error) 
 	CheckError(err)
 	return
 }
+
+//////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////
 
 // GetClassify 获取游戏种类
 func (self *ActorDB) GetClassify() (user []*sqlmodel.Kindinfo, err error) {
@@ -145,19 +222,37 @@ func (self *ActorDB) GetRooms(hostid int64) (rooms []*sqlmodel.Room, err error) 
 	return
 }
 
-// AddRoom 新增房间
-func (self *ActorDB) AddRoom(user sqlmodel.Room) (int64, error) {
-	self.Lock()
-	defer self.Unlock()
-	if 0 < self.CheckUser(user.Name) {
-		return 0, errors.New("房间已经存在")
+// GetTables 获取牌桌列表
+func (self *ActorDB) GetTables(rid int64) (tables []*sqlmodel.Table, err error) {
+	tables = make([]*sqlmodel.Table, 0)
+	table := &sqlmodel.Table{}
+	err = self.db.Table(table.TableName()).Select("*").Where("rid=?", rid).Find(&tables).Error
+	CheckError(err)
+	return
+}
+
+// GetGames 获取游戏列表
+func (self *ActorDB) GetGames(kid int64) (games []*sqlmodel.Game, err error) {
+	games = make([]*sqlmodel.Game, 0)
+	game := &sqlmodel.Game{}
+	err = self.db.Table(game.TableName()).Select("*").Where("kid=?", kid).Find(&games).Error
+	CheckError(err)
+	return
+}
+
+// GetAllGames 获取所有游戏列表
+func (self *ActorDB) GetAllGames(pageSize, pageNumber int) (games []*sqlmodel.Game, err error) {
+	games = make([]*sqlmodel.Game, 0)
+	game := &sqlmodel.Game{}
+	if pageSize < 0 {
+		pageSize = -1
 	}
-	user.CreatedAt = time.Now()
-	err := self.db.Table(user.TableName()).Create(&user).Error
-	if !CheckError(err) {
-		return 0, err
+	if pageNumber < 1 {
+		pageNumber = 1
 	}
-	return user.ID, nil
+	err = self.db.Table(game.TableName()).Limit(pageSize).Offset((pageNumber - 1) * pageSize).Find(&games).Error
+	CheckError(err)
+	return
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

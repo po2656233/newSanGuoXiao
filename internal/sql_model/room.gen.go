@@ -23,7 +23,7 @@ type Room struct {
 	OnlineCount int32          `gorm:"column:online_count;comment:当前在线人数" json:"online_count"`                       // 当前在线人数
 	RobotCount  int32          `gorm:"column:robot_count;comment:机器人数量" json:"robot_count"`                          // 机器人数量
 	MaxCount    int32          `gorm:"column:max_count;comment:人数上限" json:"max_count"`                               // 人数上限
-	Mark        string         `gorm:"column:mark;comment:备注" json:"mark"`                                           // 备注
+	Remark      string         `gorm:"column:remark;comment:备注" json:"remark"`                                       // 备注
 	CreatedAt   time.Time      `gorm:"column:created_at" json:"created_at"`
 	UpdatedAt   time.Time      `gorm:"column:updated_at" json:"updated_at"`
 	DeletedAt   gorm.DeletedAt `gorm:"column:deleted_at" json:"deleted_at"`

@@ -18,6 +18,7 @@ const (
 	OpsActor     = ".ops"
 	AccountActor = ".account"
 	HomeActor    = ".home"
+	DBActor      = ".db"
 	CenterType   = "center"
 	GameType     = "game"
 	WebType      = "web"
