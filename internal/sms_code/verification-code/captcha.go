@@ -12,7 +12,7 @@ import (
 
 var store = base64Captcha.DefaultMemStore
 
-//获取验证码
+// 获取验证码
 func MakeCaptcha(codeLen int) (string, string, error) {
 	//定义一个driver
 	var driver base64Captcha.Driver
@@ -71,7 +71,7 @@ func VerifyCaptchaCode(tag, inputCode, from string) error {
 	// 对比后马上删除
 	err = redisDb.Del(ctx, key).Err()
 	if err != nil {
-		fmt.Printf("redis del fail %v\n", err)
+		fmt.Printf("redis_cluster del fail %v\n", err)
 		return err
 	}
 

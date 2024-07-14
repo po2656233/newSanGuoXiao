@@ -35,7 +35,7 @@ func ValidateSmsCode(phone, code, from string) error {
 	// 对比后马上删除
 	err = redisDb.Del(ctx, key).Err()
 	if err != nil {
-		fmt.Printf("redis del fail %v\n", err)
+		fmt.Printf("redis_cluster del fail %v\n", err)
 		return err
 	}
 

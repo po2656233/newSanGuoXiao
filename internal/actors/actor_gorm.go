@@ -116,35 +116,27 @@ func (self *ActorDB) AddRoom(room sqlmodel.Room) (int64, error) {
 
 // AddTable 新增桌牌
 func (self *ActorDB) AddTable(table sqlmodel.Table) (int64, int32, error) {
-	// 开始事务
-	tx := self.db.Begin()
-
-	// 查询特定的gid和rid组合
-	if err := tx.Where("gid = ? AND rid = ?", table.Gid, table.Rid).First(&table).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			// 如果记录不存在，则创建新记录，num从1开始
-			table.Num = 1
-			if err = tx.Create(&table).Error; err != nil {
-				tx.Rollback()
-				return 0, 0, err
-				//panic("failed to create new record")
-			}
-		} else {
-			tx.Rollback()
-			return 0, 0, err
+	// 使用事务来确保操作的原子性
+	err := self.db.Transaction(func(tx *gorm.DB) error {
+		// 查询当前gid和rid组合下的最大num值
+		var currentMaxNum int32
+		err := tx.Model(&table).Where("gid = ? AND rid = ?", table.Gid, table.Rid).Select("max(num)").Scan(&currentMaxNum).Error
+		if err != nil {
+			return err
 		}
-	} else {
-		// 如果记录存在，则递增num字段
-		table.Num++
-		if err := tx.Save(&table).Error; err != nil {
-			tx.Rollback()
-			return 0, 0, err
-		}
-	}
 
-	// 提交事务
-	tx.Commit()
-	return table.ID, table.Num, nil
+		// 计算新的num值
+		table.Num = currentMaxNum + 1
+
+		// 创建一个新的记录
+		// 插入新的记录
+		if err := tx.Create(&table).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+	return table.ID, table.Num, err
 }
 
 ///////////////////////Check//////////////////////////////////////////////

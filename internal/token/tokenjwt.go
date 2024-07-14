@@ -5,6 +5,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	superGin "github.com/po2656233/superplace/components/gin"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -36,6 +37,18 @@ func VerifyToken(ctx *superGin.Context, tokenString string) (int, string) {
 		return http.StatusForbidden, fmt.Sprintf("Claims parse error: %v", err)
 	}
 	return http.StatusOK, ""
+}
+
+func GetIDForToken(tokenString string) (int64, error) {
+	token1, err := jwt.ParseWithClaims(tokenString, &jwt.RegisteredClaims{}, func(t *jwt.Token) (interface{}, error) { return jwtKey, nil })
+	if err != nil {
+		return -1, fmt.Errorf("access token parse error: %v. ", err)
+	}
+	claims, ok := token1.Claims.(*jwt.RegisteredClaims)
+	if !ok {
+		return -1, fmt.Errorf("token is broken")
+	}
+	return strconv.ParseInt(claims.ID, 10, 64)
 }
 
 func CreateToken(uid int64, username string, timeout time.Duration) (string, error) {

@@ -1,23 +1,29 @@
 package process
 
 import (
+	"context"
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"github.com/po2656233/goleaf/chanrpc"
-	"github.com/po2656233/goleaf/log"
+	"github.com/go-redis/redis/v8"
+	log "github.com/po2656233/superplace/logger"
 	"google.golang.org/protobuf/proto"
 	"math"
 	"reflect"
 	"strings"
-	"superman/nodes/leaf/jettengame/base"
-	"superman/nodes/leaf/jettengame/conf"
-	"superman/nodes/leaf/jettengame/sql/redis"
+	. "superman/internal/constant"
+	. "superman/internal/hints"
+	"superman/internal/redis_cluster"
+)
+
+const (
+	protoPackageName = "pb"
 )
 
 // -------------------------
 // | id | protobuf message |
 // -------------------------
+
 type Processor struct {
 	littleEndian bool
 	msgInfo      map[uint16]*MsgInfo
@@ -26,7 +32,7 @@ type Processor struct {
 
 type MsgInfo struct {
 	msgType       reflect.Type
-	msgRouter     *chanrpc.Server
+	msgRouter     *Server
 	msgHandler    MsgHandler
 	msgRawHandler MsgHandler
 }
@@ -38,21 +44,21 @@ type MsgRaw struct {
 	msgRawData []byte
 }
 
-var redisHandle = redis.RedisHandle()
+var redisHandle = redis_cluster.SingleRedis()
 
-func NewProcessor() *Processor {
+func NewProcessor(isLittleEndian bool) *Processor {
 	p := new(Processor)
-	p.littleEndian = conf.LittleEndian
+	p.littleEndian = isLittleEndian
 	p.msgID = make(map[reflect.Type]uint16)
 	return p
 }
 
-// It's dangerous to call the method on routing or marshaling (unmarshaling)
+// SetByteOrder It's dangerous to call the method on routing or marshaling (unmarshaling)
 func (p *Processor) SetByteOrder(littleEndian bool) {
 	p.littleEndian = littleEndian
 }
 
-// It's dangerous to call the method on routing or marshaling (unmarshaling)
+// Register It's dangerous to call the method on routing or marshaling (unmarshaling)
 func (p *Processor) Register(msg proto.Message) (uint16, string) {
 	msgType := reflect.TypeOf(msg)
 	if msgType == nil || msgType.Kind() != reflect.Ptr {
@@ -63,9 +69,13 @@ func (p *Processor) Register(msg proto.Message) (uint16, string) {
 	}
 
 	// 获取最大消息ID
-	fId, _, err := redisHandle.ZMaxScore(base.KeyMsgProto)
-	if err != nil && err.Error() != base.StatusText[base.Redis01] {
+	zVal, err := redisHandle.GetTopCount(context.Background(), KeyMsgProto, 1)
+	if err != nil && err.Error() != StatusText[Redis01] {
 		log.Fatal("max msgId can't set in redis_cluster err:%v", err)
+	}
+	fId := float64(0)
+	if 0 < len(zVal) {
+		fId = zVal[0].Score
 	}
 	maxId := uint16(fId)
 
@@ -74,13 +84,13 @@ func (p *Processor) Register(msg proto.Message) (uint16, string) {
 	if 0 == size {
 		p.msgInfo = make(map[uint16]*MsgInfo, 0)
 	}
-	if size >= math.MaxUint16 || int64(fId) >= math.MaxUint16 {
+	if size >= math.MaxUint16 || fId >= math.MaxUint16 {
 		log.Fatal("too many protobuf messages maxId:%f (max = %v) ", fId, math.MaxUint16)
 	}
 
 	//根据消息结构体名称 从redis里获取消息ID,若获取不到则从最大消息ID中
 	// 消息体名称
-	packageName := "*" + conf.ProtoPackageName + "."
+	packageName := "*" + protoPackageName + "."
 	strMsg := msgType.String()
 	if strings.Contains(strMsg, packageName) {
 		strMsg = strMsg[len(packageName):]
@@ -88,9 +98,14 @@ func (p *Processor) Register(msg proto.Message) (uint16, string) {
 
 	// 获取消息ID
 	id := maxId + 1
-	if fId, err = redisHandle.ZScore(base.KeyMsgProto, strMsg); err != nil || uint16(fId) == 0 {
-		err = redisHandle.ZAdd(base.KeyMsgProto, float64(id), strMsg).Err()
-		log.Release("[warn]%v was id in redis_cluster. ID(%v) err:%v", strMsg, id, err)
+	fVal := redisHandle.DB.ZScore(context.Background(), KeyMsgProto, strMsg)
+	fId = fVal.Val()
+	if fVal.Err() != nil || uint16(fId) == 0 {
+		err = redisHandle.DB.ZAdd(context.Background(), KeyMsgProto, &redis.Z{
+			Score:  float64(id),
+			Member: strMsg,
+		}).Err()
+		log.Warnf("[warn]%v was id in redis_cluster. ID(%v) err:%v", strMsg, id, err)
 	} else {
 		id = uint16(fId)
 	}
@@ -102,8 +117,8 @@ func (p *Processor) Register(msg proto.Message) (uint16, string) {
 	return id, strMsg
 }
 
-// It's dangerous to call the method on routing or marshaling (unmarshaling)
-func (p *Processor) SetRouter(msg proto.Message, msgRouter *chanrpc.Server) {
+// SetRouter It's dangerous to call the method on routing or marshaling (unmarshaling)
+func (p *Processor) SetRouter(msg proto.Message, msgRouter *Server) {
 	msgType := reflect.TypeOf(msg)
 	id, ok := p.msgID[msgType]
 	if !ok {
@@ -113,7 +128,7 @@ func (p *Processor) SetRouter(msg proto.Message, msgRouter *chanrpc.Server) {
 	p.msgInfo[id].msgRouter = msgRouter
 }
 
-// It's dangerous to call the method on routing or marshaling (unmarshaling)
+// SetHandler It's dangerous to call the method on routing or marshaling (unmarshaling)
 func (p *Processor) SetHandler(msg proto.Message, msgHandler MsgHandler) {
 	msgType := reflect.TypeOf(msg)
 	id, ok := p.msgID[msgType]
@@ -124,7 +139,7 @@ func (p *Processor) SetHandler(msg proto.Message, msgHandler MsgHandler) {
 	p.msgInfo[id].msgHandler = msgHandler
 }
 
-// It's dangerous to call the method on routing or marshaling (unmarshaling)
+// SetRawHandler It's dangerous to call the method on routing or marshaling (unmarshaling)
 func (p *Processor) SetRawHandler(id uint16, msgRawHandler MsgHandler) {
 	if id >= uint16(len(p.msgInfo)) {
 		log.Fatal("message id %v not registered", id)
@@ -133,7 +148,7 @@ func (p *Processor) SetRawHandler(id uint16, msgRawHandler MsgHandler) {
 	p.msgInfo[id].msgRawHandler = msgRawHandler
 }
 
-// goroutine safe
+// Route goroutine safe
 func (p *Processor) Route(msg interface{}, userData interface{}) error {
 	// raw
 	if msgRaw, ok := msg.(MsgRaw); ok {
@@ -163,7 +178,7 @@ func (p *Processor) Route(msg interface{}, userData interface{}) error {
 	return nil
 }
 
-// goroutine safe
+// Unmarshal goroutine safe
 func (p *Processor) Unmarshal(data []byte) (interface{}, error) {
 	if len(data) < 2 {
 		return nil, errors.New("protobuf data too short")
@@ -190,7 +205,7 @@ func (p *Processor) Unmarshal(data []byte) (interface{}, error) {
 	}
 }
 
-// goroutine safe
+// Marshal goroutine safe
 func (p *Processor) Marshal(msg interface{}) ([][]byte, error) {
 	msgType := reflect.TypeOf(msg)
 
@@ -213,9 +228,9 @@ func (p *Processor) Marshal(msg interface{}) ([][]byte, error) {
 	return [][]byte{id, data}, err
 }
 
-// goroutine safe
+// Range goroutine safe
 func (p *Processor) Range(f func(id uint16, t reflect.Type)) {
 	for id, i := range p.msgInfo {
-		f(uint16(id), i.msgType)
+		f(id, i.msgType)
 	}
 }

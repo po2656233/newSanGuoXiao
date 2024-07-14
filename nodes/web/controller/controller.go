@@ -12,7 +12,7 @@ import (
 	. "superman/internal/constant"
 	. "superman/internal/hints"
 	pb "superman/internal/protocol/gofile"
-	"superman/internal/redis"
+	"superman/internal/redis_cluster"
 	"superman/internal/rpc"
 	"superman/internal/token"
 	"superman/nodes/web/sdk"
@@ -268,7 +268,7 @@ func (p *Controller) login(c *superGin.Context) {
 		// 第一种 获取token
 		// 从redis上获取token,如果获取到token,且有效时长超过5分钟的，则返回原token.
 		userKey := GetTokenKey(params[Username])
-		ret := redis.SingleRedis().DB.Get(c.Context, userKey)
+		ret := redis_cluster.SingleRedis().DB.Get(c.Context, userKey)
 		if ret.Err() == nil && ret.String() != "" { // 返回现有token
 			strToken := ret.Val()
 			//校验token时长
@@ -286,7 +286,7 @@ func (p *Controller) login(c *superGin.Context) {
 			return
 		}
 		// 返回Bearer Token
-		redis.SingleRedis().DB.Set(c.Context, userKey, strToken, timeout)
+		redis_cluster.SingleRedis().DB.Set(c.Context, userKey, strToken, timeout)
 		RenderResult(c, http.StatusOK, strToken)
 		// 另一种token
 		//openid, found := result.GetString("open_id")

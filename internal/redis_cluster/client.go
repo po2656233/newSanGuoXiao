@@ -1,4 +1,4 @@
-package redis
+package redis_cluster
 
 import (
 	"context"
@@ -6,13 +6,15 @@ import (
 	"github.com/go-redis/redis/v8"
 	exViper "github.com/po2656233/superplace/extend/viper"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
 type RdbClient struct {
 	redisOption
-	DB     *redis.ClusterClient //本地使用
-	Client *redis.Client
+	DB *redis.ClusterClient //本地使用
+	//Client *redis_cluster.Client
+	seqScore uint64
 }
 
 type redisOption struct {
@@ -47,7 +49,7 @@ type Redis struct {
 }
 
 type CnfRedis struct {
-	Redis Redis `json:"redis"`
+	Redis Redis `json:"redis_cluster"`
 }
 
 var once sync.Once
@@ -55,9 +57,12 @@ var redisObj *RdbClient
 
 func SingleRedis() *RdbClient {
 	once.Do(func() {
-		vp := exViper.NewViper("internal/redis/redis.toml")
+		vp := exViper.NewViper("internal/redis_cluster/redis.toml")
 		cfr := CnfRedis{}
-		vp.Unmarshal(&cfr)
+		err := vp.Unmarshal(&cfr)
+		if err != nil {
+			panic(err)
+		}
 		redisObj = &RdbClient{
 			redisOption: redisOption{
 				Addrs:    cfr.Redis.Addrs,
@@ -111,7 +116,7 @@ func initClients() {
 		//钩子函数
 		//仅当客户端执行命令需要从连接池获取连接时，如果连接池需要新建连接则会调用此钩子函数
 		OnConnect: func(ctx context.Context, conn *redis.Conn) error {
-			fmt.Printf("redis conn=%v\n", conn)
+			fmt.Printf("redis_cluster conn=%v\n", conn)
 			return nil
 		},
 
@@ -146,9 +151,109 @@ func (rdb *RdbClient) Get(ctx context.Context, key string) *redis.StringCmd {
 	return nil
 }
 
-func (rdb *RdbClient) Close() {
-	if rdb.DB != nil {
-		rdb.DB.Close()
-		rdb.DB = nil
+func (self *RdbClient) Close() {
+	if self.DB != nil {
+		self.DB.Close()
+		self.DB = nil
 	}
+}
+
+// AddRank 添加排名子项
+func (self *RdbClient) AddRank(ctx context.Context, key string, score float64, member interface{}) error {
+	_, err := self.DB.ZAdd(ctx, key, &redis.Z{Score: score, Member: member}).Result()
+	return err
+}
+
+// AddRankSequence 添加排名子项(依照添加的顺序进行排名)
+func (self *RdbClient) AddRankSequence(ctx context.Context, key string, member interface{}) error {
+	_, err := self.DB.ZAdd(ctx, key, &redis.Z{Score: float64(atomic.AddUint64(&self.seqScore, 1)), Member: member}).Result()
+	return err
+}
+
+// IncrBy 增加元素的分数
+func (self *RdbClient) IncrBy(ctx context.Context, key string, score float64, member string) error {
+	_, err := self.DB.ZIncrBy(ctx, key, score, member).Result()
+	return err
+}
+
+// Remove 删除元素
+func (self *RdbClient) Remove(ctx context.Context, key string, member []string) error {
+	_, err := self.DB.ZRem(ctx, key, member).Result()
+	return err
+}
+
+// RemoveByRank 删除元素 ZRemRangeByRank("key", -1, -2) -1表示最高分 -2表示第二高分
+func (self *RdbClient) RemoveByRank(ctx context.Context, key string, start, stop int64) error {
+	_, err := self.DB.ZRemRangeByRank(ctx, key, start, stop).Result()
+	return err
+}
+
+// GetTopCount 取指定个数的最高份,即排名前几位 注:count=0时,降序展示所有数据
+func (self *RdbClient) GetTopCount(ctx context.Context, key string, count int) ([]redis.Z, error) {
+	if count < 0 {
+		return nil, fmt.Errorf("GetTopCount count is invalid! ")
+	}
+	ret, err := self.DB.ZRevRangeWithScores(ctx, key, 0, int64(count-1)).Result()
+	if err != nil {
+		return nil, fmt.Errorf("GetTopCount error : %v", err)
+	}
+	return ret, nil
+}
+
+// GetTopCountMembers 取指定个数的最高份,即排名前几位的用户数据
+func (self *RdbClient) GetTopCountMembers(ctx context.Context, key string, count int) ([]interface{}, error) {
+	ret, err := self.GetTopCount(ctx, key, count)
+	if err != nil {
+		return nil, err
+	}
+	return getMembers(ret), nil
+}
+
+// GetLowestCount 取指定个数的最低分份,即排名前几位 注:count=0时,升序展示所有数据
+func (self *RdbClient) GetLowestCount(ctx context.Context, key string, count int) ([]redis.Z, error) {
+	if count < 0 {
+		return nil, fmt.Errorf("GetLowestCount count is invalid! ")
+	}
+	ret, err := self.DB.ZRangeWithScores(ctx, key, 0, int64(count-1)).Result()
+	if err != nil {
+		return nil, fmt.Errorf("GetLowestCount error : %v", err)
+	}
+	return ret, nil
+}
+
+// GetLowestCountMembers 取指定个数的最低分份,即排名前几位用户数据
+func (self *RdbClient) GetLowestCountMembers(ctx context.Context, key string, count int) ([]interface{}, error) {
+	ret, err := self.GetLowestCount(ctx, key, count)
+	if err != nil {
+		return nil, err
+	}
+	return getMembers(ret), nil
+}
+
+// GetRankSection 根据分值区间获取排名
+func (self *RdbClient) GetRankSection(ctx context.Context, key, min, max string) ([]redis.Z, error) {
+	ret, err := self.DB.ZRangeByScoreWithScores(ctx, key, &redis.ZRangeBy{Min: min, Max: max}).Result()
+	if err != nil {
+		fmt.Printf("GetRankSection failed, err:%v\n", err)
+		return nil, fmt.Errorf("GetRankSection  error : %v", err)
+	}
+	return ret, nil
+}
+
+// GetRankSectionMembers 根据分值区间获取排名的用户数据
+func (self *RdbClient) GetRankSectionMembers(ctx context.Context, key, min, max string) ([]interface{}, error) {
+	ret, err := self.GetRankSection(ctx, key, min, max)
+	if err != nil {
+		return nil, err
+	}
+	return getMembers(ret), nil
+}
+
+// //////////////////////////////////////////////
+func getMembers(ret []redis.Z) []interface{} {
+	members := make([]interface{}, 0)
+	for _, z := range ret {
+		members = append(members, z.Member)
+	}
+	return members
 }

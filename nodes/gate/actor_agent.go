@@ -162,17 +162,18 @@ func (p *ActorAgent) simpleLogin(session *cproto.Session, req *pb.LoginRequest) 
 	}
 
 	// 验证token
-	userToken, errCode1 := token.ValidateBase64(req.Token)
-	if code.IsFail(errCode1) {
-		agent.Response(session.Mid, &pb.ResultResp{
-			State: errCode1,
-			Hints: hints.StatusText[int(errCode1)],
-		})
-		return
-	}
+	uid, _ := token.GetIDForToken(req.Token)
+	//userToken, errCode1 := token.ValidateBase64(req.Token)
+	//if code.IsFail(errCode1) {
+	//	agent.Response(session.Mid, &pb.ResultResp{
+	//		State: errCode1,
+	//		Hints: hints.StatusText[int(errCode1)],
+	//	})
+	//	return
+	//}
 
 	// 验证pid是否配置
-	sdkRow := conf.SdkConfig.Get(userToken.PID)
+	sdkRow := conf.SdkConfig.Get(2126001)
 	if sdkRow == nil {
 		agent.Response(session.Mid, &pb.ResultResp{
 			State: hints.Login15,
@@ -180,16 +181,7 @@ func (p *ActorAgent) simpleLogin(session *cproto.Session, req *pb.LoginRequest) 
 		})
 		return
 	}
-	// 根据token带来的sdk参数，从中心节点获取uid
-	resp, errCode2 := rpc.SendData(p.App(), rpc.SourcePath, rpc.AccountActor, rpc.CenterType, &pb.GetUserIDReq{
-		SdkId:  sdkRow.SdkId,
-		Pid:    userToken.PID,
-		OpenId: userToken.OpenID,
-	})
-
-	rsp := resp.(*pb.GetUserIDResp)
-	uid := rsp.Uid
-	if uid == 0 || code.IsFail(errCode2) {
+	if uid == 0 {
 		agent.Response(session.Mid, &pb.ResultResp{
 			State: hints.Login07,
 			Hints: hints.StatusText[hints.Login07],
@@ -209,12 +201,12 @@ func (p *ActorAgent) simpleLogin(session *cproto.Session, req *pb.LoginRequest) 
 	}
 
 	agent.Session().Set(constant.ServerID, cstring.ToString(req.ServerId))
-	agent.Session().Set(constant.PID, cstring.ToString(userToken.PID))
-	agent.Session().Set(constant.OpenID, userToken.OpenID)
+	agent.Session().Set(constant.PID, cstring.ToString(2126001))
+	agent.Session().Set(constant.OpenID, cstring.ToString(uid))
 	agent.Response(session.Mid, &pb.LoginResponse{
 		Uid:    uid,
-		Pid:    userToken.PID,
-		OpenId: userToken.OpenID,
+		Pid:    2126001,
+		OpenId: cstring.ToString(uid),
 	})
 }
 

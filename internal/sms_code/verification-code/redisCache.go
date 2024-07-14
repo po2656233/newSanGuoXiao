@@ -20,9 +20,9 @@ func RedisInit(redisAddr, password string, db int) {
 
 	pong, err := redisDb.Ping(ctx).Result()
 	if err != nil {
-		panic(fmt.Sprintf("connect redis fail: %v", err))
+		panic(fmt.Sprintf("connect redis_cluster fail: %v", err))
 	} else {
-		fmt.Printf("connect redis succ %v\n", pong)
+		fmt.Printf("connect redis_cluster succ %v\n", pong)
 	}
 
 }

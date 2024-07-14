@@ -1,17 +1,18 @@
 package sanguoxiao
 
 import (
-	"github.com/po2656233/goleaf/log"
 	clog "github.com/po2656233/superplace/logger"
 	"github.com/po2656233/superplace/net/parser/simple"
 	cproto "github.com/po2656233/superplace/net/proto"
 	"golang.org/x/net/websocket"
 	"net"
 	"net/url"
+	"reflect"
 	event2 "superman/internal/event"
 	protoMsg "superman/internal/protocol/gofile"
+	"superman/internal/utils"
 	"superman/nodes/game/module/online"
-	"superman/nodes/leaf/jettengame/msg"
+	"superman/nodes/game/msg"
 )
 
 type (
@@ -27,15 +28,42 @@ type (
 	}
 )
 
-//func (p *ActorPlayer) AliasID() string {
-//	return "game"
-//}
+//	func (p *ActorPlayer) AliasID() string {
+//		return "game"
+//	}
+
+// 绑定协议与其处理函数
+func init() {
+	//系统
+	//handlerMsg(&protoMsg.SuggestReq{}, handleSuggest)           //意见反馈
+	//handlerMsg(&protoMsg.NotifyNoticeReq{}, handleNotifyNotice) //意见反馈
+	//玩家行为
+	msg.ServerChanRPC.Register(reflect.TypeOf(&protoMsg.EnterGameReq{}), enter)
+	msg.ProcessorProto.SetRouter(&protoMsg.EnterGameReq{}, msg.ServerChanRPC)
+	//handlerMsg(&protoMsg.ExitGameReq{}, exit)
+	//handlerMsg(&protoMsg.DisbandedGameReq{}, disbandedGame)
+	//handlerMsg(&protoMsg.TrusteeReq{}, trustee)
+	//handlerMsg(&protoMsg.ChangeTableReq{}, changeTable)
+	//handlerMsg(&protoMsg.GetInningsInfoReq{}, getInnings)
+	//handlerMsg(&protoMsg.GameRecord{}, getGameRecords)
+	//handlerMsg(&protoMsg.GetRecordReq{}, getRecords)
+	//handlerMsg(&protoMsg.GetBackPasswordReq{}, getBackPassword)
+	//handlerMsg(&protoMsg.UpdateGoldReq{}, updateGold)
+	//
+	////slotGame
+	//handlerMsg(&protoMsg.ZhaocaimiaoBetReq{}, playing)
+	go func() {
+		for {
+			msg.ServerChanRPC.Exec(<-msg.ServerChanRPC.ChanCall)
+		}
+	}()
+}
 
 func (p *ActorPlayer) OnInit() {
 	// 注册 session关闭的remote函数(网关触发连接断开后，会调用RPC发送该消息)
 	p.Remote().Register(p.sessionClose)
+	p.Local().Register(p.request)
 
-	p.Local().Register(p.enterGame)
 }
 
 // sessionClose 接收角色session关闭处理
@@ -46,8 +74,21 @@ func (p *ActorPlayer) sessionClose() {
 
 	logoutEvent := event2.NewPlayerLogout(p.ActorID(), p.playerId)
 	p.PostEvent(&logoutEvent)
-}
 
+}
+func (p *ActorPlayer) request(session *cproto.Session, req *protoMsg.Request) {
+	// 派发给各个模块
+	msgData, err := msg.ProcessorProto.Unmarshal(req.Data)
+	if err != nil {
+		clog.Debug("unmarshal message error: %v", err)
+		return
+	}
+	//session.GetUid()
+	p.Session = session
+	err = msg.ProcessorProto.Route(msgData, p)
+	utils.CheckError(err)
+	//p.Call(session.AgentPath, "Response", &protoMsg.Response{})
+}
 func (p *ActorPlayer) enterGame(session *cproto.Session, req *protoMsg.EnterGameReq) {
 	// 派发给各个模块
 	clog.Debugf("game:ID:%v req:%+v", session.GetUid(), req)
@@ -86,7 +127,7 @@ func (p *ActorPlayer) OnStop() {
 func (p *ActorPlayer) WriteMsg(v interface{}) {
 	msgData, err := msg.ProcessorProto.Marshal(v)
 	if err != nil {
-		log.Debug("unmarshal message error: %v", err)
+		clog.Debug("unmarshal message error: %v", err)
 		return
 	}
 	data := make([]byte, 0)

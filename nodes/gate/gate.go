@@ -111,7 +111,7 @@ func buildSimpleParser(app *superplace.AppBuilder) cfacade.INetParser {
 	agentActor.AddNodeRoute(constant.MIDGame, &simple.NodeRoute{
 		NodeType: constant.NodeTypeGame,
 		ActorID:  constant.ActorGame,
-		FuncName: "enterGame",
+		FuncName: "request",
 	})
 
 	GetMsgFunc("config/leafconf/message_id.json")

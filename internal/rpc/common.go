@@ -16,12 +16,14 @@ import (
 const (
 	SourcePath   = ".system"
 	OpsActor     = ".ops"
-	AccountActor = ".account"
-	HomeActor    = ".home"
 	DBActor      = ".db"
-	CenterType   = "center"
-	GameType     = "game"
-	WebType      = "web"
+	AccountActor = ".account"
+)
+
+const (
+	CenterType = "center"
+	GameType   = "game"
+	WebType    = "web"
 )
 
 const (

@@ -52,7 +52,7 @@ func SendMailCode(mailOption *MailOptions, code, from, host string, ttl int) err
 	// 如果code没有过期，是不允许再发送的
 	success, err := redisDb.SetNX(ctx, key, code, time.Duration(ttl)*time.Second).Result()
 	if err != nil {
-		fmt.Printf("SendMailCode redis fail %v\n", err)
+		fmt.Printf("SendMailCode redis_cluster fail %v\n", err)
 		return err
 	}
 
@@ -94,7 +94,7 @@ func ValidateMailCode(mailAddr, code, from string) error {
 	// 对比后马上删除
 	err = redisDb.Del(ctx, key).Err()
 	if err != nil {
-		fmt.Printf("redis del fail %v\n", err)
+		fmt.Printf("redis_cluster del fail %v\n", err)
 		return err
 	}
 

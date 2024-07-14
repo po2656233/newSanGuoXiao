@@ -3,7 +3,8 @@ package constant
 import "fmt"
 
 const (
-	KeyToken = "token_"
+	KeyToken    = "token_"
+	KeyMsgProto = "msg_proto"
 )
 
 func GetTokenKey(account string) string {
