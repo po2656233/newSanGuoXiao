@@ -163,24 +163,6 @@ func (p *ActorAgent) simpleLogin(session *cproto.Session, req *pb.LoginRequest) 
 
 	// 验证token
 	uid, _ := token.GetIDForToken(req.Token)
-	//userToken, errCode1 := token.ValidateBase64(req.Token)
-	//if code.IsFail(errCode1) {
-	//	agent.Response(session.Mid, &pb.ResultResp{
-	//		State: errCode1,
-	//		Hints: hints.StatusText[int(errCode1)],
-	//	})
-	//	return
-	//}
-
-	// 验证pid是否配置
-	sdkRow := conf.SdkConfig.Get(2126001)
-	if sdkRow == nil {
-		agent.Response(session.Mid, &pb.ResultResp{
-			State: hints.Login15,
-			Hints: hints.StatusText[hints.Login15],
-		})
-		return
-	}
 	if uid == 0 {
 		agent.Response(session.Mid, &pb.ResultResp{
 			State: hints.Login07,
@@ -201,11 +183,9 @@ func (p *ActorAgent) simpleLogin(session *cproto.Session, req *pb.LoginRequest) 
 	}
 
 	agent.Session().Set(constant.ServerID, cstring.ToString(req.ServerId))
-	agent.Session().Set(constant.PID, cstring.ToString(2126001))
 	agent.Session().Set(constant.OpenID, cstring.ToString(uid))
 	agent.Response(session.Mid, &pb.LoginResponse{
 		Uid:    uid,
-		Pid:    2126001,
 		OpenId: cstring.ToString(uid),
 	})
 }

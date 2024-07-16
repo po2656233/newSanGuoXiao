@@ -2,11 +2,13 @@ package actors
 
 import (
 	"errors"
+	"fmt"
 	superGorm "github.com/po2656233/superplace/components/gorm"
 	clog "github.com/po2656233/superplace/logger"
 	cactor "github.com/po2656233/superplace/net/actor"
 	"gorm.io/gorm"
 	. "superman/internal/constant"
+	"superman/internal/hints"
 	sqlmodel "superman/internal/sql_model"
 	. "superman/internal/utils"
 	"sync"
@@ -115,28 +117,42 @@ func (self *ActorDB) AddRoom(room sqlmodel.Room) (int64, error) {
 }
 
 // AddTable 新增桌牌
-func (self *ActorDB) AddTable(table sqlmodel.Table) (int64, int32, error) {
-	// 使用事务来确保操作的原子性
-	err := self.db.Transaction(func(tx *gorm.DB) error {
-		// 查询当前gid和rid组合下的最大num值
-		var currentMaxNum int32
-		err := tx.Model(&table).Where("gid = ? AND rid = ?", table.Gid, table.Rid).Select("max(num)").Scan(&currentMaxNum).Error
-		if err != nil {
-			return err
-		}
+func (self *ActorDB) AddTable(table sqlmodel.Table) (int64, error) {
+	self.Lock()
+	defer self.Unlock()
+	count := self.GetTableCount(table.Rid)
+	max := self.GetTableMaxCount(table.Rid)
+	if max <= count {
+		return 0, fmt.Errorf("%s:%d", hints.StatusText[hints.Room15], max)
+	}
+	table.CreatedAt = time.Now()
+	err := self.db.Table(table.TableName()).Create(&table).Error
+	if !CheckError(err) {
+		return 0, err
+	}
+	return table.ID, nil
 
-		// 计算新的num值
-		table.Num = currentMaxNum + 1
-
-		// 创建一个新的记录
-		// 插入新的记录
-		if err := tx.Create(&table).Error; err != nil {
-			return err
-		}
-
-		return nil
-	})
-	return table.ID, table.Num, err
+	//// 使用事务来确保操作的原子性
+	//err := self.db.Transaction(func(tx *gorm.DB) error {
+	//	// 查询当前gid和rid组合下的最大num值
+	//	var currentMaxNum int32
+	//	err := tx.Model(&table).Where("gid = ? AND rid = ?", table.Gid, table.Rid).Select("max(num)").Scan(&currentMaxNum).Error
+	//	if err != nil {
+	//		return err
+	//	}
+	//
+	//	// 计算新的num值
+	//	table.Num = currentMaxNum + 1
+	//
+	//	// 创建一个新的记录
+	//	// 插入新的记录
+	//	if err := tx.Create(&table).Error; err != nil {
+	//		return err
+	//	}
+	//
+	//	return nil
+	//})
+	//return table.ID, table.Num, err
 }
 
 ///////////////////////Check//////////////////////////////////////////////
@@ -159,10 +175,26 @@ func (self *ActorDB) CheckRoom(hostid int64, name string) (rid int64) {
 	return
 }
 
-// CheckTable 检测桌牌是否包含
-func (self *ActorDB) CheckTable(hostid int64, name string) (tid int64) {
-	room := sqlmodel.Table{}
-	err := self.db.Table(room.TableName()).Select("id").Where("hostid = ? AND name = ?", hostid, name).Find(&tid).Error
+// GetTableCount 检测桌牌存在数量
+func (self *ActorDB) GetTableCount(rid int64) (count int64) {
+	tb := sqlmodel.Table{}
+	err := self.db.Table(tb.TableName()).Select("id").Where("rid = ? ", rid).Count(&count).Error
+	CheckError(err)
+	return
+}
+
+// GetTableMaxCount 检测桌牌存在数量
+func (self *ActorDB) GetTableMaxCount(rid int64) (count int64) {
+	room := sqlmodel.Room{}
+	err := self.db.Table(room.TableName()).Select("max_table").Where("id = ? ", rid).Find(&count).Error
+	CheckError(err)
+	return
+}
+
+// GetGameMaxCount 检测桌牌存在数量
+func (self *ActorDB) GetGameMaxCount(gid int64) (count int64) {
+	gm := sqlmodel.Game{}
+	err := self.db.Table(gm.TableName()).Select("max_player").Where("id = ? ", gid).Find(&count).Error
 	CheckError(err)
 	return
 }
@@ -227,7 +259,12 @@ func (self *ActorDB) GetTables(rid int64) (tables []*sqlmodel.Table, err error) 
 func (self *ActorDB) GetGames(kid int64) (games []*sqlmodel.Game, err error) {
 	games = make([]*sqlmodel.Game, 0)
 	game := &sqlmodel.Game{}
-	err = self.db.Table(game.TableName()).Select("*").Where("kid=?", kid).Find(&games).Error
+	if kid == -1 {
+		err = self.db.Table(game.TableName()).Select("*").Find(&games).Error
+	} else {
+		err = self.db.Table(game.TableName()).Select("*").Where("kid=?", kid).Find(&games).Error
+	}
+
 	CheckError(err)
 	return
 }

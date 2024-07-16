@@ -21,6 +21,61 @@ func CopyInsert(slice interface{}, pos int, value interface{}) interface{} {
 	return v.Interface()
 }
 
+// DeleteKey 删除key 慎用
+func DeleteKey(slice interface{}, index int) interface{} {
+	//判断是否是切片类型
+	v := reflect.ValueOf(slice)
+	if v.Kind() != reflect.Slice {
+		return nil
+	}
+	//参数检查
+	if v.Len() == 0 || index < 0 || index > v.Len()-1 {
+		return nil
+	}
+	return reflect.AppendSlice(v.Slice(0, index), v.Slice(index+1, v.Len())).Interface()
+}
+
+// DeleteValue 删除值
+func DeleteValue(slice interface{}, value interface{}) interface{} {
+	//判断是否是切片类型
+	v := reflect.ValueOf(slice)
+	if v.Kind() != reflect.Slice {
+		return nil
+	}
+	for i := 0; i < v.Len(); i++ {
+		if reflect.ValueOf(value).IsValid() {
+			if v.Index(i).Kind() == reflect.ValueOf(value).Kind() {
+				if reflect.DeepEqual(v.Index(i).Interface(), value) {
+					return reflect.AppendSlice(v.Slice(0, i), v.Slice(i+1, v.Len())).Interface()
+				}
+			}
+		}
+	}
+	return slice
+}
+
+// SliceRemoveDuplicate 删除重复的数值
+func SliceRemoveDuplicate(data interface{}) interface{} {
+	inArr := reflect.ValueOf(data)
+	if inArr.Kind() != reflect.Slice && inArr.Kind() != reflect.Array {
+		return data
+	}
+
+	existMap := make(map[interface{}]bool)
+	outArr := reflect.MakeSlice(inArr.Type(), 0, inArr.Len())
+
+	for i := 0; i < inArr.Len(); i++ {
+		iVal := inArr.Index(i)
+
+		if _, ok := existMap[iVal.Interface()]; !ok {
+			outArr = reflect.Append(outArr, inArr.Index(i))
+			existMap[iVal.Interface()] = true
+		}
+	}
+
+	return outArr.Interface()
+}
+
 func BytesToRune(byteArray []byte) []rune {
 	runeArray := make([]rune, 0)
 	for _, b := range byteArray {

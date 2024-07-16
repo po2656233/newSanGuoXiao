@@ -15,13 +15,13 @@ const TableNameGame = "game"
 // Game mapped from table <game>
 type Game struct {
 	ID        int64          `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
-	Kid       int32          `gorm:"column:kid;not null;comment:种类" json:"kid"`              // 种类
-	Name      string         `gorm:"column:name;comment:游戏名称" json:"name"`                   // 游戏名称
-	Lessscore int64          `gorm:"column:lessscore;comment:底分" json:"lessscore"`           // 底分
-	State     int32          `gorm:"column:state;comment:状态(0未开放 1正常 2维护 3关闭)" json:"state"` // 状态(0未开放 1正常 2维护 3关闭)
-	Maxcount  int32          `gorm:"column:maxcount;comment:最大人数(0:无限制)" json:"maxcount"`    // 最大人数(0:无限制)
-	Remark    string         `gorm:"column:remark;comment:备注" json:"remark"`                 // 备注
-	HowToPlay string         `gorm:"column:how_to_play;comment:玩法介绍" json:"how_to_play"`     // 玩法介绍
+	Kid       int32          `gorm:"column:kid;not null;comment:种类" json:"kid"`                           // 种类
+	Name      string         `gorm:"column:name;comment:游戏名称" json:"name"`                                // 游戏名称
+	Lessscore int64          `gorm:"column:lessscore;comment:底分" json:"lessscore"`                        // 底分
+	State     int32          `gorm:"column:state;comment:状态(0未开放 1正常 2维护 3关闭)" json:"state"`              // 状态(0未开放 1正常 2维护 3关闭)
+	MaxPlayer int32          `gorm:"column:max_player;default:-1;comment:最大人数(-1:无限制)" json:"max_player"` // 最大人数(-1:无限制)
+	Remark    string         `gorm:"column:remark;comment:备注" json:"remark"`                              // 备注
+	HowToPlay string         `gorm:"column:how_to_play;comment:玩法介绍" json:"how_to_play"`                  // 玩法介绍
 	CreatedAt time.Time      `gorm:"column:created_at" json:"created_at"`
 	UpdatedAt time.Time      `gorm:"column:updated_at" json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at" json:"deleted_at"`

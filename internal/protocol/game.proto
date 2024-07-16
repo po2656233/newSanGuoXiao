@@ -30,10 +30,8 @@ message PlayerSimpleInfo {
 //若无本地化需求,统一走 EnterGameResp协议
 //进入游戏
 message EnterGameReq {
-  int64 gameID = 1;          //房间 ID
+  int64 gameID = 1;          //游戏标识
   int32 chairNum = 2;        //椅子编号(可选) 注: =0时,将由系统分配.
-  string password = 3;       //房间密钥
-  //  string token = 4;
 }
 //入场协议  百人类
 message EnterGameResp {

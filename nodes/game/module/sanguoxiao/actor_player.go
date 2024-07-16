@@ -36,10 +36,12 @@ type (
 func init() {
 	//系统
 	//handlerMsg(&protoMsg.SuggestReq{}, handleSuggest)           //意见反馈
-	//handlerMsg(&protoMsg.NotifyNoticeReq{}, handleNotifyNotice) //意见反馈
+	//handlerMsg(&protoMsg.{}, handleNotifyNotice) //意见反馈
+
 	//玩家行为
 	msg.ServerChanRPC.Register(reflect.TypeOf(&protoMsg.EnterGameReq{}), enter)
-	msg.ProcessorProto.SetRouter(&protoMsg.EnterGameReq{}, msg.ServerChanRPC)
+	msg.ServerChanRPC.Register(reflect.TypeOf(&protoMsg.ExitGameReq{}), exit)
+
 	//handlerMsg(&protoMsg.ExitGameReq{}, exit)
 	//handlerMsg(&protoMsg.DisbandedGameReq{}, disbandedGame)
 	//handlerMsg(&protoMsg.TrusteeReq{}, trustee)

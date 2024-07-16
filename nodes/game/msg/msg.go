@@ -23,6 +23,7 @@ var msgMap = make(map[uint16]string, 0)
 func RegisterMessage(message proto.Message) {
 	id, name := ProcessorProto.Register(message)
 	msgMap[id] = name
+	ProcessorProto.SetRouter(message, ServerChanRPC)
 }
 
 func init() {

@@ -14,24 +14,19 @@ const TableNameGameRecord = "game_record"
 
 // GameRecord mapped from table <game_record>
 type GameRecord struct {
-	ID         int64          `gorm:"column:id;primaryKey;autoIncrement:true;comment:游戏记录表" json:"id"` // 游戏记录表
-	Gid        int64          `gorm:"column:gid;comment:游戏ID" json:"gid"`                              // 游戏ID
-	UID        int64          `gorm:"column:uid;comment:玩家ID" json:"uid"`                              // 玩家ID
-	FatherID   int64          `gorm:"column:father_id;comment:父级(游戏记录ID)" json:"father_id"`            // 父级(游戏记录ID)
-	Inning     string         `gorm:"column:inning;comment:牌局号" json:"inning"`                         // 牌局号
-	Result     string         `gorm:"column:result;comment:开奖结果" json:"result"`                        // 开奖结果
-	Rounds     int32          `gorm:"column:rounds;comment:轮次" json:"rounds"`                          // 轮次
-	RemainFree int32          `gorm:"column:remain_free;comment:剩余免费次数" json:"remain_free"`            // 剩余免费次数
-	Status     int32          `gorm:"column:status;comment:状态" json:"status"`                          // 状态
-	Code       int32          `gorm:"column:code;comment:操作码" json:"code"`                             // 操作码
-	Time       int64          `gorm:"column:time;comment:时间戳" json:"time"`                             // 时间戳
-	IsFree     bool           `gorm:"column:is_free;comment:是否免费(免费时,父级不能为0)" json:"is_free"`          // 是否免费(免费时,父级不能为0)
-	Remark     string         `gorm:"column:remark;comment:备注" json:"remark"`                          // 备注
-	CreatedAt  time.Time      `gorm:"column:created_at" json:"created_at"`
-	UpdatedAt  time.Time      `gorm:"column:updated_at" json:"updated_at"`
-	DeletedAt  gorm.DeletedAt `gorm:"column:deleted_at" json:"deleted_at"`
-	UpdateBy   int64          `gorm:"column:update_by" json:"update_by"`
-	CreateBy   int64          `gorm:"column:create_by" json:"create_by"`
+	ID        int64          `gorm:"column:id;primaryKey;autoIncrement:true;comment:游戏记录表" json:"id"` // 游戏记录表
+	UID       int64          `gorm:"column:uid;not null;comment:玩家ID" json:"uid"`                     // 玩家ID
+	Rid       int64          `gorm:"column:rid;not null;comment:房间ID" json:"rid"`                     // 房间ID
+	Tid       int64          `gorm:"column:tid;not null;comment:游戏ID" json:"tid"`                     // 游戏ID
+	Inning    string         `gorm:"column:inning;comment:牌局号" json:"inning"`                         // 牌局号
+	Result    string         `gorm:"column:result;comment:开奖结果" json:"result"`                        // 开奖结果
+	Status    int32          `gorm:"column:status;comment:状态" json:"status"`                          // 状态
+	Code      int32          `gorm:"column:code;comment:操作码" json:"code"`                             // 操作码
+	CreatedAt time.Time      `gorm:"column:created_at" json:"created_at"`
+	UpdatedAt time.Time      `gorm:"column:updated_at" json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at" json:"deleted_at"`
+	UpdateBy  int64          `gorm:"column:update_by" json:"update_by"`
+	CreateBy  int64          `gorm:"column:create_by" json:"create_by"`
 }
 
 // TableName GameRecord's table name

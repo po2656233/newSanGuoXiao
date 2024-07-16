@@ -92,8 +92,8 @@ func (p *Controller) tableList(c *superGin.Context) {
 
 // http://127.0.0.1:8089/game/list
 func (p *Controller) gameList(c *superGin.Context) {
-	kid := c.GetInt64("kid", 0)
-	if kid < 1 {
+	kid := c.GetInt64("kid", -1)
+	if kid == 0 {
 		sgxLogger.Warnf("rid < 1 params=%v", c.GetParams())
 		RenderResult(c, Service003, StatusText[Service003])
 		return
@@ -126,23 +126,21 @@ func (p *Controller) roomCreate(c *superGin.Context) {
 	name, ok1 := c.GetPostForm("name")
 	roomKey, ok2 := c.GetPostForm("roomkey")
 	enterScore, ok3 := c.GetPostForm("enterscore")
-	maxCount, ok4 := c.GetPostForm("maxcount")
 	level, ok5 := c.GetPostForm("level")
-	if !ok1 || !ok2 || !ok3 || !ok4 || !ok5 {
+	if !ok1 || !ok2 || !ok3 || !ok5 {
 		sgxLogger.Warnf("roomCreate get hostid fail. current params=%v", c.GetParams())
 		RenderResult(c, Service004, StatusText[Service004])
 		return
 	}
 	enScore, _ := strconv.ParseInt(enterScore, 10, 64)
-	mCount, _ := strconv.ParseInt(maxCount, 10, 64)
+	//mCount, _ := strconv.ParseInt(maxCount, 10, 64)
 	lev, _ := strconv.ParseInt(level, 10, 64)
 	data, errCode := rpc.SendData(p.App, rpc.SourcePath, rpc.DBActor, rpc.CenterType, &pb.CreateRoomReq{
 		HostId:     uid,
 		Name:       name,
 		RoomKey:    roomKey,
 		EnterScore: enScore,
-		MaxCount:   int32(mCount),
-		Level:      int32(lev),
+		Level:      pb.RoomLevel(lev),
 	})
 
 	// 创建房间结果
@@ -208,7 +206,7 @@ func (p *Controller) tableCreate(c *superGin.Context) {
 		return
 	}
 	if resp, ok := data.(*pb.CreateTableResp); ok {
-		if resp.Table.Id == 0 {
+		if resp.Table == nil || resp.Table.Id == 0 {
 			RenderResult(c, http.StatusNotAcceptable, "牌桌创建失败")
 			return
 		}

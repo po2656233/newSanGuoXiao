@@ -22,6 +22,15 @@ enum NTFLevel{
   MTrumpetNTF = 6;  // 银喇叭
   BTrumpetNTF = 7;  // 金喇叭
 }
+// 房间级别
+enum RoomLevel{
+  GeneralRoom = 0;//普通
+  MiddleRoom = 1;//中级
+  HighRoom = 2;//高级
+  TopRoom = 3;//顶级
+  SuperRoom = 4;    //超级
+  SystemRoom = 5;  // 系统级
+}
 // 玩家状态
 enum PlayerState {
   PlayerLookOn = 0;         //旁观(可作为刚入场时的初始状态)
@@ -164,15 +173,11 @@ message PlayerInfo {
   int32 level = 9;        // 游戏级别
   int32 ranking = 10;      // 排名
   PlayerState state = 11; // 状态
-  int64 gold = 12; //金币 *100
-  int64 money = 13;//钱
-  string bindInfo = 14; // 绑定信息
-  int32 gameState = 15; //游戏级别
-  int64 platformID = 16; // 平台ID 0:无效
-  int64 roomNum = 17; // 房间号 0:无效
-  int64 gameID = 18; // 所在游戏ID 0:无效
-  int32 tableID = 19; // 所在桌号ID 0:不提供
-  int32 chairID = 20; // 所在椅子ID 0:不提供
+  int64 gold = 12;        //金币 *100
+  int64 money = 13;       //余额
+  int64 inRooId = 14;   //所在的房间ID,为重连后,拉取相应数据
+  int64 inTableId = 15; //所在的牌桌ID
+  int64 inChairId = 16; //椅子编号
 }
 // 武将信息
 message HeroInfo {
@@ -238,27 +243,26 @@ message EmailInfo {
 message RoomInfo{
   int64  id = 1;          // 房间ID
   int64  hostId = 2;      // 房主ID
-  int32  level = 3;       // 房间级别
+  RoomLevel  level = 3;   // 房间级别
   string name = 4;        // 房间名称
   string roomKey = 5;     // 房间密钥
   int64  enterScore = 6;  // 进场分
   int32  onlineCount = 7; // 在线人数
-  int32  robotCount = 8;  // 机器人数量
+  int32  maxTable = 8;    // 最大牌桌数
   int32  maxCount = 9;    // 最大人数 -1:表示无限制[一级房5人 二级房10人 三级房100人 4级房1000人 5级房10000人]
 }
 //桌子信息
 message TableInfo{
   int64    id = 1;
-  int32    num = 2;         // 桌台编号(在房间内的编号)
-  string   name = 3;        // 桌牌名称
-  int64    rid = 4;         // 房间ID
-  int64    gid = 5;         // 绑定的游戏ID
-  int64    openTime = 6;    // 开启时间
-  int64    taxation = 7;    // 固定税收
-  int32    commission = 8;  // 每局税收
-  int32    amount = 9;      // 总共场数
-  int64    playScore = 10;   // 初始积分(携带的积分)
-  int32    sitterCount = 11;     // 客人数量(即:当前玩家数量)
+  string   name = 2;        // 桌牌名称
+  int64    rid = 3;         // 房间ID
+  int64    gid = 4;         // 绑定的游戏ID
+  int64    openTime = 5;    // 开启时间
+  int64    taxation = 6;    // 固定税收
+  int32    commission = 7;  // 每局税收
+  int32    amount = 8;      // 总共场数
+  int64    playScore = 9;   // 初始积分(携带的积分)
+  int32    sitterCount = 10;     // 客人数量(即:当前玩家数量)
 }
 //////////////////////////////////[游戏信息]/////////////////////////////////////////
 //时间信息
@@ -297,7 +301,7 @@ message GameInfo{
   int64 id = 1;           // 游戏ID
   int32 kid = 2;          // 游戏种类(类型)
   string  name = 3;       // 游戏名称
-//  int32 level = 4;        // 游戏类别 0:普通 1:中级 2:高级 3:积分排位 4:淘汰制排位
+  //  int32 level = 4;        // 游戏类别 0:普通 1:中级 2:高级 3:积分排位 4:淘汰制排位
   int64 lessscore = 5;    // 底分
   GameScene scene = 6;    // 游戏场景
   GameState state = 7;    // 游戏状态

@@ -118,12 +118,11 @@ func (self *ActorDB) GetRoomList(req *pb.GetRoomListReq) (*pb.GetRoomListResp, e
 		resp.Items.Items = append(resp.Items.Items, &pb.RoomInfo{
 			Id:          room.ID,
 			HostId:      room.Hostid,
-			Level:       room.Level,
+			Level:       pb.RoomLevel(room.Level),
 			Name:        room.Name,
 			RoomKey:     room.Roomkey,
 			EnterScore:  room.Enterscore,
 			OnlineCount: room.OnlineCount,
-			RobotCount:  room.RobotCount,
 			MaxCount:    room.MaxCount,
 		})
 	}
@@ -141,7 +140,6 @@ func (self *ActorDB) GetTableList(req *pb.GetTableListReq) (*pb.GetTableListResp
 	for _, table := range ret {
 		resp.Items.Items = append(resp.Items.Items, &pb.TableInfo{
 			Id:          table.ID,
-			Num:         table.Num,
 			Rid:         table.Rid,
 			Gid:         table.Gid,
 			OpenTime:    table.Opentime,
@@ -170,7 +168,7 @@ func (self *ActorDB) GetGameList(req *pb.GetGameListReq) (*pb.GetGameListResp, e
 			Kid:       game.Kid,
 			Lessscore: game.Lessscore,
 			State:     pb.GameState(game.State),
-			MaxCount:  game.Maxcount,
+			MaxCount:  game.MaxPlayer,
 			HowToPlay: game.HowToPlay,
 		})
 	}
@@ -181,34 +179,58 @@ func (self *ActorDB) GetGameList(req *pb.GetGameListReq) (*pb.GetGameListResp, e
 
 func (self *ActorDB) CreateRoom(req *pb.CreateRoomReq) (interface{}, error) {
 	resp := &pb.CreateRoomResp{}
+	maxCount := int32(0)
+	maxTable := int32(0)
+	switch req.Level {
+	case pb.RoomLevel_GeneralRoom:
+		maxCount = 20
+		maxTable = 5
+	case pb.RoomLevel_MiddleRoom:
+		maxCount = 50
+		maxTable = 10
+	case pb.RoomLevel_HighRoom:
+		maxCount = 200
+		maxTable = 20
+	case pb.RoomLevel_TopRoom:
+		maxCount = 1000
+		maxTable = 50
+	case pb.RoomLevel_SuperRoom:
+		maxCount = 10000
+		maxTable = 100
+	case pb.RoomLevel_SystemRoom:
+		maxCount = -1
+		maxTable = -1
+
+	}
 	roomId, err := self.AddRoom(sqlmodel.Room{
-		Hostid:      req.HostId,
-		Level:       req.Level,
-		Name:        req.Name,
-		Roomkey:     req.RoomKey,
-		Enterscore:  req.EnterScore,
-		OnlineCount: req.OnlineCount,
-		RobotCount:  req.RobotCount,
-		MaxCount:    req.MaxCount,
-		Remark:      req.Remark,
-		CreatedAt:   time.Now(),
-		DeletedAt:   gorm.DeletedAt{},
-		UpdateBy:    0,
-		CreateBy:    req.HostId,
+		Hostid:     req.HostId,
+		Level:      int32(req.Level),
+		Name:       req.Name,
+		Roomkey:    Md5Sum(req.RoomKey),
+		Enterscore: req.EnterScore,
+		MaxTable:   maxTable,
+		MaxCount:   maxCount,
+		Remark:     req.Remark,
+		CreatedAt:  time.Now(),
+		DeletedAt:  gorm.DeletedAt{},
+		UpdateBy:   0,
+		CreateBy:   req.HostId,
 	})
 	if 0 == roomId {
 		return nil, err
 	}
 	resp.HostId = req.HostId
 	resp.RoomId = roomId
-	resp.RoomKey = req.RoomKey
 	resp.Name = req.Name
+	resp.EnterScore = req.EnterScore
+	resp.MaxCount = maxCount
+	resp.MaxTable = maxTable
 	return resp, nil
 }
 
 func (self *ActorDB) CreateTable(req *pb.CreateTableReq) (*pb.CreateTableResp, error) {
 	resp := &pb.CreateTableResp{}
-	tid, num, err := self.AddTable(sqlmodel.Table{
+	tid, err := self.AddTable(sqlmodel.Table{
 		Gid:        req.Gid,
 		Rid:        req.Rid,
 		Name:       req.Name,
@@ -221,7 +243,6 @@ func (self *ActorDB) CreateTable(req *pb.CreateTableReq) (*pb.CreateTableResp, e
 	}
 	resp.Table = &pb.TableInfo{
 		Id:         tid,
-		Num:        num,
 		Gid:        req.Gid,
 		Name:       req.Name,
 		Commission: req.Commission,

@@ -12,6 +12,7 @@ func enter(args []interface{}) {
 	m := args[0].(*protoMsg.EnterGameReq)
 	agent := args[1].(*ActorPlayer)
 	clog.Debugf("params %+v  uid:%+v", m, agent.Session.Uid)
+
 	agent.WriteMsg(&protoMsg.EnterGameResp{
 		GameID:   1,
 		ChairNum: 1,
@@ -23,4 +24,12 @@ func enter(args []interface{}) {
 			RankNo: 0,
 		},
 	})
+}
+
+// 退出游戏
+func exit(args []interface{}) {
+	_ = args[1]
+	m := args[0].(*protoMsg.ExitGameReq)
+	agent := args[1].(*ActorPlayer)
+	clog.Debugf("params %+v  uid:%+v", m, agent.Session.Uid)
 }

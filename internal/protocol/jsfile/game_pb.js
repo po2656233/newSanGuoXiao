@@ -1199,8 +1199,7 @@ proto.pb.EnterGameReq.prototype.toObject = function(opt_includeInstance) {
 proto.pb.EnterGameReq.toObject = function(includeInstance, msg) {
   var obj = {
     gameid: jspb.Message.getFieldWithDefault(msg, 1, 0),
-    chairnum: jspb.Message.getFieldWithDefault(msg, 2, 0),
-    password: jspb.Message.getFieldWithDefault(msg, 3, "")
+    chairnum: jspb.Message.getFieldWithDefault(msg, 2, 0)
   };
 
   if (includeInstance) {
@@ -1245,10 +1244,6 @@ proto.pb.EnterGameReq.deserializeBinaryFromReader = function(msg, reader) {
       var value = /** @type {number} */ (reader.readInt32());
       msg.setChairnum(value);
       break;
-    case 3:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setPassword(value);
-      break;
     default:
       reader.skipField();
       break;
@@ -1292,13 +1287,6 @@ proto.pb.EnterGameReq.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getPassword();
-  if (f.length > 0) {
-    writer.writeString(
-      3,
-      f
-    );
-  }
 };
 
 
@@ -1329,21 +1317,6 @@ proto.pb.EnterGameReq.prototype.getChairnum = function() {
 /** @param {number} value */
 proto.pb.EnterGameReq.prototype.setChairnum = function(value) {
   jspb.Message.setProto3IntField(this, 2, value);
-};
-
-
-/**
- * optional string password = 3;
- * @return {string}
- */
-proto.pb.EnterGameReq.prototype.getPassword = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
-};
-
-
-/** @param {string} value */
-proto.pb.EnterGameReq.prototype.setPassword = function(value) {
-  jspb.Message.setProto3StringField(this, 3, value);
 };
 
 

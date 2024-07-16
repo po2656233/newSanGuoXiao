@@ -101,6 +101,7 @@ var StatusText = map[int]string{
 	Room12: "平台无效,无法进入该游戏",
 	Room13: "没有房间权限,无法进入该游戏",
 	Room14: "通用房卡",
+	Room15: "牌桌数已达到最大限制",
 
 	User01: "玩家",
 	User02: "无效请求",
@@ -213,6 +214,9 @@ var StatusText = map[int]string{
 	Game57: "您还未选择武将,不能进行匹配",
 	Game58: "该武将已在阵列,不可重复使用",
 	//Game49: "无效的场景操作",
+
+	Table01: "牌桌已存在",
+	Table02: "创建失败:已超过房间最大人数",
 
 	Service001: "SDK无效",
 	Service002: "PID无效",
@@ -357,6 +361,7 @@ const (
 	Room12
 	Room13
 	Room14
+	Room15
 )
 
 const (
@@ -477,6 +482,20 @@ const (
 	Game57
 	Game58
 )
+
+const (
+	Table01 = 21000 + iota
+	Table02
+	Table03
+	Table04
+	Table05
+	Table06
+	Table07
+	Table08
+	Table09
+	Table10
+)
+
 const (
 	_ = 30000 + iota //游戏清场
 	Service001
