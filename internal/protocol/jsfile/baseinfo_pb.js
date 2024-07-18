@@ -3679,9 +3679,9 @@ proto.pb.RoomInfo.toObject = function(includeInstance, msg) {
     name: jspb.Message.getFieldWithDefault(msg, 4, ""),
     roomkey: jspb.Message.getFieldWithDefault(msg, 5, ""),
     enterscore: jspb.Message.getFieldWithDefault(msg, 6, 0),
-    onlinecount: jspb.Message.getFieldWithDefault(msg, 7, 0),
-    maxtable: jspb.Message.getFieldWithDefault(msg, 8, 0),
-    maxcount: jspb.Message.getFieldWithDefault(msg, 9, 0)
+    maxperson: jspb.Message.getFieldWithDefault(msg, 7, 0),
+    tablecount: jspb.Message.getFieldWithDefault(msg, 8, 0),
+    maxtable: jspb.Message.getFieldWithDefault(msg, 9, 0)
   };
 
   if (includeInstance) {
@@ -3744,15 +3744,15 @@ proto.pb.RoomInfo.deserializeBinaryFromReader = function(msg, reader) {
       break;
     case 7:
       var value = /** @type {number} */ (reader.readInt32());
-      msg.setOnlinecount(value);
+      msg.setMaxperson(value);
       break;
     case 8:
       var value = /** @type {number} */ (reader.readInt32());
-      msg.setMaxtable(value);
+      msg.setTablecount(value);
       break;
     case 9:
       var value = /** @type {number} */ (reader.readInt32());
-      msg.setMaxcount(value);
+      msg.setMaxtable(value);
       break;
     default:
       reader.skipField();
@@ -3825,21 +3825,21 @@ proto.pb.RoomInfo.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getOnlinecount();
+  f = message.getMaxperson();
   if (f !== 0) {
     writer.writeInt32(
       7,
       f
     );
   }
-  f = message.getMaxtable();
+  f = message.getTablecount();
   if (f !== 0) {
     writer.writeInt32(
       8,
       f
     );
   }
-  f = message.getMaxcount();
+  f = message.getMaxtable();
   if (f !== 0) {
     writer.writeInt32(
       9,
@@ -3940,46 +3940,46 @@ proto.pb.RoomInfo.prototype.setEnterscore = function(value) {
 
 
 /**
- * optional int32 onlineCount = 7;
+ * optional int32 maxPerson = 7;
  * @return {number}
  */
-proto.pb.RoomInfo.prototype.getOnlinecount = function() {
+proto.pb.RoomInfo.prototype.getMaxperson = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 7, 0));
 };
 
 
 /** @param {number} value */
-proto.pb.RoomInfo.prototype.setOnlinecount = function(value) {
+proto.pb.RoomInfo.prototype.setMaxperson = function(value) {
   jspb.Message.setProto3IntField(this, 7, value);
 };
 
 
 /**
- * optional int32 maxTable = 8;
+ * optional int32 tableCount = 8;
  * @return {number}
  */
-proto.pb.RoomInfo.prototype.getMaxtable = function() {
+proto.pb.RoomInfo.prototype.getTablecount = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 8, 0));
 };
 
 
 /** @param {number} value */
-proto.pb.RoomInfo.prototype.setMaxtable = function(value) {
+proto.pb.RoomInfo.prototype.setTablecount = function(value) {
   jspb.Message.setProto3IntField(this, 8, value);
 };
 
 
 /**
- * optional int32 maxCount = 9;
+ * optional int32 maxTable = 9;
  * @return {number}
  */
-proto.pb.RoomInfo.prototype.getMaxcount = function() {
+proto.pb.RoomInfo.prototype.getMaxtable = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 9, 0));
 };
 
 
 /** @param {number} value */
-proto.pb.RoomInfo.prototype.setMaxcount = function(value) {
+proto.pb.RoomInfo.prototype.setMaxtable = function(value) {
   jspb.Message.setProto3IntField(this, 9, value);
 };
 
@@ -4023,7 +4023,7 @@ proto.pb.TableInfo.toObject = function(includeInstance, msg) {
     commission: jspb.Message.getFieldWithDefault(msg, 7, 0),
     amount: jspb.Message.getFieldWithDefault(msg, 8, 0),
     playscore: jspb.Message.getFieldWithDefault(msg, 9, 0),
-    sittercount: jspb.Message.getFieldWithDefault(msg, 10, 0)
+    maxsitter: jspb.Message.getFieldWithDefault(msg, 10, 0)
   };
 
   if (includeInstance) {
@@ -4098,7 +4098,7 @@ proto.pb.TableInfo.deserializeBinaryFromReader = function(msg, reader) {
       break;
     case 10:
       var value = /** @type {number} */ (reader.readInt32());
-      msg.setSittercount(value);
+      msg.setMaxsitter(value);
       break;
     default:
       reader.skipField();
@@ -4192,7 +4192,7 @@ proto.pb.TableInfo.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getSittercount();
+  f = message.getMaxsitter();
   if (f !== 0) {
     writer.writeInt32(
       10,
@@ -4338,16 +4338,16 @@ proto.pb.TableInfo.prototype.setPlayscore = function(value) {
 
 
 /**
- * optional int32 sitterCount = 10;
+ * optional int32 maxSitter = 10;
  * @return {number}
  */
-proto.pb.TableInfo.prototype.getSittercount = function() {
+proto.pb.TableInfo.prototype.getMaxsitter = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 10, 0));
 };
 
 
 /** @param {number} value */
-proto.pb.TableInfo.prototype.setSittercount = function(value) {
+proto.pb.TableInfo.prototype.setMaxsitter = function(value) {
   jspb.Message.setProto3IntField(this, 10, value);
 };
 

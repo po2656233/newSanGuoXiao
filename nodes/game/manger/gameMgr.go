@@ -1,23 +1,9 @@
 package manger
 
-// CalculateInfo 结算信息
-type CalculateInfo struct {
-	UserID   int64  // 结算对象(接受充值的ID)
-	ByUID    int64  // 该用户发起
-	PreMoney int64  // 结算前的钱
-	Payment  int64  // 付款金额
-	Code     int32  // 操作码(即为什么付款)
-	Order    string // 订单号(或牌局号)
-	Remark   string // 备注
-}
-
-// ProductCallback 实例回调(根据桌子号创建游戏)
-type ProductCallback func(table *Table) IGameOperate
-
-type CalculateSQL func(info CalculateInfo) (nowMoney, factDeduct int64, isOK bool)
-
-// ClearCallback 清场回调
-type ClearCallback func() (gameID int64)
+import (
+	. "superman/internal/constant"
+	protoMsg "superman/internal/protocol/gofile"
+)
 
 // IGameOperate 子游戏接口
 type IGameOperate interface {
@@ -51,4 +37,70 @@ type IDevice interface {
 	Maintain(time int64) bool //维护(暂停)
 	Clear(time int64) bool    //清场
 	Close() bool              //关闭
+}
+
+// ProductCallback 实例回调(根据桌子号创建游戏)
+type ProductCallback func(table *Game) IGameOperate
+
+type CalculateSQL func(info CalculateInfo) (nowMoney, factDeduct int64, isOK bool)
+
+// ClearCallback 清场回调
+type ClearCallback func() (gameID int64)
+
+// CalculateInfo 结算信息
+type CalculateInfo struct {
+	UserID   int64  // 结算对象(接受充值的ID)
+	ByUID    int64  // 该用户发起
+	PreMoney int64  // 结算前的钱
+	Payment  int64  // 付款金额
+	Code     int32  // 操作码(即为什么付款)
+	Order    string // 订单号(或牌局号)
+	Remark   string // 备注
+}
+type Game struct {
+	*protoMsg.GameInfo
+}
+
+// ///////////////////游戏功能//////////////////////////////////////////////
+func NewGame(gid int64) IGameOperate {
+	switch gid {
+	case ChineseChess:
+	case Chess:
+
+	case SanGuoXiao:
+
+	}
+	return nil
+}
+
+// Ready 准备
+func (g *Game) Ready() bool {
+
+	return true
+}
+
+// Start 开始
+func (tb *Game) Start(time int64) bool {
+
+	return true
+}
+
+// Playing 运作
+func (tb *Game) Playing() bool {
+	return true
+}
+
+// Maintain 维护
+func (tb *Game) Maintain(time int64) bool {
+	return true
+}
+
+// Clear 清桌
+func (tb *Game) Clear(time int64) bool {
+	return true
+}
+
+// Close 关闭
+func (tb *Game) Close() bool {
+	return true
 }

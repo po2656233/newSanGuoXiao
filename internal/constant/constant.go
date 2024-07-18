@@ -68,7 +68,8 @@ const (
 	Win  = 1 // 赢
 	Draw = 2 // 平局
 
-	Limit = 99 // 限制
+	Limit     = 99 // 限制
+	Unlimited = -1
 )
 
 func Join(sources ...string) string {

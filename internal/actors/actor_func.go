@@ -116,14 +116,15 @@ func (self *ActorDB) GetRoomList(req *pb.GetRoomListReq) (*pb.GetRoomListResp, e
 	ret, err := self.GetRooms(req.Uid)
 	for _, room := range ret {
 		resp.Items.Items = append(resp.Items.Items, &pb.RoomInfo{
-			Id:          room.ID,
-			HostId:      room.Hostid,
-			Level:       pb.RoomLevel(room.Level),
-			Name:        room.Name,
-			RoomKey:     room.Roomkey,
-			EnterScore:  room.Enterscore,
-			OnlineCount: room.OnlineCount,
-			MaxCount:    room.MaxCount,
+			Id:         room.ID,
+			HostId:     room.Hostid,
+			Level:      pb.RoomLevel(room.Level),
+			Name:       room.Name,
+			RoomKey:    room.Roomkey,
+			EnterScore: room.Enterscore,
+			MaxPerson:  room.MaxPerson,
+			TableCount: room.TableCount,
+			MaxTable:   room.MaxTable,
 		})
 	}
 	return resp, err
@@ -139,15 +140,15 @@ func (self *ActorDB) GetTableList(req *pb.GetTableListReq) (*pb.GetTableListResp
 	ret, err := self.GetTables(req.Rid)
 	for _, table := range ret {
 		resp.Items.Items = append(resp.Items.Items, &pb.TableInfo{
-			Id:          table.ID,
-			Rid:         table.Rid,
-			Gid:         table.Gid,
-			OpenTime:    table.Opentime,
-			Taxation:    table.Taxation,
-			Commission:  table.Commission,
-			Amount:      table.Amount,
-			PlayScore:   table.Playscore,
-			SitterCount: table.SitterCount,
+			Id:         table.ID,
+			Rid:        table.Rid,
+			Gid:        table.Gid,
+			OpenTime:   table.Opentime,
+			Taxation:   table.Taxation,
+			Commission: table.Commission,
+			Amount:     table.Amount,
+			PlayScore:  table.Playscore,
+			MaxSitter:  table.MaxSitter,
 		})
 	}
 	return resp, err
@@ -209,7 +210,8 @@ func (self *ActorDB) CreateRoom(req *pb.CreateRoomReq) (interface{}, error) {
 		Roomkey:    Md5Sum(req.RoomKey),
 		Enterscore: req.EnterScore,
 		MaxTable:   maxTable,
-		MaxCount:   maxCount,
+		TableCount: 0,
+		MaxPerson:  maxCount,
 		Remark:     req.Remark,
 		CreatedAt:  time.Now(),
 		DeletedAt:  gorm.DeletedAt{},
@@ -249,5 +251,22 @@ func (self *ActorDB) CreateTable(req *pb.CreateTableReq) (*pb.CreateTableResp, e
 		Taxation:   req.Taxation,
 		PlayScore:  req.Playscore,
 	}
+	return resp, err
+}
+
+func (self *ActorDB) DeleteTable(req *pb.DeleteTableReq) (*pb.DeleteTableResp, error) {
+	resp := &pb.DeleteTableResp{}
+	rid := self.GetTableRid(req.Tid)
+	if rid == 0 {
+		return resp, fmt.Errorf("tid:%d no have rid", req.Tid)
+	}
+	count := self.CheckRoomHost(req.HostId, rid)
+	if count == 0 {
+		return resp, fmt.Errorf("hostid:%d rid:%d no exist", req.HostId, rid)
+	}
+	// 检测游戏是否处于关闭状态，才能
+	err := self.DelTable(req.HostId, req.Tid)
+	resp.Tid = req.Tid
+	resp.Rid = rid
 	return resp, err
 }

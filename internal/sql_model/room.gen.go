@@ -14,21 +14,21 @@ const TableNameRoom = "room"
 
 // Room mapped from table <room>
 type Room struct {
-	ID          int64          `gorm:"column:id;primaryKey;autoIncrement:true;comment:房间标识[一个房间只能绑定一个游戏]" json:"id"` // 房间标识[一个房间只能绑定一个游戏]
-	Hostid      int64          `gorm:"column:hostid;comment:房主ID" json:"hostid"`                                     // 房主ID
-	Level       int32          `gorm:"column:level;comment:房间级别(类型:=1普通级别20人 =2中等级别100人)" json:"level"`              // 房间级别(类型:=1普通级别20人 =2中等级别100人)
-	Name        string         `gorm:"column:name;not null;comment:房间名称" json:"name"`                                // 房间名称
-	Roomkey     string         `gorm:"column:roomkey;comment:房间钥匙" json:"roomkey"`                                   // 房间钥匙
-	Enterscore  int64          `gorm:"column:enterscore;default:-1;comment:准入分数(=-1不受限制)" json:"enterscore"`         // 准入分数(=-1不受限制)
-	OnlineCount int32          `gorm:"column:online_count;comment:当前在线人数" json:"online_count"`                       // 当前在线人数
-	MaxTable    int32          `gorm:"column:max_table;default:20;comment:最大牌桌数(=-1时不受限，仅限于系统房)" json:"max_table"`   // 最大牌桌数(=-1时不受限，仅限于系统房)
-	MaxCount    int32          `gorm:"column:max_count;default:200;comment:人数上限(与level相应变动)" json:"max_count"`       // 人数上限(与level相应变动)
-	Remark      string         `gorm:"column:remark;comment:备注" json:"remark"`                                       // 备注
-	CreatedAt   time.Time      `gorm:"column:created_at" json:"created_at"`
-	UpdatedAt   time.Time      `gorm:"column:updated_at" json:"updated_at"`
-	DeletedAt   gorm.DeletedAt `gorm:"column:deleted_at" json:"deleted_at"`
-	UpdateBy    int64          `gorm:"column:update_by" json:"update_by"`
-	CreateBy    int64          `gorm:"column:create_by" json:"create_by"`
+	ID         int64          `gorm:"column:id;primaryKey;autoIncrement:true;comment:房间标识[一个房间只能绑定一个游戏]" json:"id"` // 房间标识[一个房间只能绑定一个游戏]
+	Hostid     int64          `gorm:"column:hostid;comment:房主ID" json:"hostid"`                                     // 房主ID
+	Level      int32          `gorm:"column:level;comment:房间级别(类型:=1普通级别20人 =2中等级别100人)" json:"level"`              // 房间级别(类型:=1普通级别20人 =2中等级别100人)
+	Name       string         `gorm:"column:name;not null;comment:房间名称" json:"name"`                                // 房间名称
+	Roomkey    string         `gorm:"column:roomkey;comment:房间钥匙" json:"roomkey"`                                   // 房间钥匙
+	Enterscore int64          `gorm:"column:enterscore;default:-1;comment:准入分数(=-1不受限制)" json:"enterscore"`         // 准入分数(=-1不受限制)
+	MaxPerson  int32          `gorm:"column:max_person;default:-1;comment:最大人数(=-1时不受限，仅限于系统房)" json:"max_person"`  // 最大人数(=-1时不受限，仅限于系统房)
+	MaxTable   int32          `gorm:"column:max_table;default:20;comment:最大牌桌数(=-1时不受限，仅限于系统房)" json:"max_table"`   // 最大牌桌数(=-1时不受限，仅限于系统房)
+	TableCount int32          `gorm:"column:table_count;comment:当前桌牌数" json:"table_count"`                          // 当前桌牌数
+	Remark     string         `gorm:"column:remark;comment:备注" json:"remark"`                                       // 备注
+	CreatedAt  time.Time      `gorm:"column:created_at" json:"created_at"`
+	UpdatedAt  time.Time      `gorm:"column:updated_at" json:"updated_at"`
+	DeletedAt  gorm.DeletedAt `gorm:"column:deleted_at" json:"deleted_at"`
+	UpdateBy   int64          `gorm:"column:update_by" json:"update_by"`
+	CreateBy   int64          `gorm:"column:create_by" json:"create_by"`
 }
 
 // TableName Room's table name

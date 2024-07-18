@@ -37,6 +37,7 @@ func (self *ActorDB) OnInit() {
 
 	self.Remote().Register(self.CreateRoom)
 	self.Remote().Register(self.CreateTable)
+	self.Remote().Register(self.DeleteTable)
 
 	self.changeDB(CenterDb)
 	//// 每秒查询一次db
@@ -121,15 +122,19 @@ func (self *ActorDB) AddTable(table sqlmodel.Table) (int64, error) {
 	self.Lock()
 	defer self.Unlock()
 	count := self.GetTableCount(table.Rid)
-	max := self.GetTableMaxCount(table.Rid)
+	max := self.GetRoomMaxTable(table.Rid)
 	if max <= count {
 		return 0, fmt.Errorf("%s:%d", hints.StatusText[hints.Room15], max)
 	}
+	maxSit := self.GetGameMaxPlayer(table.Gid)
+	table.MaxSitter = int32(maxSit)
 	table.CreatedAt = time.Now()
 	err := self.db.Table(table.TableName()).Create(&table).Error
 	if !CheckError(err) {
 		return 0, err
 	}
+	room := sqlmodel.Room{}
+	self.db.Table(room.TableName()).Where("id=?", table.Rid).UpdateColumn("table_count", gorm.Expr("table_count + ?", 1))
 	return table.ID, nil
 
 	//// 使用事务来确保操作的原子性
@@ -155,6 +160,20 @@ func (self *ActorDB) AddTable(table sqlmodel.Table) (int64, error) {
 	//return table.ID, table.Num, err
 }
 
+// DelTable 新增桌牌
+func (self *ActorDB) DelTable(rid, tid int64) error {
+	self.Lock()
+	defer self.Unlock()
+	tb := sqlmodel.Table{}
+	db := self.db.Table(tb.TableName()).Select("rid").Where("id=?", tid).Find(&rid)
+	err := db.Delete(tb).Error
+	if !CheckError(err) {
+		return err
+	}
+	room := sqlmodel.Room{}
+	return self.db.Table(room.TableName()).Where("id=?", rid).UpdateColumn("table_count", gorm.Expr("table_count - ?", 1)).Error
+}
+
 ///////////////////////Check//////////////////////////////////////////////
 
 // CheckUser 获取玩家ID
@@ -175,6 +194,23 @@ func (self *ActorDB) CheckRoom(hostid int64, name string) (rid int64) {
 	return
 }
 
+func (self *ActorDB) CheckRoomHost(hostid, rid int64) (count int64) {
+	room := sqlmodel.Room{}
+	err := self.db.Table(room.TableName()).Select("id").Where("hostid = ? AND id = ?", hostid, rid).Count(&count).Error
+	CheckError(err)
+	return
+}
+
+////////////////////////////////////////////////////////////
+
+// GetRoomMaxTable 检测桌牌存在数量
+func (self *ActorDB) GetRoomMaxTable(rid int64) (max int64) {
+	room := sqlmodel.Room{}
+	err := self.db.Table(room.TableName()).Select("max_table").Where("id = ? ", rid).Find(&max).Error
+	CheckError(err)
+	return
+}
+
 // GetTableCount 检测桌牌存在数量
 func (self *ActorDB) GetTableCount(rid int64) (count int64) {
 	tb := sqlmodel.Table{}
@@ -183,18 +219,18 @@ func (self *ActorDB) GetTableCount(rid int64) (count int64) {
 	return
 }
 
-// GetTableMaxCount 检测桌牌存在数量
-func (self *ActorDB) GetTableMaxCount(rid int64) (count int64) {
-	room := sqlmodel.Room{}
-	err := self.db.Table(room.TableName()).Select("max_table").Where("id = ? ", rid).Find(&count).Error
+// GetTableRid 检测桌牌存在数量
+func (self *ActorDB) GetTableRid(tid int64) (rid int64) {
+	room := sqlmodel.Table{}
+	err := self.db.Table(room.TableName()).Select("rid").Where("id = ? ", tid).Find(&rid).Error
 	CheckError(err)
 	return
 }
 
-// GetGameMaxCount 检测桌牌存在数量
-func (self *ActorDB) GetGameMaxCount(gid int64) (count int64) {
+// GetGameMaxPlayer 检测桌牌存在数量
+func (self *ActorDB) GetGameMaxPlayer(gid int64) (max int64) {
 	gm := sqlmodel.Game{}
-	err := self.db.Table(gm.TableName()).Select("max_player").Where("id = ? ", gid).Find(&count).Error
+	err := self.db.Table(gm.TableName()).Select("max_player").Where("id = ? ", gid).Find(&max).Error
 	CheckError(err)
 	return
 }
@@ -231,7 +267,7 @@ func (self *ActorDB) GetUserID(account, password string) (uid int64, err error) 
 // GetClassify 获取游戏种类
 func (self *ActorDB) GetClassify() (user []*sqlmodel.Kindinfo, err error) {
 	user = make([]*sqlmodel.Kindinfo, 0)
-	kind := &sqlmodel.Kindinfo{}
+	kind := sqlmodel.Kindinfo{}
 	err = self.db.Table(kind.TableName()).Select("*").Find(&user).Error
 	CheckError(err)
 	return
@@ -240,7 +276,7 @@ func (self *ActorDB) GetClassify() (user []*sqlmodel.Kindinfo, err error) {
 // GetRooms 获取房间列表
 func (self *ActorDB) GetRooms(hostid int64) (rooms []*sqlmodel.Room, err error) {
 	rooms = make([]*sqlmodel.Room, 0)
-	room := &sqlmodel.Room{}
+	room := sqlmodel.Room{}
 	err = self.db.Table(room.TableName()).Select("*").Where("hostid=?", hostid).Find(&rooms).Error
 	CheckError(err)
 	return
@@ -249,7 +285,7 @@ func (self *ActorDB) GetRooms(hostid int64) (rooms []*sqlmodel.Room, err error) 
 // GetTables 获取牌桌列表
 func (self *ActorDB) GetTables(rid int64) (tables []*sqlmodel.Table, err error) {
 	tables = make([]*sqlmodel.Table, 0)
-	table := &sqlmodel.Table{}
+	table := sqlmodel.Table{}
 	err = self.db.Table(table.TableName()).Select("*").Where("rid=?", rid).Find(&tables).Error
 	CheckError(err)
 	return
@@ -258,7 +294,7 @@ func (self *ActorDB) GetTables(rid int64) (tables []*sqlmodel.Table, err error) 
 // GetGames 获取游戏列表
 func (self *ActorDB) GetGames(kid int64) (games []*sqlmodel.Game, err error) {
 	games = make([]*sqlmodel.Game, 0)
-	game := &sqlmodel.Game{}
+	game := sqlmodel.Game{}
 	if kid == -1 {
 		err = self.db.Table(game.TableName()).Select("*").Find(&games).Error
 	} else {
@@ -272,7 +308,7 @@ func (self *ActorDB) GetGames(kid int64) (games []*sqlmodel.Game, err error) {
 // GetAllGames 获取所有游戏列表
 func (self *ActorDB) GetAllGames(pageSize, pageNumber int) (games []*sqlmodel.Game, err error) {
 	games = make([]*sqlmodel.Game, 0)
-	game := &sqlmodel.Game{}
+	game := sqlmodel.Game{}
 	if pageSize < 0 {
 		pageSize = -1
 	}

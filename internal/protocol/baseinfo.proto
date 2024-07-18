@@ -247,9 +247,9 @@ message RoomInfo{
   string name = 4;        // 房间名称
   string roomKey = 5;     // 房间密钥
   int64  enterScore = 6;  // 进场分
-  int32  onlineCount = 7; // 在线人数
-  int32  maxTable = 8;    // 最大牌桌数
-  int32  maxCount = 9;    // 最大人数 -1:表示无限制[一级房5人 二级房10人 三级房100人 4级房1000人 5级房10000人]
+  int32  maxPerson = 7;   // 最大人数
+  int32  tableCount = 8;  // 当前桌牌数
+  int32  maxTable = 9;    // 最大牌桌数
 }
 //桌子信息
 message TableInfo{
@@ -262,7 +262,7 @@ message TableInfo{
   int32    commission = 7;  // 每局税收
   int32    amount = 8;      // 总共场数
   int64    playScore = 9;   // 初始积分(携带的积分)
-  int32    sitterCount = 10;     // 客人数量(即:当前玩家数量)
+  int32    maxSitter = 10;     // 客人数量(即:当前玩家数量)
 }
 //////////////////////////////////[游戏信息]/////////////////////////////////////////
 //时间信息

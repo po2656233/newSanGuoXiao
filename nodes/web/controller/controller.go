@@ -214,6 +214,46 @@ func (p *Controller) tableCreate(c *superGin.Context) {
 	RenderResult(c, http.StatusOK, data)
 }
 
+// http://127.0.0.1:8089/table/delete
+func (p *Controller) tableDelete(c *superGin.Context) {
+	claims, ok := c.Get("claims")
+	if !ok || claims == nil {
+		sgxLogger.Warnf("roomCreate get claims fail. current params=%v", c.GetParams())
+		RenderResult(c, Login15, StatusText[Login15])
+		return
+	}
+	uid := int64(0)
+	if clms, ok := claims.(*jwt.RegisteredClaims); ok {
+		uid, _ = strconv.ParseInt(clms.ID, 10, 64)
+	}
+	strTid, ok1 := c.GetPostForm("tid")
+	if !ok1 {
+		sgxLogger.Warnf("roomCreate get hostid fail. current params=%v", c.GetParams())
+		RenderResult(c, Service004, StatusText[Service004])
+		return
+	}
+	// 先检测游戏服相应游戏是否处于关闭状态，如果没有关闭则请求关闭
+	tid, _ := strconv.ParseInt(strTid, 10, 64)
+	data, errCode := rpc.SendData(p.App, rpc.SourcePath, rpc.DBActor, rpc.CenterType, &pb.DeleteTableReq{
+		Tid:    tid,
+		HostId: uid,
+	})
+
+	// 创建房间结果
+	if errCode != code.OK {
+		RenderResult(c, errCode, code.CodeTxt[errCode])
+		return
+	}
+	if resp, ok := data.(*pb.DeleteTableResp); ok {
+		if resp.Tid == 0 || resp.Rid == 0 {
+			RenderResult(c, http.StatusNotAcceptable, "牌桌删除失败")
+			return
+		}
+	}
+	RenderResult(c, http.StatusOK, data)
+}
+
+// ///////////////////////////////////////////////////////////////////////////
 // login 根据pid获取sdkConfig，与第三方进行帐号登陆效验
 // http://127.0.0.1:8089/login?pid=2126001&account=test1&password=test1
 func (p *Controller) login(c *superGin.Context) {

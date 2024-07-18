@@ -19,4 +19,5 @@ func (p *Controller) Init() {
 	group.GET("/game/list", p.gameList)          //游戏列表
 	group.POST("/room/create", p.roomCreate)     //房间创建
 	group.POST("/table/create", p.tableCreate)   //房间创建
+	group.POST("/table/delete", p.tableDelete)   //房间创建
 }

@@ -167,6 +167,8 @@ func init() {
     msg.ProcessorProto.SetRouter(&protoMsg.CreateRoomResp{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.CreateTableReq{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.CreateTableResp{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.DeleteTableReq{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.DeleteTableResp{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.CheckInReq{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.CheckInResp{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.GetCheckInReq{}, game.ChanRPC)

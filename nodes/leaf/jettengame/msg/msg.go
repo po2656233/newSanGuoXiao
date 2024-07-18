@@ -179,6 +179,8 @@ func init() {
     RegisterMessage(&protoMsg.CreateRoomResp{})
     RegisterMessage(&protoMsg.CreateTableReq{})
     RegisterMessage(&protoMsg.CreateTableResp{})
+    RegisterMessage(&protoMsg.DeleteTableReq{})
+    RegisterMessage(&protoMsg.DeleteTableResp{})
     RegisterMessage(&protoMsg.CheckInReq{})
     RegisterMessage(&protoMsg.CheckInResp{})
     RegisterMessage(&protoMsg.GetCheckInReq{})
