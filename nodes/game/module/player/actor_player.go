@@ -120,6 +120,14 @@ func (p *ActorPlayer) SendResult(state int32, hints string) {
 	})
 }
 
+func (p *ActorPlayer) SendResultPop(state int32, title, hints string) {
+	p.WriteMsg(&protoMsg.ResultPopResp{
+		Flag:  state,
+		Title: title,
+		Hints: hints,
+	})
+}
+
 func (p *ActorPlayer) OnStop() {
 	clog.Infof("OnStop onlineCount = %d", online.Count())
 }

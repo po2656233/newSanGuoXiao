@@ -89,8 +89,8 @@ type RoomManger struct {
 var lock sync.Mutex
 var settingFixTime int64
 
-// GetRoomManger 由于新增平台，则这里的管理不应该再是单例模式
-func GetRoomManger() *RoomManger {
+// GetRoomMgr 由于新增平台，则这里的管理不应该再是单例模式
+func GetRoomMgr() *RoomManger {
 	return &RoomManger{
 		sync.Map{},
 	}
@@ -144,7 +144,7 @@ func getRandomTable(gid, butTid int64, tables []*Table) *Table {
 }
 
 // AddTable 新增桌子(tid == gid 即桌子ID和游戏ID共用)
-func (self *Room) AddTable(table *protoMsg.TableInfo, f NewGameCallback) error {
+func (self *Room) AddTable(table *protoMsg.TableInfo, f NewGameCallback) (*Table, error) {
 	self.Lock()
 	defer self.Unlock()
 	if self.tables == nil {
@@ -152,21 +152,24 @@ func (self *Room) AddTable(table *protoMsg.TableInfo, f NewGameCallback) error {
 	}
 	for _, t := range self.tables {
 		if t.Id == table.Id {
-			return fmt.Errorf(hints.StatusText[hints.Table01])
+			return t, fmt.Errorf(hints.StatusText[hints.TableInfo07])
 		}
 	}
 	if self.MaxTable < int32(len(self.tables)+1) {
-		return fmt.Errorf(hints.StatusText[hints.Table02])
+		return nil, fmt.Errorf(hints.StatusText[hints.TableInfo08])
 	}
 	tb := &Table{
 		TableInfo:  table,
-		GameHandle: f(table.Gid),
+		GameHandle: f(table.Gid), //创建游戏句柄
 		sitters:    make([]*Chair, 0),
 		lookers:    make([]*Player, 0),
 		RWMutex:    sync.RWMutex{},
 	}
+	if tb.GameHandle == nil {
+		return nil, fmt.Errorf("%s 游戏ID:%d", hints.StatusText[hints.TableInfo03], table.Gid)
+	}
 	self.tables = append(self.tables, tb)
-	return nil
+	return tb, nil
 }
 
 // Join 加入

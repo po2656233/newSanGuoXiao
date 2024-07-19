@@ -27,6 +27,13 @@ message GetTableListReq{
 message GetTableListResp{
   TableList items = 1;
 }
+// 获取单张桌信息
+message GetTableReq{
+  int64 tid = 1;
+}
+message GetTableResp{
+  TableInfo info = 1;
+}
 //获取游戏列表
 message GetGameListReq{
   int64 kid = 1;// =-1时，表示取所有游戏信息
@@ -67,7 +74,7 @@ message ChooseTableReq{
 }
 message ChooseTableResp{
   int64 tableId = 1;          // 桌台ID
-  int64 tableNum = 2;         // 桌台编号
+  int64 chairId = 2;         // 桌台编号
   GameInfo info = 3;          // 游戏信息
 }
 //////////////////////////////////////////////////

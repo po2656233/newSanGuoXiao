@@ -16,6 +16,7 @@ const TableNameGame = "game"
 type Game struct {
 	ID        int64          `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
 	Kid       int32          `gorm:"column:kid;not null;comment:种类" json:"kid"`                           // 种类
+	EnName    string         `gorm:"column:en_name;comment:英文名，用来匹配生成游戏" json:"en_name"`                  // 英文名，用来匹配生成游戏
 	Name      string         `gorm:"column:name;comment:游戏名称" json:"name"`                                // 游戏名称
 	Lessscore int64          `gorm:"column:lessscore;comment:底分" json:"lessscore"`                        // 底分
 	State     int32          `gorm:"column:state;comment:状态(0未开放 1正常 2维护 3关闭)" json:"state"`              // 状态(0未开放 1正常 2维护 3关闭)

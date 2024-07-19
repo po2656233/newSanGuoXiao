@@ -4,6 +4,7 @@ import (
 	cfacade "github.com/po2656233/superplace/facade"
 	clog "github.com/po2656233/superplace/logger"
 	"github.com/po2656233/superplace/net/parser/simple"
+	cst "superman/internal/constant"
 	event2 "superman/internal/event"
 	pb "superman/internal/protocol/gofile"
 	"superman/internal/rpc"
@@ -36,7 +37,7 @@ func (p *ActorGame) OnInit() {
 	p.Remote().Register(p.checkChild)
 
 	p.Timer().RemoveAll()
-	p.Timer().AddOnce(time.Second, p.everySecondTimer)
+	p.checkTimeId = p.Timer().AddOnce(time.Second, p.everySecondTimer)
 }
 
 func (p *ActorGame) OnFindChild(msg *cfacade.Message) (cfacade.IActor, bool) {
@@ -61,16 +62,17 @@ func (p *ActorGame) OnStop() {
 func (p *ActorGame) everySecondTimer() {
 	//p.Call(p.PathString(), "checkChild", nil)
 	data, errCode := rpc.SendData(p.App(), rpc.SourcePath, rpc.DBActor, rpc.CenterType, &pb.GetGameListReq{
-		Kid: -1,
+		Kid: cst.Unlimited,
 	})
 	if errCode == 0 {
 		resp, ok := data.(*pb.GetGameListResp)
 		if ok && resp != nil && resp.Items != nil {
-			manger.GetGameMgr().AddGames(resp.Items.Items)
+			p.Timer().Remove(p.checkTimeId)
+			manger.GetGameInfoMgr().AddGames(resp.Items.Items)
 			return
 		}
 	}
-	p.Timer().AddOnce(3*time.Second, p.everySecondTimer)
+	p.checkTimeId = p.Timer().AddOnce(3*time.Second, p.everySecondTimer)
 }
 
 func (p *ActorGame) checkChild() {
@@ -92,6 +94,8 @@ func (p *ActorGame) checkChild() {
 		}
 	})
 }
+
+/////////////////////////////////////////////////////////////////
 
 // onLoginEvent 玩家登陆事件处理
 func (p *ActorGame) onLoginEvent(e cfacade.IEventData) {

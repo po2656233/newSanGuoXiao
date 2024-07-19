@@ -1,7 +1,6 @@
 package manger
 
 import (
-	"github.com/po2656233/goleaf/gate"
 	log "github.com/po2656233/superplace/logger"
 	. "superman/internal/constant"
 	. "superman/internal/hints"
@@ -97,25 +96,23 @@ func (playerSelf *PlayerManger) GetAccount(userID int64) string {
 
 // Enter 进入场景(限制条件由外部转入)
 func (itself *Player) Enter(args []interface{}) { //入场
-	game := args[0].(*Game)
-	agent := args[1].(gate.Agent)
+	//game := args[0].(*Game)
+	agent := args[1].(Agent)
 	if itself == nil {
 		GetClientManger().SendResult(agent, FAILED, StatusText[User03])
 		return
 	}
 
 	//游戏句柄
-	userID := itself.UserID
-	gameHandle := itself.GameHandle
-	if gameHandle == nil {
-		log.Debug("[%v:%v] 玩家%v 进入出错:%v", game.Name, game.Id, userID, StatusText[Game18])
+	if itself.GameHandle == nil {
+		log.Debug("[%v:%v] 玩家%v 进入出错:%v", itself.InRooId, itself.InTableId, itself.UserID, StatusText[Game18])
 		GetClientManger().SendResult(agent, FAILED, StatusText[Game18])
 		return
 	}
 
 	var sceneArgs []interface{}
 	sceneArgs = append(sceneArgs, agent)
-	gameHandle.Scene(sceneArgs) // 【进入-> 游戏场景】
+	itself.GameHandle.Scene(sceneArgs) // 【进入-> 游戏场景】
 }
 
 func (itself *Player) Exit() { //退出

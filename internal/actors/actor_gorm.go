@@ -310,7 +310,6 @@ func (self *ActorDB) GetGames(kid int64) (games []*sqlmodel.Game, err error) {
 func (self *ActorDB) GetGame(gid int64) (*sqlmodel.Game, error) {
 	game := &sqlmodel.Game{}
 	err := self.db.Table(game.TableName()).Select("*").Where("id=?", gid).Find(game).Error
-
 	CheckError(err)
 	return game, err
 }

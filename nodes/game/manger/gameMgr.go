@@ -75,7 +75,7 @@ var gOnce sync.Once
 // ///////////////////游戏功能//////////////////////////////////////////////
 var gameMgr *GameMgr
 
-func GetGameMgr() *GameMgr {
+func GetGameInfoMgr() *GameMgr {
 	gOnce.Do(func() {
 		gameMgr = &GameMgr{}
 	})
