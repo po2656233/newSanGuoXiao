@@ -29,7 +29,7 @@ message GetTableListResp{
 }
 //获取游戏列表
 message GetGameListReq{
-  int64 kid = 1;// =0时，表示取所有游戏信息
+  int64 kid = 1;// =-1时，表示取所有游戏信息
 }
 message GetGameListResp{
   GameList items = 1;

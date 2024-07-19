@@ -1,4 +1,4 @@
-package sanguoxiao
+package player
 
 import (
 	clog "github.com/po2656233/superplace/logger"

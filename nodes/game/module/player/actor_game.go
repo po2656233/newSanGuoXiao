@@ -3,25 +3,30 @@ package player
 import (
 	cfacade "github.com/po2656233/superplace/facade"
 	clog "github.com/po2656233/superplace/logger"
-	"github.com/po2656233/superplace/net/parser/pomelo"
+	"github.com/po2656233/superplace/net/parser/simple"
 	event2 "superman/internal/event"
+	pb "superman/internal/protocol/gofile"
+	"superman/internal/rpc"
+	"superman/nodes/game/manger"
 	"superman/nodes/game/module/online"
 	"time"
 )
 
 type (
-	// ActorPlayers 玩家总管理actor
-	ActorPlayers struct {
-		pomelo.ActorBase
+	// ActorGame 每位登录的玩家对应一个子actor
+	ActorGame struct {
+		//pomelo.ActorBase
+		simple.ActorBase
+		checkTimeId   uint64
 		childExitTime time.Duration
 	}
 )
 
-func (p *ActorPlayers) AliasID() string {
-	return "player"
+func (p *ActorGame) AliasID() string {
+	return "game"
 }
-
-func (p *ActorPlayers) OnInit() {
+func (p *ActorGame) OnInit() {
+	clog.Debugf("[ActorGame] path = %s init!", p.PathString())
 	p.childExitTime = time.Minute * 30
 
 	// 注册角色登陆事件
@@ -30,13 +35,14 @@ func (p *ActorPlayers) OnInit() {
 	p.Event().Register(p.onPlayerCreateEvent)
 	p.Remote().Register(p.checkChild)
 
-	p.Timer().Add(1*time.Second, p.everySecondTimer)
+	p.Timer().RemoveAll()
+	p.Timer().AddOnce(time.Second, p.everySecondTimer)
 }
 
-func (p *ActorPlayers) OnFindChild(msg *cfacade.Message) (cfacade.IActor, bool) {
+func (p *ActorGame) OnFindChild(msg *cfacade.Message) (cfacade.IActor, bool) {
 	// 动态创建 player child actor
 	childID := msg.TargetPath().ChildID
-	childActor, err := p.Child().Create(childID, &actorPlayer{
+	childActor, err := p.Child().Create(childID, &ActorPlayer{
 		isOnline: false,
 	})
 
@@ -47,15 +53,30 @@ func (p *ActorPlayers) OnFindChild(msg *cfacade.Message) (cfacade.IActor, bool) 
 	return childActor, true
 }
 
-// cron
-func (p *ActorPlayers) everySecondTimer() {
-	p.Call(p.PathString(), "checkChild", nil)
+func (p *ActorGame) OnStop() {
+	clog.Debugf("[ActorGame] path = %s exit!", p.PathString())
 }
 
-func (p *ActorPlayers) checkChild() {
+// cron
+func (p *ActorGame) everySecondTimer() {
+	//p.Call(p.PathString(), "checkChild", nil)
+	data, errCode := rpc.SendData(p.App(), rpc.SourcePath, rpc.DBActor, rpc.CenterType, &pb.GetGameListReq{
+		Kid: -1,
+	})
+	if errCode == 0 {
+		resp, ok := data.(*pb.GetGameListResp)
+		if ok && resp != nil && resp.Items != nil {
+			manger.GetGameMgr().AddGames(resp.Items.Items)
+			return
+		}
+	}
+	p.Timer().AddOnce(3*time.Second, p.everySecondTimer)
+}
+
+func (p *ActorGame) checkChild() {
 	// 扫描所有玩家actor
 	p.Child().Each(func(iActor cfacade.IActor) {
-		child, ok := iActor.(*actorPlayer)
+		child, ok := iActor.(*ActorPlayer)
 		if !ok {
 			return
 		}
@@ -73,7 +94,7 @@ func (p *ActorPlayers) checkChild() {
 }
 
 // onLoginEvent 玩家登陆事件处理
-func (p *ActorPlayers) onLoginEvent(e cfacade.IEventData) {
+func (p *ActorGame) onLoginEvent(e cfacade.IEventData) {
 	evt, ok := e.(*event2.PlayerLogin)
 	if ok == false {
 		return
@@ -86,7 +107,7 @@ func (p *ActorPlayers) onLoginEvent(e cfacade.IEventData) {
 }
 
 // onLoginEvent 玩家登出事件处理
-func (p *ActorPlayers) onLogoutEvent(e cfacade.IEventData) {
+func (p *ActorGame) onLogoutEvent(e cfacade.IEventData) {
 	evt, ok := e.(*event2.PlayerLogout)
 	if !ok {
 		return
@@ -99,15 +120,11 @@ func (p *ActorPlayers) onLogoutEvent(e cfacade.IEventData) {
 }
 
 // onPlayerCreateEvent 玩家创建事件
-func (p *ActorPlayers) onPlayerCreateEvent(e cfacade.IEventData) {
+func (p *ActorGame) onPlayerCreateEvent(e cfacade.IEventData) {
 	evt, ok := e.(*event2.PlayerCreate)
 	if !ok {
 		return
 	}
 
 	clog.Infof("[PlayerCreateEvent] [%+v]", evt)
-}
-
-func (p *ActorPlayers) OnStop() {
-	clog.Infof("onlineCount = %d", online.Count())
 }

@@ -144,7 +144,7 @@ func getRandomTable(gid, butTid int64, tables []*Table) *Table {
 }
 
 // AddTable 新增桌子(tid == gid 即桌子ID和游戏ID共用)
-func (self *Room) AddTable(table *protoMsg.TableInfo) error {
+func (self *Room) AddTable(table *protoMsg.TableInfo, f NewGameCallback) error {
 	self.Lock()
 	defer self.Unlock()
 	if self.tables == nil {
@@ -160,7 +160,7 @@ func (self *Room) AddTable(table *protoMsg.TableInfo) error {
 	}
 	tb := &Table{
 		TableInfo:  table,
-		GameHandle: NewGame(table.Gid),
+		GameHandle: f(table.Gid),
 		sitters:    make([]*Chair, 0),
 		lookers:    make([]*Player, 0),
 		RWMutex:    sync.RWMutex{},

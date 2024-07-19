@@ -313,7 +313,7 @@ type GetGameListReq struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Kid int64 `protobuf:"varint,1,opt,name=kid,proto3" json:"kid,omitempty"` // =0时，表示取所有游戏信息
+	Kid int64 `protobuf:"varint,1,opt,name=kid,proto3" json:"kid,omitempty"` // =-1时，表示取所有游戏信息
 }
 
 func (x *GetGameListReq) Reset() {

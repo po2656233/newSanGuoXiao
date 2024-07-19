@@ -34,6 +34,7 @@ func (self *ActorDB) OnInit() {
 	self.Remote().Register(self.GetRoomList)
 	self.Remote().Register(self.GetTableList)
 	self.Remote().Register(self.GetGameList)
+	self.Remote().Register(self.GetGame)
 
 	self.Remote().Register(self.CreateRoom)
 	self.Remote().Register(self.CreateTable)
@@ -303,6 +304,15 @@ func (self *ActorDB) GetGames(kid int64) (games []*sqlmodel.Game, err error) {
 
 	CheckError(err)
 	return
+}
+
+// GetGame 获取游戏列表
+func (self *ActorDB) GetGame(gid int64) (*sqlmodel.Game, error) {
+	game := &sqlmodel.Game{}
+	err := self.db.Table(game.TableName()).Select("*").Where("id=?", gid).Find(game).Error
+
+	CheckError(err)
+	return game, err
 }
 
 // GetAllGames 获取所有游戏列表

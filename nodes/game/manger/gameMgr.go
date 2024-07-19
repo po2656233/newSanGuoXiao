@@ -1,8 +1,8 @@
 package manger
 
 import (
-	. "superman/internal/constant"
 	protoMsg "superman/internal/protocol/gofile"
+	"sync"
 )
 
 // IGameOperate 子游戏接口
@@ -39,8 +39,8 @@ type IDevice interface {
 	Close() bool              //关闭
 }
 
-// ProductCallback 实例回调(根据桌子号创建游戏)
-type ProductCallback func(table *Game) IGameOperate
+// NewGameCallback 实例回调(根据桌子号创建游戏)
+type NewGameCallback func(gid int64) IGameOperate
 
 type CalculateSQL func(info CalculateInfo) (nowMoney, factDeduct int64, isOK bool)
 
@@ -59,19 +59,70 @@ type CalculateInfo struct {
 }
 type Game struct {
 	*protoMsg.GameInfo
+	IsStart    bool  // 第一次启动
+	IsClear    bool  // 是否清场
+	ReadyCount int32 // 已准备人数
+	RunCount   int32 // 运行次数
+	TimeStamp  int64 // 当前时间戳
 }
+
+type GameMgr struct {
+	sync.Map
+}
+
+var gOnce sync.Once
 
 // ///////////////////游戏功能//////////////////////////////////////////////
-func NewGame(gid int64) IGameOperate {
-	switch gid {
-	case ChineseChess:
-	case Chess:
+var gameMgr *GameMgr
 
-	case SanGuoXiao:
-
-	}
-	return nil
+func GetGameMgr() *GameMgr {
+	gOnce.Do(func() {
+		gameMgr = &GameMgr{}
+	})
+	return gameMgr
 }
+
+func (gmr *GameMgr) AddGames(games []*protoMsg.GameInfo) {
+	for _, game := range games {
+		gmr.Store(game.Id, game)
+	}
+}
+
+func (gmr *GameMgr) AddGame(game *protoMsg.GameInfo) {
+	gmr.Store(game.Id, game)
+}
+
+func (gmr *GameMgr) GetGame(gid int64) *protoMsg.GameInfo {
+	val, ok := gmr.Load(gid)
+	if !ok {
+		return nil
+	}
+	return val.(*protoMsg.GameInfo)
+}
+
+// NewGame 新建游戏
+//func NewGame(gid int64) IGameOperate {
+//	gameInfo := GetGameMgr().GetGame(gid)
+//	if gameInfo == nil {
+//		return nil
+//	}
+//	game := &Game{
+//		GameInfo:   gameInfo,
+//		IsStart:    true,
+//		IsClear:    false,
+//		ReadyCount: 0,
+//		RunCount:   0,
+//		TimeStamp:  time.Now().Unix(),
+//	}
+//	switch gid {
+//	case cst.ChineseChess:
+//	case cst.Chess:
+//
+//	case cst.SanGuoXiao:
+//		sanguoxiao.New(game)
+//	}
+//	return nil
+//}
 
 // Ready 准备
 func (g *Game) Ready() bool {
@@ -104,3 +155,5 @@ func (tb *Game) Clear(time int64) bool {
 func (tb *Game) Close() bool {
 	return true
 }
+
+//////////////////////////////////////////////////////////////////////////
