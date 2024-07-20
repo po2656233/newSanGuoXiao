@@ -1,10 +1,11 @@
 package sanguoxiao
 
 import (
-	"github.com/po2656233/goleaf/gate"
 	"github.com/po2656233/goleaf/log"
 	protoMsg "superman/internal/protocol/gofile"
+	"superman/internal/utils"
 	mgr "superman/nodes/game/manger"
+	"superman/nodes/game/module/category"
 	"time"
 )
 
@@ -36,17 +37,19 @@ type SanguoxiaoGame struct {
 	arrayBoard [][]protoMsg.SgxPiece // 和board等同,游戏主要操作该棋盘
 	result     *protoMsg.SanguoxiaoResult
 
-	redPlay  *protoMsg.SanguoxiaoPlayer // 玩家1
-	bluePlay *protoMsg.SanguoxiaoPlayer // 玩家2
+	redPlay  *protoMsg.SanguoxiaoPlayer // 红方玩家
+	bluePlay *protoMsg.SanguoxiaoPlayer // 蓝方玩家
 	playList []int64
 }
 
 // New 创建实例
 func New(game *mgr.Game) *SanguoxiaoGame {
-
 	p := &SanguoxiaoGame{
 		Game: game,
 	}
+	category.InitConfig()
+	p.row = category.YamlObj.SanGuoXiao.Row
+	p.col = category.YamlObj.SanGuoXiao.Col
 	p.Init()
 	return p
 }
@@ -59,11 +62,12 @@ func (self *SanguoxiaoGame) Init() {
 // Scene 场 景
 func (self *SanguoxiaoGame) Scene(args []interface{}) {
 	//level := args[0].(int32)
-	agent := args[1].(gate.Agent)
+	self.initBord(self.row, self.col)
+	agent := args[0].(mgr.Agent)
 	userData := agent.UserData()
 	person := userData.(*mgr.Player)
 	now := time.Now().Unix()
-	mgr.GetClientManger().SendTo(person.UserID,
+	mgr.GetClientMgr().SendTo(person.UserID,
 		&protoMsg.SanguoxiaoSceneResp{
 			TimeStamp: time.Now().Unix(),
 			//Inning:    self.InningInfo.Number,
@@ -84,7 +88,7 @@ func (self *SanguoxiaoGame) Scene(args []interface{}) {
 					//TotalTime: self.Duration.PlayTime,
 				},
 			}
-			mgr.GetClientManger().SendTo(person.UserID, msg)
+			mgr.GetClientMgr().SendTo(person.UserID, msg)
 		}
 	case protoMsg.GameScene_Opening: // 消除
 		{
@@ -97,7 +101,7 @@ func (self *SanguoxiaoGame) Scene(args []interface{}) {
 					//TotalTime: self.Config.SanGuoXiao.Duration.OpenTime,
 				},
 			}
-			mgr.GetClientManger().SendTo(person.UserID, msg)
+			mgr.GetClientMgr().SendTo(person.UserID, msg)
 		}
 	case protoMsg.GameScene_Over: // 结算
 		{
@@ -110,7 +114,7 @@ func (self *SanguoxiaoGame) Scene(args []interface{}) {
 					//TotalTime: self.Config.SanGuoXiao.Duration.OverTime,
 				},
 			}
-			mgr.GetClientManger().SendTo(person.UserID, msg)
+			mgr.GetClientMgr().SendTo(person.UserID, msg)
 		}
 
 	}
@@ -126,14 +130,14 @@ func (self *SanguoxiaoGame) Start(args []interface{}) {
 func (self *SanguoxiaoGame) Playing(args []interface{}) {
 	//
 	m := args[0].(*protoMsg.SanguoxiaoSwapReq)
-	agent := args[1].(gate.Agent)
+	agent := args[1].(mgr.Agent)
 	if protoMsg.GameScene_Playing != self.status {
 		log.Error("[Sanguoxiao][Playing] 场景信息不匹配 %v ", self.status)
 		return
 	}
 	userData := agent.UserData()
 	if userData == nil { //[0
-		//mgr.GetClientManger().SendResult(agent, FAILED, StatusText[Game37])
+		//mgr.GetClientMgr().SendResult(agent, FAILED, StatusText[Game37])
 		log.Error("[Sanguoxiao][Playing] 用户数据 %v ", self.status)
 		return
 	}
@@ -148,13 +152,13 @@ func (self *SanguoxiaoGame) Playing(args []interface{}) {
 	}
 	// 交换位置上的数值
 	if !self.swapGrid(m.Origin, m.Target) {
-		//mgr.GetClientManger().SendResult(agent, FAILED, StatusText[Game37])
+		//mgr.GetClientMgr().SendResult(agent, FAILED, StatusText[Game37])
 		log.Error("[Sanguoxiao][Playing] 用户操作错误 %v ", self.status)
 		return
 	}
 
 	// 通知玩家 当前操作
-	mgr.GetClientManger().NotifyOthers(self.playList, &protoMsg.SanguoxiaoSwapResp{
+	mgr.GetClientMgr().NotifyOthers(self.playList, &protoMsg.SanguoxiaoSwapResp{
 		UserID: person.UserID,
 		Origin: m.Origin,
 		Target: m.Target,
@@ -209,13 +213,14 @@ func (self *SanguoxiaoGame) Over(args []interface{}) {
 }
 
 // UpdateInfo 更新信息
-func (self *SanguoxiaoGame) UpdateInfo(args []interface{}) {
+func (self *SanguoxiaoGame) UpdateInfo(args []interface{}) bool {
 
+	return true
 }
 
 // SuperControl 超级控制 在检测到没真实玩家时,且处于空闲状态时,自动关闭
-func (self *SanguoxiaoGame) SuperControl(args []interface{}) {
-
+func (self *SanguoxiaoGame) SuperControl(args []interface{}) bool {
+	return true
 }
 
 // //////////////////////////////////////////////////////////////
@@ -237,7 +242,7 @@ func (self *SanguoxiaoGame) OnNext() {
 		self.curUID = self.redPlay.Info.UserID
 	}
 
-	mgr.GetClientManger().NotifyOthers(self.playList,
+	mgr.GetClientMgr().NotifyOthers(self.playList,
 		&protoMsg.SanguoxiaoStatePlayingResp{
 			Times: &protoMsg.TimeInfo{
 				TimeStamp: self.TimeStamp,
@@ -273,7 +278,7 @@ func (self *SanguoxiaoGame) OnOpen() {
 		return
 	}
 	self.TimeStamp = time.Now().Unix()
-	mgr.GetClientManger().NotifyOthers(self.playList,
+	mgr.GetClientMgr().NotifyOthers(self.playList,
 		&protoMsg.SanguoxiaoStateEraseResp{
 			Times: &protoMsg.TimeInfo{
 				TimeStamp: self.TimeStamp,
@@ -309,7 +314,7 @@ func (self *SanguoxiaoGame) OnOver() {
 			//TotalTime: self.Config.SanGuoXiao.Duration.OverTime,
 		},
 	}
-	mgr.GetClientManger().NotifyOthers(self.playList, msg)
+	mgr.GetClientMgr().NotifyOthers(self.playList, msg)
 	//self.curTimer = time.AfterFunc(time.Duration(self.Config.SanGuoXiao.Duration.OverTime)*time.Second, func() {
 	//	self = nil
 	//})
@@ -326,17 +331,17 @@ func (self *SanguoxiaoGame) toState(scene protoMsg.GameScene, f func()) {
 // initBord 初始化方格
 func (self *SanguoxiaoGame) initBord(row, col int32) {
 	self.board = &protoMsg.BoardInfo{}
-	self.arrayBoard = make([][]protoMsg.SgxPiece, row, row) // [rowNum][colNum]protoMsg.SgxPiece{}
+	self.arrayBoard = make([][]protoMsg.SgxPiece, row) // [rowNum][colNum]protoMsg.SgxPiece{}
 	for i := 0; i < int(row); i++ {
-		self.arrayBoard[i] = make([]protoMsg.SgxPiece, col, col)
+		self.arrayBoard[i] = make([]protoMsg.SgxPiece, col)
 	}
 	// 避免连续三个相同
 	for i := int32(0); i < row; i++ {
 		for j := int32(0); j < col; j++ {
 			item := &protoMsg.Grid{
-				Row: i,
-				Col: j,
-				//Core: protoMsg.SgxPiece(GenRandNum32(int32(protoMsg.SgxPiece_Jin), int32(protoMsg.SgxPiece_Yao))),
+				Row:  i,
+				Col:  j,
+				Core: protoMsg.SgxPiece(utils.GenRandNum32(int32(protoMsg.SgxPiece_Jin), int32(protoMsg.SgxPiece_Yao))),
 			}
 			if self.canErase(item) {
 				for index := protoMsg.SgxPiece_Jin; index <= protoMsg.SgxPiece_Yao; index++ {
@@ -478,7 +483,7 @@ func (self *SanguoxiaoGame) eraseGrid() bool {
 	}
 
 	msg.NowBoard = self.board
-	mgr.GetClientManger().NotifyOthers(self.playList, msg)
+	mgr.GetClientMgr().NotifyOthers(self.playList, msg)
 
 	// 当前各玩家生命值
 	self.redPlay.Health = msg.RedCampHealth
@@ -493,11 +498,11 @@ func (self *SanguoxiaoGame) eraseGrid() bool {
 // 掉落
 func (self *SanguoxiaoGame) fallDown() {
 	//// 按列掉落
-	//for c := int32(0); c < self.Config.SanGuoXiao.Col; c++ {
-	//	for r := int32(0); r < self.Config.SanGuoXiao.Row; r++ {
+	//for c := int32(0); c < self.col; c++ {
+	//	for r := int32(0); r < self.row; r++ {
 	//		// 找到空位
 	//		if self.arrayBoard[r][c] == protoMsg.SgxPiece_NoPiece {
-	//			for nr := r + 1; nr < self.Config.SanGuoXiao.Row; nr++ {
+	//			for nr := r + 1; nr < self.row; nr++ {
 	//				// 找到可以用的方块
 	//				if self.arrayBoard[nr][c] != protoMsg.SgxPiece_NoPiece {
 	//					// 转移数据
@@ -515,8 +520,8 @@ func (self *SanguoxiaoGame) fallDown() {
 
 // 填充
 func (self *SanguoxiaoGame) fillEmpty() {
-	//for r := int32(0); r < self.Config.SanGuoXiao.Row; r++ {
-	//	for c := int32(0); c < self.Config.SanGuoXiao.Col; c++ {
+	//for r := int32(0); r < self.row; r++ {
+	//	for c := int32(0); c < self.col; c++ {
 	//		if self.arrayBoard[r][c] == protoMsg.SgxPiece_NoPiece {
 	//			self.arrayBoard[r][c] = protoMsg.SgxPiece(GenRandNum32(int32(protoMsg.SgxPiece_Jin), int32(protoMsg.SgxPiece_Yao)))
 	//			self.setGrid(r, c, self.arrayBoard[r][c])
@@ -555,83 +560,82 @@ func (self *SanguoxiaoGame) getAttacks(cells []*protoMsg.Grid, heros []*protoMsg
 // //////////////////////////////////////////////////////////////////////////
 // 判断格子前后的是否可消除
 func (self *SanguoxiaoGame) canErase(grid *protoMsg.Grid) bool {
-	return false
-	//if grid.Core == protoMsg.SgxPiece_NoPiece || 0 == len(self.arrayBoard) {
-	//	return false
-	//}
-	//gridUp1 := &protoMsg.Grid{
-	//	Row: grid.Row - 1,
-	//	Col: grid.Col,
-	//}
-	//gridUp2 := &protoMsg.Grid{
-	//	Row: grid.Row - 2,
-	//	Col: grid.Col,
-	//}
-	//gridDw1 := &protoMsg.Grid{
-	//	Row: grid.Row + 1,
-	//	Col: grid.Col,
-	//}
-	//gridDw2 := &protoMsg.Grid{
-	//	Row: grid.Row + 2,
-	//	Col: grid.Col,
-	//}
-	//gridLf1 := &protoMsg.Grid{
-	//	Row: grid.Row,
-	//	Col: grid.Col - 1,
-	//}
-	//gridLf2 := &protoMsg.Grid{
-	//	Row: grid.Row,
-	//	Col: grid.Col - 2,
-	//}
-	//gridRt1 := &protoMsg.Grid{
-	//	Row: grid.Row,
-	//	Col: grid.Col + 1,
-	//}
-	//gridRt2 := &protoMsg.Grid{
-	//	Row: grid.Row,
-	//	Col: grid.Col + 2,
-	//}
+	if grid.Core == protoMsg.SgxPiece_NoPiece || 0 == len(self.arrayBoard) {
+		return false
+	}
+	gridUp1 := &protoMsg.Grid{
+		Row: grid.Row - 1,
+		Col: grid.Col,
+	}
+	gridUp2 := &protoMsg.Grid{
+		Row: grid.Row - 2,
+		Col: grid.Col,
+	}
+	gridDw1 := &protoMsg.Grid{
+		Row: grid.Row + 1,
+		Col: grid.Col,
+	}
+	gridDw2 := &protoMsg.Grid{
+		Row: grid.Row + 2,
+		Col: grid.Col,
+	}
+	gridLf1 := &protoMsg.Grid{
+		Row: grid.Row,
+		Col: grid.Col - 1,
+	}
+	gridLf2 := &protoMsg.Grid{
+		Row: grid.Row,
+		Col: grid.Col - 2,
+	}
+	gridRt1 := &protoMsg.Grid{
+		Row: grid.Row,
+		Col: grid.Col + 1,
+	}
+	gridRt2 := &protoMsg.Grid{
+		Row: grid.Row,
+		Col: grid.Col + 2,
+	}
 	// 获取相连的两格
-	//// 上方 前两格
-	//if 0 <= gridUp1.Row && gridUp1.Row < self.Config.SanGuoXiao.Row &&
-	//	0 <= gridUp1.Col && gridUp1.Col < self.Config.SanGuoXiao.Col {
-	//	gridUp1.Core = self.arrayBoard[gridUp1.Row][gridUp1.Col]
-	//}
-	//if 0 <= gridUp2.Row && gridUp2.Row < self.Config.SanGuoXiao.Row &&
-	//	0 <= gridUp2.Col && gridUp2.Col < self.Config.SanGuoXiao.Col {
-	//	gridUp2.Core = self.arrayBoard[gridUp2.Row][gridUp2.Col]
-	//}
-	//// 下方 前两格
-	//if 0 <= gridDw1.Row && gridDw1.Row < self.Config.SanGuoXiao.Row &&
-	//	0 <= gridDw1.Col && gridDw1.Col < self.Config.SanGuoXiao.Col {
-	//	gridDw1.Core = self.arrayBoard[gridDw1.Row][gridDw1.Col]
-	//}
-	//if 0 <= gridDw2.Row && gridDw2.Row < self.Config.SanGuoXiao.Row &&
-	//	0 <= gridDw2.Col && gridDw2.Col < self.Config.SanGuoXiao.Col {
-	//	gridDw2.Core = self.arrayBoard[gridDw2.Row][gridDw2.Col]
-	//}
-	//// 左方 前两格
-	//if 0 <= gridLf1.Row && gridLf1.Row < self.Config.SanGuoXiao.Row &&
-	//	0 <= gridLf1.Col && gridLf1.Col < self.Config.SanGuoXiao.Col {
-	//	gridLf1.Core = self.arrayBoard[gridLf1.Row][gridLf1.Col]
-	//}
-	//if 0 <= gridLf2.Row && gridLf2.Row < self.Config.SanGuoXiao.Row &&
-	//	0 <= gridLf2.Col && gridLf2.Col < self.Config.SanGuoXiao.Col {
-	//	gridLf2.Core = self.arrayBoard[gridLf2.Row][gridLf2.Col]
-	//}
-	//// 右方 前两格
-	//if 0 <= gridRt1.Row && gridRt1.Row < self.Config.SanGuoXiao.Row &&
-	//	0 <= gridRt1.Col && gridRt1.Col < self.Config.SanGuoXiao.Col {
-	//	gridRt1.Core = self.arrayBoard[gridRt1.Row][gridRt1.Col]
-	//}
-	//if 0 <= gridRt2.Row && gridRt2.Row < self.Config.SanGuoXiao.Row &&
-	//	0 <= gridRt2.Col && gridRt2.Col < self.Config.SanGuoXiao.Col {
-	//	gridRt2.Core = self.arrayBoard[gridRt2.Row][gridRt2.Col]
-	//}
-	//return (gridUp1.Core == grid.Core && gridUp2.Core == grid.Core) || //上消除
-	//	(gridDw1.Core == grid.Core && gridDw2.Core == grid.Core) || //下消除
-	//	(gridUp1.Core == grid.Core && gridDw1.Core == grid.Core) || //上下消除
-	//	(gridLf1.Core == grid.Core && gridLf2.Core == grid.Core) || //左消除
-	//	(gridRt1.Core == grid.Core && gridRt2.Core == grid.Core) || //右消除
-	//	(gridLf1.Core == grid.Core && gridRt1.Core == grid.Core) //左右消除
+	// 上方 前两格
+	if 0 <= gridUp1.Row && gridUp1.Row < self.row &&
+		0 <= gridUp1.Col && gridUp1.Col < self.col {
+		gridUp1.Core = self.arrayBoard[gridUp1.Row][gridUp1.Col]
+	}
+	if 0 <= gridUp2.Row && gridUp2.Row < self.row &&
+		0 <= gridUp2.Col && gridUp2.Col < self.col {
+		gridUp2.Core = self.arrayBoard[gridUp2.Row][gridUp2.Col]
+	}
+	// 下方 前两格
+	if 0 <= gridDw1.Row && gridDw1.Row < self.row &&
+		0 <= gridDw1.Col && gridDw1.Col < self.col {
+		gridDw1.Core = self.arrayBoard[gridDw1.Row][gridDw1.Col]
+	}
+	if 0 <= gridDw2.Row && gridDw2.Row < self.row &&
+		0 <= gridDw2.Col && gridDw2.Col < self.col {
+		gridDw2.Core = self.arrayBoard[gridDw2.Row][gridDw2.Col]
+	}
+	// 左方 前两格
+	if 0 <= gridLf1.Row && gridLf1.Row < self.row &&
+		0 <= gridLf1.Col && gridLf1.Col < self.col {
+		gridLf1.Core = self.arrayBoard[gridLf1.Row][gridLf1.Col]
+	}
+	if 0 <= gridLf2.Row && gridLf2.Row < self.row &&
+		0 <= gridLf2.Col && gridLf2.Col < self.col {
+		gridLf2.Core = self.arrayBoard[gridLf2.Row][gridLf2.Col]
+	}
+	// 右方 前两格
+	if 0 <= gridRt1.Row && gridRt1.Row < self.row &&
+		0 <= gridRt1.Col && gridRt1.Col < self.col {
+		gridRt1.Core = self.arrayBoard[gridRt1.Row][gridRt1.Col]
+	}
+	if 0 <= gridRt2.Row && gridRt2.Row < self.row &&
+		0 <= gridRt2.Col && gridRt2.Col < self.col {
+		gridRt2.Core = self.arrayBoard[gridRt2.Row][gridRt2.Col]
+	}
+	return (gridUp1.Core == grid.Core && gridUp2.Core == grid.Core) || //上消除
+		(gridDw1.Core == grid.Core && gridDw2.Core == grid.Core) || //下消除
+		(gridUp1.Core == grid.Core && gridDw1.Core == grid.Core) || //上下消除
+		(gridLf1.Core == grid.Core && gridLf2.Core == grid.Core) || //左消除
+		(gridRt1.Core == grid.Core && gridRt2.Core == grid.Core) || //右消除
+		(gridLf1.Core == grid.Core && gridRt1.Core == grid.Core) //左右消除
 }

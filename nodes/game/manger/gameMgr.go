@@ -7,12 +7,12 @@ import (
 
 // IGameOperate 子游戏接口
 type IGameOperate interface {
-	Scene(args []interface{})        //场 景
-	Start(args []interface{})        //开 始
-	Playing(args []interface{})      //游 戏(下分|下注)
-	Over(args []interface{})         //结 算
-	UpdateInfo(args []interface{})   //更新信息
-	SuperControl(args []interface{}) //超级控制 在检测到没真实玩家时,且处于空闲状态时,自动关闭
+	Scene(args []interface{})             //场 景
+	Start(args []interface{})             //开 始
+	Playing(args []interface{})           //游 戏(下分|下注)
+	Over(args []interface{})              //结 算
+	UpdateInfo(args []interface{}) bool   //更新信息
+	SuperControl(args []interface{}) bool //超级控制 在检测到没真实玩家时,且处于空闲状态时,自动关闭
 }
 
 // IAgainst 对战类
@@ -115,7 +115,7 @@ func (gmr *GameMgr) GetGame(gid int64) *protoMsg.GameInfo {
 //		TimeStamp:  time.Now().Unix(),
 //	}
 //	switch gid {
-//	case cst.ChineseChess:
+//	case cst.chinesechess:
 //	case cst.Chess:
 //
 //	case cst.SanGuoXiao:

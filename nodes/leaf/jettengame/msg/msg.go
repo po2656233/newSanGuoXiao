@@ -41,6 +41,7 @@ func init() {
 
     //baseinfo文件生成的代码
     RegisterMessage(&protoMsg.UserInfo{})
+    RegisterMessage(&protoMsg.UserSimpleInfo{})
     RegisterMessage(&protoMsg.PlayerInfo{})
     RegisterMessage(&protoMsg.HeroInfo{})
     RegisterMessage(&protoMsg.WeaponInfo{})
@@ -173,6 +174,8 @@ func init() {
     RegisterMessage(&protoMsg.GetGameListResp{})
     RegisterMessage(&protoMsg.GetTaskListReq{})
     RegisterMessage(&protoMsg.GetTaskListResp{})
+    RegisterMessage(&protoMsg.GetUserInfoReq{})
+    RegisterMessage(&protoMsg.GetUserInfoResp{})
     RegisterMessage(&protoMsg.ChooseClassReq{})
     RegisterMessage(&protoMsg.ChooseClassResp{})
     RegisterMessage(&protoMsg.ChooseRoomReq{})
@@ -185,6 +188,8 @@ func init() {
     RegisterMessage(&protoMsg.CreateTableResp{})
     RegisterMessage(&protoMsg.DeleteTableReq{})
     RegisterMessage(&protoMsg.DeleteTableResp{})
+    RegisterMessage(&protoMsg.FixNickNameReq{})
+    RegisterMessage(&protoMsg.FixNickNameResp{})
     RegisterMessage(&protoMsg.CheckInReq{})
     RegisterMessage(&protoMsg.CheckInResp{})
     RegisterMessage(&protoMsg.GetCheckInReq{})

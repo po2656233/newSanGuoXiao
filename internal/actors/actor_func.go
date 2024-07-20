@@ -16,10 +16,10 @@ import (
 func (self *ActorDB) Register(req *pb.RegisterReq) (*pb.RegisterResp, error) {
 	m := req
 	identity := uuid.New().String()
+	//Password: Md5Sum(m.Password + strconv.FormatInt(int64(len(m.Password)), 10)),
 	user := sqlmodel.User{
 		Name:     m.Name,
 		Account:  m.Name,
-		Password: Md5Sum(m.Password + strconv.FormatInt(int64(len(m.Password)), 10)),
 		Passport: m.PassPortID,
 		Realname: m.RealName,
 		Phone:    m.PhoneNum,
@@ -33,16 +33,9 @@ func (self *ActorDB) Register(req *pb.RegisterReq) (*pb.RegisterResp, error) {
 		Face:   m.FaceID,
 		Gender: m.Gender,
 		Age:    m.Age,
-		//Vip:          LessVIP,
-		//Level:        LessLevel,
-		//Agentid: m.PlatformID,
-		//Agentid:      agentID,
-		//Withdraw:     INVALID,
-		//Deposit:      LessMoney,
-		//Money:        LessMoney,
 	}
 	clog.Warnf("actorDB register req:%v", req)
-	uid, err := self.AddUser(user)
+	uid, err := self.addUser(user)
 	if err != nil {
 		uid = -1
 		clog.Errorf("[actor_gorm] Register uid:%v err:%v", uid, err)
@@ -56,7 +49,10 @@ func (self *ActorDB) Register(req *pb.RegisterReq) (*pb.RegisterResp, error) {
 
 func (self *ActorDB) Login(req *pb.LoginReq) (*pb.LoginResp, error) {
 	psw := Md5Sum(req.Password + strconv.FormatInt(int64(len(req.Password)), 10))
-	userInfo, err := self.GetUserInfo(req.Account, psw)
+	userInfo, err := self.checkUserInfo(req.Account, psw)
+	if err != nil {
+		return nil, err
+	}
 	resp := &pb.LoginResp{}
 	resp.MainInfo = &pb.MasterInfo{
 		UserInfo: &pb.UserInfo{
@@ -70,7 +66,7 @@ func (self *ActorDB) Login(req *pb.LoginReq) (*pb.LoginResp, error) {
 			FaceID:       userInfo.Face,
 			Gender:       userInfo.Gender,
 			Age:          userInfo.Age,
-			VIP:          userInfo.Vip,
+			Vip:          userInfo.Vip,
 			Level:        userInfo.Level,
 			PassPortID:   userInfo.Passport,
 			Address:      userInfo.Address,
@@ -95,7 +91,7 @@ func (self *ActorDB) GetClassList() (*pb.GetClassListResp, error) {
 			Classify: make([]*pb.ClassItem, 0),
 		},
 	}
-	ret, err := self.GetClassify()
+	ret, err := self.checkClassify()
 	for _, kind := range ret {
 		resp.Items.Classify = append(resp.Items.Classify, &pb.ClassItem{
 			Id:     kind.ID,
@@ -113,7 +109,7 @@ func (self *ActorDB) GetRoomList(req *pb.GetRoomListReq) (*pb.GetRoomListResp, e
 			Items: make([]*pb.RoomInfo, 0),
 		},
 	}
-	ret, err := self.GetRooms(req.Uid)
+	ret, err := self.checkRooms(req.Uid, req.StartTime)
 	for _, room := range ret {
 		resp.Items.Items = append(resp.Items.Items, &pb.RoomInfo{
 			Id:         room.ID,
@@ -137,7 +133,7 @@ func (self *ActorDB) GetTableList(req *pb.GetTableListReq) (*pb.GetTableListResp
 			Items: make([]*pb.TableInfo, 0),
 		},
 	}
-	ret, err := self.GetTables(req.Rid)
+	ret, err := self.checkTables(req.Rid)
 	for _, table := range ret {
 		resp.Items.Items = append(resp.Items.Items, &pb.TableInfo{
 			Id:         table.ID,
@@ -161,7 +157,7 @@ func (self *ActorDB) GetGameList(req *pb.GetGameListReq) (*pb.GetGameListResp, e
 			Items: make([]*pb.GameInfo, 0),
 		},
 	}
-	ret, err := self.GetGames(req.Kid)
+	ret, err := self.checkGames(req.Kid)
 	for _, game := range ret {
 		resp.Items.Items = append(resp.Items.Items, &pb.GameInfo{
 			Id:        game.ID,
@@ -178,7 +174,7 @@ func (self *ActorDB) GetGameList(req *pb.GetGameListReq) (*pb.GetGameListResp, e
 
 ///////////////////////create////////////////////////////////////
 
-func (self *ActorDB) CreateRoom(req *pb.CreateRoomReq) (interface{}, error) {
+func (self *ActorDB) CreateRoom(req *pb.CreateRoomReq) (*pb.CreateRoomResp, error) {
 	resp := &pb.CreateRoomResp{}
 	maxCount := int32(0)
 	maxTable := int32(0)
@@ -203,7 +199,7 @@ func (self *ActorDB) CreateRoom(req *pb.CreateRoomReq) (interface{}, error) {
 		maxTable = -1
 
 	}
-	roomId, err := self.AddRoom(sqlmodel.Room{
+	roomId, err := self.addRoom(sqlmodel.Room{
 		Hostid:     req.HostId,
 		Level:      int32(req.Level),
 		Name:       req.Name,
@@ -218,7 +214,7 @@ func (self *ActorDB) CreateRoom(req *pb.CreateRoomReq) (interface{}, error) {
 		UpdateBy:   0,
 		CreateBy:   req.HostId,
 	})
-	if 0 == roomId {
+	if 0 == roomId || err != nil {
 		return nil, err
 	}
 	resp.HostId = req.HostId
@@ -232,7 +228,7 @@ func (self *ActorDB) CreateRoom(req *pb.CreateRoomReq) (interface{}, error) {
 
 func (self *ActorDB) CreateTable(req *pb.CreateTableReq) (*pb.CreateTableResp, error) {
 	resp := &pb.CreateTableResp{}
-	tid, err := self.AddTable(sqlmodel.Table{
+	tid, err := self.addTable(sqlmodel.Table{
 		Gid:        req.Gid,
 		Rid:        req.Rid,
 		Name:       req.Name,
@@ -256,17 +252,72 @@ func (self *ActorDB) CreateTable(req *pb.CreateTableReq) (*pb.CreateTableResp, e
 
 func (self *ActorDB) DeleteTable(req *pb.DeleteTableReq) (*pb.DeleteTableResp, error) {
 	resp := &pb.DeleteTableResp{}
-	rid := self.GetTableRid(req.Tid)
+	rid := self.checkTableRid(req.Tid)
 	if rid == 0 {
 		return resp, fmt.Errorf("tid:%d no have rid", req.Tid)
 	}
-	count := self.CheckRoomHost(req.HostId, rid)
+	count := self.checkRoomHost(req.HostId, rid)
 	if count == 0 {
 		return resp, fmt.Errorf("hostid:%d rid:%d no exist", req.HostId, rid)
 	}
 	// 检测游戏是否处于关闭状态，才能
-	err := self.DelTable(req.HostId, req.Tid)
+	err := self.delTable(req.HostId, req.Tid)
 	resp.Tid = req.Tid
 	resp.Rid = rid
 	return resp, err
+}
+
+// /////////////////////////////////////////////////////////////////////////////////////
+func (self *ActorDB) GetTable(req *pb.GetTableReq) (*pb.GetTableResp, error) {
+	resp := &pb.GetTableResp{}
+	info, err := self.checkTable(req.Tid)
+	if err != nil {
+		return nil, err
+	}
+	resp.Info = &pb.TableInfo{
+		Id:         info.ID,
+		Name:       info.Name,
+		Rid:        info.Rid,
+		Gid:        info.Gid,
+		OpenTime:   info.Opentime,
+		Taxation:   info.Taxation,
+		Commission: info.Commission,
+		Amount:     info.Amount,
+		PlayScore:  info.Playscore,
+		MaxSitter:  info.MaxSitter,
+	}
+	return resp, err
+}
+func (self *ActorDB) GetUserInfo(req *pb.GetUserInfoReq) (*pb.GetUserInfoResp, error) {
+	resp := &pb.GetUserInfoResp{}
+	info, err := self.checkUserSimpInfo(req.Uid)
+	if err != nil {
+		return resp, err
+	}
+	resp.Info = &pb.UserSimpleInfo{
+		UserID:   info.ID,
+		Name:     info.Name,
+		Account:  info.Account,
+		FaceID:   info.Face,
+		Gender:   info.Gender,
+		Age:      info.Age,
+		Empirice: info.Empirice,
+		Vip:      info.Vip,
+		Level:    info.Level,
+		YuanBao:  info.Yuanbao,
+		Coin:     info.Coin,
+		Money:    info.Money,
+	}
+	return resp, nil
+}
+
+func (self *ActorDB) FixNickName(req *pb.FixNickNameReq) (*pb.FixNickNameResp, error) {
+	resp := &pb.FixNickNameResp{}
+	err := self.updateNickName(req.Uid, req.Name)
+	if err != nil {
+		return resp, err
+	}
+	resp.Uid = req.Uid
+	resp.Name = req.Name
+	return resp, nil
 }

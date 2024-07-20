@@ -36,6 +36,15 @@ func RandomStrLetter(count int) string {
 	return string(b)
 }
 
+// GetRandString 生成n位随机数字字符串
+func GetRandString(n int) string {
+	var buffer bytes.Buffer
+	for i := 0; i < n; i++ {
+		buffer.WriteString(strconv.Itoa(RandIntn(10)))
+	}
+	return buffer.String()
+}
+
 // RandomNum 生成固定随机 elementMax元素的最大值(注:最后一个元素不受限制,其他元素必须等于或小于elementMax) remainder余数 count元素个数
 func RandomNum(elementMax, remainder, count int) ([]int64, bool) {
 	var data []int64
@@ -68,11 +77,54 @@ func RandIntn(n int) int {
 	return r.Intn(n)
 }
 
-// GetRandString 生成n位随机数字字符串
-func GetRandString(n int) string {
-	var buffer bytes.Buffer
-	for i := 0; i < n; i++ {
-		buffer.WriteString(strconv.Itoa(RandIntn(10)))
+func GenRandNum(min, max int) int {
+	mus := max - min
+	if mus < 0 {
+		return min
 	}
-	return buffer.String()
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	return min + r.Intn(mus+1)
+}
+func GenRandNum32(min, max int32) int32 {
+	mus := max - min
+	if mus < 0 {
+		return min
+	}
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	return min + r.Int31n(mus+1)
+}
+func GenRandNum64(min, max int64) int64 {
+	mus := max - min
+	if mus < 0 {
+		return min
+	}
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	return min + r.Int63n(mus+1)
+}
+
+// GetRandList64 从指定的列表中获取随机元素
+func GetRandList64(src []int64, count int, canRepeat bool) []int64 {
+	size := len(src)
+	if size < 2 {
+		return src
+	}
+	dest := make([]int64, size)
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	// 可重复
+	if canRepeat {
+		for i := 0; i < count; i++ {
+			dest = append(dest, src[r.Int()%size])
+		}
+		return dest
+	}
+
+	// 不重复
+	if size <= count {
+		return src
+	}
+	copy(dest, src)
+	r.Shuffle(count, func(i, j int) {
+		dest[i], dest[j] = dest[j], dest[i]
+	})
+	return dest[:count]
 }

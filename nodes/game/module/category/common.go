@@ -20,10 +20,10 @@ const (
 	WAITTIME         = 5
 )
 
-// 管理类(数据库、客户端、平台、用户)
-var redisHandle = redis_cluster.SingleRedis()
-var GlobalSender = manger.GetClientManger()
-var GlobalPlayerMgr = manger.GetPlayerManger()
+// RedisHandle 管理类(数据库、客户端、平台、用户)
+var RedisHandle = redis_cluster.SingleRedis()
+var GlobalSender = manger.GetClientMgr()
+var GlobalPlayerMgr = manger.GetPlayerMgr()
 
 // GetCardValue 获取数值
 func GetCardValue(cbCardData byte) byte {

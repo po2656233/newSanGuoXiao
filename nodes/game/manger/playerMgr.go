@@ -43,8 +43,8 @@ type PlayerManger struct {
 var manger *PlayerManger = nil
 var once sync.Once
 
-// GetPlayerManger 玩家管理对象(单例模式)//manger.persons = make(map[int64]*Player)
-func GetPlayerManger() *PlayerManger {
+// GetPlayerMgr 玩家管理对象(单例模式)//manger.persons = make(map[int64]*Player)
+func GetPlayerMgr() *PlayerManger {
 	once.Do(func() {
 		manger = &PlayerManger{
 			sync.Map{},
@@ -53,15 +53,61 @@ func GetPlayerManger() *PlayerManger {
 	return manger
 }
 
+func ToPlayer(info *protoMsg.PlayerInfo) *Player {
+	return &Player{
+		PlayerInfo: &protoMsg.PlayerInfo{
+			UserID:    info.UserID,
+			Account:   info.Account,
+			Name:      info.Name,
+			FaceID:    info.FaceID,
+			Age:       info.Age,
+			Sex:       info.Sex,
+			YuanBao:   info.YuanBao,
+			Coin:      info.Coin,
+			Level:     info.Level,
+			Ranking:   0,
+			State:     0,
+			Gold:      0,
+			Money:     info.Money,
+			InRooId:   info.InRooId,
+			InTableId: info.InTableId,
+			InChairId: info.InChairId,
+		},
+	}
+}
+
+func SimpleToPlayer(info *protoMsg.UserSimpleInfo) *Player {
+	return &Player{
+		PlayerInfo: &protoMsg.PlayerInfo{
+			UserID:    info.UserID,
+			Account:   info.Account,
+			Name:      info.Name,
+			FaceID:    info.FaceID,
+			Age:       info.Age,
+			Sex:       info.Gender,
+			YuanBao:   info.YuanBao,
+			Coin:      info.Coin,
+			Level:     info.Level,
+			Ranking:   0,
+			State:     0,
+			Gold:      0,
+			Money:     info.Money,
+			InRooId:   0,
+			InTableId: 0,
+			InChairId: 0,
+		},
+	}
+}
+
 // Append 添加玩家
 func (playerSelf *PlayerManger) Append(play *Player) (*Player, bool) {
 	v, ok := playerSelf.Load(play.UserID)
 	if !ok || v == nil {
-		//log.Debug("[新增玩家]\tID:%v 账号:%v isRobot:%v", play.UserID, play.Account, play.Sex == 0x0F)
+		log.Debugf("[新增玩家]\tID:%v 账号:%v isRobot:%v", play.UserID, play.Account, play.Sex == 0x0F)
 		playerSelf.Store(play.UserID, play)
 		return play, true
 	}
-	//log.Debug("[已經存在玩家]\tID:%v 账号:%v isRobot:%v", play.UserID, play.Account, play.Sex == 0x0F)
+	log.Debugf("[已經存在玩家]\tID:%v 账号:%v isRobot:%v", play.UserID, play.Account, play.Sex == 0x0F)
 	return v.(*Player), false
 }
 
@@ -99,40 +145,35 @@ func (itself *Player) Enter(args []interface{}) { //入场
 	//game := args[0].(*Game)
 	agent := args[1].(Agent)
 	if itself == nil {
-		GetClientManger().SendResult(agent, FAILED, StatusText[User03])
+		GetClientMgr().SendResult(agent, FAILED, StatusText[User03])
 		return
 	}
 
 	//游戏句柄
 	if itself.GameHandle == nil {
-		log.Debug("[%v:%v] 玩家%v 进入出错:%v", itself.InRooId, itself.InTableId, itself.UserID, StatusText[Game18])
-		GetClientManger().SendResult(agent, FAILED, StatusText[Game18])
+		log.Debugf("[%v:%v] 玩家%v 进入出错:%v", itself.InRooId, itself.InTableId, itself.UserID, StatusText[Game18])
+		GetClientMgr().SendResult(agent, FAILED, StatusText[Game18])
 		return
 	}
 
-	var sceneArgs []interface{}
-	sceneArgs = append(sceneArgs, agent)
-	itself.GameHandle.Scene(sceneArgs) // 【进入-> 游戏场景】
+	itself.GameHandle.Scene([]interface{}{agent}) // 【进入-> 游戏场景】
 }
 
 func (itself *Player) Exit() { //退出
-	itself.State = protoMsg.PlayerState_PlayerStandUp
-	itself.InTableId = INVALID
-	itself.InChairId = INVALID
-	itself.InRooId = INVALID
-	itself.GameHandle = nil //游戏正常结束退出时
-
+	if itself.GameHandle.UpdateInfo([]interface{}{protoMsg.PlayerState_PlayerStandUp, itself.UserID}) {
+		itself.State = protoMsg.PlayerState_PlayerStandUp
+		itself.InTableId = INVALID
+		itself.InChairId = INVALID
+		itself.InRooId = INVALID
+	}
 }
 
 func (itself *Player) UpdateState(flag protoMsg.PlayerState, args []interface{}) bool {
 	if game := itself.GameHandle; game != nil { //[1-0
-		var updateArgs []interface{}
-		updateArgs = append(updateArgs, flag, itself.UserID, args)
-		//log.Release("\t[%v:%v]玩家:%v-> 操作:%v\n", game.Info.Name, game.GameID, itself.UserID, RecvMessage[int(flag)])
-		game.UpdateInfo(updateArgs)
-		return true
+		log.Infof("玩家[%v]:%v-> 操作:%+v", itself.UserID, itself.Name, flag)
+		return game.UpdateInfo([]interface{}{flag, itself.UserID, args})
 	}
 
-	log.Debug("[error:GameUpdate]\t ->:%v userID:%v", flag, itself.UserID)
+	log.Debugf("[error:GameUpdate]\t ->:%v userID:%v", flag, itself.UserID)
 	return false
 }

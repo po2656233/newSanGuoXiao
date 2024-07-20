@@ -7,6 +7,7 @@ import (
 	protoMsg "superman/internal/protocol/gofile"
 	"superman/internal/rpc"
 	"superman/nodes/game/manger"
+	"superman/nodes/game/module/online"
 )
 
 // enter 进入
@@ -16,15 +17,33 @@ func enter(args []interface{}) {
 	m := args[0].(*protoMsg.EnterGameReq)
 	agent := args[1].(*ActorPlayer)
 	uid := agent.Session.Uid
-	clog.Debugf("params %+v  uid:%+v", m, uid)
+	clog.Debugf("[enter]params %+v  uid:%+v", m, uid)
 
-	person := manger.GetPlayerManger().Get(uid)
+	person := manger.GetPlayerMgr().Get(uid)
 	if person == nil {
+		// 获取玩家信息
+		data, errCode := rpc.SendData(agent.App(), rpc.SourcePath, rpc.DBActor, rpc.CenterType, &protoMsg.GetUserInfoReq{Uid: uid})
+		if errCode == 0 && data != nil {
+			resp, ok := data.(*protoMsg.GetUserInfoResp)
+			if ok && resp.Info != nil {
+				person = manger.SimpleToPlayer(resp.Info)
+				online.BindPlayer(uid, person.UserID, agent.PathString())
+				manger.GetPlayerMgr().Append(person)
+			}
+		}
+	}
+
+	if person == nil {
+		clog.Warnf("[enter]params %+v  uid:%+v err:%s", m, uid, StatusText[User03])
 		agent.SendResultPop(constant.FAILED, StatusText[Title004], StatusText[User03])
 		return
 	}
+	agent.SetUserData(person)
+	manger.GetClientMgr().Append(person.UserID, agent)
+
+	// 玩家仍在游戏中
 	if person.GameHandle != nil {
-		agent.SendResultPop(constant.FAILED, StatusText[Title004], StatusText[User03])
+		person.GameHandle.Scene([]interface{}{agent})
 		return
 	}
 
@@ -36,7 +55,8 @@ func enter(args []interface{}) {
 	var tb *manger.Table
 	tb = room.GetTable(m.TableID)
 	if tb == nil {
-		if data, errCodfe := rpc.SendData(agent.App(), rpc.SourcePath, rpc.DBActor, rpc.CenterType, &protoMsg.GetTableReq{Tid: m.TableID}); errCodfe == 0 {
+		data, errCode := rpc.SendData(agent.App(), rpc.SourcePath, rpc.DBActor, rpc.CenterType, &protoMsg.GetTableReq{Tid: m.TableID})
+		if errCode == 0 {
 			if tbResp, ok := data.(*protoMsg.GetTableResp); ok {
 				tb, _ = room.AddTable(tbResp.Info, NewGame)
 			}
@@ -57,5 +77,12 @@ func exit(args []interface{}) {
 	_ = args[1]
 	m := args[0].(*protoMsg.ExitGameReq)
 	agent := args[1].(*ActorPlayer)
-	clog.Debugf("params %+v  uid:%+v", m, agent.Session.Uid)
+	uid := agent.Session.Uid
+	clog.Debugf("[exit]params %+v  uid:%+v", m, uid)
+	person := manger.GetPlayerMgr().Get(uid)
+	if person == nil {
+		agent.SendResultPop(constant.FAILED, StatusText[Title004], StatusText[User03])
+		return
+	}
+	person.Exit()
 }

@@ -16,6 +16,7 @@ message GetClassListResp{
 //获取房间列表
 message GetRoomListReq{
   int64 uid = 1;
+  int64 startTime = 2;
 }
 message GetRoomListResp{
   RoomList items = 1;
@@ -47,6 +48,13 @@ message GetTaskListReq{
 }
 message GetTaskListResp{
   TaskList items = 1;
+}
+// 获取用户简要信息
+message GetUserInfoReq{
+  int64 uid = 1;
+}
+message GetUserInfoResp{
+  UserSimpleInfo info = 1;
 }
 ////////////////选择分类//////////////////////////////////////
 //选择分类
@@ -117,6 +125,15 @@ message DeleteTableReq {
 message DeleteTableResp {
   int64 tid = 1;
   int64 rid = 2;
+}
+// 修改用户昵称
+message FixNickNameReq{
+  int64 uid = 1;
+  string name = 2;
+}
+message FixNickNameResp{
+  int64 uid = 1;
+  string name = 2;
 }
 //////////////////////签到///////////////////////////////////////////
 //签到

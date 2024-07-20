@@ -11,6 +11,7 @@ import (
 	event2 "superman/internal/event"
 	protoMsg "superman/internal/protocol/gofile"
 	"superman/internal/utils"
+	"superman/nodes/game/manger"
 	"superman/nodes/game/module/online"
 	"superman/nodes/game/msg"
 )
@@ -91,23 +92,6 @@ func (p *ActorPlayer) request(session *cproto.Session, req *protoMsg.Request) {
 	utils.CheckError(err)
 	//p.Call(session.AgentPath, "Response", &protoMsg.Response{})
 }
-func (p *ActorPlayer) enterGame(session *cproto.Session, req *protoMsg.EnterGameReq) {
-	// 派发给各个模块
-	clog.Debugf("game:ID:%v req:%+v", session.GetUid(), req)
-	// 查找游戏
-
-	// 校验进入权限
-
-	// 校验准入条件
-
-	// 安排座椅
-
-	// 进入游戏场景
-
-	// 开始游戏
-
-	//p.Call(session.AgentPath, "Response", &protoMsg.Response{})
-}
 
 func (p *ActorPlayer) Send(funName string, resp interface{}) {
 	p.Call(p.Session.AgentPath, funName, resp)
@@ -130,6 +114,11 @@ func (p *ActorPlayer) SendResultPop(state int32, title, hints string) {
 
 func (p *ActorPlayer) OnStop() {
 	clog.Infof("OnStop onlineCount = %d", online.Count())
+	person := manger.GetPlayerMgr().Get(p.Session.Uid)
+	if person != nil {
+		person.Exit()
+	}
+
 }
 
 //////////////////////////////实现Agent/////////////////////////////////////////////////////////

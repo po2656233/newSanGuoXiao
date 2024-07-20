@@ -1,0 +1,56 @@
+Chips:
+  general : [1, 5, 10, 20, 50, 100]
+  middle : [10, 50, 100, 500, 1000, 5000]
+  high : [50, 100, 200, 500, 1000, 10000]
+  other : [1, 5, 25, 50, 100]
+
+
+#斗地主
+Landlord:
+  duration:
+    free: 20    #空闲时长(满时后，将被踢出)
+    ready: 5    #准备后等待开始的时长
+    deal: 3     #发牌时长
+    call: 5     #比牌时长
+    double: 1   #加倍
+    play: 15    #出牌时长
+    open: 3    #开奖时长
+    over: 15     #结算时长
+  minPerson: 3
+  maxPerson: 5
+
+#麻将
+Mahjong:
+  duration:
+    direct: 3    #方位
+    decide: 2    #定庄
+    roll: 3     #掷骰子
+    deal: 5     #发牌时长
+    play: 8    #出牌时长
+    operate: 3 #等待操作时长
+    open: 3    #开奖时长
+    over: 10     #结算时长
+  minPerson: 4
+  maxPerson: 4
+#二人麻将
+MahjongER:
+  duration:
+    direct: 3    #方位
+    decide: 3    #定庄
+    roll: 2     #掷骰子
+    deal: 5     #发牌时长
+    play: 8    #出牌时长
+    operate: 3 #等待操作时长
+    open: 3    #开奖时长
+    over: 10     #结算时长
+  minPerson: 2
+  maxPerson: 2
+#三国消
+SanGuoXiao:
+  duration:
+    start: 5    #准备后等待开始的时长
+    play: 15    #移动时长
+    open: 3    #消除时长
+    over: 15   #结算时长
+  col: 8
+  row: 8

@@ -143,22 +143,38 @@ message UserInfo{
   int32 faceID = 5;      //头像
   int32 gender = 6;      //性别
   int32 age = 7;         //年龄
-  int32 vIP = 8;         //VIP级别
+  int32 empirice= 8;      //经验
+  int32 vip = 9;         //VIP级别
+  int32 level = 10;       //级别
+  int64  yuanBao = 11;      //元宝
+  int64  coin = 12;      //铜钱
+  int64  money = 13;      //金钱(余额)
+  string passPortID = 14;   //证件号
+  string realName = 15;     //真实名字
+  string phoneNum = 16;     //手机
+  string email = 17;        //邮箱
+  string address = 18;      //住址
+  string iDentity = 19;     //识别码(平台生成)
+  int64 agentID = 20;        //代理标识(上级代理人)
+  string referralCode = 21;   //推荐标识(推荐码,由邀请码生成)
+  string clientAddr = 22;     //连接地址(当前实际IP)
+  string serverAddr = 23;     //(跳转至该地址 由登录服务返回的真实服务器地址)
+  string machineCode = 24;    //机器序列
+}
+//用户个人信息
+message UserSimpleInfo{
+  int64 userID = 1;      //ID
+  string name = 2;        //用户
+  string account = 3;     //帐号
+  int32 faceID = 4;      //头像
+  int32 gender = 5;      //性别
+  int32 age = 6;         //年龄
+  int32 empirice= 7;      //经验
+  int32 vip = 8;         //VIP级别
   int32 level = 9;       //级别
   int64  yuanBao = 10;      //元宝
   int64  coin = 11;      //铜钱
   int64  money = 12;      //金钱(余额)
-  string passPortID = 13;   //证件号
-  string realName = 14;     //真实名字
-  string phoneNum = 15;     //手机
-  string email = 16;        //邮箱
-  string address = 17;      //住址
-  string iDentity = 18;     //识别码(平台生成)
-  int64 agentID = 19;        //代理标识(上级代理人)
-  string referralCode = 20;   //推荐标识(推荐码,由邀请码生成)
-  string clientAddr = 21;     //连接地址(当前实际IP)
-  string serverAddr = 22;     //(跳转至该地址 由登录服务返回的真实服务器地址)
-  string machineCode = 23;    //机器序列
 }
 //玩家信息
 message PlayerInfo {

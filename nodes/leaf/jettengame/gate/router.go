@@ -29,6 +29,7 @@ func init() {
 
     //baseinfo文件生成的代码
     msg.ProcessorProto.SetRouter(&protoMsg.UserInfo{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.UserSimpleInfo{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.PlayerInfo{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.HeroInfo{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.WeaponInfo{}, game.ChanRPC)
@@ -161,6 +162,8 @@ func init() {
     msg.ProcessorProto.SetRouter(&protoMsg.GetGameListResp{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.GetTaskListReq{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.GetTaskListResp{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.GetUserInfoReq{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.GetUserInfoResp{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.ChooseClassReq{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.ChooseClassResp{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.ChooseRoomReq{}, game.ChanRPC)
@@ -173,6 +176,8 @@ func init() {
     msg.ProcessorProto.SetRouter(&protoMsg.CreateTableResp{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.DeleteTableReq{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.DeleteTableResp{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.FixNickNameReq{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.FixNickNameResp{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.CheckInReq{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.CheckInResp{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.GetCheckInReq{}, game.ChanRPC)

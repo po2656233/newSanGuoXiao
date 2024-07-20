@@ -89,11 +89,17 @@ type RoomManger struct {
 var lock sync.Mutex
 var settingFixTime int64
 
+var rOnce sync.Once
+var roomMgr *RoomManger
+
 // GetRoomMgr 由于新增平台，则这里的管理不应该再是单例模式
 func GetRoomMgr() *RoomManger {
-	return &RoomManger{
-		sync.Map{},
-	}
+	rOnce.Do(func() {
+		roomMgr = &RoomManger{
+			sync.Map{},
+		}
+	})
+	return roomMgr
 }
 
 /////////////////////////////////////////[manger]////////////////////////////////////////////
@@ -107,6 +113,13 @@ func (self *RoomManger) AddRoom(info *protoMsg.RoomInfo) {
 	}
 	self.Store(info.Id, Create(info))
 }
+
+func (self *RoomManger) AddRooms(infos []*protoMsg.RoomInfo) {
+	for _, info := range infos {
+		self.AddRoom(info)
+	}
+}
+
 func (self *RoomManger) GetRoom(rid int64) *Room {
 	val, ok := self.Load(rid)
 	if ok && val != nil {
