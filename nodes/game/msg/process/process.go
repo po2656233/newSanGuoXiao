@@ -12,7 +12,6 @@ import (
 	"reflect"
 	"strings"
 	. "superman/internal/constant"
-	. "superman/internal/hints"
 	"superman/internal/redis_cluster"
 )
 

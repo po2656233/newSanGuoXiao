@@ -8,7 +8,6 @@ import (
 	sgxError "github.com/po2656233/superplace/logger/error"
 	"superman/internal/conf"
 	. "superman/internal/constant"
-	"superman/internal/hints"
 	pb "superman/internal/protocol/gofile"
 	"superman/internal/rpc"
 )
@@ -26,11 +25,11 @@ func (p devSdk) Login(_ *conf.SdkRow, params Params, callback Callback) {
 	password, _ := params.GetString(Password)
 	if accountName == "" || password == "" {
 		err := sgxError.Errorf("account or password params is empty.")
-		callback(hints.Login08, nil, err)
+		callback(Login08, nil, err)
 		return
 	}
 
-	resp, errCode := rpc.SendData(p.app, rpc.SourcePath, rpc.AccountActor, rpc.CenterType, &pb.LoginReq{
+	resp, errCode := rpc.SendDataToAcc(p.app, &pb.LoginReq{
 		Account:  accountName,
 		Password: password,
 	})

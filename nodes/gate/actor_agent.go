@@ -10,8 +10,7 @@ import (
 	"github.com/po2656233/superplace/net/parser/simple"
 	cproto "github.com/po2656233/superplace/net/proto"
 	"superman/internal/conf"
-	"superman/internal/constant"
-	"superman/internal/hints"
+	. "superman/internal/constant"
 	pb "superman/internal/protocol/gofile"
 	"superman/internal/rpc"
 	"superman/internal/token"
@@ -30,7 +29,7 @@ type (
 
 func (p *ActorAgent) OnInit() {
 	duplicateLoginCode, _ = p.App().Serializer().Marshal(&cproto.I32{
-		Value: hints.Login12,
+		Value: Login12,
 	})
 	// pomelo
 	p.Remote().Register(p.setSession)
@@ -70,11 +69,11 @@ func (p *ActorAgent) login(session *cproto.Session, req *pb.LoginRequest) {
 	// 验证pid是否配置
 	sdkRow := conf.SdkConfig.Get(userToken.PID)
 	if sdkRow == nil {
-		agent.ResponseCode(session, hints.Login15, true)
+		agent.ResponseCode(session, Login15, true)
 		return
 	}
 	// 根据token带来的sdk参数，从中心节点获取uid
-	resp, errCode := rpc.SendData(p.App(), rpc.SourcePath, rpc.AccountActor, rpc.CenterType, &pb.GetUserIDReq{
+	resp, errCode := rpc.SendData(p.App(), SourcePath, AccActor, NodeTypeCenter, &pb.GetUserIDReq{
 		SdkId:  sdkRow.SdkId,
 		Pid:    userToken.PID,
 		OpenId: userToken.OpenID,
@@ -83,7 +82,7 @@ func (p *ActorAgent) login(session *cproto.Session, req *pb.LoginRequest) {
 	rsp := resp.(*pb.GetUserIDResp)
 	uid := rsp.Uid
 	if uid == 0 || code.IsFail(errCode) {
-		agent.ResponseCode(session, hints.Login07, true)
+		agent.ResponseCode(session, Login07, true)
 		return
 	}
 
@@ -91,13 +90,13 @@ func (p *ActorAgent) login(session *cproto.Session, req *pb.LoginRequest) {
 
 	if err := agent.Bind(uid); err != nil {
 		clog.Warn(err)
-		agent.ResponseCode(session, hints.Login07, true)
+		agent.ResponseCode(session, Login07, true)
 		return
 	}
 
-	agent.Session().Set(constant.ServerID, cstring.ToString(req.ServerId))
-	agent.Session().Set(constant.PID, cstring.ToString(userToken.PID))
-	agent.Session().Set(constant.OpenID, userToken.OpenID)
+	agent.Session().Set(ServerID, cstring.ToString(req.ServerId))
+	agent.Session().Set(PID, cstring.ToString(userToken.PID))
+	agent.Session().Set(OpenID, userToken.OpenID)
 	agent.Response(session, &pb.LoginResponse{
 		Uid:    uid,
 		Pid:    userToken.PID,
@@ -119,7 +118,7 @@ func (p *ActorAgent) checkSession(uid cfacade.UID) {
 	members := p.App().Discovery().ListByType(p.App().NodeType(), p.App().NodeId())
 	for _, member := range members {
 		// user是gate.go里自定义的agentActorID
-		actorPath := cfacade.NewPath(member.GetNodeId(), constant.ActorGate)
+		actorPath := cfacade.NewPath(member.GetNodeId(), ActIdGate)
 		p.Call(actorPath, pomelo.KickFuncName, rsp)
 	}
 }
@@ -127,7 +126,7 @@ func (p *ActorAgent) checkSession(uid cfacade.UID) {
 // onSessionClose  当agent断开时，关闭对应的ActorAgent
 func (p *ActorAgent) onPomeloSessionClose(agent *pomelo.Agent) {
 	session := agent.Session()
-	serverId := session.GetString(constant.ServerID)
+	serverId := session.GetString(ServerID)
 	if serverId == "" {
 		return
 	}
@@ -135,7 +134,7 @@ func (p *ActorAgent) onPomeloSessionClose(agent *pomelo.Agent) {
 	// 通知game节点关闭session
 	childId := cstring.ToString(session.Uid)
 	if childId != "" {
-		targetPath := cfacade.NewChildPath(serverId, constant.ActorGame, childId)
+		targetPath := cfacade.NewChildPath(serverId, ActIdGame, childId)
 		p.Call(targetPath, "sessionClose", nil)
 	}
 
@@ -165,8 +164,8 @@ func (p *ActorAgent) simpleLogin(session *cproto.Session, req *pb.LoginRequest) 
 	uid, _ := token.GetIDForToken(req.Token)
 	if uid == 0 {
 		agent.Response(session.Mid, &pb.ResultResp{
-			State: hints.Login07,
-			Hints: hints.StatusText[hints.Login07],
+			State: Login07,
+			Hints: StatusText[Login07],
 		})
 		return
 	}
@@ -176,14 +175,14 @@ func (p *ActorAgent) simpleLogin(session *cproto.Session, req *pb.LoginRequest) 
 	if err := agent.Bind(uid); err != nil {
 		clog.Warn(err)
 		agent.Response(session.Mid, &pb.ResultResp{
-			State: hints.Flag0003,
-			Hints: hints.StatusText[hints.Flag0003],
+			State: Flag0003,
+			Hints: StatusText[Flag0003],
 		})
 		return
 	}
 
-	agent.Session().Set(constant.ServerID, cstring.ToString(req.ServerId))
-	agent.Session().Set(constant.OpenID, cstring.ToString(uid))
+	agent.Session().Set(ServerID, cstring.ToString(req.ServerId))
+	agent.Session().Set(OpenID, cstring.ToString(uid))
 	agent.Response(session.Mid, &pb.LoginResponse{
 		Uid:    uid,
 		OpenId: cstring.ToString(uid),
@@ -194,8 +193,8 @@ func (p *ActorAgent) checkSimpleSession(uid cfacade.UID) {
 	if agent, found := simple.GetAgentWithUID(uid); found {
 		session := agent.Session()
 		agent.Response(session.Mid, &pb.ResultResp{
-			State: hints.Login12,
-			Hints: hints.StatusText[hints.Login12],
+			State: Login12,
+			Hints: StatusText[Login12],
 		})
 	}
 
@@ -208,7 +207,7 @@ func (p *ActorAgent) checkSimpleSession(uid cfacade.UID) {
 	members := p.App().Discovery().ListByType(p.App().NodeType(), p.App().NodeId())
 	for _, member := range members {
 		// user是gate.go里自定义的agentActorID
-		actorPath := cfacade.NewPath(member.GetNodeId(), constant.ActorGate)
+		actorPath := cfacade.NewPath(member.GetNodeId(), ActIdGate)
 		p.Call(actorPath, pomelo.KickFuncName, rsp)
 	}
 }
@@ -216,7 +215,7 @@ func (p *ActorAgent) checkSimpleSession(uid cfacade.UID) {
 // onSessionClose  当agent断开时，关闭对应的ActorAgent
 func (p *ActorAgent) onSimpleSessionClose(agent *simple.Agent) {
 	session := agent.Session()
-	serverId := session.GetString(constant.ServerID)
+	serverId := session.GetString(ServerID)
 	if serverId == "" {
 		return
 	}
@@ -224,8 +223,8 @@ func (p *ActorAgent) onSimpleSessionClose(agent *simple.Agent) {
 	// 通知game节点关闭session
 	childId := cstring.ToString(session.Uid)
 	if childId != "" {
-		targetPath := cfacade.NewChildPath(serverId, constant.ActorGame, childId)
-		p.Call(targetPath, constant.SessionClose, nil)
+		targetPath := cfacade.NewChildPath(serverId, ActIdGame, childId)
+		p.Call(targetPath, SessionClose, nil)
 	}
 
 	// 自己退出

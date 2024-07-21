@@ -35,7 +35,7 @@ func (p *Controller) hello(c *superGin.Context) {
 
 // http://127.0.0.1:8089/class/list
 func (p *Controller) classList(c *superGin.Context) {
-	data, errCode := rpc.SendData(p.App, rpc.SourcePath, rpc.DBActor, rpc.CenterType, &pb.GetClassListReq{})
+	data, errCode := rpc.SendDataToDB(p.App, &pb.GetClassListReq{})
 	//获取分类列表
 	if errCode != code.OK {
 		RenderResult(c, errCode, code.CodeTxt[errCode])
@@ -60,7 +60,7 @@ func (p *Controller) roomList(c *superGin.Context) {
 		return
 	}
 	uid, _ = strconv.ParseInt(clms.ID, 10, 64)
-	data, errCode := rpc.SendData(p.App, rpc.SourcePath, rpc.DBActor, rpc.CenterType, &pb.GetRoomListReq{
+	data, errCode := rpc.SendDataToDB(p.App, &pb.GetRoomListReq{
 		Uid: uid,
 	})
 	//获取房间列表
@@ -79,7 +79,7 @@ func (p *Controller) tableList(c *superGin.Context) {
 		RenderResult(c, Service003, StatusText[Service003])
 		return
 	}
-	data, errCode := rpc.SendData(p.App, rpc.SourcePath, rpc.DBActor, rpc.CenterType, &pb.GetTableListReq{
+	data, errCode := rpc.SendDataToDB(p.App, &pb.GetTableListReq{
 		Rid: rid,
 	})
 	//获取游戏列表
@@ -98,7 +98,7 @@ func (p *Controller) gameList(c *superGin.Context) {
 		RenderResult(c, Service003, StatusText[Service003])
 		return
 	}
-	data, errCode := rpc.SendData(p.App, rpc.SourcePath, rpc.DBActor, rpc.CenterType, &pb.GetGameListReq{
+	data, errCode := rpc.SendDataToDB(p.App, &pb.GetGameListReq{
 		Kid: kid,
 	})
 	//获取游戏列表
@@ -135,7 +135,7 @@ func (p *Controller) roomCreate(c *superGin.Context) {
 	enScore, _ := strconv.ParseInt(enterScore, 10, 64)
 	//mCount, _ := strconv.ParseInt(maxCount, 10, 64)
 	lev, _ := strconv.ParseInt(level, 10, 64)
-	data, errCode := rpc.SendData(p.App, rpc.SourcePath, rpc.DBActor, rpc.CenterType, &pb.CreateRoomReq{
+	data, errCode := rpc.SendDataToDB(p.App, &pb.CreateRoomReq{
 		HostId:     uid,
 		Name:       name,
 		RoomKey:    roomKey,
@@ -189,7 +189,7 @@ func (p *Controller) tableCreate(c *superGin.Context) {
 	taxation, _ := strconv.ParseInt(strTaxation, 10, 64)
 	commission, _ := strconv.ParseInt(strCommission, 10, 64)
 	amount, _ := strconv.ParseInt(strAmount, 10, 64)
-	data, errCode := rpc.SendData(p.App, rpc.SourcePath, rpc.DBActor, rpc.CenterType, &pb.CreateTableReq{
+	data, errCode := rpc.SendDataToDB(p.App, &pb.CreateTableReq{
 		Rid:        rid,
 		Gid:        gid,
 		Playscore:  playscore,
@@ -234,7 +234,7 @@ func (p *Controller) tableDelete(c *superGin.Context) {
 	}
 	// 先检测游戏服相应游戏是否处于关闭状态，如果没有关闭则请求关闭
 	tid, _ := strconv.ParseInt(strTid, 10, 64)
-	data, errCode := rpc.SendData(p.App, rpc.SourcePath, rpc.DBActor, rpc.CenterType, &pb.DeleteTableReq{
+	data, errCode := rpc.SendDataToDB(p.App, &pb.DeleteTableReq{
 		Tid:    tid,
 		HostId: uid,
 	})
@@ -344,7 +344,7 @@ func (p *Controller) login(c *superGin.Context) {
 func (p *Controller) register(c *superGin.Context) {
 	accountName := c.PostString(Username, "")
 	password := c.PostString(Password, "")
-	data, statusCode := rpc.SendData(p.App, rpc.SourcePath, rpc.AccountActor, rpc.CenterType, &pb.RegisterReq{
+	data, statusCode := rpc.SendDataToAcc(p.App, &pb.RegisterReq{
 		Name:     accountName,
 		Password: password,
 		Address:  c.ClientIP(),

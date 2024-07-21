@@ -67,7 +67,7 @@ func (p *ActorGame) OnStop() {
 
 // cron
 func (p *ActorGame) checkGameList() {
-	data, errCode := rpc.SendData(p.App(), rpc.SourcePath, rpc.DBActor, rpc.CenterType, &pb.GetGameListReq{
+	data, errCode := rpc.SendData(p.App(), cst.SourcePath, cst.DBActor, cst.NodeTypeCenter, &pb.GetGameListReq{
 		Kid: cst.Unlimited,
 	})
 	if errCode == 0 {
@@ -91,7 +91,7 @@ func (p *ActorGame) checkRoomList() {
 		req.StartTime = time.Now().Add(-p.getRoomsTime).Unix()
 	}
 
-	data, errCode := rpc.SendData(p.App(), rpc.SourcePath, rpc.DBActor, rpc.CenterType, req)
+	data, errCode := rpc.SendData(p.App(), cst.SourcePath, cst.DBActor, cst.NodeTypeCenter, req)
 	if errCode == 0 {
 		resp, ok := data.(*pb.GetRoomListResp)
 		if ok && resp != nil && resp.Items != nil {

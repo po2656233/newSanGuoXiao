@@ -61,8 +61,6 @@ func (self *SanguoxiaoGame) Init() {
 
 // Scene 场 景
 func (self *SanguoxiaoGame) Scene(args []interface{}) {
-	//level := args[0].(int32)
-	self.initBord(self.row, self.col)
 	agent := args[0].(mgr.Agent)
 	userData := agent.UserData()
 	person := userData.(*mgr.Player)

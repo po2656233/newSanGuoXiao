@@ -3,7 +3,6 @@ package manger
 import (
 	log "github.com/po2656233/superplace/logger"
 	. "superman/internal/constant"
-	. "superman/internal/hints"
 	protoMsg "superman/internal/protocol/gofile"
 	"sync"
 )

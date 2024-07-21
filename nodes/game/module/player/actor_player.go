@@ -35,15 +35,9 @@ type (
 
 // 绑定协议与其处理函数
 func init() {
-	//系统
-	//handlerMsg(&protoMsg.SuggestReq{}, handleSuggest)           //意见反馈
-	//handlerMsg(&protoMsg.{}, handleNotifyNotice) //意见反馈
-
 	//玩家行为
-	msg.ServerChanRPC.Register(reflect.TypeOf(&protoMsg.EnterGameReq{}), enter)
-	msg.ServerChanRPC.Register(reflect.TypeOf(&protoMsg.ExitGameReq{}), exit)
-
-	//handlerMsg(&protoMsg.ExitGameReq{}, exit)
+	handlerMsg(&protoMsg.EnterGameReq{}, enter)
+	handlerMsg(&protoMsg.ExitGameReq{}, exit)
 	//handlerMsg(&protoMsg.DisbandedGameReq{}, disbandedGame)
 	//handlerMsg(&protoMsg.TrusteeReq{}, trustee)
 	//handlerMsg(&protoMsg.ChangeTableReq{}, changeTable)
@@ -51,9 +45,13 @@ func init() {
 	//handlerMsg(&protoMsg.GameRecord{}, getGameRecords)
 	//handlerMsg(&protoMsg.GetRecordReq{}, getRecords)
 	//handlerMsg(&protoMsg.GetBackPasswordReq{}, getBackPassword)
-	//handlerMsg(&protoMsg.UpdateGoldReq{}, updateGold)
 	//
+	////系统
+	//handlerMsg(&protoMsg.UpdateGoldReq{}, updateGold)
+	//handlerMsg(&protoMsg.SuggestReq{}, handleSuggest)           //意见反馈
+	//handlerMsg(&protoMsg.NotifyNoticeReq{}, handleNotifyNotice) //意见反馈
 	////slotGame
+	//// zhaocaimiao
 	//handlerMsg(&protoMsg.ZhaocaimiaoBetReq{}, playing)
 	go func() {
 		for {
@@ -62,6 +60,10 @@ func init() {
 	}()
 }
 
+// 注册传输消息
+func handlerMsg(m interface{}, h interface{}) {
+	msg.ServerChanRPC.Register(reflect.TypeOf(m), h)
+}
 func (p *ActorPlayer) OnInit() {
 	// 注册 session关闭的remote函数(网关触发连接断开后，会调用RPC发送该消息)
 	p.Remote().Register(p.sessionClose)

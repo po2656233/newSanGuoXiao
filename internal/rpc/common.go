@@ -9,21 +9,8 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
 	"strings"
-	"superman/internal/hints"
+	. "superman/internal/constant"
 	pb "superman/internal/protocol/gofile"
-)
-
-const (
-	SourcePath   = ".system"
-	OpsActor     = ".ops"
-	DBActor      = ".db"
-	AccountActor = ".account"
-)
-
-const (
-	CenterType = "center"
-	GameType   = "game"
-	WebType    = "web"
 )
 
 const (
@@ -64,7 +51,7 @@ func (ms *MessageSender) SendData(req proto.Message) interface{} {
 
 // Ping 实现了Ping功能
 func Ping(app facade.IApplication) bool {
-	_, errCode := SendData(app, SourcePath, OpsActor, CenterType, &pb.PingReq{})
+	_, errCode := SendData(app, SourcePath, OpsActor, NodeTypeCenter, &pb.PingReq{})
 	return errCode == code.OK
 }
 
@@ -73,7 +60,7 @@ func SendData(app facade.IApplication, source, actorID, nodeType string, req pro
 	descriptor := req.ProtoReflect().Descriptor()
 	if descriptor == nil {
 		clog.Errorf("[SendData] descriptor err:descriptor is nil")
-		return resp, hints.NetworkErr02
+		return resp, NetworkErr02
 	}
 
 	// 根据请求类型 创建回包数据类型便于数据序列化于结构体中
@@ -109,6 +96,17 @@ func SendData(app facade.IApplication, source, actorID, nodeType string, req pro
 		clog.Warnf("[SendData] sourcePath:%s targetPath:%v funcName:%s reqData:%+v errCode:%v", source, target, funcName, req, errCode)
 	}
 	return resp, errCode
+}
+
+func SendDataToDB(app facade.IApplication, req proto.Message) (interface{}, int32) {
+	return SendData(app, SourcePath, DBActor, NodeTypeCenter, req)
+}
+
+func SendDataToAcc(app facade.IApplication, req proto.Message) (interface{}, int32) {
+	return SendData(app, SourcePath, AccActor, NodeTypeCenter, req)
+}
+func SendDataToOps(app facade.IApplication, req proto.Message) (interface{}, int32) {
+	return SendData(app, SourcePath, OpsActor, NodeTypeCenter, req)
 }
 
 func GetTargetPath(app facade.IApplication, actorID, nodeType string) string {

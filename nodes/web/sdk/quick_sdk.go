@@ -8,8 +8,7 @@ import (
 	sgxLogger "github.com/po2656233/superplace/logger"
 	cerror "github.com/po2656233/superplace/logger/error"
 	"superman/internal/conf"
-	"superman/internal/constant"
-	"superman/internal/hints"
+	. "superman/internal/constant"
 )
 
 type (
@@ -18,21 +17,21 @@ type (
 )
 
 func (quickSdk) SdkId() int32 {
-	return constant.QuickSDK
+	return QuickSDK
 }
 
 func (quickSdk) Login(config *conf.SdkRow, params Params, callback Callback) {
 	token, found := params.GetString("token")
 	if found == false || cstring.IsBlank(token) {
 		err := cerror.Error("token is nil")
-		callback(hints.Login11, nil, err)
+		callback(Login11, nil, err)
 		return
 	}
 
 	uid, found := params.GetString("uid")
 	if found == false || cstring.IsBlank(uid) {
 		err := cerror.Error("uid is nil")
-		callback(hints.Login02, nil, err)
+		callback(Login02, nil, err)
 		return
 	}
 
@@ -43,19 +42,19 @@ func (quickSdk) Login(config *conf.SdkRow, params Params, callback Callback) {
 	})
 
 	if err != nil || rspBody == nil {
-		callback(hints.Login02, nil, err)
+		callback(Login02, nil, err)
 		return
 	}
 
 	var result = string(rspBody)
 	if result != "1" {
 		sgxLogger.Warnf("quick sdk login fail. rsp =%s", rspBody)
-		callback(hints.Login02, nil, err)
+		callback(Login02, nil, err)
 		return
 	}
 
 	callback(code.OK, map[string]string{
-		constant.OpenID: uid, //返回 quick的uid做为 open id
+		OpenID: uid, //返回 quick的uid做为 open id
 	})
 }
 

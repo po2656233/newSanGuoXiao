@@ -8,7 +8,6 @@ import (
 	cactor "github.com/po2656233/superplace/net/actor"
 	"gorm.io/gorm"
 	. "superman/internal/constant"
-	"superman/internal/hints"
 	sqlmodel "superman/internal/sql_model"
 	. "superman/internal/utils"
 	"sync"
@@ -129,7 +128,7 @@ func (self *ActorDB) addTable(table sqlmodel.Table) (int64, error) {
 	count := self.checkTableCount(table.Rid)
 	max := self.checkRoomMaxTable(table.Rid)
 	if max <= count {
-		return 0, fmt.Errorf("%s:%d", hints.StatusText[hints.Room15], max)
+		return 0, fmt.Errorf("%s:%d", StatusText[Room15], max)
 	}
 	maxSit := self.checkGameMaxPlayer(table.Gid)
 	table.MaxSitter = int32(maxSit)

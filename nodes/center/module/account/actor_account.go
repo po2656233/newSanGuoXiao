@@ -1,10 +1,11 @@
 package account
 
+import "C"
 import (
 	"github.com/po2656233/superplace/const/code"
 	cactor "github.com/po2656233/superplace/net/actor"
 	"strings"
-	"superman/internal/hints"
+	. "superman/internal/constant"
 	"superman/internal/protocol/gofile"
 	"superman/internal/rpc"
 	db2 "superman/nodes/center/db"
@@ -33,52 +34,46 @@ func (p *ActorAccount) Register(req *pb.RegisterReq) (*pb.RegisterResp, int32) {
 	password := req.Password
 
 	if strings.TrimSpace(accountName) == "" || strings.TrimSpace(password) == "" {
-		return nil, hints.Register02
+		return nil, Register02
 	}
 
 	if len(accountName) < 3 || len(accountName) > 18 {
-		return nil, hints.Register02
+		return nil, Register02
 	}
 
 	if len(password) < 3 || len(password) > 18 {
-		return nil, hints.Register02
+		return nil, Register02
 	}
 
 	//db2.DevAccountRegister(accountName, password, req.Address)
-	app := p.App()
-	target := rpc.GetTargetPath(app, ".db", rpc.CenterType)
-	resp := &pb.RegisterResp{}
-	errCode := p.App().ActorSystem().CallWait(rpc.SourcePath, target, "Register", req, resp)
-	_ = errCode
-	return resp, code.OK
+	data, errCode := rpc.SendDataToDB(p.App(), req)
+	resp, _ := data.(*pb.RegisterResp)
+	return resp, errCode
 }
 
 // Login 根据帐号名获取开发者帐号表
 func (p *ActorAccount) Login(req *pb.LoginReq) (*pb.LoginResp, int32) {
-	accountName := req.Account
-	password := req.Password
+	data, errCode := rpc.SendDataToDB(p.App(), req)
+	resp, _ := data.(*pb.LoginResp)
+	return resp, errCode
 
-	devAccount, _ := db2.DevAccountWithName(accountName)
-	resp := &pb.LoginResp{}
-	if devAccount == nil {
-		app := p.App()
-		target := rpc.GetTargetPath(app, ".db", rpc.CenterType)
-		if errCode := p.App().ActorSystem().CallWait(rpc.SourcePath, target, "Login", req, resp); errCode != code.OK {
-			return nil, errCode
-		}
-		//db2.DevAccountRegister(accountName, resp.MainInfo.UserInfo.Password,resp.MainInfo.UserInfo.ClientAddr)
-		return resp, code.OK
-	} else if devAccount.Password != password {
-		return nil, hints.Login07
-	}
-	return resp, code.OK
+	//accountName := req.Account
+	//password := req.Password
+	//devAccount, _ := db2.DevAccountWithName(accountName)
+	//if devAccount == nil {
+	//	//db2.DevAccountRegister(accountName, resp.MainInfo.UserInfo.Password,resp.MainInfo.UserInfo.ClientAddr)
+	//} else if devAccount.Password != password {
+	//	return nil, Login07
+	//}
+	//return &pb.LoginResp{
+	//}, code.OK
 }
 
 // GetUserID 获取uid
 func (p *ActorAccount) GetUserID(req *pb.GetUserIDReq) (*pb.GetUserIDResp, int32) {
 	uid, ok := db2.BindUID(req.SdkId, req.Pid, req.OpenId)
 	if uid == 0 || ok == false {
-		return nil, hints.Login07
+		return nil, Login07
 	}
 
 	return &pb.GetUserIDResp{Uid: uid}, code.OK

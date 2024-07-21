@@ -8,7 +8,7 @@ import (
 	sgxTime "github.com/po2656233/superplace/extend/time"
 	sgxLogger "github.com/po2656233/superplace/logger"
 	"superman/internal/conf"
-	"superman/internal/hints"
+	. "superman/internal/constant"
 )
 
 const (
@@ -63,12 +63,12 @@ func DecodeToken(base64Token string) (*Token, bool) {
 func ValidateBase64(base64Token string) (*Token, int32) {
 	userToken, ok := DecodeToken(base64Token)
 	if ok == false {
-		return nil, hints.Login15
+		return nil, Login15
 	}
 
 	platformRow := conf.SdkConfig.Get(userToken.PID)
 	if platformRow == nil {
-		return nil, hints.Login15
+		return nil, Login15
 	}
 
 	statusCode, ok := Validate(userToken, platformRow.Salt)
@@ -85,13 +85,13 @@ func Validate(token *Token, appKey string) (int32, bool) {
 
 	if token.Timestamp > now.ToMillisecond() {
 		sgxLogger.Warnf("token is expired, token = %s", token)
-		return hints.Login11, false
+		return Login11, false
 	}
 
 	newHash := BuildHash(token, appKey)
 	if newHash != token.Hash {
 		sgxLogger.Warnf("hash validate fail. newHash = %s, token = %s", token)
-		return hints.Login15, false
+		return Login15, false
 	}
 
 	return code.OK, true

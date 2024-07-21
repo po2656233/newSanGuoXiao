@@ -10,7 +10,7 @@ import (
 	"strings"
 	"superman/internal/component/check_center"
 	"superman/internal/conf"
-	"superman/internal/constant"
+	. "superman/internal/constant"
 	"time"
 )
 
@@ -47,9 +47,9 @@ func Run(profileFilePath, nodeId string) {
 
 func buildPomeloParser(app *superplace.AppBuilder) cfacade.INetParser {
 	// 使用pomelo网络数据包解析器
-	agentActor := pomelo.NewActor(constant.ActorGate)
+	agentActor := pomelo.NewActor(ActIdGate)
 	//创建一个tcp监听，用于client/robot压测机器人连接网关tcp
-	agentActor.AddConnector(cconnector.NewTCP(constant.TcpAddr))
+	agentActor.AddConnector(cconnector.NewTCP(TcpAddr))
 	//再创建一个websocket监听，用于h5客户端建立连接
 	agentActor.AddConnector(cconnector.NewWS(app.Address()))
 	//当有新连接创建Agent时，启动一个自定义(ActorAgent)的子actor
@@ -67,8 +67,8 @@ func buildPomeloParser(app *superplace.AppBuilder) cfacade.INetParser {
 
 // 构建简单的网络数据包解析器
 func buildSimpleParser(app *superplace.AppBuilder) cfacade.INetParser {
-	agentActor := simple.NewActor(constant.ActorGate)
-	agentActor.AddConnector(cconnector.NewTCP(constant.TcpAddr))
+	agentActor := simple.NewActor(ActIdGate)
+	agentActor.AddConnector(cconnector.NewTCP(TcpAddr))
 	agentActor.AddConnector(cconnector.NewWS(app.Address()))
 
 	agentActor.SetOnNewAgent(func(newAgent *simple.Agent) {
@@ -89,29 +89,27 @@ func buildSimpleParser(app *superplace.AppBuilder) cfacade.INetParser {
 
 	// 设置消息节点路由(建议配合data-config组件进行使用)
 	// mid = 1 的消息路由到  gate节点.user的Actor.login函数上
-	agentActor.AddNodeRoute(constant.MIDGate, &simple.NodeRoute{
-		NodeType: constant.NodeTypeGate,
-		ActorID:  constant.ActorGate,
-		//FuncName: constant.FuncLogin,
-		FuncName: "simpleLogin",
+	agentActor.AddNodeRoute(MIDGate, &simple.NodeRoute{
+		NodeType: NodeTypeGate,
+		ActorID:  ActIdGate,
+		FuncName: FuncSimpLogin,
 	})
 
-	agentActor.AddNodeRoute(constant.MIDPing, &simple.NodeRoute{
-		NodeType: constant.NodeTypeGate,
-		ActorID:  constant.ActorGate,
-		//FuncName: "ping",
+	agentActor.AddNodeRoute(MIDPing, &simple.NodeRoute{
+		NodeType: NodeTypeGate,
+		ActorID:  ActIdGate,
 	})
 
-	agentActor.AddNodeRoute(constant.MIDLeaf, &simple.NodeRoute{
-		NodeType: constant.NodeTypeLeaf,
-		ActorID:  constant.ActorGame,
-		FuncName: "request",
+	agentActor.AddNodeRoute(MIDLeaf, &simple.NodeRoute{
+		NodeType: NodeTypeLeaf,
+		ActorID:  ActIdGame,
+		FuncName: FuncRequest,
 	})
 
-	agentActor.AddNodeRoute(constant.MIDGame, &simple.NodeRoute{
-		NodeType: constant.NodeTypeGame,
-		ActorID:  constant.ActorGame,
-		FuncName: "request",
+	agentActor.AddNodeRoute(MIDGame, &simple.NodeRoute{
+		NodeType: NodeTypeGame,
+		ActorID:  ActIdGame,
+		FuncName: FuncRequest,
 	})
 
 	GetMsgFunc("config/leafconf/message_id.json")

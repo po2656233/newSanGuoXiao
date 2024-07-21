@@ -4,8 +4,8 @@ import (
 	"github.com/po2656233/superplace/const/code"
 	sgxTime "github.com/po2656233/superplace/extend/time"
 	sgxError "github.com/po2656233/superplace/logger/error"
+	. "superman/internal/constant"
 	"superman/internal/guid"
-	"superman/internal/hints"
 )
 
 // DevAccountTable 开发模式的帐号信息表(platform.TypeDevMode)
@@ -27,7 +27,7 @@ func SaveUserInfo() {
 func DevAccountRegister(accountName, password, ip string) int32 {
 	devAccount, _ := DevAccountWithName(accountName)
 	if devAccount != nil {
-		return hints.Register05
+		return Register05
 	}
 	devAccountTable := &DevAccountTable{
 		AccountId:   guid.Next(),

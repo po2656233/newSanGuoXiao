@@ -1,7 +1,5 @@
 package constant
 
-import superConst "github.com/po2656233/superplace/const"
-
 const (
 	Username = "username"
 	Password = "password"
@@ -14,6 +12,12 @@ const (
 	UserId    = "uid"
 	openId    = "openid" //开发者ID
 )
+const (
+	SourcePath = ".system"
+	OpsActor   = ".ops"
+	DBActor    = ".db"
+	AccActor   = ".account"
+)
 
 const (
 	MIDGate = 1
@@ -22,18 +26,21 @@ const (
 	MIDPing = 4
 )
 const (
-	NodeTypeGate = "gate"
-	NodeTypeGame = "game"
-	NodeTypeLeaf = "leaf"
+	NodeTypeCenter = "center"
+	NodeTypeGate   = "gate"
+	NodeTypeGame   = "game"
+	NodeTypeLeaf   = "leaf"
 )
 const (
-	ActorGate = "user"
-	ActorGame = "game"
+	ActIdGate = "user"
+	ActIdGame = "game"
 )
 
 const (
-	FuncLogin = "login"
-	FuncEnter = "enter"
+	FuncLogin     = "login"
+	FuncEnter     = "enter"
+	FuncRequest   = "request"
+	FuncSimpLogin = "simpleLogin"
 )
 
 const (
@@ -52,14 +59,14 @@ const (
 
 // 源码中重要标识
 const (
-	INVALID    = 0  //无效(切记有效初始化,不要从零开始)
-	FAILED     = 1  // 失败
-	Fault      = -1 // 故障
-	Default    = 1  // 默认
-	SUCCESS    = 0  // 成功
-	IndexStart = 1  // 起始索引
+	INVALID = 0  //无效(切记有效初始化,不要从零开始)
+	SUCCESS = 0  // 成功
+	FAILED  = 1  // 失败
+	Fault   = -1 // 故障
+	Default = 1  // 默认
 
-	SYSTEMID = 0
+	IndexStart = 1 // 起始索引
+	SYSTEMID   = 0
 
 	ADD = 0 // 新增
 	DEL = 1 // 删除
@@ -72,14 +79,24 @@ const (
 	Unlimited = -1
 )
 
-func Join(sources ...string) string {
-	var result string
-	size := len(sources)
-	for i, source := range sources {
-		result += source
-		if i != size-1 {
-			result += superConst.DOT
-		}
-	}
-	return result
-}
+// 时间
+const (
+	Date   = 24 * 60 * 60
+	Hour   = 60 * 60
+	Minute = 60
+)
+
+// ByteSize 流量
+type ByteSize float64
+
+const (
+	_           = iota
+	KB ByteSize = 1 << (10 * iota)
+	MB
+	GB
+	TB
+	PB
+	EB
+	ZB
+	YB
+)

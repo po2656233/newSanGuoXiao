@@ -5,7 +5,6 @@ import (
 	log "github.com/po2656233/superplace/logger"
 	"strings"
 	. "superman/internal/constant"
-	"superman/internal/hints"
 	protoMsg "superman/internal/protocol/gofile"
 	"superman/internal/utils"
 	"superman/nodes/leaf/jettengame/gamedata/goclib/util"
@@ -165,11 +164,11 @@ func (self *Room) AddTable(table *protoMsg.TableInfo, f NewGameCallback) (*Table
 	}
 	for _, t := range self.tables {
 		if t.Id == table.Id {
-			return t, fmt.Errorf(hints.StatusText[hints.TableInfo07])
+			return t, fmt.Errorf(StatusText[TableInfo07])
 		}
 	}
 	if self.MaxTable < int32(len(self.tables)+1) {
-		return nil, fmt.Errorf(hints.StatusText[hints.TableInfo08])
+		return nil, fmt.Errorf(StatusText[TableInfo08])
 	}
 	tb := &Table{
 		TableInfo:  table,
@@ -179,7 +178,7 @@ func (self *Room) AddTable(table *protoMsg.TableInfo, f NewGameCallback) (*Table
 		RWMutex:    sync.RWMutex{},
 	}
 	if tb.GameHandle == nil {
-		return nil, fmt.Errorf("%s 游戏ID:%d", hints.StatusText[hints.TableInfo03], table.Gid)
+		return nil, fmt.Errorf("%s 游戏ID:%d", StatusText[TableInfo03], table.Gid)
 	}
 	self.tables = append(self.tables, tb)
 	return tb, nil

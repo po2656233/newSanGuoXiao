@@ -18,24 +18,23 @@ import (
 	"os"
 	"strconv"
 	. "superman/internal/constant"
-	"superman/internal/hints"
 	"superman/internal/protocol/gofile"
 )
 
 var (
 	// 客户端连接后，必需先执行第一条协议，进行token验证后，才能进行后续的逻辑
-	firstRouteName = Join(NodeTypeGate, ActorGate, FuncLogin)
+	firstRouteName = Join(NodeTypeGate, ActIdGate, FuncLogin)
 	// 角色进入游戏时的前三个协议
 	beforeLoginRoutes = []string{
 		//"game.player.select",  //查询玩家角色
 		//"game.player.create",  //玩家创建角色
 		//"game.player.enter",   //玩家角色进入游戏
-		Join(NodeTypeLeaf, ActorGame, FuncEnter),
+		Join(NodeTypeLeaf, ActIdGame, FuncEnter),
 		//"leaf.game.enter", //玩家角色进入游戏
 	}
 
 	notLoginRsp = &pb.Int32{
-		Value: hints.Login07,
+		Value: Login07,
 	}
 	mapFuncs = make(map[string]string)
 	endian   = binary.BigEndian
@@ -180,7 +179,7 @@ func onSimpleDataRoute(agent *simple.Agent, msg *simple.Message, route *simple.N
 	clusterPacket.Session = session   // agent session
 	clusterPacket.ArgBytes = msg.Data // packet -> message -> data
 	if clusterPacket.FuncName == "" {
-		clusterPacket.FuncName = "request"
+		clusterPacket.FuncName = FuncRequest
 	}
 	if err := agent.Cluster().PublishLocal(serverId, clusterPacket); err != nil {
 		clog.Errorf("[route][gameNodeRoute] ClusterLocalDataRoute err:%v", err)
