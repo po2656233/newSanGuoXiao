@@ -27,4 +27,10 @@ func (p *Controller) Init() {
 	}
 	create.POST("/room", p.roomCreate)   //房间创建
 	create.POST("/table", p.tableCreate) //房间创建
+
+	del := &superGin.Group{
+		RouterGroup: group.Group("/delete"),
+	}
+	del.POST("/table", p.tableDelete) //删除牌桌
+
 }
