@@ -2,16 +2,11 @@ package zhaocaimiao
 
 import (
 	"fmt"
-	"github.com/po2656233/goleaf/gate"
-	"github.com/po2656233/goleaf/log"
+	log "github.com/po2656233/superplace/logger"
 	"runtime"
 	"strings"
 	protoMsg "superman/internal/protocol/gofile"
-	. "superman/nodes/leaf/jettengame/base"
-	"superman/nodes/leaf/jettengame/conf"
-	. "superman/nodes/leaf/jettengame/game/internal/category"
-	. "superman/nodes/leaf/jettengame/manger"
-	"superman/nodes/leaf/jettengame/sql/model"
+	mgr "superman/nodes/game/manger"
 	"time"
 )
 
@@ -22,7 +17,7 @@ type col int32
 
 // ZhaocaimiaoGame 继承于GameItem
 type ZhaocaimiaoGame struct {
-	*Game
+	*mgr.Game
 	//lk sync.Mutex
 }
 
@@ -60,7 +55,6 @@ func NewGame(game *Game) *ZhaocaimiaoGame {
 		Game: game,
 	}
 
-	p.Config = conf.YamlObj
 	p.Init()
 	return p
 }
@@ -77,7 +71,7 @@ func (self *ZhaocaimiaoGame) Init() {
 func (self *ZhaocaimiaoGame) Scene(args []interface{}) {
 	_ = args[1]
 	level := args[0].(int32)
-	agent := args[1].(gate.Agent)
+	agent := args[1].(mgr.Agent)
 	userData := agent.UserData()
 	if userData == nil {
 		GlobalSender.SendResult(agent, FAILED, StatusText[Game02])
@@ -159,7 +153,7 @@ func (self *ZhaocaimiaoGame) Playing(args []interface{}) {
 	//【消息】
 	m := args[0].(*protoMsg.ZhaocaimiaoBetReq)
 	//【传输对象】
-	agent := args[1].(gate.Agent)
+	agent := args[1].(mgr.Agent)
 
 	userData := agent.UserData()
 	if nil == userData {

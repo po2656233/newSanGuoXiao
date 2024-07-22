@@ -1,8 +1,11 @@
 package manger
 
 import (
+	"strings"
 	protoMsg "superman/internal/protocol/gofile"
+	"superman/nodes/leaf/jettengame/gamedata/goclib/util"
 	"sync"
+	"time"
 )
 
 // IGameOperate 子游戏接口
@@ -40,7 +43,7 @@ type IDevice interface {
 }
 
 // NewGameCallback 实例回调(根据桌子号创建游戏)
-type NewGameCallback func(gid int64) IGameOperate
+type NewGameCallback func(gid, tid int64) IGameOperate
 
 type CalculateSQL func(info CalculateInfo) (nowMoney, factDeduct int64, isOK bool)
 
@@ -61,9 +64,11 @@ type Game struct {
 	*protoMsg.GameInfo
 	IsStart    bool  // 第一次启动
 	IsClear    bool  // 是否清场
+	Tid        int64 // 当前绑定的牌桌号
 	ReadyCount int32 // 已准备人数
 	RunCount   int32 // 运行次数
-	TimeStamp  int64 // 当前时间戳
+	Inning     string
+	TimeStamp  int64 // 当前状态时刻的时间戳
 }
 
 type GameMgr struct {
@@ -100,29 +105,11 @@ func (gmr *GameMgr) GetGame(gid int64) *protoMsg.GameInfo {
 	return val.(*protoMsg.GameInfo)
 }
 
-// NewGame 新建游戏
-//func NewGame(gid int64) IGameOperate {
-//	gameInfo := GetGameMgr().GetGame(gid)
-//	if gameInfo == nil {
-//		return nil
-//	}
-//	game := &Game{
-//		GameInfo:   gameInfo,
-//		IsStart:    true,
-//		IsClear:    false,
-//		ReadyCount: 0,
-//		RunCount:   0,
-//		TimeStamp:  time.Now().Unix(),
-//	}
-//	switch gid {
-//	case cst.chinesechess:
-//	case cst.Chess:
-//
-//	case cst.SanGuoXiao:
-//		sanguoxiao.New(game)
-//	}
-//	return nil
-//}
+// Reset 重置信息
+func (g *Game) Reset() bool {
+	g.Inning = strings.ToUpper(util.Md5Sum(g.Name + time.Now().String()))
+	return true
+}
 
 // Ready 准备
 func (g *Game) Ready() bool {
@@ -133,11 +120,6 @@ func (g *Game) Ready() bool {
 // Start 开始
 func (tb *Game) Start(time int64) bool {
 
-	return true
-}
-
-// Playing 运作
-func (tb *Game) Playing() bool {
 	return true
 }
 

@@ -23,7 +23,7 @@ enum SgxHeroType {
   TU = 5;         //土
 }
 enum SgxPiece {
-  NoPiece = 0;
+  NoSGXPiece = 0;
   Jin = 1;   // 金
   Mu = 2;    // 木
   Shui = 3;  // 水
@@ -32,14 +32,14 @@ enum SgxPiece {
   Yao = 6;   // 药
 }
 // 格子
-message Grid {
+message SgxGrid {
   int32 row = 1;    // 所在排
   int32 col = 2;    // 所在列
   SgxPiece core = 3;   // 实际子项
 }
 // 棋盘
-message BoardInfo {
-  repeated Grid  cells = 1; // 所有格子
+message SgxBoardInfo {
+  repeated SgxGrid  cells = 1; // 所有格子
 }
 // 三国消玩家信息
 message SanguoxiaoPlayer {
@@ -73,7 +73,7 @@ message ChallengeResp {
 message SanguoxiaoSceneResp{
   int64 timeStamp = 1;              // 时间戳
   string inning = 2;                // 牌局号
-  BoardInfo board = 3;              // 方格盘信息
+  SgxBoardInfo board = 3;              // 方格盘信息
   SanguoxiaoPlayer redCamp = 4;      // 红方
   SanguoxiaoPlayer blueCamp = 5;       // 蓝方
 }
@@ -85,7 +85,7 @@ message SanguoxiaoStatePlayingResp {
 // 状态-方格消除
 message SanguoxiaoStateEraseResp {
   TimeInfo times = 1;
-  BoardInfo nowBoard = 2;   // 当前盘子信息
+  SgxBoardInfo nowBoard = 2;   // 当前盘子信息
 }
 // 状态-游戏结算
 message SanguoxiaoStateOverResp {
@@ -94,21 +94,21 @@ message SanguoxiaoStateOverResp {
 }
 // 交换
 message SanguoxiaoSwapReq{
-  Grid origin = 1;        //原先的格子
-  Grid target = 2;        //移至的目标格子
+  SgxGrid origin = 1;        //原先的格子
+  SgxGrid target = 2;        //移至的目标格子
 }
 message SanguoxiaoSwapResp{
-  int64 userID = 1;
-  Grid origin = 2;        //原先的格子
-  Grid target = 3;        //移至的目标格子
+  SgxGrid origin = 1;        //原先的格子
+  SgxGrid target = 2;        //移至的目标格子
+  int64 uid = 3;
 }
 // 触发消除
 message SanguoxiaoTriggerResp{
-  int64 userID = 1;
-  int64 redCampHealth  = 2;  // 消除后自己的血量 即UserID的血量
-  int64 blueCampHealth  = 3;   // 敌方血量
-  BoardInfo perBoard = 4;   // 消除前
-  BoardInfo nowBoard = 5;   // 消除后
-  repeated Grid erase = 6;  // 被消除的格子
+  int64 uid = 1;
+  int64 redCampHealth = 2;  // 消除后自己的血量 即UserID的血量
+  int64 blueCampHealth = 3;   // 敌方血量
+  SgxBoardInfo perBoard = 4;   // 消除前
+  SgxBoardInfo nowBoard = 5;   // 消除后
+  repeated SgxGrid erase = 6;  // 被消除的格子
   repeated SanguoxiaoAttack attacks = 7;//武将发起的伤害
 }

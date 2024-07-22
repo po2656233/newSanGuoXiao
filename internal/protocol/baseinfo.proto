@@ -195,6 +195,14 @@ message PlayerInfo {
   int64 inTableId = 15; //所在的牌桌ID
   int64 inChairId = 16; //椅子编号
 }
+// 玩家简明信息
+message PlayerSimpleInfo {
+  int64 uid = 1;//玩家ID
+  string name = 2; //玩家姓名
+  int64 headId = 3;//头像
+  int64 score = 4;//分数
+  int64 rankNo = 5;// 排名
+}
 // 武将信息
 message HeroInfo {
   int64 id = 1;
@@ -323,6 +331,14 @@ message GameInfo{
   GameState state = 7;    // 游戏状态
   int32 maxCount = 8;     // 最大人数
   string howToPlay = 9;
+}
+//游戏记录
+message GameRecord {
+  GameInfo gameInfo = 1;
+  CardInfo cardInfo = 2;
+}
+message GameRecordList {
+  repeated GameRecord list = 1; //所有历史信息
 }
 ////////////////////主页信息(起始信息,优先获取)///////////////////////////////////////
 //主页信息

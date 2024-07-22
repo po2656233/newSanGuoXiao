@@ -3,7 +3,6 @@ package manger
 import (
 	"fmt"
 	log "github.com/po2656233/superplace/logger"
-	"strings"
 	. "superman/internal/constant"
 	protoMsg "superman/internal/protocol/gofile"
 	"superman/internal/utils"
@@ -28,7 +27,6 @@ type Room struct {
 type Table struct {
 	*protoMsg.TableInfo
 	GameHandle IGameOperate
-	InningInfo *Inning
 	sitters    []*Chair  // 座位上的玩家
 	lookers    []*Player // 旁观者
 	sitCount   int32
@@ -59,24 +57,12 @@ type MahjongChair struct {
 	Multiple int //倍数|番数
 }
 
-// Inning 每局信息
-type Inning struct {
-	Number   string //牌局号(游戏名+桌号+时间戳)
-	OpenData []byte //开奖纪录(路单)
-}
-
 // IRoomHandle 房间接口
 type IRoomHandle interface {
 	Join(tid int64, person *Player) *Table        //加入
 	Match(gid int64, person *Player) *Table       //配桌
 	ChangeTable(gid int64, person *Player) *Table //换桌
 	Leave(person *Player)                         // 离开房间
-	//Check(rid int64) (*Room, bool)                       //查找房间
-	//Open(rid int64, key string) (*Room, bool)            //开启房间
-	//Close(rid int64, key string) bool                    //关闭房间
-	//Clear(rid int64, key string) bool                    //清理房间
-	//Del(rid int64, key string) bool                      //删除房间[房间ID和钥匙配对成功后,才能删除]
-
 }
 
 // RoomManger 管理房间
@@ -172,7 +158,7 @@ func (self *Room) AddTable(table *protoMsg.TableInfo, f NewGameCallback) (*Table
 	}
 	tb := &Table{
 		TableInfo:  table,
-		GameHandle: f(table.Gid), //创建游戏句柄
+		GameHandle: f(table.Id, table.Gid), //创建游戏句柄
 		sitters:    make([]*Chair, 0),
 		lookers:    make([]*Player, 0),
 		RWMutex:    sync.RWMutex{},
@@ -293,6 +279,20 @@ func (self *Room) GetTableForGid(gid int64) *Table {
 		}
 	}
 	return nil
+}
+func (self *Room) GetTablesForGid(gid int64) []*Table {
+	self.RLock()
+	defer self.RUnlock()
+	tbls := make([]*Table, 0)
+	if self.tables == nil {
+		return nil
+	}
+	for _, table := range self.tables {
+		if table.TableInfo.Gid == gid {
+			tbls = append(tbls, table)
+		}
+	}
+	return tbls
 }
 
 // DelTable 删除桌子
@@ -431,7 +431,6 @@ func (tb *Table) SitCount() int32 {
 
 // Reset 重置座位上的玩家
 func (tb *Table) Reset() int64 {
-
 	log.Debugf("[%v:%v]   \t扫地僧出来干活了...List %v", tb.Name, tb.Id, tb.sitters)
 	// 遍历过程中存在slice的数据删除
 	tb.Lock()
@@ -449,7 +448,6 @@ func (tb *Table) Reset() int64 {
 	tb.Unlock()
 
 	tb.CorrectCommission()
-	tb.GetInnings()
 	tb.Init()
 	return tb.Id
 }
@@ -462,18 +460,6 @@ func (tb *Table) CorrectCommission() {
 	if tb.Commission <= 0 || tb.Commission == 100 {
 		tb.Commission = 100
 	}
-}
-
-// GetInnings 获取牌局信息
-func (tb *Table) GetInnings() *Inning {
-	if tb.InningInfo == nil {
-		info := &Inning{}
-		info.OpenData = make([]byte, 0)
-		tb.InningInfo = info
-	}
-
-	tb.InningInfo.Number = strings.ToUpper(util.Md5Sum(time.Now().String())) //GenerateGameNum(, self.Level, int32(self.TID))
-	return tb.InningInfo
 }
 
 /////////////////////房间管理功能//////////////////////////////////////////////
@@ -526,20 +512,16 @@ func (self *RoomManger) Check(rid int64) (*Room, bool) { //查找
 	return nil, false
 }
 func (self *RoomManger) Open(rid int64, key string) (*Room, bool) { //开启
-	lock.Lock()
-	defer lock.Unlock()
+
 	info := &Room{}
+
 	return info, true
 }
 func (self *RoomManger) Close(rid int64, key string) bool { //关闭
-	lock.Lock()
-	defer lock.Unlock()
 
 	return true
 }
 func (self *RoomManger) Clear(rid int64, key string) bool { //清理房间
-	lock.Lock()
-	defer lock.Unlock()
 
 	return true
 }

@@ -2,23 +2,6 @@ syntax = "proto3";
 option go_package = "/pb";
 package pb;
 import "baseinfo.proto";
-//游戏记录
-message GameRecord {
-  CardInfo cardInfo = 1;
-  bool isWon = 2; //输赢情况
-}
-//历史记录(保存十二条记录)
-message GameRecordList {
-  repeated GameRecord list = 1; //所有历史信息
-}
-// 玩家简明信息
-message PlayerSimpleInfo {
-  int64 uid = 1;//玩家ID
-  string name = 2; //玩家姓名
-  int64 headId = 3;//头像
-  int64 score = 4;//分数
-  int64 rankNo = 5;// 排名
-}
 //-----------------------------------------------------------------------------------------
 /////////////[优秀如你]-->Req:请求 Resp:反馈<--[交互专用]///////////////////////////////////
 /////////////[优秀如你]-->Req:请求 Resp:反馈<--[交互专用]///////////////////////////////////
@@ -28,17 +11,27 @@ message PlayerSimpleInfo {
 //受游戏本身特性影响,PlayerInfo有本地化需求
 //请查看对应的子游戏协议文件 中的 EnterXXXGameResp
 //若无本地化需求,统一走 EnterGameResp协议
-//进入系统游戏
+//进入游戏
 message EnterGameReq {
-  int64 roomID = 1;         //房间ID 注: =0时,为系统房
-  int64 tableID = 2;        //牌桌标识
-  int32 chairID = 3;        //椅子编号(可选) 注: =0时,将由系统分配.
+  int64 roomID = 1;                 // 房间ID 注: =0时,为系统房
+  int64 tableID = 2;                // 牌桌标识
+  int32 chairID = 3;                // 椅子编号(可选) 注: =0时,将由系统分配.
 }
 message EnterGameResp {
-  int64 roomID = 1;         //房间ID 注: =0时,为系统房
-  int64 tableID = 2;        // 牌桌标识
-  int32 chairID = 3;        // 椅子编号(不满足req的此项时,将由系统分配,并返回提示)
-  PlayerSimpleInfo userInfo = 4;    //玩家信息
+  int64 roomID = 1;                 // 房间ID 注: =0时,为系统房
+  int64 tableID = 2;                // 牌桌标识
+  int32 chairID = 3;                // 椅子编号(不满足req的此项时,将由系统分配,并返回提示)
+  PlayerSimpleInfo userInfo = 4;    // 玩家信息
+}
+//加入游戏准备队列
+message JoinGameReadyQueueReq {
+  int64 roomID = 1;                 // 房间ID 注: =0时,为系统房
+  int64 gameID = 2;                    // 游戏ID
+}
+message JoinGameReadyQueueResp {
+  int64 roomID = 1;                 // 房间ID 注: =0时,为系统房
+  int64 tableID = 2;                // 牌桌标识
+  repeated PlayerSimpleInfo userInfo = 3;    // 玩家信息
 }
 //入场协议 对战类 [EnterXXXGameResp]
 //受游戏本身特性影响,PlayerInfo有本地化需求
@@ -109,8 +102,8 @@ message RollDiceReq {
   int32 diceCount = 1; //骰子的个数
 }
 message RollDiceResp {
-  int64 userID = 1;
-  int32 diceCount = 2;  //骰子的个数
+  int32 diceCount = 1;  //骰子的个数
+  int64 uid = 2;
   bytes dice = 3;       //骰子具体个数,起抓牌位置
 }
 //请求游戏结束（注:返回牌局记录后,游戏随即销毁）

@@ -1,0 +1,103 @@
+syntax = "proto3";
+option go_package = "/pb";
+package pb;
+import "baseinfo.proto";
+//中国象棋
+//游戏类型
+enum XQPiece {
+  NoXQPiece = 0;
+  RedBing = 1;   // 兵
+  RedPao = 2;    // 炮
+  RedJu = 3;  // 车
+  RedMa = 4;   // 马
+  RedXiang = 5;    // 象
+  RedShi = 6;   // 士
+  RedShuai = 7;   // 帅
+  BlackZu = 8;
+  BlackPao = 9;
+  BlackJu = 10;
+  BlackMa = 11;
+  BlackXiang = 12;
+  BlackShi = 13;
+  BlackJiang = 14;
+}
+// 格子
+message XQGrid {
+  int32 row = 1;    // 所在排
+  int32 col = 2;    // 所在列
+  XQPiece core = 3;   // 实际子项
+}
+// 棋盘
+message XQBoardInfo {
+  repeated XQGrid  cells = 1; // 所有格子
+}
+// 游戏结果
+message ChineseChessResult {
+  PlayerSimpleInfo redCamp = 1;      // 红方
+  PlayerSimpleInfo blackCamp = 2;    // 蓝方
+}
+/////////////////////////////////////////////////////
+//场景
+message ChineseChessSceneResp{
+  int64 timeStamp = 1;              // 时间戳
+  string inning = 2;                // 牌局号
+  XQBoardInfo board = 3;            // 方格盘信息
+  PlayerSimpleInfo redCamp = 4;     // 红方
+  PlayerSimpleInfo blackCamp = 5;   // 蓝方
+}
+// 状态-玩家操作
+// 等待玩家进入
+message ChineseChessStateFreeResp {
+  TimeInfo times = 1;
+}
+// 设置时长
+message ChineseChessStateStartResp {
+  TimeInfo times = 1;
+  int64 uid = 2;         // 当前操作方
+}
+// 状态-玩家操作
+message ChineseChessStatePlayingResp {
+  TimeInfo times = 1;
+  int64 uid = 2;              // 当前操作方
+  XQBoardInfo nowBoard = 3;   // 当前盘子信息
+}
+// 状态-玩家操作
+message ChineseChessStateOpenResp {
+  TimeInfo times = 1;
+  int64 winUid = 2;           // 当前操作方
+  XQBoardInfo nowBoard = 3;   // 当前盘子信息
+}
+// 状态-游戏结算
+message ChineseChessStateOverResp {
+  TimeInfo times = 1;
+  ChineseChessResult result = 2;
+}
+//////////////////////////////////
+//设置时长
+message ChineseChessSetTimeReq{
+  int64 timeout = 1;//设置时长
+  repeated XQGrid  giveCells = 2; // 设置方让棋子,最多三个
+}
+message ChineseChessSetTimeResp{
+  int64 uid = 1;
+  int64 timeout = 2;
+  repeated XQGrid  giveCells = 3; // 设置方让棋子,最多三个
+}
+//是否同意对方设置的时长
+message ChineseChessAgreeTimeReq{
+  bool isAgree = 1;
+}
+message ChineseChessAgreeTimeResp{
+  int64 uid = 1;
+  bool isAgree = 2;
+}
+// 移动棋子
+message ChineseChessMoveReq{
+  XQGrid origin = 1;        //原先的格子
+  XQGrid target = 2;        //被吃掉的格子
+}
+message ChineseChessMoveResp{
+  int64 uid = 1;
+  XQGrid origin = 2;        //原先的格子
+  XQGrid target = 3;        //被吃掉的格子
+}

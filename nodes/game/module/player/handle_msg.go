@@ -73,6 +73,23 @@ func enter(args []interface{}) {
 	person.Enter(args)
 }
 
+func join(args []interface{}) {
+	_ = args[1]
+	m := args[0].(*protoMsg.JoinGameReadyQueueReq)
+	agent := args[1].(*ActorPlayer)
+	uid := agent.Session.Uid
+	clog.Debugf("[join]params %+v  uid:%+v", m, uid)
+	person := mgr.GetPlayerMgr().Get(uid)
+	// 玩家仍在游戏中
+	if person.GameHandle != nil {
+		clog.Warnf("[enter] params %+v  uid:%+v FAIL", m, uid)
+		agent.SendResultPop(FAILED, StatusText[Title001], StatusText[Login09])
+		return
+	}
+	// 玩家加入游戏准备列表
+	person.Join(args)
+}
+
 // 退出游戏
 func exit(args []interface{}) {
 	_ = args[1]

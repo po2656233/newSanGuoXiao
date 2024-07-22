@@ -141,7 +141,6 @@ func (playerSelf *PlayerManger) GetAccount(userID int64) string {
 
 // Enter 进入场景(限制条件由外部转入)
 func (itself *Player) Enter(args []interface{}) { //入场
-	//game := args[0].(*Game)
 	agent := args[1].(Agent)
 	if itself == nil {
 		GetClientMgr().SendResult(agent, FAILED, StatusText[User03])
@@ -158,8 +157,28 @@ func (itself *Player) Enter(args []interface{}) { //入场
 	itself.GameHandle.Scene([]interface{}{agent}) // 【进入-> 游戏场景】
 }
 
+// Join 加入
+func (itself *Player) Join(args []interface{}) {
+	m := args[0].(*protoMsg.JoinGameReadyQueueReq)
+	agent := args[1].(Agent)
+	if itself == nil {
+		GetClientMgr().SendResult(agent, FAILED, StatusText[User03])
+		return
+	}
+
+	// 查找房间
+	if room := GetRoomMgr().GetRoom(m.RoomID); room != nil {
+		tbls := room.GetTablesForGid(m.GameID)
+		for _, tbl := range tbls {
+			if t := room.Join(tbl.Id, itself); t != nil {
+				break
+			}
+		}
+	}
+
+}
 func (itself *Player) Exit() { //退出
-	if itself.GameHandle.UpdateInfo([]interface{}{protoMsg.PlayerState_PlayerStandUp, itself.UserID}) {
+	if itself.GameHandle != nil && itself.GameHandle.UpdateInfo([]interface{}{protoMsg.PlayerState_PlayerStandUp, itself.UserID}) {
 		itself.State = protoMsg.PlayerState_PlayerStandUp
 		itself.InTableId = INVALID
 		itself.InChairId = INVALID

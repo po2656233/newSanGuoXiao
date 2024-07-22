@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"math/big"
 	rand2 "math/rand"
-	"superman/nodes/leaf/jettengame/base"
+	"superman/internal/utils"
 	"time"
 )
 
@@ -278,12 +278,12 @@ func changeKuang(rate int, lines map[col][]row) map[col][]row {
 	for i := 1; i < ColCount; i++ {
 		for j := 1; j < RowCount; j++ {
 			// 是否命中占格
-			if lines[col(i)][j] == Placeholder || lines[col(i)][j] == DuoBao || !base.IsSatisfy(rate) {
+			if lines[col(i)][j] == Placeholder || lines[col(i)][j] == DuoBao || !utils.IsSatisfy(rate) {
 				continue
 			}
 
 			// 命中四
-			if base.IsSatisfy(rate) {
+			if utils.IsSatisfy(rate) {
 				if len(lines[col(i)]) <= j+3 { // 不满足格子数
 					continue
 				}
@@ -296,7 +296,7 @@ func changeKuang(rate int, lines map[col][]row) map[col][]row {
 				break
 			}
 			// 命中三
-			if base.IsSatisfy(rate) {
+			if utils.IsSatisfy(rate) {
 				if len(lines[col(i)]) <= j+2 { // 不满足格子数
 					continue
 				}
@@ -308,7 +308,7 @@ func changeKuang(rate int, lines map[col][]row) map[col][]row {
 				break
 			}
 			// 命中两个
-			if base.IsSatisfy(rate) {
+			if utils.IsSatisfy(rate) {
 				// 格子数是否满足
 				if len(lines[col(i)]) <= j+1 { // 不满足格子数
 					continue
@@ -375,7 +375,7 @@ func eraseRule(rate int, lines map[col][]row, erasePos []AwardInfo) (newLines ma
 
 	// 消除中奖元素 并补充
 	// 第一行元素暂不删除,删除其他行元素 即(第一行按行消除，其他的按列消除。)
-	isAward := base.IsSatisfy(rate)
+	isAward := utils.IsSatisfy(rate)
 
 	// 先消除第一列
 	newLines[0] = eraseCol(isAward, newLines[0], newLines[0])

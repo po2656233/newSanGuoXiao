@@ -4,6 +4,8 @@ package utils
 // 生成随机字符串
 import (
 	"bytes"
+	rand2 "crypto/rand"
+	"math/big"
 	"math/rand"
 	"strconv"
 	"time"
@@ -127,4 +129,21 @@ func GetRandList64(src []int64, count int, canRepeat bool) []int64 {
 		dest[i], dest[j] = dest[j], dest[i]
 	})
 	return dest[:count]
+}
+
+// IsSatisfy 是否命中 百分比
+func IsSatisfy(rate int) bool {
+	r2, _ := rand2.Int(rand2.Reader, big.NewInt(100))
+	return 0 == r2.Int64()%int64(rate)
+}
+
+// GetOneDay 获取当天0点和24点时间戳
+// beginTimeNum  0点
+// endTimeNum  24点
+func GetOneDay() (beginTimeNum, endTimeNum int64) {
+	timeStr := time.Now().Format("2006-01-02")
+	t, _ := time.ParseInLocation("2006-01-02", timeStr, time.Local)
+	beginTimeNum = t.Unix()
+	endTimeNum = beginTimeNum + 86400
+	return beginTimeNum, endTimeNum
 }

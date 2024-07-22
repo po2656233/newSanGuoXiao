@@ -1,11 +1,11 @@
 package sanguoxiao
 
 import (
-	"github.com/po2656233/goleaf/log"
+	log "github.com/po2656233/superplace/logger"
 	protoMsg "superman/internal/protocol/gofile"
 	"superman/internal/utils"
 	mgr "superman/nodes/game/manger"
-	"superman/nodes/game/module/category"
+	. "superman/nodes/game/module/category"
 	"time"
 )
 
@@ -33,8 +33,8 @@ type SanguoxiaoGame struct {
 	curUID     int64
 	status     protoMsg.GameScene
 	curTimer   *time.Timer
-	board      *protoMsg.BoardInfo   // 其实质是二维数组
-	arrayBoard [][]protoMsg.SgxPiece // 和board等同,游戏主要操作该棋盘
+	board      *protoMsg.SgxBoardInfo // 其实质是二维数组
+	arrayBoard [][]protoMsg.SgxPiece  // 和board等同,游戏主要操作该棋盘
 	result     *protoMsg.SanguoxiaoResult
 
 	redPlay  *protoMsg.SanguoxiaoPlayer // 红方玩家
@@ -47,9 +47,8 @@ func New(game *mgr.Game) *SanguoxiaoGame {
 	p := &SanguoxiaoGame{
 		Game: game,
 	}
-	category.InitConfig()
-	p.row = category.YamlObj.SanGuoXiao.Row
-	p.col = category.YamlObj.SanGuoXiao.Col
+	p.row = YamlObj.SanGuoXiao.Row
+	p.col = YamlObj.SanGuoXiao.Col
 	p.Init()
 	return p
 }
@@ -140,9 +139,9 @@ func (self *SanguoxiaoGame) Playing(args []interface{}) {
 		return
 	}
 	person := userData.(*mgr.Player)
-	cells := make([]*protoMsg.Grid, len(self.board.Cells))
+	cells := make([]*protoMsg.SgxGrid, len(self.board.Cells))
 	for _, item := range self.board.Cells {
-		cells = append(cells, &protoMsg.Grid{
+		cells = append(cells, &protoMsg.SgxGrid{
 			Row:  item.Row,
 			Col:  item.Col,
 			Core: item.Core,
@@ -328,7 +327,7 @@ func (self *SanguoxiaoGame) toState(scene protoMsg.GameScene, f func()) {
 
 // initBord 初始化方格
 func (self *SanguoxiaoGame) initBord(row, col int32) {
-	self.board = &protoMsg.BoardInfo{}
+	self.board = &protoMsg.SgxBoardInfo{}
 	self.arrayBoard = make([][]protoMsg.SgxPiece, row) // [rowNum][colNum]protoMsg.SgxPiece{}
 	for i := 0; i < int(row); i++ {
 		self.arrayBoard[i] = make([]protoMsg.SgxPiece, col)
@@ -336,7 +335,7 @@ func (self *SanguoxiaoGame) initBord(row, col int32) {
 	// 避免连续三个相同
 	for i := int32(0); i < row; i++ {
 		for j := int32(0); j < col; j++ {
-			item := &protoMsg.Grid{
+			item := &protoMsg.SgxGrid{
 				Row:  i,
 				Col:  j,
 				Core: protoMsg.SgxPiece(utils.GenRandNum32(int32(protoMsg.SgxPiece_Jin), int32(protoMsg.SgxPiece_Yao))),
@@ -360,7 +359,7 @@ func (self *SanguoxiaoGame) initBord(row, col int32) {
 }
 
 // 获取格子
-func (self *SanguoxiaoGame) getGrid(row, col int32) *protoMsg.Grid {
+func (self *SanguoxiaoGame) getGrid(row, col int32) *protoMsg.SgxGrid {
 	for _, cell := range self.board.Cells {
 		if cell.Row == row && cell.Col == col {
 			return cell
@@ -377,7 +376,7 @@ func (self *SanguoxiaoGame) setGrid(row, col int32, core protoMsg.SgxPiece) {
 }
 
 // swapGrid 方格属性交换
-func (self *SanguoxiaoGame) swapGrid(origin, target *protoMsg.Grid) bool {
+func (self *SanguoxiaoGame) swapGrid(origin, target *protoMsg.SgxGrid) bool {
 	divR := origin.Row - target.Row
 	divC := origin.Col - target.Col
 	// 必须是相连的方格
@@ -387,7 +386,7 @@ func (self *SanguoxiaoGame) swapGrid(origin, target *protoMsg.Grid) bool {
 	if (1 < divR || divR < -1) && divC != 0 {
 		return false
 	}
-	tempCell := &protoMsg.Grid{
+	tempCell := &protoMsg.SgxGrid{
 		Row:  origin.Row,
 		Col:  origin.Col,
 		Core: target.Core,
@@ -426,17 +425,17 @@ func (self *SanguoxiaoGame) swapGrid(origin, target *protoMsg.Grid) bool {
 func (self *SanguoxiaoGame) eraseGrid() bool {
 	msg := &protoMsg.SanguoxiaoTriggerResp{
 		UserID: self.curUID,
-		PerBoard: &protoMsg.BoardInfo{
-			Cells: make([]*protoMsg.Grid, 0),
+		PerBoard: &protoMsg.SgxBoardInfo{
+			Cells: make([]*protoMsg.SgxGrid, 0),
 		},
-		Erase:   make([]*protoMsg.Grid, 0),
+		Erase:   make([]*protoMsg.SgxGrid, 0),
 		Attacks: make([]*protoMsg.SanguoxiaoAttack, 0),
 	}
 
 	/////////////////////////游戏核心玩法////////////////////////////////
 	// 消除 逐个消除
 	for _, cell := range self.board.Cells {
-		temp := &protoMsg.Grid{
+		temp := &protoMsg.SgxGrid{
 			Row:  cell.Row,
 			Col:  cell.Col,
 			Core: cell.Core,
@@ -450,9 +449,9 @@ func (self *SanguoxiaoGame) eraseGrid() bool {
 	// 根据消除的元素数量统计攻击伤害
 	for _, grid := range msg.Erase {
 		if cell := self.getGrid(grid.Row, grid.Col); cell != nil {
-			cell.Core = protoMsg.SgxPiece_NoPiece
+			cell.Core = protoMsg.SgxPiece_NoSGXPiece
 		}
-		self.arrayBoard[grid.Row][grid.Col] = protoMsg.SgxPiece_NoPiece
+		self.arrayBoard[grid.Row][grid.Col] = protoMsg.SgxPiece_NoSGXPiece
 	}
 
 	// 掉落
@@ -529,7 +528,7 @@ func (self *SanguoxiaoGame) fillEmpty() {
 }
 
 // 获取伤害或治疗
-func (self *SanguoxiaoGame) getAttacks(cells []*protoMsg.Grid, heros []*protoMsg.HeroInfo) ([]*protoMsg.SanguoxiaoAttack, int64, int64) {
+func (self *SanguoxiaoGame) getAttacks(cells []*protoMsg.SgxGrid, heros []*protoMsg.HeroInfo) ([]*protoMsg.SanguoxiaoAttack, int64, int64) {
 	attackList := make([]*protoMsg.SanguoxiaoAttack, 0)
 	therapyTotal := int64(0)
 	damageTotal := int64(0)
@@ -557,39 +556,39 @@ func (self *SanguoxiaoGame) getAttacks(cells []*protoMsg.Grid, heros []*protoMsg
 
 // //////////////////////////////////////////////////////////////////////////
 // 判断格子前后的是否可消除
-func (self *SanguoxiaoGame) canErase(grid *protoMsg.Grid) bool {
-	if grid.Core == protoMsg.SgxPiece_NoPiece || 0 == len(self.arrayBoard) {
+func (self *SanguoxiaoGame) canErase(grid *protoMsg.SgxGrid) bool {
+	if grid.Core == protoMsg.SgxPiece_NoSGXPiece || 0 == len(self.arrayBoard) {
 		return false
 	}
-	gridUp1 := &protoMsg.Grid{
+	gridUp1 := &protoMsg.SgxGrid{
 		Row: grid.Row - 1,
 		Col: grid.Col,
 	}
-	gridUp2 := &protoMsg.Grid{
+	gridUp2 := &protoMsg.SgxGrid{
 		Row: grid.Row - 2,
 		Col: grid.Col,
 	}
-	gridDw1 := &protoMsg.Grid{
+	gridDw1 := &protoMsg.SgxGrid{
 		Row: grid.Row + 1,
 		Col: grid.Col,
 	}
-	gridDw2 := &protoMsg.Grid{
+	gridDw2 := &protoMsg.SgxGrid{
 		Row: grid.Row + 2,
 		Col: grid.Col,
 	}
-	gridLf1 := &protoMsg.Grid{
+	gridLf1 := &protoMsg.SgxGrid{
 		Row: grid.Row,
 		Col: grid.Col - 1,
 	}
-	gridLf2 := &protoMsg.Grid{
+	gridLf2 := &protoMsg.SgxGrid{
 		Row: grid.Row,
 		Col: grid.Col - 2,
 	}
-	gridRt1 := &protoMsg.Grid{
+	gridRt1 := &protoMsg.SgxGrid{
 		Row: grid.Row,
 		Col: grid.Col + 1,
 	}
-	gridRt2 := &protoMsg.Grid{
+	gridRt2 := &protoMsg.SgxGrid{
 		Row: grid.Row,
 		Col: grid.Col + 2,
 	}

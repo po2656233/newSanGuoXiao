@@ -37,6 +37,7 @@ type (
 func init() {
 	//玩家行为
 	handlerMsg(&protoMsg.EnterGameReq{}, enter)
+	handlerMsg(&protoMsg.JoinGameReadyQueueReq{}, join)
 	handlerMsg(&protoMsg.ExitGameReq{}, exit)
 	//handlerMsg(&protoMsg.DisbandedGameReq{}, disbandedGame)
 	//handlerMsg(&protoMsg.TrusteeReq{}, trustee)
