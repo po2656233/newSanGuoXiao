@@ -36,23 +36,24 @@ enum PlayerState {
   PlayerLookOn = 0;         //旁观(可作为刚入场时的初始状态)
   PlayerSitDown = 1;        //坐下(此状态下，才能参与游戏)
   PlayerAgree = 2;          //同意(可作为准备状态)
-  PlayerPlaying = 3;        //游戏中
-  PlayerPickUp = 4;         //托管
-  PlayerCall = 5;           //叫分
-  PlayerFollow = 6;         //跟牌
-  PlayerRaise = 7;          //加注
-  PlayerLook = 8;           //看牌
-  PlayerCompare = 9;        //比牌
-  PlayerCompareLose = 10;   //比牌失败
-  PlayerOutCard = 11;       //出牌|摊牌
-  PlayerPass = 12;          //过牌|要不起
-  PlayerChi = 13;           //吃
-  PlayerPong = 14;          //碰
-  PlayerMingGang = 15;      //明杠
-  PlayerAnGang = 16;        //暗杠
-  PlayerTing = 17;          //听
-  PlayerHu = 18;            //胡
-  PlayerZiMo = 19;          //自摸
+  PlayerWaiTing = 3;         //旁观(可作为刚入场时的初始状态)
+  PlayerPlaying = 4;        //游戏中
+  PlayerPickUp = 5;         //托管
+  PlayerCall = 6;           //叫分
+  PlayerFollow = 7;         //跟牌
+  PlayerRaise = 8;          //加注
+  PlayerLook = 9;           //看牌
+  PlayerCompare = 10;        //比牌
+  PlayerCompareLose = 11;   //比牌失败
+  PlayerOutCard = 12;       //出牌|摊牌
+  PlayerPass = 13;          //过牌|要不起
+  PlayerChi = 14;           //吃
+  PlayerPong = 15;          //碰
+  PlayerMingGang = 16;      //明杠
+  PlayerAnGang = 17;        //暗杠
+  PlayerTing = 18;          //听
+  PlayerHu = 19;            //胡
+  PlayerZiMo = 20;          //自摸
   PlayerTrustee = 97;       //托管
   PlayerGiveUp = 98;        //弃牌
   PlayerStandUp = 99;       //站起(可作为结束状态)
@@ -193,15 +194,15 @@ message PlayerInfo {
   int64 money = 13;       //余额
   int64 inRooId = 14;   //所在的房间ID,为重连后,拉取相应数据
   int64 inTableId = 15; //所在的牌桌ID
-  int64 inChairId = 16; //椅子编号
+  int32 inChairId = 16; //椅子编号
 }
 // 玩家简明信息
 message PlayerSimpleInfo {
   int64 uid = 1;//玩家ID
-  string name = 2; //玩家姓名
-  int64 headId = 3;//头像
-  int64 score = 4;//分数
-  int64 rankNo = 5;// 排名
+  int32 headId = 2;//头像
+  int64 score = 3;//分数
+  int32 rankNo = 4;// 排名
+  string name = 5; //玩家姓名
 }
 // 武将信息
 message HeroInfo {

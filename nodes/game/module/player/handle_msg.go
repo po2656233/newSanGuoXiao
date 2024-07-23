@@ -80,14 +80,76 @@ func join(args []interface{}) {
 	uid := agent.Session.Uid
 	clog.Debugf("[join]params %+v  uid:%+v", m, uid)
 	person := mgr.GetPlayerMgr().Get(uid)
+	if person == nil {
+		agent.SendResult(FAILED, StatusText[User03])
+		return
+	}
 	// 玩家仍在游戏中
 	if person.GameHandle != nil {
-		clog.Warnf("[enter] params %+v  uid:%+v FAIL", m, uid)
+		clog.Warnf("[join] [GameHandle] params %+v  uid:%+v FAIL", m, uid)
 		agent.SendResultPop(FAILED, StatusText[Title001], StatusText[Login09])
 		return
 	}
+	// 获取房间句柄
+	room := mgr.GetRoomMgr().GetRoom(m.RoomID)
+	if room == nil {
+		clog.Warnf("[join] [room] params %+v  uid:%+v FAIL", m, uid)
+		agent.SendResultPop(FAILED, StatusText[Title001], StatusText[Room16])
+		return
+	}
 	// 玩家加入游戏准备列表
-	person.Join(args)
+	ok := room.AddWait(&mgr.WaitPlayer{Player: person, Gid: m.GameID})
+	if !ok {
+		clog.Warnf("[join] [GameHandle] params %+v  uid:%+v FAIL", m, uid)
+		agent.SendResultPop(FAILED, StatusText[Title001], StatusText[Login09])
+		return
+	}
+	// 检测房间的游戏是否满员
+	ok = mgr.GetRoomMgr().GetRoom(m.RoomID).CheckGameFull(m.GameID)
+	if ok {
+		if m.RoomID != SYSTEMID {
+			// 牌桌不足
+			agent.SendResult(FAILED, StatusText[TableInfo11])
+			return
+		}
+
+		// 系统房主动添加牌桌。 如果没有加入队列,并且是系统房,则创建牌桌
+		// 请求数据库创建牌桌
+		data, errCode := rpc.SendDataToDB(agent.App(), &protoMsg.CreateTableReq{
+			Rid:        SYSTEMID,
+			Gid:        m.GameID,
+			Playscore:  0,
+			Name:       "",
+			Opentime:   time.Now().Unix(),
+			Taxation:   0, //系统房没有税收
+			Commission: 0,
+			Amount:     Unlimited,
+		})
+		if errCode != SUCCESS {
+			clog.Warnf("[join] [SendDataToDB] params %+v  uid:%+v FAIL", m, uid)
+			agent.SendResultPop(FAILED, StatusText[Title001], StatusText[User29])
+			return
+		}
+		resp, ok1 := data.(*protoMsg.CreateTableResp)
+		if !ok1 || resp == nil || resp.Table == nil {
+			clog.Warnf("[join]  params %+v  uid:%+v FAIL", m, uid)
+			agent.SendResultPop(FAILED, StatusText[Title001], StatusText[User29])
+			return
+		}
+		// 给系统房添加刚创建的牌桌
+		t, err := room.AddTable(resp.Table, NewGame)
+		if err != nil || t == nil {
+			clog.Warnf("[join] [AddTable] params %+v  uid:%+v FAIL. err:%v", m, uid, err)
+			agent.SendResultPop(FAILED, StatusText[Title001], StatusText[User29])
+			return
+		}
+	}
+
+	mgr.GetClientMgr().SendData(agent, &protoMsg.JoinGameReadyQueueResp{
+		RoomID: m.RoomID,
+		Uid:    uid,
+		GameID: m.GameID,
+	})
 }
 
 // 退出游戏
@@ -99,7 +161,7 @@ func exit(args []interface{}) {
 	clog.Debugf("[exit]params %+v  uid:%+v", m, uid)
 	person := mgr.GetPlayerMgr().Get(uid)
 	if person == nil {
-		agent.SendResultPop(FAILED, StatusText[Title004], StatusText[User03])
+		agent.SendResult(FAILED, StatusText[User03])
 		return
 	}
 	person.Exit()

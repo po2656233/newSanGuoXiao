@@ -115,7 +115,7 @@ if (goog.DEBUG && !COMPILED) {
  * @constructor
  */
 proto.pb.JoinGameReadyQueueResp = function(opt_data) {
-  jspb.Message.initialize(this, opt_data, 0, -1, proto.pb.JoinGameReadyQueueResp.repeatedFields_, null);
+  jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
 goog.inherits(proto.pb.JoinGameReadyQueueResp, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
@@ -1187,13 +1187,6 @@ proto.pb.JoinGameReadyQueueReq.prototype.setGameid = function(value) {
 
 
 
-/**
- * List of repeated fields within this message type.
- * @private {!Array<number>}
- * @const
- */
-proto.pb.JoinGameReadyQueueResp.repeatedFields_ = [3];
-
 
 
 if (jspb.Message.GENERATE_TO_OBJECT) {
@@ -1223,10 +1216,9 @@ proto.pb.JoinGameReadyQueueResp.prototype.toObject = function(opt_includeInstanc
  */
 proto.pb.JoinGameReadyQueueResp.toObject = function(includeInstance, msg) {
   var obj = {
-    roomid: jspb.Message.getFieldWithDefault(msg, 1, 0),
-    tableid: jspb.Message.getFieldWithDefault(msg, 2, 0),
-    userinfoList: jspb.Message.toObjectList(msg.getUserinfoList(),
-    baseinfo_pb.PlayerSimpleInfo.toObject, includeInstance)
+    uid: jspb.Message.getFieldWithDefault(msg, 1, 0),
+    roomid: jspb.Message.getFieldWithDefault(msg, 2, 0),
+    gameid: jspb.Message.getFieldWithDefault(msg, 3, 0)
   };
 
   if (includeInstance) {
@@ -1265,16 +1257,15 @@ proto.pb.JoinGameReadyQueueResp.deserializeBinaryFromReader = function(msg, read
     switch (field) {
     case 1:
       var value = /** @type {number} */ (reader.readInt64());
-      msg.setRoomid(value);
+      msg.setUid(value);
       break;
     case 2:
       var value = /** @type {number} */ (reader.readInt64());
-      msg.setTableid(value);
+      msg.setRoomid(value);
       break;
     case 3:
-      var value = new baseinfo_pb.PlayerSimpleInfo;
-      reader.readMessage(value,baseinfo_pb.PlayerSimpleInfo.deserializeBinaryFromReader);
-      msg.addUserinfo(value);
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setGameid(value);
       break;
     default:
       reader.skipField();
@@ -1305,92 +1296,72 @@ proto.pb.JoinGameReadyQueueResp.prototype.serializeBinary = function() {
  */
 proto.pb.JoinGameReadyQueueResp.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
-  f = message.getRoomid();
+  f = message.getUid();
   if (f !== 0) {
     writer.writeInt64(
       1,
       f
     );
   }
-  f = message.getTableid();
+  f = message.getRoomid();
   if (f !== 0) {
     writer.writeInt64(
       2,
       f
     );
   }
-  f = message.getUserinfoList();
-  if (f.length > 0) {
-    writer.writeRepeatedMessage(
+  f = message.getGameid();
+  if (f !== 0) {
+    writer.writeInt64(
       3,
-      f,
-      baseinfo_pb.PlayerSimpleInfo.serializeBinaryToWriter
+      f
     );
   }
 };
 
 
 /**
- * optional int64 roomID = 1;
+ * optional int64 uid = 1;
  * @return {number}
  */
-proto.pb.JoinGameReadyQueueResp.prototype.getRoomid = function() {
+proto.pb.JoinGameReadyQueueResp.prototype.getUid = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 1, 0));
 };
 
 
 /** @param {number} value */
-proto.pb.JoinGameReadyQueueResp.prototype.setRoomid = function(value) {
+proto.pb.JoinGameReadyQueueResp.prototype.setUid = function(value) {
   jspb.Message.setProto3IntField(this, 1, value);
 };
 
 
 /**
- * optional int64 tableID = 2;
+ * optional int64 roomID = 2;
  * @return {number}
  */
-proto.pb.JoinGameReadyQueueResp.prototype.getTableid = function() {
+proto.pb.JoinGameReadyQueueResp.prototype.getRoomid = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 2, 0));
 };
 
 
 /** @param {number} value */
-proto.pb.JoinGameReadyQueueResp.prototype.setTableid = function(value) {
+proto.pb.JoinGameReadyQueueResp.prototype.setRoomid = function(value) {
   jspb.Message.setProto3IntField(this, 2, value);
 };
 
 
 /**
- * repeated PlayerSimpleInfo userInfo = 3;
- * @return {!Array<!proto.pb.PlayerSimpleInfo>}
+ * optional int64 gameID = 3;
+ * @return {number}
  */
-proto.pb.JoinGameReadyQueueResp.prototype.getUserinfoList = function() {
-  return /** @type{!Array<!proto.pb.PlayerSimpleInfo>} */ (
-    jspb.Message.getRepeatedWrapperField(this, baseinfo_pb.PlayerSimpleInfo, 3));
+proto.pb.JoinGameReadyQueueResp.prototype.getGameid = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
 };
 
 
-/** @param {!Array<!proto.pb.PlayerSimpleInfo>} value */
-proto.pb.JoinGameReadyQueueResp.prototype.setUserinfoList = function(value) {
-  jspb.Message.setRepeatedWrapperField(this, 3, value);
-};
-
-
-/**
- * @param {!proto.pb.PlayerSimpleInfo=} opt_value
- * @param {number=} opt_index
- * @return {!proto.pb.PlayerSimpleInfo}
- */
-proto.pb.JoinGameReadyQueueResp.prototype.addUserinfo = function(opt_value, opt_index) {
-  return jspb.Message.addToRepeatedWrapperField(this, 3, opt_value, proto.pb.PlayerSimpleInfo, opt_index);
-};
-
-
-/**
- * Clears the list making it empty but non-null.
- */
-proto.pb.JoinGameReadyQueueResp.prototype.clearUserinfoList = function() {
-  this.setUserinfoList([]);
+/** @param {number} value */
+proto.pb.JoinGameReadyQueueResp.prototype.setGameid = function(value) {
+  jspb.Message.setProto3IntField(this, 3, value);
 };
 
 

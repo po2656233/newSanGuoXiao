@@ -69,6 +69,8 @@ var StatusText = map[int]string{
 	TableInfo07: "牌桌已存在",
 	TableInfo08: "创建失败:已超过房间最大人数",
 	TableInfo09: "无法获取有效牌桌",
+	TableInfo10: "牌桌不足",
+	TableInfo11: "已添加至等待队列,但需房主补充牌桌",
 
 	Setting01: "名字不能为空!",
 	Setting02: "座位数过少!",
@@ -135,6 +137,7 @@ var StatusText = map[int]string{
 	User26: "购买房卡失败:无效的求购信息!",
 	User27: "暂无新邮件",
 	User28: "您今天已经签到过了",
+	User29: "加入游戏队列失败",
 
 	Mysql01: "数据库",
 	Mysql02: "数据库登录成功",
@@ -345,6 +348,8 @@ const (
 	TableInfo07
 	TableInfo08
 	TableInfo09
+	TableInfo10
+	TableInfo11
 )
 
 const (
@@ -420,6 +425,7 @@ const (
 	User26
 	User27
 	User28
+	User29
 )
 const (
 	_ = 20000 + iota //游戏清场

@@ -157,25 +157,9 @@ func (itself *Player) Enter(args []interface{}) { //入场
 	itself.GameHandle.Scene([]interface{}{agent}) // 【进入-> 游戏场景】
 }
 
-// Join 加入
-func (itself *Player) Join(args []interface{}) {
-	m := args[0].(*protoMsg.JoinGameReadyQueueReq)
-	agent := args[1].(Agent)
-	if itself == nil {
-		GetClientMgr().SendResult(agent, FAILED, StatusText[User03])
-		return
-	}
-
-	// 查找房间
-	if room := GetRoomMgr().GetRoom(m.RoomID); room != nil {
-		tbls := room.GetTablesForGid(m.GameID)
-		for _, tbl := range tbls {
-			if t := room.Join(tbl.Id, itself); t != nil {
-				break
-			}
-		}
-	}
-
+// JoinQueue 加入
+func (itself *Player) JoinQueue() {
+	itself.State = protoMsg.PlayerState_PlayerStandUp
 }
 func (itself *Player) Exit() { //退出
 	if itself.GameHandle != nil && itself.GameHandle.UpdateInfo([]interface{}{protoMsg.PlayerState_PlayerStandUp, itself.UserID}) {

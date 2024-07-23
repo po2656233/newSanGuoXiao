@@ -228,6 +228,10 @@ func (self *ActorDB) CreateRoom(req *pb.CreateRoomReq) (*pb.CreateRoomResp, erro
 
 func (self *ActorDB) CreateTable(req *pb.CreateTableReq) (*pb.CreateTableResp, error) {
 	resp := &pb.CreateTableResp{}
+	if req.Name == "" {
+		// 则获取游戏名称
+		req.Name, _ = self.checkGameName(req.Gid)
+	}
 	tid, err := self.addTable(sqlmodel.Table{
 		Gid:        req.Gid,
 		Rid:        req.Rid,

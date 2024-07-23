@@ -1969,7 +1969,7 @@ proto.pb.PlayerInfo.deserializeBinaryFromReader = function(msg, reader) {
       msg.setIntableid(value);
       break;
     case 16:
-      var value = /** @type {number} */ (reader.readInt64());
+      var value = /** @type {number} */ (reader.readInt32());
       msg.setInchairid(value);
       break;
     default:
@@ -2108,7 +2108,7 @@ proto.pb.PlayerInfo.serializeBinaryToWriter = function(message, writer) {
   }
   f = message.getInchairid();
   if (f !== 0) {
-    writer.writeInt64(
+    writer.writeInt32(
       16,
       f
     );
@@ -2342,7 +2342,7 @@ proto.pb.PlayerInfo.prototype.setIntableid = function(value) {
 
 
 /**
- * optional int64 inChairId = 16;
+ * optional int32 inChairId = 16;
  * @return {number}
  */
 proto.pb.PlayerInfo.prototype.getInchairid = function() {
@@ -2387,10 +2387,10 @@ proto.pb.PlayerSimpleInfo.prototype.toObject = function(opt_includeInstance) {
 proto.pb.PlayerSimpleInfo.toObject = function(includeInstance, msg) {
   var obj = {
     uid: jspb.Message.getFieldWithDefault(msg, 1, 0),
-    name: jspb.Message.getFieldWithDefault(msg, 2, ""),
-    headid: jspb.Message.getFieldWithDefault(msg, 3, 0),
-    score: jspb.Message.getFieldWithDefault(msg, 4, 0),
-    rankno: jspb.Message.getFieldWithDefault(msg, 5, 0)
+    headid: jspb.Message.getFieldWithDefault(msg, 2, 0),
+    score: jspb.Message.getFieldWithDefault(msg, 3, 0),
+    rankno: jspb.Message.getFieldWithDefault(msg, 4, 0),
+    name: jspb.Message.getFieldWithDefault(msg, 5, "")
   };
 
   if (includeInstance) {
@@ -2432,20 +2432,20 @@ proto.pb.PlayerSimpleInfo.deserializeBinaryFromReader = function(msg, reader) {
       msg.setUid(value);
       break;
     case 2:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setName(value);
+      var value = /** @type {number} */ (reader.readInt32());
+      msg.setHeadid(value);
       break;
     case 3:
       var value = /** @type {number} */ (reader.readInt64());
-      msg.setHeadid(value);
-      break;
-    case 4:
-      var value = /** @type {number} */ (reader.readInt64());
       msg.setScore(value);
       break;
-    case 5:
-      var value = /** @type {number} */ (reader.readInt64());
+    case 4:
+      var value = /** @type {number} */ (reader.readInt32());
       msg.setRankno(value);
+      break;
+    case 5:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setName(value);
       break;
     default:
       reader.skipField();
@@ -2483,30 +2483,30 @@ proto.pb.PlayerSimpleInfo.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getName();
-  if (f.length > 0) {
-    writer.writeString(
-      2,
-      f
-    );
-  }
   f = message.getHeadid();
   if (f !== 0) {
-    writer.writeInt64(
-      3,
+    writer.writeInt32(
+      2,
       f
     );
   }
   f = message.getScore();
   if (f !== 0) {
     writer.writeInt64(
-      4,
+      3,
       f
     );
   }
   f = message.getRankno();
   if (f !== 0) {
-    writer.writeInt64(
+    writer.writeInt32(
+      4,
+      f
+    );
+  }
+  f = message.getName();
+  if (f.length > 0) {
+    writer.writeString(
       5,
       f
     );
@@ -2530,62 +2530,62 @@ proto.pb.PlayerSimpleInfo.prototype.setUid = function(value) {
 
 
 /**
- * optional string name = 2;
- * @return {string}
- */
-proto.pb.PlayerSimpleInfo.prototype.getName = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
-};
-
-
-/** @param {string} value */
-proto.pb.PlayerSimpleInfo.prototype.setName = function(value) {
-  jspb.Message.setProto3StringField(this, 2, value);
-};
-
-
-/**
- * optional int64 headId = 3;
+ * optional int32 headId = 2;
  * @return {number}
  */
 proto.pb.PlayerSimpleInfo.prototype.getHeadid = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 2, 0));
 };
 
 
 /** @param {number} value */
 proto.pb.PlayerSimpleInfo.prototype.setHeadid = function(value) {
-  jspb.Message.setProto3IntField(this, 3, value);
+  jspb.Message.setProto3IntField(this, 2, value);
 };
 
 
 /**
- * optional int64 score = 4;
+ * optional int64 score = 3;
  * @return {number}
  */
 proto.pb.PlayerSimpleInfo.prototype.getScore = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 4, 0));
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
 };
 
 
 /** @param {number} value */
 proto.pb.PlayerSimpleInfo.prototype.setScore = function(value) {
-  jspb.Message.setProto3IntField(this, 4, value);
+  jspb.Message.setProto3IntField(this, 3, value);
 };
 
 
 /**
- * optional int64 rankNo = 5;
+ * optional int32 rankNo = 4;
  * @return {number}
  */
 proto.pb.PlayerSimpleInfo.prototype.getRankno = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 5, 0));
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 4, 0));
 };
 
 
 /** @param {number} value */
 proto.pb.PlayerSimpleInfo.prototype.setRankno = function(value) {
-  jspb.Message.setProto3IntField(this, 5, value);
+  jspb.Message.setProto3IntField(this, 4, value);
+};
+
+
+/**
+ * optional string name = 5;
+ * @return {string}
+ */
+proto.pb.PlayerSimpleInfo.prototype.getName = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
+};
+
+
+/** @param {string} value */
+proto.pb.PlayerSimpleInfo.prototype.setName = function(value) {
+  jspb.Message.setProto3StringField(this, 5, value);
 };
 
 
@@ -8582,23 +8582,24 @@ proto.pb.PlayerState = {
   PLAYERLOOKON: 0,
   PLAYERSITDOWN: 1,
   PLAYERAGREE: 2,
-  PLAYERPLAYING: 3,
-  PLAYERPICKUP: 4,
-  PLAYERCALL: 5,
-  PLAYERFOLLOW: 6,
-  PLAYERRAISE: 7,
-  PLAYERLOOK: 8,
-  PLAYERCOMPARE: 9,
-  PLAYERCOMPARELOSE: 10,
-  PLAYEROUTCARD: 11,
-  PLAYERPASS: 12,
-  PLAYERCHI: 13,
-  PLAYERPONG: 14,
-  PLAYERMINGGANG: 15,
-  PLAYERANGANG: 16,
-  PLAYERTING: 17,
-  PLAYERHU: 18,
-  PLAYERZIMO: 19,
+  PLAYERWAITING: 3,
+  PLAYERPLAYING: 4,
+  PLAYERPICKUP: 5,
+  PLAYERCALL: 6,
+  PLAYERFOLLOW: 7,
+  PLAYERRAISE: 8,
+  PLAYERLOOK: 9,
+  PLAYERCOMPARE: 10,
+  PLAYERCOMPARELOSE: 11,
+  PLAYEROUTCARD: 12,
+  PLAYERPASS: 13,
+  PLAYERCHI: 14,
+  PLAYERPONG: 15,
+  PLAYERMINGGANG: 16,
+  PLAYERANGANG: 17,
+  PLAYERTING: 18,
+  PLAYERHU: 19,
+  PLAYERZIMO: 20,
   PLAYERTRUSTEE: 97,
   PLAYERGIVEUP: 98,
   PLAYERSTANDUP: 99

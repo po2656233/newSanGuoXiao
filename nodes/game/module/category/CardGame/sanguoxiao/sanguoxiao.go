@@ -156,7 +156,7 @@ func (self *SanguoxiaoGame) Playing(args []interface{}) {
 
 	// 通知玩家 当前操作
 	mgr.GetClientMgr().NotifyOthers(self.playList, &protoMsg.SanguoxiaoSwapResp{
-		UserID: person.UserID,
+		Uid:    person.UserID,
 		Origin: m.Origin,
 		Target: m.Target,
 	})
@@ -424,7 +424,7 @@ func (self *SanguoxiaoGame) swapGrid(origin, target *protoMsg.SgxGrid) bool {
 // eraseGrid 消除方格 获得的战力 主要逻辑
 func (self *SanguoxiaoGame) eraseGrid() bool {
 	msg := &protoMsg.SanguoxiaoTriggerResp{
-		UserID: self.curUID,
+		Uid: self.curUID,
 		PerBoard: &protoMsg.SgxBoardInfo{
 			Cells: make([]*protoMsg.SgxGrid, 0),
 		},

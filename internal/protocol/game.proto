@@ -29,9 +29,9 @@ message JoinGameReadyQueueReq {
   int64 gameID = 2;                    // 游戏ID
 }
 message JoinGameReadyQueueResp {
-  int64 roomID = 1;                 // 房间ID 注: =0时,为系统房
-  int64 tableID = 2;                // 牌桌标识
-  repeated PlayerSimpleInfo userInfo = 3;    // 玩家信息
+  int64 uid = 1;
+  int64 roomID = 2;                 // 房间ID 注: =0时,为系统房
+  int64 gameID = 3;                    // 游戏ID
 }
 //入场协议 对战类 [EnterXXXGameResp]
 //受游戏本身特性影响,PlayerInfo有本地化需求

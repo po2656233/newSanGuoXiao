@@ -282,6 +282,22 @@ func (self *ActorDB) checkUserID(account, password string) (uid int64, err error
 	return
 }
 
+// checkGameName 获取游戏名称
+func (self *ActorDB) checkGameName(gid int64) (name string, err error) {
+	game := sqlmodel.Game{}
+	err = self.db.Table(game.TableName()).Select("name").Where("id = ?", gid).Find(&name).Error
+	CheckError(err)
+	return
+}
+
+// checkGameEnName 获取游戏英文名
+func (self *ActorDB) checkGameEnName(gid int64) (name string, err error) {
+	game := sqlmodel.Game{}
+	err = self.db.Table(game.TableName()).Select("en_name").Where("id = ?", gid).Find(&name).Error
+	CheckError(err)
+	return
+}
+
 //////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
 
