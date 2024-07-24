@@ -36,7 +36,7 @@ enum PlayerState {
   PlayerLookOn = 0;         //旁观(可作为刚入场时的初始状态)
   PlayerSitDown = 1;        //坐下(此状态下，才能参与游戏)
   PlayerAgree = 2;          //同意(可作为准备状态)
-  PlayerWaiTing = 3;         //旁观(可作为刚入场时的初始状态)
+  PlayerWaiting = 3;         //旁观(可作为刚入场时的初始状态)
   PlayerPlaying = 4;        //游戏中
   PlayerPickUp = 5;         //托管
   PlayerCall = 6;           //叫分
@@ -54,9 +54,9 @@ enum PlayerState {
   PlayerTing = 18;          //听
   PlayerHu = 19;            //胡
   PlayerZiMo = 20;          //自摸
-  PlayerTrustee = 97;       //托管
-  PlayerGiveUp = 98;        //弃牌
-  PlayerStandUp = 99;       //站起(可作为结束状态)
+  PlayerTrustee = 21;       //托管
+  PlayerGiveUp = 22;        //弃牌
+  PlayerStandUp = 23;       //站起(可作为结束状态)
 }
 ////游戏类型
 //enum GameType {
@@ -84,19 +84,20 @@ enum GameState {
 enum GameScene {
   Free = 0;           //空闲
   Start = 1;          //开始
-  Call = 2;           //叫分
-  Decide = 3;         //定庄
-  Playing = 4;        //游戏中
-  Opening = 5;        //开奖
-  Over = 6;           //结算
-  Closing = 7;        //关闭
-  SitDirect = 8;      //决定方位
-  RollDice = 9;       //掷骰子
-  WaitOperate = 10;   //等待操作
-  ChangeThree = 11;   //换三张
-  DingQue = 12;       //定缺门
-  CheckTing = 13;     //查听
-  CheckHuaZHu = 14;   //查花猪
+  Setting = 2;        //设置时长
+  Call = 3;           //叫分
+  Decide = 4;         //定庄
+  Playing = 5;        //游戏中
+  Opening = 6;        //开奖
+  Over = 7;           //结算
+  Closing = 8;        //关闭
+  SitDirect = 9;      //决定方位
+  RollDice = 10;       //掷骰子
+  WaitOperate = 11;   //等待操作
+  ChangeThree = 12;   //换三张
+  DingQue = 13;       //定缺门
+  CheckTing = 14;     //查听
+  CheckHuaZHu = 15;   //查花猪
 }
 // 方位
 enum Direct {
@@ -112,17 +113,17 @@ enum Direct {
 }
 // 麻将操作
 enum MJOperate {
-  NULL = 0;       //用于校验
-  Pass = 1;       // 过牌
-  Chi = 2;        // 吃
-  Pong = 3;       // 碰
-  Gang = 4;       // 杠 自己手上三个,杠别家一个。和MingGang效果一样,显示不同
-  MingGang = 5;   // 明杠(同杠)或碰后,抓牌起杠
-  AnGang = 6;     // 暗杠
-  BuHua = 7;      // 补花
-  Ting = 8;       // 听
-  Hu = 9;         // 胡牌
-  ZiMo = 10;      // 自摸
+  MjNull = 0;       //用于校验
+  MjPass = 1;       // 过牌
+  MjChi = 2;        // 吃
+  MjPong = 3;       // 碰
+  MjGang = 4;       // 杠 自己手上三个,杠别家一个。和MingGang效果一样,显示不同
+  MjMingGang = 5;   // 明杠(同杠)或碰后,抓牌起杠
+  MjAnGang = 6;     // 暗杠
+  MjBuHua = 7;      // 补花
+  MjTing = 8;       // 听
+  MjHu = 9;         // 胡牌
+  MjZiMo = 10;      // 自摸
 }
 //跑胡子
 enum PHZOperate {
@@ -200,9 +201,10 @@ message PlayerInfo {
 message PlayerSimpleInfo {
   int64 uid = 1;//玩家ID
   int32 headId = 2;//头像
-  int64 score = 3;//分数
-  int32 rankNo = 4;// 排名
-  string name = 5; //玩家姓名
+  int32 chairId = 3; //椅子编号
+  int64 score = 4;//分数
+  int32 rankNo = 5;// 排名
+  string name = 6; //玩家姓名
 }
 // 武将信息
 message HeroInfo {

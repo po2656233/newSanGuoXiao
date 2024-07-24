@@ -138,6 +138,7 @@ var StatusText = map[int]string{
 	User27: "暂无新邮件",
 	User28: "您今天已经签到过了",
 	User29: "加入游戏队列失败",
+	User30: "加入游戏队列成功,请耐心稍等",
 
 	Mysql01: "数据库",
 	Mysql02: "数据库登录成功",
@@ -426,6 +427,7 @@ const (
 	User27
 	User28
 	User29
+	User30
 )
 const (
 	_ = 20000 + iota //游戏清场

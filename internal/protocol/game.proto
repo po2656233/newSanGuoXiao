@@ -15,23 +15,22 @@ import "baseinfo.proto";
 message EnterGameReq {
   int64 roomID = 1;                 // 房间ID 注: =0时,为系统房
   int64 tableID = 2;                // 牌桌标识
-  int32 chairID = 3;                // 椅子编号(可选) 注: =0时,将由系统分配.
 }
 message EnterGameResp {
   int64 roomID = 1;                 // 房间ID 注: =0时,为系统房
   int64 tableID = 2;                // 牌桌标识
-  int32 chairID = 3;                // 椅子编号(不满足req的此项时,将由系统分配,并返回提示)
+  int32 chairID = 3;                // 椅子编号
   PlayerSimpleInfo userInfo = 4;    // 玩家信息
 }
 //加入游戏准备队列
 message JoinGameReadyQueueReq {
   int64 roomID = 1;                 // 房间ID 注: =0时,为系统房
-  int64 gameID = 2;                    // 游戏ID
+  int64 gameID = 2;                 // 游戏ID
 }
 message JoinGameReadyQueueResp {
-  int64 uid = 1;
-  int64 roomID = 2;                 // 房间ID 注: =0时,为系统房
-  int64 gameID = 3;                    // 游戏ID
+  int64 roomID = 1;                 // 房间ID 注: =0时,为系统房
+  int64 tableID = 2;                // 牌桌信息
+  repeated PlayerSimpleInfo playerList = 3;    // 玩家信息
 }
 //入场协议 对战类 [EnterXXXGameResp]
 //受游戏本身特性影响,PlayerInfo有本地化需求

@@ -236,8 +236,8 @@ enum Fan_t {
   FanSansesanbugao= 50;     //三色三步高
   FanWumenqi= 51;           //五门齐
   FanQuanqiuren= 52;        //全求人
-  FANShuangangang=53 ;      //双暗杠
-  FANShuangjianke=54 ;      //双箭刻
+  FANShuangangang= 53;      //双暗杠
+  FANShuangjianke= 54;      //双箭刻
   //========4番========
   FanQuandaiyao= 55;        //全带幺
   FanBuqiuren= 56;          //不求人
@@ -255,7 +255,7 @@ enum Fan_t {
   FanAngang= 67;            //暗杠
   FanDuanyao= 68;           //断幺
   //========1番========
-  FANYibangao=69 ;          //一般高
+  FANYibangao= 69;          //一般高
   FanXixiangfeng= 70;       //喜相逢
   FanLianliu= 71;           //连六
   FanLaoshaofu= 72;         //老少副

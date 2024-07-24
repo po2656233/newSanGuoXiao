@@ -144,12 +144,7 @@ func join(args []interface{}) {
 			return
 		}
 	}
-
-	mgr.GetClientMgr().SendData(agent, &protoMsg.JoinGameReadyQueueResp{
-		RoomID: m.RoomID,
-		Uid:    uid,
-		GameID: m.GameID,
-	})
+	agent.SendResult(SUCCESS, StatusText[User30])
 }
 
 // 退出游戏

@@ -93,7 +93,7 @@ func (self *ChineseChess) Scene(args []interface{}) {
 		})
 	case protoMsg.GameScene_Opening: // 开奖
 		mgr.GetClientMgr().SendData(agent, &protoMsg.ChineseChessStateOpenResp{
-			Times:  getTimeInfo(category.YamlObj.ChineseChess.OverTime),
+			Times:  getTimeInfo(category.YamlObj.ChineseChess.OpenTime),
 			WinUid: self.winUid,
 		})
 	case protoMsg.GameScene_Over: // 结算
@@ -109,9 +109,32 @@ func (self *ChineseChess) Scene(args []interface{}) {
 	}
 }
 
+// Ready 准备
+func (self *ChineseChess) Ready(args []interface{}) {
+	person, ok := args[0].(*mgr.Player)
+	if !ok || person == nil {
+		return
+	}
+	simpleInfo := &protoMsg.PlayerSimpleInfo{
+		Uid:     person.UserID,
+		HeadId:  person.FaceID,
+		ChairId: person.InChairId,
+		Score:   person.Gold,
+		RankNo:  person.Ranking,
+		Name:    person.Name,
+	}
+	if self.redCamp == nil {
+		self.redCamp = simpleInfo
+	} else if self.blackCamp == nil {
+		self.blackCamp = simpleInfo
+	}
+}
+
 // Start 开始
 func (self *ChineseChess) Start(args []interface{}) {
-
+	if self.blackCamp == nil || self.redCamp == nil {
+		return
+	}
 }
 
 // Playing 结 算
@@ -135,6 +158,33 @@ func (self *ChineseChess) UpdateInfo(args []interface{}) bool {
 func (self *ChineseChess) SuperControl(args []interface{}) bool {
 
 	return true
+}
+
+// /////////////////////////[定时器事件]//////////////////////////////////////////
+func (self *ChineseChess) onStart() {
+	self.ChangeState(protoMsg.GameScene_Start)
+	time.AfterFunc(time.Duration(category.YamlObj.ChineseChess.Duration.StartTime)*time.Second, self.onSetTime)
+
+	// 开始状态
+	//m := self.permitHost() //反馈定庄信息
+	//GlobalSender.NotifyOthers(self.PlayerList, MainGameState, protoMsg.GameScene_Start, m)
+	GlobalSender.NotifyOthers(self.PlayerList, &protoMsg.BaccaratStateStartResp{
+		Times: &protoMsg.TimeInfo{
+			TimeStamp: self.TimeStamp,
+			OutTime:   0,
+			WaitTime:  self.Config.Baccarat.Duration.StartTime,
+			TotalTime: self.Config.Baccarat.Duration.StartTime,
+		},
+		Inning: self.InningInfo.Number,
+	})
+}
+
+func (self *ChineseChess) onSetTime() {
+	self.ChangeState(protoMsg.GameScene_SetTing)
+}
+
+func (self *ChineseChess) onPlay() {
+	self.ChangeState(protoMsg.GameScene_Start)
 }
 
 // ///////////////////////[初始化]///////////////////////////////////

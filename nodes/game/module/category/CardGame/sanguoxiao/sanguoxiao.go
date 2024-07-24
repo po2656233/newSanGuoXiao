@@ -118,6 +118,11 @@ func (self *SanguoxiaoGame) Scene(args []interface{}) {
 
 }
 
+// Ready 准备
+func (self *SanguoxiaoGame) Ready(args []interface{}) {
+
+}
+
 // Start 开 始 检测玩家是否
 func (self *SanguoxiaoGame) Start(args []interface{}) {
 

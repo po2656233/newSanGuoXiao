@@ -2388,9 +2388,10 @@ proto.pb.PlayerSimpleInfo.toObject = function(includeInstance, msg) {
   var obj = {
     uid: jspb.Message.getFieldWithDefault(msg, 1, 0),
     headid: jspb.Message.getFieldWithDefault(msg, 2, 0),
-    score: jspb.Message.getFieldWithDefault(msg, 3, 0),
-    rankno: jspb.Message.getFieldWithDefault(msg, 4, 0),
-    name: jspb.Message.getFieldWithDefault(msg, 5, "")
+    chairid: jspb.Message.getFieldWithDefault(msg, 3, 0),
+    score: jspb.Message.getFieldWithDefault(msg, 4, 0),
+    rankno: jspb.Message.getFieldWithDefault(msg, 5, 0),
+    name: jspb.Message.getFieldWithDefault(msg, 6, "")
   };
 
   if (includeInstance) {
@@ -2436,14 +2437,18 @@ proto.pb.PlayerSimpleInfo.deserializeBinaryFromReader = function(msg, reader) {
       msg.setHeadid(value);
       break;
     case 3:
+      var value = /** @type {number} */ (reader.readInt32());
+      msg.setChairid(value);
+      break;
+    case 4:
       var value = /** @type {number} */ (reader.readInt64());
       msg.setScore(value);
       break;
-    case 4:
+    case 5:
       var value = /** @type {number} */ (reader.readInt32());
       msg.setRankno(value);
       break;
-    case 5:
+    case 6:
       var value = /** @type {string} */ (reader.readString());
       msg.setName(value);
       break;
@@ -2490,24 +2495,31 @@ proto.pb.PlayerSimpleInfo.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
+  f = message.getChairid();
+  if (f !== 0) {
+    writer.writeInt32(
+      3,
+      f
+    );
+  }
   f = message.getScore();
   if (f !== 0) {
     writer.writeInt64(
-      3,
+      4,
       f
     );
   }
   f = message.getRankno();
   if (f !== 0) {
     writer.writeInt32(
-      4,
+      5,
       f
     );
   }
   f = message.getName();
   if (f.length > 0) {
     writer.writeString(
-      5,
+      6,
       f
     );
   }
@@ -2545,47 +2557,62 @@ proto.pb.PlayerSimpleInfo.prototype.setHeadid = function(value) {
 
 
 /**
- * optional int64 score = 3;
+ * optional int32 chairId = 3;
  * @return {number}
  */
-proto.pb.PlayerSimpleInfo.prototype.getScore = function() {
+proto.pb.PlayerSimpleInfo.prototype.getChairid = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
 };
 
 
 /** @param {number} value */
-proto.pb.PlayerSimpleInfo.prototype.setScore = function(value) {
+proto.pb.PlayerSimpleInfo.prototype.setChairid = function(value) {
   jspb.Message.setProto3IntField(this, 3, value);
 };
 
 
 /**
- * optional int32 rankNo = 4;
+ * optional int64 score = 4;
  * @return {number}
  */
-proto.pb.PlayerSimpleInfo.prototype.getRankno = function() {
+proto.pb.PlayerSimpleInfo.prototype.getScore = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 4, 0));
 };
 
 
 /** @param {number} value */
-proto.pb.PlayerSimpleInfo.prototype.setRankno = function(value) {
+proto.pb.PlayerSimpleInfo.prototype.setScore = function(value) {
   jspb.Message.setProto3IntField(this, 4, value);
 };
 
 
 /**
- * optional string name = 5;
+ * optional int32 rankNo = 5;
+ * @return {number}
+ */
+proto.pb.PlayerSimpleInfo.prototype.getRankno = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 5, 0));
+};
+
+
+/** @param {number} value */
+proto.pb.PlayerSimpleInfo.prototype.setRankno = function(value) {
+  jspb.Message.setProto3IntField(this, 5, value);
+};
+
+
+/**
+ * optional string name = 6;
  * @return {string}
  */
 proto.pb.PlayerSimpleInfo.prototype.getName = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 5, ""));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 6, ""));
 };
 
 
 /** @param {string} value */
 proto.pb.PlayerSimpleInfo.prototype.setName = function(value) {
-  jspb.Message.setProto3StringField(this, 5, value);
+  jspb.Message.setProto3StringField(this, 6, value);
 };
 
 
@@ -8600,9 +8627,9 @@ proto.pb.PlayerState = {
   PLAYERTING: 18,
   PLAYERHU: 19,
   PLAYERZIMO: 20,
-  PLAYERTRUSTEE: 97,
-  PLAYERGIVEUP: 98,
-  PLAYERSTANDUP: 99
+  PLAYERTRUSTEE: 21,
+  PLAYERGIVEUP: 22,
+  PLAYERSTANDUP: 23
 };
 
 /**
@@ -8623,19 +8650,20 @@ proto.pb.GameState = {
 proto.pb.GameScene = {
   FREE: 0,
   START: 1,
-  CALL: 2,
-  DECIDE: 3,
-  PLAYING: 4,
-  OPENING: 5,
-  OVER: 6,
-  CLOSING: 7,
-  SITDIRECT: 8,
-  ROLLDICE: 9,
-  WAITOPERATE: 10,
-  CHANGETHREE: 11,
-  DINGQUE: 12,
-  CHECKTING: 13,
-  CHECKHUAZHU: 14
+  SETTING: 2,
+  CALL: 3,
+  DECIDE: 4,
+  PLAYING: 5,
+  OPENING: 6,
+  OVER: 7,
+  CLOSING: 8,
+  SITDIRECT: 9,
+  ROLLDICE: 10,
+  WAITOPERATE: 11,
+  CHANGETHREE: 12,
+  DINGQUE: 13,
+  CHECKTING: 14,
+  CHECKHUAZHU: 15
 };
 
 /**
@@ -8657,17 +8685,17 @@ proto.pb.Direct = {
  * @enum {number}
  */
 proto.pb.MJOperate = {
-  NULL: 0,
-  PASS: 1,
-  CHI: 2,
-  PONG: 3,
-  GANG: 4,
-  MINGGANG: 5,
-  ANGANG: 6,
-  BUHUA: 7,
-  TING: 8,
-  HU: 9,
-  ZIMO: 10
+  MJNULL: 0,
+  MJPASS: 1,
+  MJCHI: 2,
+  MJPONG: 3,
+  MJGANG: 4,
+  MJMINGGANG: 5,
+  MJANGANG: 6,
+  MJBUHUA: 7,
+  MJTING: 8,
+  MJHU: 9,
+  MJZIMO: 10
 };
 
 /**

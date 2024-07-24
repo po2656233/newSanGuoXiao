@@ -1,6 +1,7 @@
 package manger
 
 import (
+	log "github.com/po2656233/superplace/logger"
 	"strings"
 	protoMsg "superman/internal/protocol/gofile"
 	"superman/nodes/leaf/jettengame/gamedata/goclib/util"
@@ -11,6 +12,7 @@ import (
 // IGameOperate 子游戏接口
 type IGameOperate interface {
 	Scene(args []interface{})             //场 景
+	Ready(args []interface{})             //准 备
 	Start(args []interface{})             //开 始
 	Playing(args []interface{})           //游 戏(下分|下注)
 	Over(args []interface{})              //结 算
@@ -69,6 +71,7 @@ type Game struct {
 	RunCount   int32 // 运行次数
 	Inning     string
 	TimeStamp  int64 // 当前状态时刻的时间戳
+	PlayerList []int64
 }
 
 type GameMgr struct {
@@ -105,16 +108,24 @@ func (gmr *GameMgr) GetGame(gid int64) *protoMsg.GameInfo {
 	return val.(*protoMsg.GameInfo)
 }
 
+///////////////////////////GAME//////////////////////////////////////////////////////
+
 // Reset 重置信息
 func (g *Game) Reset() bool {
 	g.Inning = strings.ToUpper(util.Md5Sum(g.Name + time.Now().String()))
 	return true
 }
 
-// Ready 准备
-func (g *Game) Ready() bool {
+// ChangeState 改变游戏状态
+func (self *Game) ChangeState(state protoMsg.GameScene) {
+	self.Scene = state
+	self.TimeStamp = time.Now().Unix()
+	log.Debugf("[%v:%v]   \t当前状态:%v ", self.Name, self.Tid, protoMsg.GameScene_name[int32(self.Scene)])
+}
 
-	return true
+// Ready 准备
+func (g *Game) Ready(args []interface{}) {
+
 }
 
 // Start 开始

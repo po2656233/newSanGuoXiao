@@ -29,14 +29,15 @@ def deal(s):
     m2 = ';'
     patN = re.compile(m1 + '(.*?)' + m2)
     data = s.group()
+    
     resultN = patN.findall(str(data))
     if 0 == len(resultN):
         return data
-    str1 = resultN[0].replace(' ', resultN[0])
-    if int(str1) == 0:
-        return data
     global number
     number = 0
+    str1 = resultN[0].replace(' ', resultN[0])
+    if int(str1) == 0:
+        number = -1
     word = re.sub(patN, dealSub, str(data))
     return word
 

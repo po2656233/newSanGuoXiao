@@ -407,7 +407,7 @@ func (x *MahjongKeZi) GetCode() MJOperate {
 	if x != nil {
 		return x.Code
 	}
-	return MJOperate_NULL
+	return MJOperate_MjNull
 }
 
 func (x *MahjongKeZi) GetByUid() int64 {
@@ -464,7 +464,7 @@ func (x *MahjongHint) GetCode() MJOperate {
 	if x != nil {
 		return x.Code
 	}
-	return MJOperate_NULL
+	return MJOperate_MjNull
 }
 
 func (x *MahjongHint) GetCards() []int32 {
@@ -1679,7 +1679,7 @@ func (x *MahjongOperateReq) GetCode() MJOperate {
 	if x != nil {
 		return x.Code
 	}
-	return MJOperate_NULL
+	return MJOperate_MjNull
 }
 
 func (x *MahjongOperateReq) GetCards() []int32 {
@@ -1742,7 +1742,7 @@ func (x *MahjongOperateResp) GetCode() MJOperate {
 	if x != nil {
 		return x.Code
 	}
-	return MJOperate_NULL
+	return MJOperate_MjNull
 }
 
 func (x *MahjongOperateResp) GetCards() []int32 {

@@ -159,7 +159,7 @@ func (itself *Player) Enter(args []interface{}) { //入场
 
 // JoinQueue 加入
 func (itself *Player) JoinQueue() {
-	itself.State = protoMsg.PlayerState_PlayerStandUp
+	itself.State = protoMsg.PlayerState_PlayerWaiTing
 }
 func (itself *Player) Exit() { //退出
 	if itself.GameHandle != nil && itself.GameHandle.UpdateInfo([]interface{}{protoMsg.PlayerState_PlayerStandUp, itself.UserID}) {
