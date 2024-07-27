@@ -56,6 +56,12 @@ type MjXLCHDuration struct {
 	HuaZhuTime  int32 `yaml:"huazhu"`
 }
 
+type ChineseChessDuration struct {
+	Duration
+	SetTime     int32 `yaml:"settime"`
+	ConfirmTime int32 `yaml:"confirm"`
+}
+
 type ConfSetting struct {
 	//---------筹码-------------
 	Chips struct {
@@ -200,10 +206,10 @@ type ConfSetting struct {
 		Col      int32 `yaml:"col"`
 		Row      int32 `yaml:"row"`
 	} ` yaml:"SanGuoXiao"`
-	// 三国消
+	// 象棋
 	ChineseChess struct {
-		Duration ` yaml:"duration"`
-		Col      int32 `yaml:"col"`
-		Row      int32 `yaml:"row"`
+		ChineseChessDuration ` yaml:"duration"`
+		Col                  int32 `yaml:"col"`
+		Row                  int32 `yaml:"row"`
 	} ` yaml:"ChineseChess"`
 }

@@ -3,7 +3,9 @@ package manger
 import (
 	log "github.com/po2656233/superplace/logger"
 	"strings"
+	. "superman/internal/constant"
 	protoMsg "superman/internal/protocol/gofile"
+	"superman/internal/utils"
 	"superman/nodes/leaf/jettengame/gamedata/goclib/util"
 	"sync"
 	"time"
@@ -12,11 +14,10 @@ import (
 // IGameOperate 子游戏接口
 type IGameOperate interface {
 	Scene(args []interface{})             //场 景
-	Ready(args []interface{})             //准 备
 	Start(args []interface{})             //开 始
 	Playing(args []interface{})           //游 戏(下分|下注)
 	Over(args []interface{})              //结 算
-	UpdateInfo(args []interface{}) bool   //更新信息
+	UpdateInfo(args []interface{}) bool   //更新信息 如玩家进入或离开
 	SuperControl(args []interface{}) bool //超级控制 在检测到没真实玩家时,且处于空闲状态时,自动关闭
 }
 
@@ -44,8 +45,9 @@ type IDevice interface {
 	Close() bool              //关闭
 }
 
-// NewGameCallback 实例回调(根据桌子号创建游戏)
-type NewGameCallback func(gid, tid int64) IGameOperate
+// NewGameFunc 实例回调(根据桌子号创建游戏)
+type NewGameFunc func(gid, tid int64) IGameOperate
+type NewSingleGameFunc func(gid, tid int64) IGameOperate
 
 type CalculateSQL func(info CalculateInfo) (nowMoney, factDeduct int64, isOK bool)
 
@@ -64,14 +66,14 @@ type CalculateInfo struct {
 }
 type Game struct {
 	*protoMsg.GameInfo
-	IsStart    bool  // 第一次启动
-	IsClear    bool  // 是否清场
-	Tid        int64 // 当前绑定的牌桌号
-	ReadyCount int32 // 已准备人数
-	RunCount   int32 // 运行次数
-	Inning     string
-	TimeStamp  int64 // 当前状态时刻的时间戳
-	PlayerList []int64
+	IsStart    bool    // 第一次启动
+	IsClear    bool    // 是否清场
+	ReadyCount int32   // 已准备人数
+	RunCount   int32   // 运行次数
+	Inning     string  // 牌局号
+	TimeStamp  int64   // 当前状态时刻的时间戳
+	PlayIDList []int64 // 玩家列表
+	lk         sync.RWMutex
 }
 
 type GameMgr struct {
@@ -112,40 +114,108 @@ func (gmr *GameMgr) GetGame(gid int64) *protoMsg.GameInfo {
 
 // Reset 重置信息
 func (g *Game) Reset() bool {
+	g.RunCount++
+	g.ReadyCount = 0
+	g.TimeStamp = time.Now().Unix()
 	g.Inning = strings.ToUpper(util.Md5Sum(g.Name + time.Now().String()))
 	return true
 }
 
 // ChangeState 改变游戏状态
 func (self *Game) ChangeState(state protoMsg.GameScene) {
-	self.Scene = state
+	self.GameInfo.Scene = state
 	self.TimeStamp = time.Now().Unix()
-	log.Debugf("[%v:%v]   \t当前状态:%v ", self.Name, self.Tid, protoMsg.GameScene_name[int32(self.Scene)])
+	log.Debugf("[%v:%v]   \t当前状态:%v ", self.Name, self.Id, protoMsg.GameScene_name[int32(self.GameInfo.Scene)])
 }
 
 // Ready 准备
 func (g *Game) Ready(args []interface{}) {
+	uid := args[0].(int64)
+	if g.MaxPlayer != Unlimited && g.MaxPlayer < int32(len(g.PlayIDList)) {
+		return
+	}
+	g.PlayIDList = append(g.PlayIDList, uid)
+	g.PlayIDList = utils.Unique(g.PlayIDList)
+}
+
+// Scene 游戏场景
+func (g *Game) Scene(args []interface{}) {
+	_ = args
+}
+
+// Start 开 始
+func (g *Game) Start(args []interface{}) {
+	_ = args
+	if g.IsStart {
+		return
+	}
+	g.IsStart = true
 
 }
 
-// Start 开始
-func (tb *Game) Start(time int64) bool {
+// Playing 游 戏(下分|下注)
+func (g *Game) Playing(args []interface{}) {
+	_ = args
+}
+
+// Over 结 算
+func (g *Game) Over(args []interface{}) {
+	_ = args
+}
+
+// UpdateInfo 更新信息 如玩家进入或离开
+func (g *Game) UpdateInfo(args []interface{}) bool {
+	if len(args) < 2 {
+		return false
+	}
+	flag, ok := args[0].(protoMsg.PlayerState)
+	uid, ok1 := args[1].(int64)
+	if !ok || !ok1 {
+		return false
+	}
+
+	switch flag {
+	case protoMsg.PlayerState_PlayerSitDown: //新增玩家
+		{
+			g.lk.Lock()
+			g.PlayIDList = append(g.PlayIDList, uid)
+			g.lk.Unlock()
+		}
+	case protoMsg.PlayerState_PlayerStandUp: //删除玩家
+		{
+			scene := g.GameInfo.Scene
+			// 空闲  结算 关闭 除了这三种场景，一般不允许玩家离开
+			if scene != protoMsg.GameScene_Free && scene != protoMsg.GameScene_Over && scene != protoMsg.GameScene_Closing {
+				return false
+			}
+			g.lk.Lock()
+			g.PlayIDList = utils.RemoveValue(g.PlayIDList, uid)
+			g.lk.Unlock()
+		}
+	default:
+		return false
+	}
 
 	return true
 }
 
-// Maintain 维护
-func (tb *Game) Maintain(time int64) bool {
-	return true
-}
-
-// Clear 清桌
-func (tb *Game) Clear(time int64) bool {
-	return true
-}
-
-// Close 关闭
-func (tb *Game) Close() bool {
+// SuperControl 超级控制 在检测到没真实玩家时,且处于空闲状态时,自动关闭
+func (g *Game) SuperControl(args []interface{}) bool {
+	if len(args) == 0 {
+		return false
+	}
+	flag, ok := args[0].(int32)
+	if !ok {
+		return false
+	}
+	switch protoMsg.GameScene(flag) {
+	case protoMsg.GameScene_Closing:
+		{
+			// 移除所有玩家
+		}
+	default:
+		return false
+	}
 	return true
 }
 

@@ -14,7 +14,7 @@ const replaceWith = '';
 //--------------------------------------------------------------
 var protoDir = "../internal/protocol"
 //server begin
-var outServerMsg =  "../nodes/leaf/jettengame/msg/msg.go";
+var outServerMsg =  "../nodes/game/msg/msg.go";
 var outRouter = "../nodes/leaf/jettengame/gate/router.go";
 
 var all_protos = {};
@@ -114,19 +114,22 @@ function genServer() {
     msgStr += "package msg\n\n"
     msgStr += "import (\n"
     msgStr += '    "google.golang.org/protobuf/proto"\n'
-    msgStr += '    "superman/nodes/leaf/jettengame/base"\n'
-    msgStr += '    "superman/nodes/leaf/jettengame/msg/process"\n'
+    msgStr += '    "superman/internal/utils"\n'
+    msgStr += '    "superman/nodes/game/msg/process"\n'
     msgStr += '    protoMsg "superman/internal/protocol/gofile"\n'
     msgStr += ')\n\n'
 	msgStr += "// 使用默认的 JSON 消息处理器（默认还提供了 protobuf 消息处理器）\n"
 	msgStr += "// var ProcessorJson = json.NewProcessor()\n"
 	msgStr += "//var ProcessorProto = protobuf.NewProcessor()\n\n"
-	msgStr += " var ProcessorProto = process.NewProcessor()\n\n"
+    msgStr += " var ProcessorProto = process.NewProcessor(false)\n\n"
+    msgStr += " var ServerChanRPC = process.NewServer(10000)\n\n"
+
 	msgStr += "//对外接口 【这里的注册函数并非线程安全】\n"
     msgStr += "var msgMap = make(map[uint16]string, 0)\n"
 	msgStr += "func RegisterMessage(message proto.Message) {\n"
 	msgStr += "    id, name := ProcessorProto.Register(message)\n"
-	msgStr += "    msgMap[id] = name\n"
+    msgStr += "    msgMap[id] = name\n"
+    msgStr += "    ProcessorProto.SetRouter(message, ServerChanRPC)\n"
 	msgStr += "}\n\n"
 	msgStr += "func init() {"
 
@@ -169,7 +172,7 @@ function genServer() {
     }
 
     routerStr += "}\n\n"
-	msgStr += '  \n\tbase.ToJsonFile("../../../config/leafconf/message_id.json", msgMap, "", "\\t") \n'
+	msgStr += '  \n\tutils.ToJsonFile("./../../config/leafconf/message_id.json", msgMap, "", "\\t") \n'
 	msgStr += "\tmsgMap = nil\n"
 	msgStr += "}\n"
 

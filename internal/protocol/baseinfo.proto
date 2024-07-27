@@ -73,12 +73,12 @@ enum PlayerState {
 //}
 //游戏状态
 enum GameState {
-  InitTB = 0;     //初始化
+  InitTB = 0;     //未开放
   OpenTB = 1;     //开启
   RepairTB = 2;   //维护
-  ClearTB = 3;    //清场(当前局结束后,清空所有场景信息)
-  StopTB = 4;     //停运(再次启动时，以当前局的场景信息继续运作)
-  CloseTB = 5;    //关闭
+  CloseTB = 3;    //关闭
+  ClearTB = 4;    //清场(当前局结束后,清空所有场景信息)
+  StopTB = 5;     //停运(再次启动时，以当前局的场景信息继续运作)
 }
 //游戏场景
 enum GameScene {
@@ -145,7 +145,7 @@ message UserInfo{
   int32 faceID = 5;      //头像
   int32 gender = 6;      //性别
   int32 age = 7;         //年龄
-  int32 empirice= 8;      //经验
+  int32 empirice = 8;      //经验
   int32 vip = 9;         //VIP级别
   int32 level = 10;       //级别
   int64  yuanBao = 11;      //元宝
@@ -171,7 +171,7 @@ message UserSimpleInfo{
   int32 faceID = 4;      //头像
   int32 gender = 5;      //性别
   int32 age = 6;         //年龄
-  int32 empirice= 7;      //经验
+  int32 empirice = 7;      //经验
   int32 vip = 8;         //VIP级别
   int32 level = 9;       //级别
   int64  yuanBao = 10;      //元宝
@@ -332,7 +332,7 @@ message GameInfo{
   int64 lessscore = 5;    // 底分
   GameScene scene = 6;    // 游戏场景
   GameState state = 7;    // 游戏状态
-  int32 maxCount = 8;     // 最大人数
+  int32 maxPlayer = 8;    // 最大人数 =-1时，不受限制
   string howToPlay = 9;
 }
 //游戏记录

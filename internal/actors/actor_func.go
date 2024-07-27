@@ -6,7 +6,9 @@ import (
 	clog "github.com/po2656233/superplace/logger"
 	"gorm.io/gorm"
 	"strconv"
+	. "superman/internal/constant"
 	pb "superman/internal/protocol/gofile"
+	"superman/internal/rpc"
 	sqlmodel "superman/internal/sql_model"
 	. "superman/internal/utils"
 	"time"
@@ -16,10 +18,10 @@ import (
 func (self *ActorDB) Register(req *pb.RegisterReq) (*pb.RegisterResp, error) {
 	m := req
 	identity := uuid.New().String()
-	//Password: Md5Sum(m.Password + strconv.FormatInt(int64(len(m.Password)), 10)),
 	user := sqlmodel.User{
 		Name:     m.Name,
 		Account:  m.Name,
+		Password: Md5Sum(m.Password + strconv.FormatInt(int64(len(m.Password)), 10)),
 		Passport: m.PassPortID,
 		Realname: m.RealName,
 		Phone:    m.PhoneNum,
@@ -165,7 +167,7 @@ func (self *ActorDB) GetGameList(req *pb.GetGameListReq) (*pb.GetGameListResp, e
 			Kid:       game.Kid,
 			Lessscore: game.Lessscore,
 			State:     pb.GameState(game.State),
-			MaxCount:  game.MaxPlayer,
+			MaxPlayer: game.MaxPlayer,
 			HowToPlay: game.HowToPlay,
 		})
 	}
@@ -199,11 +201,12 @@ func (self *ActorDB) CreateRoom(req *pb.CreateRoomReq) (*pb.CreateRoomResp, erro
 		maxTable = -1
 
 	}
+	req.RoomKey = Md5Sum(req.RoomKey)
 	roomId, err := self.addRoom(sqlmodel.Room{
 		Hostid:     req.HostId,
 		Level:      int32(req.Level),
 		Name:       req.Name,
-		Roomkey:    Md5Sum(req.RoomKey),
+		Roomkey:    req.RoomKey,
 		Enterscore: req.EnterScore,
 		MaxTable:   maxTable,
 		TableCount: 0,
@@ -217,12 +220,18 @@ func (self *ActorDB) CreateRoom(req *pb.CreateRoomReq) (*pb.CreateRoomResp, erro
 	if 0 == roomId || err != nil {
 		return nil, err
 	}
-	resp.HostId = req.HostId
-	resp.RoomId = roomId
-	resp.Name = req.Name
-	resp.EnterScore = req.EnterScore
-	resp.MaxCount = maxCount
-	resp.MaxTable = maxTable
+	resp.Info = &pb.RoomInfo{
+		Id:         roomId,
+		HostId:     req.HostId,
+		Level:      req.Level,
+		Name:       req.Name,
+		RoomKey:    req.RoomKey,
+		EnterScore: req.EnterScore,
+		MaxPerson:  maxCount,
+		TableCount: 0,
+		MaxTable:   maxTable,
+	}
+	rpc.SendData(self.App(), SourcePath, GameActor, NodeTypeGame, resp)
 	return resp, nil
 }
 
@@ -245,12 +254,14 @@ func (self *ActorDB) CreateTable(req *pb.CreateTableReq) (*pb.CreateTableResp, e
 	}
 	resp.Table = &pb.TableInfo{
 		Id:         tid,
+		Rid:        req.Rid,
 		Gid:        req.Gid,
 		Name:       req.Name,
 		Commission: req.Commission,
 		Taxation:   req.Taxation,
 		PlayScore:  req.Playscore,
 	}
+	rpc.SendData(self.App(), SourcePath, GameActor, NodeTypeGame, resp)
 	return resp, err
 }
 
@@ -268,10 +279,12 @@ func (self *ActorDB) DeleteTable(req *pb.DeleteTableReq) (*pb.DeleteTableResp, e
 	err := self.delTable(req.HostId, req.Tid)
 	resp.Tid = req.Tid
 	resp.Rid = rid
+	rpc.SendData(self.App(), SourcePath, GameActor, NodeTypeGame, resp)
 	return resp, err
 }
 
 // /////////////////////////////////////////////////////////////////////////////////////
+
 func (self *ActorDB) GetTable(req *pb.GetTableReq) (*pb.GetTableResp, error) {
 	resp := &pb.GetTableResp{}
 	info, err := self.checkTable(req.Tid)

@@ -9,71 +9,81 @@ import (
 	"unsafe"
 )
 
-// CopyInsert 插入某元素
-func CopyInsert(slice interface{}, pos int, value interface{}) interface{} {
-	v := reflect.ValueOf(slice)
-	if v.Kind() != reflect.Slice {
-		return nil
-	}
-	v = reflect.Append(v, reflect.ValueOf(value))
-	reflect.Copy(v.Slice(pos+1, v.Len()), v.Slice(pos, v.Len()))
-	v.Index(pos).Set(reflect.ValueOf(value))
-	return v.Interface()
-}
+//// CopyInsert 插入某元素
+//func CopyInsert(slice interface{}, pos int, value interface{}) interface{} {
+//	v := reflect.ValueOf(slice)
+//	if v.Kind() != reflect.Slice {
+//		return nil
+//	}
+//	v = reflect.Append(v, reflect.ValueOf(value))
+//	reflect.Copy(v.Slice(pos+1, v.Len()), v.Slice(pos, v.Len()))
+//	v.Index(pos).Set(reflect.ValueOf(value))
+//	return v.Interface()
+//}
 
-// DeleteKey 删除key 慎用
-func DeleteKey(slice interface{}, index int) interface{} {
-	//判断是否是切片类型
-	v := reflect.ValueOf(slice)
-	if v.Kind() != reflect.Slice {
-		return nil
-	}
-	//参数检查
-	if v.Len() == 0 || index < 0 || index > v.Len()-1 {
-		return nil
-	}
-	return reflect.AppendSlice(v.Slice(0, index), v.Slice(index+1, v.Len())).Interface()
-}
-
-// DeleteValue 删除值
-func DeleteValue(slice interface{}, value interface{}) interface{} {
-	//判断是否是切片类型
-	v := reflect.ValueOf(slice)
-	if v.Kind() != reflect.Slice {
-		return nil
-	}
-	for i := 0; i < v.Len(); i++ {
-		if reflect.ValueOf(value).IsValid() {
-			if v.Index(i).Kind() == reflect.ValueOf(value).Kind() {
-				if reflect.DeepEqual(v.Index(i).Interface(), value) {
-					return reflect.AppendSlice(v.Slice(0, i), v.Slice(i+1, v.Len())).Interface()
-				}
-			}
+// Contains 检查切片中是否包含指定值
+func Contains[T comparable](s []T, value T) bool {
+	for _, v := range s {
+		if v == value {
+			return true
 		}
 	}
-	return slice
+	return false
 }
 
-// SliceRemoveDuplicate 删除重复的数值
-func SliceRemoveDuplicate(data interface{}) interface{} {
-	inArr := reflect.ValueOf(data)
-	if inArr.Kind() != reflect.Slice && inArr.Kind() != reflect.Array {
-		return data
+// ContainsByField 检查切片中是否包含具有指定字段值的元素
+func ContainsByField(slice interface{}, fieldName string, value interface{}) bool {
+	sliceValue := reflect.ValueOf(slice)
+	if sliceValue.Kind() != reflect.Slice {
+		panic("input is not a slice")
 	}
 
-	existMap := make(map[interface{}]bool)
-	outArr := reflect.MakeSlice(inArr.Type(), 0, inArr.Len())
-
-	for i := 0; i < inArr.Len(); i++ {
-		iVal := inArr.Index(i)
-
-		if _, ok := existMap[iVal.Interface()]; !ok {
-			outArr = reflect.Append(outArr, inArr.Index(i))
-			existMap[iVal.Interface()] = true
+	for i := 0; i < sliceValue.Len(); i++ {
+		elem := sliceValue.Index(i)
+		if elem.Kind() == reflect.Ptr {
+			elem = elem.Elem()
+		}
+		field := elem.FieldByName(fieldName)
+		if field.IsValid() && reflect.DeepEqual(field.Interface(), value) {
+			return true
 		}
 	}
 
-	return outArr.Interface()
+	return false
+}
+
+// Unique 删除重复的数值
+func Unique[T comparable](s []T) []T {
+	uniqueMap := make(map[T]bool)
+	var uniqueSlice []T
+	for _, elem := range s {
+		if _, found := uniqueMap[elem]; !found {
+			uniqueMap[elem] = true
+			uniqueSlice = append(uniqueSlice, elem)
+		}
+	}
+	return uniqueSlice
+}
+
+// RemoveElement 删除切片中的指定元素
+func RemoveElement[T comparable](s []T, elem T) []T {
+	for i, e := range s {
+		if e == elem {
+			return append(s[:i], s[i+1:]...)
+		}
+	}
+	return s
+}
+
+// RemoveValue 删除切片中所有等于指定值的元素
+func RemoveValue[T comparable](s []T, value T) []T {
+	var result []T
+	for _, e := range s {
+		if e != value {
+			result = append(result, e)
+		}
+	}
+	return result
 }
 
 func BytesToRune(byteArray []byte) []rune {

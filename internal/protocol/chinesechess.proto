@@ -47,11 +47,18 @@ message ChineseChessSceneResp{
 }
 // 状态-玩家操作
 // 等待玩家进入
-message ChineseChessStateFreeResp {
+// 开始
+message ChineseChessStateStartResp {
   TimeInfo times = 1;
+  int64 uid = 2;         // 当前操作方
 }
 // 设置时长
-message ChineseChessStateStartResp {
+message ChineseChessStateSetResp {
+  TimeInfo times = 1;
+  int64 uid = 2;         // 当前操作方
+}
+// 等待确认
+message ChineseChessStateConfirmResp {
   TimeInfo times = 1;
   int64 uid = 2;         // 当前操作方
 }

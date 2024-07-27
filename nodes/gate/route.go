@@ -68,7 +68,7 @@ func GetProtoData(msg proto.Message) ([]byte, error) {
 		return nil, err
 	}
 	pkg := bytes.NewBuffer([]byte{})
-	err = binary.Write(pkg, endian, uint32(id))
+	err = binary.Write(pkg, endian, uint16(id))
 	if err != nil {
 		return nil, err
 	}

@@ -17,6 +17,7 @@ const (
 	OpsActor   = ".ops"
 	DBActor    = ".db"
 	AccActor   = ".account"
+	GameActor  = ".game"
 )
 
 const (

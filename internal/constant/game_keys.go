@@ -5,5 +5,6 @@ const (
 	Chess         = 2
 	SanGuoXiao    = 3
 	ThreeKingdoms = 4
-	Land
+	Landlord      = 5
+	Mahjong       = 6
 )

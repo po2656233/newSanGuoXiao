@@ -7,7 +7,6 @@ import (
 	protoMsg "superman/internal/protocol/gofile"
 	"superman/internal/rpc"
 	mgr "superman/nodes/game/manger"
-	"superman/nodes/game/module/online"
 	"time"
 )
 
@@ -22,25 +21,10 @@ func enter(args []interface{}) {
 
 	person := mgr.GetPlayerMgr().Get(uid)
 	if person == nil {
-		// 获取玩家信息
-		data, errCode := rpc.SendData(agent.App(), SourcePath, DBActor, NodeTypeCenter, &protoMsg.GetUserInfoReq{Uid: uid})
-		if errCode == 0 && data != nil {
-			resp, ok := data.(*protoMsg.GetUserInfoResp)
-			if ok && resp.Info != nil {
-				person = mgr.SimpleToPlayer(resp.Info)
-				online.BindPlayer(uid, person.UserID, agent.PathString())
-				mgr.GetPlayerMgr().Append(person)
-			}
-		}
-	}
-
-	if person == nil {
 		clog.Warnf("[enter]params %+v  uid:%+v err:%s", m, uid, StatusText[User03])
 		agent.SendResultPop(FAILED, StatusText[Title004], StatusText[User03])
 		return
 	}
-	agent.SetUserData(person)
-	mgr.GetClientMgr().Append(person.UserID, agent)
 
 	// 玩家仍在游戏中
 	if person.GameHandle != nil {
@@ -97,22 +81,34 @@ func join(args []interface{}) {
 		agent.SendResultPop(FAILED, StatusText[Title001], StatusText[Room16])
 		return
 	}
+
+	// 检测游戏是否可用
+	gInfo := mgr.GetGameInfoMgr().GetGame(m.GameID)
+	if gInfo == nil {
+		agent.SendResultPop(FAILED, StatusText[Title001], StatusText[TableInfo03])
+		return
+	}
+	if gInfo.State == protoMsg.GameState_InitTB {
+		agent.SendResultPop(FAILED, StatusText[Title001], StatusText[Game16])
+		return
+	}
+	if gInfo.State == protoMsg.GameState_CloseTB {
+		agent.SendResultPop(FAILED, StatusText[Title001], StatusText[Game19])
+		return
+	}
 	// 玩家加入游戏准备列表
-	ok := room.AddWait(&mgr.WaitPlayer{Player: person, Gid: m.GameID})
-	if !ok {
+	if ok := room.AddWait(m.GameID, person); !ok {
 		clog.Warnf("[join] [GameHandle] params %+v  uid:%+v FAIL", m, uid)
 		agent.SendResultPop(FAILED, StatusText[Title001], StatusText[Login09])
 		return
 	}
 	// 检测房间的游戏是否满员
-	ok = mgr.GetRoomMgr().GetRoom(m.RoomID).CheckGameFull(m.GameID)
-	if ok {
+	if ok := mgr.GetRoomMgr().GetRoom(m.RoomID).CheckGameFull(m.GameID); ok {
 		if m.RoomID != SYSTEMID {
 			// 牌桌不足
-			agent.SendResult(FAILED, StatusText[TableInfo11])
+			agent.SendResult(FAILED, StatusText[TableInfo10])
 			return
 		}
-
 		// 系统房主动添加牌桌。 如果没有加入队列,并且是系统房,则创建牌桌
 		// 请求数据库创建牌桌
 		data, errCode := rpc.SendDataToDB(agent.App(), &protoMsg.CreateTableReq{
@@ -144,6 +140,8 @@ func join(args []interface{}) {
 			return
 		}
 	}
+
+	// 成功添加队列
 	agent.SendResult(SUCCESS, StatusText[User30])
 }
 

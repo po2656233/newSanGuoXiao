@@ -7,22 +7,22 @@ import (
 	"sync"
 )
 
-// IUserBehavior 玩家行为
-type IUserBehavior interface {
-	Enter(args []interface{})     //入场
-	Out(args []interface{})       //出场
-	Offline(args []interface{})   //离线
-	Reconnect(args []interface{}) //重入
-	Ready(args []interface{})     //准备
-	CallScore(args []interface{}) //叫分
-	Host(args []interface{})      //抢庄/地主叫分
-	SuperHost(args []interface{}) //超级抢庄
-	Look(args []interface{})      //看牌
-	Roll(args []interface{})      //摇骰子
-	GiveUp(args []interface{})    //放弃
-	Trustee(args []interface{})   //玩家托管
-	Disbanded(args []interface{}) //解散游戏(房主权限)
-}
+//// IUserBehavior 玩家行为[废弃] 由玩家状态PlayerState取代
+//type IUserBehavior interface {
+//	Enter(args []interface{})     //入场
+//	Out(args []interface{})       //出场
+//	Offline(args []interface{})   //离线
+//	Reconnect(args []interface{}) //重入
+//	Ready(args []interface{})     //准备
+//	CallScore(args []interface{}) //叫分
+//	Host(args []interface{})      //抢庄/地主叫分
+//	SuperHost(args []interface{}) //超级抢庄
+//	Look(args []interface{})      //看牌
+//	Roll(args []interface{})      //摇骰子
+//	GiveUp(args []interface{})    //放弃
+//	Trustee(args []interface{})   //玩家托管
+//	Disbanded(args []interface{}) //解散游戏(房主权限)
+//}
 
 // Player 玩家属性
 type Player struct {
@@ -157,16 +157,18 @@ func (itself *Player) Enter(args []interface{}) { //入场
 	itself.GameHandle.Scene([]interface{}{agent}) // 【进入-> 游戏场景】
 }
 
-// JoinQueue 加入
-func (itself *Player) JoinQueue() {
-	itself.State = protoMsg.PlayerState_PlayerWaiTing
-}
 func (itself *Player) Exit() { //退出
 	if itself.GameHandle != nil && itself.GameHandle.UpdateInfo([]interface{}{protoMsg.PlayerState_PlayerStandUp, itself.UserID}) {
 		itself.State = protoMsg.PlayerState_PlayerStandUp
+		if rm := GetRoomMgr().GetRoom(itself.InRooId); rm != nil {
+			if t := rm.GetTable(itself.InTableId); t != nil {
+				t.RemoveChair(itself.UserID)
+			}
+		}
+		itself.InRooId = INVALID
 		itself.InTableId = INVALID
 		itself.InChairId = INVALID
-		itself.InRooId = INVALID
+		itself.GameHandle = nil
 	}
 }
 

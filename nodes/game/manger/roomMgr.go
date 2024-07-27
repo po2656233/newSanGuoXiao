@@ -6,10 +6,10 @@ import (
 	log "github.com/po2656233/superplace/logger"
 	. "superman/internal/constant"
 	protoMsg "superman/internal/protocol/gofile"
+	"superman/internal/utils"
 	"superman/nodes/leaf/jettengame/gamedata/goclib/util"
 	"sync"
 	"sync/atomic"
-	"time"
 )
 
 // ----------房间----------------------
@@ -17,17 +17,18 @@ import (
 // Room 房间信息
 type Room struct {
 	*protoMsg.RoomInfo
-	State       uint8    // 房间状态 [0:无效] [1:Open] [2:Close] [3:Other] [4:Clear]
-	tables      []*Table // 桌子集合
-	onlineCount int32
-	waiting     []*WaitPlayer // 等待匹配的玩家队列
-	tblock      sync.RWMutex
-	wplock      sync.RWMutex
+	State         uint8    // 房间状态 [0:无效] [1:Open] [2:Close] [3:Other] [4:Clear]
+	tables        []*Table // 桌子集合
+	cancelUidList []int64
+	onlineCount   int32
+	waiting       chan Waiter // 等待匹配的玩家队列
+	tbLk          sync.RWMutex
+	cancelLk      sync.RWMutex
 }
 
-// WaitPlayer 等待玩家
-type WaitPlayer struct {
-	*Player
+// Waiter 等待玩家
+type Waiter struct {
+	Uid int64
 	Gid int64
 }
 
@@ -54,49 +55,23 @@ func GetRoomMgr() *RoomManger {
 		roomMgr = &RoomManger{
 			sync.Map{},
 		}
-		go roomMgr.CheckQueue()
 	})
 
 	return roomMgr
 }
 
-// CheckQueue 定期检查等待队列
-func (self *RoomManger) CheckQueue() {
-
-	ticker := time.NewTicker(time.Minute)
-	defer ticker.Stop()
-	for {
-		select {
-		case <-ticker.C:
-			log.Infof("正在定期检测游戏队列")
-			self.Range(func(key, value any) bool {
-				val, ok := value.(*Room)
-				if ok {
-					return true
-				}
-				// 创建一个独立的上下文用于这个Room的处理
-				ctx, cancel := context.WithCancel(context.Background())
-				// 启动协程处理Room的等待队列
-				go func(room *Room, ctx context.Context) {
-					defer cancel() // 在协程结束时取消上下文
-					room.ProcessWaitingQueue(ctx)
-				}(val, ctx)
-				return true
-			})
-		}
-	}
-}
-
 /////////////////////////////////////////[manger]////////////////////////////////////////////
 
 // AddRoom 添加房间
-func (self *RoomManger) AddRoom(info *protoMsg.RoomInfo) {
+func (self *RoomManger) AddRoom(info *protoMsg.RoomInfo) *Room {
 	val, ok := self.Load(info.Id)
 	if ok && val != nil {
 		log.Infof("[RoomManger][AddRoom]已经存在房间:%d", info.Id)
-		return
+		return val.(*Room)
 	}
-	self.Store(info.Id, Create(info))
+	rm := Create(info)
+	self.Store(info.Id, rm)
+	return rm
 }
 
 func (self *RoomManger) AddRooms(infos []*protoMsg.RoomInfo) {
@@ -121,8 +96,21 @@ func Create(info *protoMsg.RoomInfo) *Room {
 		RoomInfo: info,
 		State:    0,
 		tables:   make([]*Table, 0),
-		waiting:  make([]*WaitPlayer, 0),
+		//waiting:  make(chan Waiter, 100),
 	}
+	if rm.MaxPerson == Unlimited {
+		rm.waiting = make(chan Waiter, 1000)
+	} else {
+		rm.waiting = make(chan Waiter, rm.MaxPerson)
+	}
+	log.Infof("开启房间-游戏队列检测[%v:%v] 牌桌数:%v 最大牌桌数:%v 最大人数:%v", rm.Id, rm.Name, rm.TableCount, rm.MaxTable, rm.MaxPerson)
+	// 创建一个独立的上下文用于这个Room的处理
+	ctx, cancel := context.WithCancel(context.Background())
+	// 启动协程处理Room的等待队列
+	go func(room *Room, ctx context.Context) {
+		defer cancel() // 在协程结束时取消上下文
+		room.ProcessWaitingQueue(ctx)
+	}(rm, ctx)
 	return rm
 }
 
@@ -131,7 +119,7 @@ func getRandomTable(gid, butTid int64, tables []*Table) *Table {
 	list := make([]*Table, 0)
 	for _, table := range tables {
 		// 不能是之前桌
-		if table.Gid == gid && table.Id != butTid && table.GameHandle != nil && table.MaxSitter <= table.SitCount()+1 {
+		if table.Gid == gid && table.Id != butTid && table.GameHandle != nil && table.SitCount()+1 <= table.MaxSitter {
 			list = append(list, table)
 		}
 	}
@@ -144,9 +132,9 @@ func getRandomTable(gid, butTid int64, tables []*Table) *Table {
 }
 
 // AddTable 新增桌子(tid == gid 即桌子ID和游戏ID共用)
-func (self *Room) AddTable(table *protoMsg.TableInfo, f NewGameCallback) (*Table, error) {
-	self.tblock.Lock()
-	defer self.tblock.Unlock()
+func (self *Room) AddTable(table *protoMsg.TableInfo, f NewGameFunc) (*Table, error) {
+	self.tbLk.Lock()
+	defer self.tbLk.Unlock()
 	if self.tables == nil {
 		self.tables = make([]*Table, 0)
 	}
@@ -160,38 +148,40 @@ func (self *Room) AddTable(table *protoMsg.TableInfo, f NewGameCallback) (*Table
 	}
 	tb := &Table{
 		TableInfo:  table,
-		GameHandle: f(table.Id, table.Gid), //创建游戏句柄
-		sitters:    make([]*Chair, 0),
+		GameHandle: f(table.Gid, table.Id), //创建游戏句柄
+		sitters:    make([]IChair, 0),
 		lookers:    make([]*Player, 0),
 		RWMutex:    sync.RWMutex{},
 	}
 	if tb.GameHandle == nil {
-		return nil, fmt.Errorf("%s 游戏ID:%d", StatusText[TableInfo03], table.Gid)
+		return nil, fmt.Errorf("%s 房间ID:%d 牌桌ID:%d(暂不可用) 游戏ID:%d", StatusText[Room17], table.Rid, table.Id, table.Gid)
 	}
 	self.tables = append(self.tables, tb)
 	return tb, nil
 }
 
 // AddWait 添加玩家到等待列表
-func (self *Room) AddWait(person *WaitPlayer) bool {
-	self.wplock.Lock()
-	defer self.wplock.Unlock()
+func (self *Room) AddWait(gid int64, person *Player) bool {
 	if person.GameHandle != nil {
 		return false
 	}
-	self.waiting = append(self.waiting, person)
+	person.State = protoMsg.PlayerState_PlayerWaiting
+	self.waiting <- Waiter{
+		Gid: gid,
+		Uid: person.UserID,
+	}
 	return true
 }
 
-// RemoveWaits 移除等待列表
-func (self *Room) RemoveWaits() bool {
-	self.wplock.Lock()
-	defer self.wplock.Unlock()
-	for i, player := range self.waiting {
-		if player == nil || player.GameHandle != nil {
-			self.waiting = append(self.waiting[:i], self.waiting[i+1:]...)
-		}
+// CancelWait 玩家取消等待
+func (self *Room) CancelWait(person *Player) bool {
+	if person.GameHandle != nil {
+		return false
 	}
+	person.State = protoMsg.PlayerState_PlayerGiveUp
+	self.cancelLk.Lock()
+	self.cancelUidList = utils.RemoveValue(self.cancelUidList, person.UserID)
+	self.cancelLk.Unlock()
 	return true
 }
 
@@ -201,32 +191,27 @@ func (self *Room) ProcessWaitingQueue(ctx context.Context) {
 	if err := ctx.Err(); err != nil {
 		return
 	}
-	self.wplock.Lock()
-	defer self.wplock.Unlock()
-	// 检查等待队列中的玩家，并尝试将他们加入房间
-	for len(self.waiting) > 0 {
-		waiter := self.waiting[0]       // 获取队列中的第一个玩家
-		self.waiting = self.waiting[1:] // 移除队列中的第一个玩家
-
+	for waiter := range self.waiting {
 		// 尝试加入房间，如果失败则重新加入队列
-		tb := getRandomTable(waiter.Gid, Unlimited, self.tables) // 不限制
-		if tb != nil {
-			err := tb.AddChair(waiter.Player)
-			if err != nil {
-				self.waiting = append(self.waiting, waiter)
-				continue
+		if tb := getRandomTable(waiter.Gid, Unlimited, self.tables); tb != nil {
+			if player := GetPlayerMgr().Get(waiter.Uid); player != nil {
+				err := tb.AddChair(player)
+				if err != nil {
+					self.waiting <- waiter
+					continue
+				}
+				log.Infof("[ProcessWaitingQueue]玩家:(%d) [gid:%d]配桌成功  [rid:%v][tid:%d] [chair:%d] ", waiter.Uid, waiter.Gid, self.Id, tb.Id, player.InChairId)
 			}
-			log.Infof("[room][ProcessWaitingQueue]玩家:(%d) 配桌成功 rid:%d  gid:%d ", waiter.UserID, self.Id, waiter.Gid)
 		} else {
-			self.waiting = append(self.waiting, waiter)
+			self.waiting <- waiter
 		}
 	}
 }
 
 // Join 加入
 func (self *Room) Join(tid int64, person *Player) *Table {
-	self.tblock.RLock()
-	defer self.tblock.RUnlock()
+	self.tbLk.RLock()
+	defer self.tbLk.RUnlock()
 	// 玩家还在其他桌且该桌的游戏还没结束
 	if 0 < person.InTableId {
 		return nil
@@ -248,8 +233,8 @@ func (self *Room) Join(tid int64, person *Player) *Table {
 }
 
 func (self *Room) Match(gid int64, person *Player, isChange bool) *Table {
-	self.tblock.RLock()
-	defer self.tblock.RUnlock()
+	self.tbLk.RLock()
+	defer self.tbLk.RUnlock()
 	strOp := "配桌"
 	tid := int64(Unlimited)
 	if isChange {
@@ -272,25 +257,25 @@ func (self *Room) Match(gid int64, person *Player, isChange bool) *Table {
 
 // Leave 离开房间
 func (self *Room) Leave(person *Player) {
-	self.tblock.Lock()
-	defer self.tblock.Unlock()
 	var tb *Table
+	self.tbLk.Lock()
 	for _, table := range self.tables {
 		if table.Id == person.InTableId {
 			tb = table
 			break
 		}
 	}
+	self.tbLk.Unlock()
 	if tb != nil {
-		tb.RemoveChair(person)
+		tb.RemoveChair(person.UserID)
 	}
 	atomic.AddInt32(&self.onlineCount, -1)
 }
 
 // CheckGameFull  检测游戏是否满员
 func (self *Room) CheckGameFull(gid int64) bool {
-	self.tblock.Lock()
-	defer self.tblock.Unlock()
+	self.tbLk.Lock()
+	defer self.tbLk.Unlock()
 	for _, table := range self.tables {
 		if gid == table.Gid {
 			if table.MaxSitter == Unlimited {
@@ -311,8 +296,8 @@ func (self *Room) OnlineCount() int32 {
 
 // GetTable 获取桌牌
 func (self *Room) GetTable(tid int64) *Table {
-	self.tblock.RLock()
-	defer self.tblock.RUnlock()
+	self.tbLk.RLock()
+	defer self.tbLk.RUnlock()
 	if self.tables == nil {
 		return nil
 	}
@@ -326,8 +311,8 @@ func (self *Room) GetTable(tid int64) *Table {
 
 // GetTableForGid 获取桌牌
 func (self *Room) GetTableForGid(gid int64) *Table {
-	self.tblock.RLock()
-	defer self.tblock.RUnlock()
+	self.tbLk.RLock()
+	defer self.tbLk.RUnlock()
 	if self.tables == nil {
 		return nil
 	}
@@ -339,8 +324,8 @@ func (self *Room) GetTableForGid(gid int64) *Table {
 	return nil
 }
 func (self *Room) GetTablesForGid(gid int64) []*Table {
-	self.tblock.RLock()
-	defer self.tblock.RUnlock()
+	self.tbLk.RLock()
+	defer self.tbLk.RUnlock()
 	tbls := make([]*Table, 0)
 	if self.tables == nil {
 		return nil
@@ -355,8 +340,8 @@ func (self *Room) GetTablesForGid(gid int64) []*Table {
 
 // DelTable 删除桌子
 func (self *Room) DelTable(tid int64) {
-	self.tblock.Lock()
-	defer self.tblock.Unlock()
+	self.tbLk.Lock()
+	defer self.tbLk.Unlock()
 	if self.tables == nil {
 		return
 	}
@@ -374,8 +359,8 @@ func (self *Room) DelTable(tid int64) {
 
 // DelTableForGid  移除指定游戏
 func (self *Room) DelTableForGid(gid int64) {
-	self.tblock.Lock()
-	defer self.tblock.Unlock()
+	self.tbLk.Lock()
+	defer self.tbLk.Unlock()
 	if self.tables == nil {
 		return
 	}
@@ -384,7 +369,7 @@ func (self *Room) DelTableForGid(gid int64) {
 			// todo 控制关闭游戏
 			//item.GameHandle.SuperControl()
 			self.tables = append(self.tables[:i], self.tables[i+1:]...)
-			break
+			return
 		}
 	}
 }

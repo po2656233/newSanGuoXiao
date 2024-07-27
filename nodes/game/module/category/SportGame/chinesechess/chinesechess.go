@@ -4,7 +4,7 @@ import (
 	log "github.com/po2656233/superplace/logger"
 	protoMsg "superman/internal/protocol/gofile"
 	mgr "superman/nodes/game/manger"
-	"superman/nodes/game/module/category"
+	. "superman/nodes/game/module/category"
 	"time"
 )
 
@@ -52,7 +52,7 @@ func (self *ChineseChess) Scene(args []interface{}) {
 	userData := agent.UserData()
 	person := userData.(*mgr.Player)
 	if person == nil {
-		log.Warnf("[%v:%v][Scene:%v] person is nil.", self.Name, self.Tid, self.Game.Scene)
+		log.Warnf("[%v:%v][Scene:%v] person is nil.", self.Name, self.Id, self.Game.Scene)
 		return
 	}
 	//
@@ -76,36 +76,37 @@ func (self *ChineseChess) Scene(args []interface{}) {
 		}
 		return t
 	}
-	switch self.Game.Scene {
-	case protoMsg.GameScene_Free: // 等待新玩家
-		mgr.GetClientMgr().SendData(agent, &protoMsg.ChineseChessStateFreeResp{
-			Times: getTimeInfo(category.YamlObj.ChineseChess.FreeTime),
+	switch self.Game.GameInfo.Scene {
+	case protoMsg.GameScene_Setting: //
+		mgr.GetClientMgr().SendData(agent, &protoMsg.ChineseChessStateSetResp{
+			Times: getTimeInfo(YamlObj.ChineseChess.SetTime),
+			Uid:   self.curUid,
 		})
 	case protoMsg.GameScene_Start: // 开始
 		mgr.GetClientMgr().SendData(agent, &protoMsg.ChineseChessStateStartResp{
-			Times: getTimeInfo(category.YamlObj.ChineseChess.StartTime),
+			Times: getTimeInfo(YamlObj.ChineseChess.StartTime),
 			Uid:   self.curUid,
 		})
 	case protoMsg.GameScene_Playing: // 下棋
 		mgr.GetClientMgr().SendData(agent, &protoMsg.ChineseChessStatePlayingResp{
-			Times: getTimeInfo(category.YamlObj.ChineseChess.PlayTime),
+			Times: getTimeInfo(YamlObj.ChineseChess.PlayTime),
 			Uid:   self.curUid,
 		})
 	case protoMsg.GameScene_Opening: // 开奖
 		mgr.GetClientMgr().SendData(agent, &protoMsg.ChineseChessStateOpenResp{
-			Times:  getTimeInfo(category.YamlObj.ChineseChess.OpenTime),
+			Times:  getTimeInfo(YamlObj.ChineseChess.OpenTime),
 			WinUid: self.winUid,
 		})
 	case protoMsg.GameScene_Over: // 结算
 		mgr.GetClientMgr().SendData(agent, &protoMsg.ChineseChessStateOverResp{
-			Times: getTimeInfo(category.YamlObj.ChineseChess.OverTime),
+			Times: getTimeInfo(YamlObj.ChineseChess.OverTime),
 			Result: &protoMsg.ChineseChessResult{
 				RedCamp:   self.redCamp,
 				BlackCamp: self.blackCamp,
 			},
 		})
 	default:
-		log.Warnf("[%v:%v][Scene:%v] person:%v no have scence.", self.Name, self.Tid, self.Game.Scene, person.UserID)
+		log.Warnf("[%v:%v][Scene:%v] person:%v no have scence.", self.Name, self.Id, self.Game.GameInfo.Scene, person.UserID)
 	}
 }
 
@@ -135,6 +136,8 @@ func (self *ChineseChess) Start(args []interface{}) {
 	if self.blackCamp == nil || self.redCamp == nil {
 		return
 	}
+	// 开始设置下棋时长
+	self.onSetTime()
 }
 
 // Playing 结 算
@@ -148,43 +151,79 @@ func (self *ChineseChess) Over(args []interface{}) {
 
 }
 
-// UpdateInfo 更新
-func (self *ChineseChess) UpdateInfo(args []interface{}) bool {
-	return true
-
-}
-
-// SuperControl 超级控制
-func (self *ChineseChess) SuperControl(args []interface{}) bool {
-
-	return true
-}
-
 // /////////////////////////[定时器事件]//////////////////////////////////////////
-func (self *ChineseChess) onStart() {
-	self.ChangeState(protoMsg.GameScene_Start)
-	time.AfterFunc(time.Duration(category.YamlObj.ChineseChess.Duration.StartTime)*time.Second, self.onSetTime)
 
-	// 开始状态
-	//m := self.permitHost() //反馈定庄信息
-	//GlobalSender.NotifyOthers(self.PlayerList, MainGameState, protoMsg.GameScene_Start, m)
-	GlobalSender.NotifyOthers(self.PlayerList, &protoMsg.BaccaratStateStartResp{
+func (self *ChineseChess) onSetTime() {
+	self.ChangeState(protoMsg.GameScene_Setting)
+	self.curUid = self.redCamp.Uid
+	time.AfterFunc(time.Duration(YamlObj.ChineseChess.SetTime)*time.Second, self.onConfirmTime)
+	GlobalSender.NotifyOthers(self.PlayIDList, &protoMsg.ChineseChessStateSetResp{
 		Times: &protoMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			OutTime:   0,
-			WaitTime:  self.Config.Baccarat.Duration.StartTime,
-			TotalTime: self.Config.Baccarat.Duration.StartTime,
+			WaitTime:  YamlObj.ChineseChess.SetTime,
+			TotalTime: YamlObj.ChineseChess.SetTime,
 		},
-		Inning: self.InningInfo.Number,
+		Uid: self.curUid,
 	})
 }
 
-func (self *ChineseChess) onSetTime() {
-	self.ChangeState(protoMsg.GameScene_SetTing)
+func (self *ChineseChess) onConfirmTime() {
+	self.ChangeState(protoMsg.GameScene_Setting)
+	self.curUid = self.blackCamp.Uid
+	time.AfterFunc(time.Duration(YamlObj.ChineseChess.ConfirmTime)*time.Second, self.onStart)
+	GlobalSender.NotifyOthers(self.PlayIDList, &protoMsg.ChineseChessStateConfirmResp{
+		Times: &protoMsg.TimeInfo{
+			TimeStamp: self.TimeStamp,
+			OutTime:   0,
+			WaitTime:  YamlObj.ChineseChess.ConfirmTime,
+			TotalTime: YamlObj.ChineseChess.ConfirmTime,
+		},
+		Uid: self.curUid,
+	})
+}
+func (self *ChineseChess) onStart() {
+	self.ChangeState(protoMsg.GameScene_Start)
+	time.AfterFunc(time.Duration(YamlObj.ChineseChess.Duration.StartTime)*time.Second, self.onPlay)
+	GlobalSender.NotifyOthers(self.PlayIDList, &protoMsg.ChineseChessStateStartResp{
+		Times: &protoMsg.TimeInfo{
+			TimeStamp: self.TimeStamp,
+			OutTime:   0,
+			WaitTime:  YamlObj.ChineseChess.Duration.StartTime,
+			TotalTime: YamlObj.ChineseChess.Duration.StartTime,
+		},
+	})
+
 }
 
 func (self *ChineseChess) onPlay() {
-	self.ChangeState(protoMsg.GameScene_Start)
+	self.ChangeState(protoMsg.GameScene_Playing)
+
+	time.AfterFunc(time.Duration(YamlObj.ChineseChess.PlayTime)*time.Second, self.onPlay)
+	GlobalSender.NotifyOthers(self.PlayIDList, &protoMsg.ChineseChessStatePlayingResp{
+		Times: &protoMsg.TimeInfo{
+			TimeStamp: self.TimeStamp,
+			OutTime:   0,
+			WaitTime:  YamlObj.ChineseChess.PlayTime,
+			TotalTime: YamlObj.ChineseChess.PlayTime,
+		},
+		Uid: self.curUid,
+	})
+}
+
+func (self *ChineseChess) onNext() {
+	self.ChangeState(protoMsg.GameScene_Playing)
+
+	time.AfterFunc(time.Duration(YamlObj.ChineseChess.PlayTime)*time.Second, self.onNext)
+	GlobalSender.NotifyOthers(self.PlayIDList, &protoMsg.ChineseChessStatePlayingResp{
+		Times: &protoMsg.TimeInfo{
+			TimeStamp: self.TimeStamp,
+			OutTime:   0,
+			WaitTime:  YamlObj.ChineseChess.PlayTime,
+			TotalTime: YamlObj.ChineseChess.PlayTime,
+		},
+		Uid: self.curUid,
+	})
 }
 
 // ///////////////////////[初始化]///////////////////////////////////

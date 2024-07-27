@@ -8,10 +8,12 @@ import (
 	"net"
 	"net/url"
 	"reflect"
+	. "superman/internal/constant"
 	event2 "superman/internal/event"
 	protoMsg "superman/internal/protocol/gofile"
+	"superman/internal/rpc"
 	"superman/internal/utils"
-	"superman/nodes/game/manger"
+	mgr "superman/nodes/game/manger"
 	"superman/nodes/game/module/online"
 	"superman/nodes/game/msg"
 )
@@ -86,13 +88,34 @@ func (p *ActorPlayer) request(session *cproto.Session, req *protoMsg.Request) {
 	// 派发给各个模块
 	msgData, err := msg.ProcessorProto.Unmarshal(req.Data)
 	if err != nil {
-		clog.Debug("unmarshal message error: %v", err)
+		clog.Debugf("unmarshal message error: %v", err)
+		p.SendResult(FAILED, StatusText[NetworkErr09])
 		return
 	}
-	//session.GetUid()
+	uid := session.GetUid()
 	p.Session = session
+	p.playerId = uid
+	person := mgr.GetPlayerMgr().Get(uid)
+	if person == nil {
+		// 获取玩家信息
+		data, errCode := rpc.SendData(p.App(), SourcePath, DBActor, NodeTypeCenter, &protoMsg.GetUserInfoReq{Uid: uid})
+		if errCode == 0 && data != nil {
+			resp, ok := data.(*protoMsg.GetUserInfoResp)
+			if ok && resp.Info != nil {
+				person = mgr.SimpleToPlayer(resp.Info)
+				online.BindPlayer(uid, person.UserID, p.PathString())
+				mgr.GetPlayerMgr().Append(person)
+			}
+		}
+	}
+
+	if person != nil {
+		p.SetUserData(person)
+		mgr.GetClientMgr().Append(person.UserID, p)
+	}
 	err = msg.ProcessorProto.Route(msgData, p)
 	utils.CheckError(err)
+
 	//p.Call(session.AgentPath, "Response", &protoMsg.Response{})
 }
 
@@ -117,9 +140,15 @@ func (p *ActorPlayer) SendResultPop(state int32, title, hints string) {
 
 func (p *ActorPlayer) OnStop() {
 	clog.Infof("OnStop onlineCount = %d", online.Count())
-	person := manger.GetPlayerMgr().Get(p.Session.Uid)
+	if p.Session == nil {
+		clog.Warnf("OnStop uid = %d", p.uid)
+		return
+	}
+	person := mgr.GetPlayerMgr().Get(p.Session.Uid)
 	if person != nil {
 		person.Exit()
+		mgr.GetClientMgr().DeleteClient(person.UserID)
+		mgr.GetPlayerMgr().Delete(person.UserID)
 	}
 
 }

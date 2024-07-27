@@ -4975,12 +4975,7 @@ proto.pb.CreateRoomResp.prototype.toObject = function(opt_includeInstance) {
  */
 proto.pb.CreateRoomResp.toObject = function(includeInstance, msg) {
   var obj = {
-    roomid: jspb.Message.getFieldWithDefault(msg, 1, 0),
-    hostid: jspb.Message.getFieldWithDefault(msg, 2, 0),
-    name: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    enterscore: jspb.Message.getFieldWithDefault(msg, 4, 0),
-    maxtable: jspb.Message.getFieldWithDefault(msg, 5, 0),
-    maxcount: jspb.Message.getFieldWithDefault(msg, 6, 0)
+    info: (f = msg.getInfo()) && baseinfo_pb.RoomInfo.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -5018,28 +5013,9 @@ proto.pb.CreateRoomResp.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {number} */ (reader.readInt64());
-      msg.setRoomid(value);
-      break;
-    case 2:
-      var value = /** @type {number} */ (reader.readInt64());
-      msg.setHostid(value);
-      break;
-    case 3:
-      var value = /** @type {string} */ (reader.readString());
-      msg.setName(value);
-      break;
-    case 4:
-      var value = /** @type {number} */ (reader.readInt64());
-      msg.setEnterscore(value);
-      break;
-    case 5:
-      var value = /** @type {number} */ (reader.readInt32());
-      msg.setMaxtable(value);
-      break;
-    case 6:
-      var value = /** @type {number} */ (reader.readInt32());
-      msg.setMaxcount(value);
+      var value = new baseinfo_pb.RoomInfo;
+      reader.readMessage(value,baseinfo_pb.RoomInfo.deserializeBinaryFromReader);
+      msg.setInfo(value);
       break;
     default:
       reader.skipField();
@@ -5070,138 +5046,47 @@ proto.pb.CreateRoomResp.prototype.serializeBinary = function() {
  */
 proto.pb.CreateRoomResp.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
-  f = message.getRoomid();
-  if (f !== 0) {
-    writer.writeInt64(
+  f = message.getInfo();
+  if (f != null) {
+    writer.writeMessage(
       1,
-      f
-    );
-  }
-  f = message.getHostid();
-  if (f !== 0) {
-    writer.writeInt64(
-      2,
-      f
-    );
-  }
-  f = message.getName();
-  if (f.length > 0) {
-    writer.writeString(
-      3,
-      f
-    );
-  }
-  f = message.getEnterscore();
-  if (f !== 0) {
-    writer.writeInt64(
-      4,
-      f
-    );
-  }
-  f = message.getMaxtable();
-  if (f !== 0) {
-    writer.writeInt32(
-      5,
-      f
-    );
-  }
-  f = message.getMaxcount();
-  if (f !== 0) {
-    writer.writeInt32(
-      6,
-      f
+      f,
+      baseinfo_pb.RoomInfo.serializeBinaryToWriter
     );
   }
 };
 
 
 /**
- * optional int64 roomId = 1;
- * @return {number}
+ * optional RoomInfo info = 1;
+ * @return {?proto.pb.RoomInfo}
  */
-proto.pb.CreateRoomResp.prototype.getRoomid = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 1, 0));
+proto.pb.CreateRoomResp.prototype.getInfo = function() {
+  return /** @type{?proto.pb.RoomInfo} */ (
+    jspb.Message.getWrapperField(this, baseinfo_pb.RoomInfo, 1));
 };
 
 
-/** @param {number} value */
-proto.pb.CreateRoomResp.prototype.setRoomid = function(value) {
-  jspb.Message.setProto3IntField(this, 1, value);
+/** @param {?proto.pb.RoomInfo|undefined} value */
+proto.pb.CreateRoomResp.prototype.setInfo = function(value) {
+  jspb.Message.setWrapperField(this, 1, value);
 };
 
 
 /**
- * optional int64 hostId = 2;
- * @return {number}
+ * Clears the message field making it undefined.
  */
-proto.pb.CreateRoomResp.prototype.getHostid = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 2, 0));
-};
-
-
-/** @param {number} value */
-proto.pb.CreateRoomResp.prototype.setHostid = function(value) {
-  jspb.Message.setProto3IntField(this, 2, value);
+proto.pb.CreateRoomResp.prototype.clearInfo = function() {
+  this.setInfo(undefined);
 };
 
 
 /**
- * optional string name = 3;
- * @return {string}
+ * Returns whether this field is set.
+ * @return {boolean}
  */
-proto.pb.CreateRoomResp.prototype.getName = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
-};
-
-
-/** @param {string} value */
-proto.pb.CreateRoomResp.prototype.setName = function(value) {
-  jspb.Message.setProto3StringField(this, 3, value);
-};
-
-
-/**
- * optional int64 enterScore = 4;
- * @return {number}
- */
-proto.pb.CreateRoomResp.prototype.getEnterscore = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 4, 0));
-};
-
-
-/** @param {number} value */
-proto.pb.CreateRoomResp.prototype.setEnterscore = function(value) {
-  jspb.Message.setProto3IntField(this, 4, value);
-};
-
-
-/**
- * optional int32 maxTable = 5;
- * @return {number}
- */
-proto.pb.CreateRoomResp.prototype.getMaxtable = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 5, 0));
-};
-
-
-/** @param {number} value */
-proto.pb.CreateRoomResp.prototype.setMaxtable = function(value) {
-  jspb.Message.setProto3IntField(this, 5, value);
-};
-
-
-/**
- * optional int32 maxCount = 6;
- * @return {number}
- */
-proto.pb.CreateRoomResp.prototype.getMaxcount = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 6, 0));
-};
-
-
-/** @param {number} value */
-proto.pb.CreateRoomResp.prototype.setMaxcount = function(value) {
-  jspb.Message.setProto3IntField(this, 6, value);
+proto.pb.CreateRoomResp.prototype.hasInfo = function() {
+  return jspb.Message.getField(this, 1) != null;
 };
 
 

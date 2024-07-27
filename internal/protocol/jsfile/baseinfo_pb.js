@@ -6114,7 +6114,7 @@ proto.pb.GameInfo.toObject = function(includeInstance, msg) {
     lessscore: jspb.Message.getFieldWithDefault(msg, 5, 0),
     scene: jspb.Message.getFieldWithDefault(msg, 6, 0),
     state: jspb.Message.getFieldWithDefault(msg, 7, 0),
-    maxcount: jspb.Message.getFieldWithDefault(msg, 8, 0),
+    maxplayer: jspb.Message.getFieldWithDefault(msg, 8, 0),
     howtoplay: jspb.Message.getFieldWithDefault(msg, 9, "")
   };
 
@@ -6178,7 +6178,7 @@ proto.pb.GameInfo.deserializeBinaryFromReader = function(msg, reader) {
       break;
     case 8:
       var value = /** @type {number} */ (reader.readInt32());
-      msg.setMaxcount(value);
+      msg.setMaxplayer(value);
       break;
     case 9:
       var value = /** @type {string} */ (reader.readString());
@@ -6255,7 +6255,7 @@ proto.pb.GameInfo.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getMaxcount();
+  f = message.getMaxplayer();
   if (f !== 0) {
     writer.writeInt32(
       8,
@@ -6363,16 +6363,16 @@ proto.pb.GameInfo.prototype.setState = function(value) {
 
 
 /**
- * optional int32 maxCount = 8;
+ * optional int32 maxPlayer = 8;
  * @return {number}
  */
-proto.pb.GameInfo.prototype.getMaxcount = function() {
+proto.pb.GameInfo.prototype.getMaxplayer = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 8, 0));
 };
 
 
 /** @param {number} value */
-proto.pb.GameInfo.prototype.setMaxcount = function(value) {
+proto.pb.GameInfo.prototype.setMaxplayer = function(value) {
   jspb.Message.setProto3IntField(this, 8, value);
 };
 
@@ -8639,9 +8639,9 @@ proto.pb.GameState = {
   INITTB: 0,
   OPENTB: 1,
   REPAIRTB: 2,
-  CLEARTB: 3,
-  STOPTB: 4,
-  CLOSETB: 5
+  CLOSETB: 3,
+  CLEARTB: 4,
+  STOPTB: 5
 };
 
 /**

@@ -8,7 +8,7 @@ import (
 	event2 "superman/internal/event"
 	pb "superman/internal/protocol/gofile"
 	"superman/internal/rpc"
-	"superman/nodes/game/manger"
+	mgr "superman/nodes/game/manger"
 	"superman/nodes/game/module/online"
 	"time"
 )
@@ -41,10 +41,14 @@ func (p *ActorGame) OnInit() {
 	p.Event().Register(p.onLogoutEvent)
 	p.Event().Register(p.onPlayerCreateEvent)
 	p.Remote().Register(p.checkChild)
+	// 接收来自中心服的数据修改
+	p.Remote().Register(p.CreateRoomResp)
+	p.Remote().Register(p.CreateTableResp)
+	p.Remote().Register(p.DeleteTableResp)
 
 	p.Timer().RemoveAll()
 	p.Timer().AddOnce(time.Second, p.checkGameList)
-	p.Timer().AddOnce(time.Second, p.checkRoomList)
+
 }
 
 func (p *ActorGame) OnFindChild(msg *cfacade.Message) (cfacade.IActor, bool) {
@@ -74,11 +78,32 @@ func (p *ActorGame) checkGameList() {
 		resp, ok := data.(*pb.GetGameListResp)
 		if ok && resp != nil && resp.Items != nil {
 			p.Timer().Remove(p.checkGamesTimeId)
-			manger.GetGameInfoMgr().AddGames(resp.Items.Items)
+			mgr.GetGameInfoMgr().AddGames(resp.Items.Items)
 			return
 		}
 	}
 	p.checkGamesTimeId = p.Timer().AddOnce(p.getGamesTime, p.checkGameList)
+}
+
+// cron
+func (p *ActorGame) checkTableList(rid int64) {
+	req := &pb.GetTableListReq{
+		Rid: rid,
+	}
+
+	data, errCode := rpc.SendData(p.App(), cst.SourcePath, cst.DBActor, cst.NodeTypeCenter, req)
+	if errCode == 0 {
+		resp, ok := data.(*pb.GetTableListResp)
+		if ok && resp != nil && resp.Items != nil {
+			for _, item := range resp.Items.Items {
+				if room := mgr.GetRoomMgr().GetRoom(item.Rid); room != nil {
+					room.AddTable(item, NewGame)
+				}
+			}
+			return
+		}
+	}
+	//p.checkTableList(rid)
 }
 
 // cron
@@ -95,7 +120,10 @@ func (p *ActorGame) checkRoomList() {
 	if errCode == 0 {
 		resp, ok := data.(*pb.GetRoomListResp)
 		if ok && resp != nil && resp.Items != nil {
-			manger.GetRoomMgr().AddRooms(resp.Items.Items)
+			for _, item := range resp.Items.Items {
+				rm := mgr.GetRoomMgr().AddRoom(item)
+				p.checkTableList(rm.Id)
+			}
 			p.haveRooms = true
 			p.Timer().AddOnce(p.getRoomsTime, p.checkRoomList)
 			return
@@ -123,6 +151,30 @@ func (p *ActorGame) checkChild() {
 			child.Exit() //actor退出
 		}
 	})
+}
+
+/////////////////////////////////////////////////////////////////
+
+func (p *ActorGame) CreateRoomResp(resp *pb.CreateRoomResp) {
+	if _, ok := mgr.GetRoomMgr().Create(resp.Info); !ok {
+		clog.Errorf("[ActorGame][CreateRoomResp] [Create] no good!")
+	}
+}
+func (p *ActorGame) CreateTableResp(resp *pb.CreateTableResp) {
+	if resp.Table == nil {
+		clog.Errorf("[ActorGame][CreateTableResp] no resp!")
+		return
+	}
+	if rm := mgr.GetRoomMgr().GetRoom(resp.Table.Rid); rm != nil {
+		if _, err := rm.AddTable(resp.Table, NewGame); err != nil {
+			clog.Errorf("[ActorGame][CreateTableResp] [AddTable] no resp!")
+		}
+	}
+}
+func (p *ActorGame) DeleteTableResp(resp *pb.DeleteTableResp) {
+	if rm := mgr.GetRoomMgr().GetRoom(resp.Rid); rm != nil {
+		rm.DelTable(resp.Tid)
+	}
 }
 
 /////////////////////////////////////////////////////////////////

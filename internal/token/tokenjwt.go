@@ -13,7 +13,7 @@ var jwtKey []byte = []byte("SECRETKEY")
 
 const (
 	TOKEN_MAX_EXPIRE_HOUR      = 1  // token最长有效期
-	TOKEN_MAX_REMAINING_MINUTE = 15 // token还有多久过期就返回新token
+	TOKEN_MAX_REMAINING_MINUTE = 72 //15 // token还有多久过期就返回新token
 )
 
 func VerifyToken(ctx *superGin.Context, tokenString string) (int, string) {

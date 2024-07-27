@@ -149,7 +149,7 @@ func (p *Controller) roomCreate(c *superGin.Context) {
 		return
 	}
 	if resp, ok := data.(*pb.CreateRoomResp); ok {
-		if resp.RoomId == 0 {
+		if resp.Info == nil || resp.Info.Id == 0 {
 			RenderResult(c, http.StatusNotAcceptable, "房间创建失败")
 			return
 		}

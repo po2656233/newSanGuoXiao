@@ -108,7 +108,6 @@ func (p *Processor) Register(msg proto.Message) (uint16, string) {
 	} else {
 		id = uint16(fId)
 	}
-
 	i := new(MsgInfo)
 	i.msgType = msgType
 	p.msgInfo[id] = i
@@ -190,12 +189,12 @@ func (p *Processor) Unmarshal(data []byte) (interface{}, error) {
 	} else {
 		id = binary.BigEndian.Uint16(data)
 	}
-	if id >= uint16(len(p.msgInfo)) {
-		return nil, fmt.Errorf("message id %v not registered", id)
-	}
 
 	// msg
-	i := p.msgInfo[id]
+	i, ok := p.msgInfo[id]
+	if !ok {
+		return nil, fmt.Errorf("message id %v not registered", id)
+	}
 	if i.msgRawHandler != nil {
 		return MsgRaw{id, data[2:]}, nil
 	} else {

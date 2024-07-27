@@ -43,14 +43,10 @@ func GetClientMgr() *ClientManger {
 
 // Append 添加玩家
 func (self *ClientManger) Append(userID int64, agent Agent) bool {
-	//if v, ok := self.Load(userID); !ok {
-	//	log.Debugf("新增一个客户端IP:%v", agent.RemoteAddr())
-	//	self.Store(userID, agent)
-	//	return true
-	//} else { //v
-	//	log.Debugf("客户端IP:%v 已經存在", v.(Agent).RemoteAddr())
-	//	return false
-	//}
+	if _, ok := self.Load(userID); ok {
+		//log.Debugf("客户端IP:%v 已經存在", v.(Agent).RemoteAddr())
+		return false
+	}
 	log.Debugf("新增一个客户端IP:%v 玩家:%v", agent.RemoteAddr(), userID)
 	self.Store(userID, agent)
 	return true
@@ -232,7 +228,7 @@ func (self *ClientManger) NotifyButOne(userIDs []int64, noNeedToSend int64, msg 
 // 发给这部分玩家
 func (self *ClientManger) NotifyOthers(userIDs []int64, msg proto.Message) {
 	self.Range(func(key, value interface{}) bool {
-		uid_k := key.(int64)
+		uidKey := key.(int64)
 		agent := value.(Agent)
 		if nil == agent {
 			log.Debugf("无效客户端:%v", value)
@@ -241,7 +237,7 @@ func (self *ClientManger) NotifyOthers(userIDs []int64, msg proto.Message) {
 
 		//获取用户ID
 		for _, uid := range userIDs {
-			if uid == uid_k {
+			if uid == uidKey {
 				//广播给客户端
 				agent.WriteMsg(msg)
 				break
@@ -264,7 +260,7 @@ func disassemble(data, byteTime byte, bit int) (byte, byte) {
 	return data<<byte(bit) ^ (byteTime >> byte(8-bit)), byteTime<<byte(bit) ^ (data >> byte(8-bit))
 }
 
-// 加密 将一个字节拆成两个或多个
+// DynamicEncode 加密 将一个字节拆成两个或多个
 func DynamicEncode(data []byte) []byte {
 	tempData := data
 	endatas := make([]byte, 0)
@@ -331,7 +327,7 @@ func DynamicEncode(data []byte) []byte {
 	return endatas
 }
 
-// 解密
+// DynamicDecode 解密
 func DynamicDecode(endata []byte) (data, timestamp []byte) {
 	//fmt.Println("--------------------------解密--------------------------")
 	data = make([]byte, 0)

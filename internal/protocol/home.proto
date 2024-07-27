@@ -96,12 +96,7 @@ message CreateRoomReq {
   string  remark = 6;//备注
 }
 message CreateRoomResp {
-  int64 roomId = 1;   // 房间ID
-  int64  hostId = 2;  // 房主ID
-  string  name = 3;   // 房间名称
-  int64  enterScore = 4;// 准入分数
-  int32  maxTable = 5;  // 可创建最大牌桌数
-  int32 maxCount = 6;  //最大可容纳人数
+    RoomInfo info = 1;
 }
 //配置游戏(房卡模式)
 message CreateTableReq {

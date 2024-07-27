@@ -333,7 +333,11 @@ func (self *ActorDB) checkRooms(hostid, startTime int64) (rooms []*sqlmodel.Room
 func (self *ActorDB) checkTables(rid int64) (tables []*sqlmodel.Table, err error) {
 	tables = make([]*sqlmodel.Table, 0)
 	table := sqlmodel.Table{}
-	err = self.db.Table(table.TableName()).Select("*").Where("rid=?", rid).Find(&tables).Error
+	if 0 < rid {
+		err = self.db.Table(table.TableName()).Select("*").Where("rid=?", rid).Find(&tables).Error
+	} else {
+		err = self.db.Table(table.TableName()).Select("*").Find(&tables).Error
+	}
 	CheckError(err)
 	return
 }
