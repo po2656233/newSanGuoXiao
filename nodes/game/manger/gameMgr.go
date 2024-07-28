@@ -6,14 +6,14 @@ import (
 	. "superman/internal/constant"
 	protoMsg "superman/internal/protocol/gofile"
 	"superman/internal/utils"
-	"superman/nodes/leaf/jettengame/gamedata/goclib/util"
 	"sync"
 	"time"
 )
 
 // IGameOperate 子游戏接口
 type IGameOperate interface {
-	Scene(args []interface{})             //场 景
+	Scene(args []interface{}) //场 景
+	Ready(args []interface{})
 	Start(args []interface{})             //开 始
 	Playing(args []interface{})           //游 戏(下分|下注)
 	Over(args []interface{})              //结 算
@@ -114,10 +114,12 @@ func (gmr *GameMgr) GetGame(gid int64) *protoMsg.GameInfo {
 
 // Reset 重置信息
 func (g *Game) Reset() bool {
+	g.ChangeState(protoMsg.GameScene_Free)
 	g.RunCount++
 	g.ReadyCount = 0
+	g.IsStart = false
 	g.TimeStamp = time.Now().Unix()
-	g.Inning = strings.ToUpper(util.Md5Sum(g.Name + time.Now().String()))
+	g.Inning = strings.ToUpper(utils.Md5Sum(g.Name + time.Now().String()))
 	return true
 }
 
@@ -130,11 +132,11 @@ func (self *Game) ChangeState(state protoMsg.GameScene) {
 
 // Ready 准备
 func (g *Game) Ready(args []interface{}) {
-	uid := args[0].(int64)
+	play := args[0].(*Player)
 	if g.MaxPlayer != Unlimited && g.MaxPlayer < int32(len(g.PlayIDList)) {
 		return
 	}
-	g.PlayIDList = append(g.PlayIDList, uid)
+	g.PlayIDList = append(g.PlayIDList, play.UserID)
 	g.PlayIDList = utils.Unique(g.PlayIDList)
 }
 
@@ -150,7 +152,7 @@ func (g *Game) Start(args []interface{}) {
 		return
 	}
 	g.IsStart = true
-
+	g.ChangeState(protoMsg.GameScene_Start)
 }
 
 // Playing 游 戏(下分|下注)

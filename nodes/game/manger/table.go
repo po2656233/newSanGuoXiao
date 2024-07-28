@@ -102,10 +102,15 @@ func (tb *Table) AddChair(player *Player) error {
 
 	// 游戏准备 添加刚坐下的玩家
 	tb.GameHandle.UpdateInfo([]interface{}{player.State, player.UserID})
-	// 满员后,开始游戏
-	if isNew && ((tb.MaxSitter == Unlimited && tb.sitCount == Default) || tb.MaxSitter == tb.sitCount) {
-		tb.GameHandle.Start(nil)
+	if isNew {
+		tb.GameHandle.Ready([]interface{}{player})
+		// 满员后,开始游戏
+		if (tb.MaxSitter == Unlimited && tb.sitCount == Default) || tb.MaxSitter == tb.sitCount {
+			tb.GameHandle.Start(nil)
+		}
+
 	}
+
 	return nil
 }
 

@@ -208,7 +208,7 @@ type ConfSetting struct {
 	} ` yaml:"SanGuoXiao"`
 	// 象棋
 	ChineseChess struct {
-		ChineseChessDuration ` yaml:"duration"`
+		ChineseChessDuration `yaml:"duration"`
 		Col                  int32 `yaml:"col"`
 		Row                  int32 `yaml:"row"`
 	} ` yaml:"ChineseChess"`

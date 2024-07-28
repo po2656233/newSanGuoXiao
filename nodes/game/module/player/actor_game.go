@@ -9,6 +9,7 @@ import (
 	pb "superman/internal/protocol/gofile"
 	"superman/internal/rpc"
 	mgr "superman/nodes/game/manger"
+	"superman/nodes/game/module/category"
 	"superman/nodes/game/module/online"
 	"time"
 )
@@ -33,6 +34,7 @@ func (p *ActorGame) OnInit() {
 	p.childExitTime = time.Minute * 30
 	p.getGamesTime = time.Second * 5
 	p.getRoomsTime = time.Minute * 1
+	category.InitConfig()
 
 	// 注册角色登陆事件
 	p.Event().Register(p.onLoginEvent)

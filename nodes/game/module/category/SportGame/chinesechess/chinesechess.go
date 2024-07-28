@@ -133,11 +133,13 @@ func (self *ChineseChess) Ready(args []interface{}) {
 
 // Start 开始
 func (self *ChineseChess) Start(args []interface{}) {
+	self.Game.Start(args)
 	if self.blackCamp == nil || self.redCamp == nil {
 		return
 	}
 	// 开始设置下棋时长
 	self.onSetTime()
+
 }
 
 // Playing 结 算

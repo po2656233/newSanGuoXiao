@@ -54,13 +54,15 @@ SanGuoXiao:
     over: 15   #结算时长
   col: 8
   row: 8
+
+duration: &duration
+  start: 5    #准备后等待开始的时长
+  play: 30    #默认移动时长 如果设置时长了，则安装设置时长的来
+  open: 3     #消除时长
+  over: 3     #结算时长
 #象棋
 ChineseChess:
-  duration:
-    start: 5    #准备后等待开始的时长
-    settime: 15 #设置时长
-    play: 30    #默认移动时长 如果设置时长了，则安装设置时长的来
-    open: 3     #消除时长
-    over: 3     #结算时长
+  settime: 15 #设置时长
+  <<: *duration
   col: 9
   row: 10
