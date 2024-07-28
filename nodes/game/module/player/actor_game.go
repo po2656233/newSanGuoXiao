@@ -19,7 +19,6 @@ type (
 		//pomelo.ActorBase
 		simple.ActorBase
 		checkGamesTimeId uint64
-		haveRooms        bool
 		childExitTime    time.Duration
 		getGamesTime     time.Duration
 		getRoomsTime     time.Duration
@@ -34,7 +33,6 @@ func (p *ActorGame) OnInit() {
 	p.childExitTime = time.Minute * 30
 	p.getGamesTime = time.Second * 5
 	p.getRoomsTime = time.Minute * 1
-	p.haveRooms = false
 
 	// 注册角色登陆事件
 	p.Event().Register(p.onLoginEvent)
@@ -48,6 +46,7 @@ func (p *ActorGame) OnInit() {
 
 	p.Timer().RemoveAll()
 	p.Timer().AddOnce(time.Second, p.checkGameList)
+	p.Timer().AddOnce(time.Second, p.checkRoomList)
 
 }
 
@@ -103,17 +102,13 @@ func (p *ActorGame) checkTableList(rid int64) {
 			return
 		}
 	}
-	//p.checkTableList(rid)
+	p.checkTableList(rid)
 }
 
 // cron
 func (p *ActorGame) checkRoomList() {
 	req := &pb.GetRoomListReq{
 		Uid: cst.Unlimited,
-	}
-	if p.haveRooms {
-		// 获取最新的房间列表
-		req.StartTime = time.Now().Add(-p.getRoomsTime).Unix()
 	}
 
 	data, errCode := rpc.SendData(p.App(), cst.SourcePath, cst.DBActor, cst.NodeTypeCenter, req)
@@ -124,8 +119,6 @@ func (p *ActorGame) checkRoomList() {
 				rm := mgr.GetRoomMgr().AddRoom(item)
 				p.checkTableList(rm.Id)
 			}
-			p.haveRooms = true
-			p.Timer().AddOnce(p.getRoomsTime, p.checkRoomList)
 			return
 		}
 	}

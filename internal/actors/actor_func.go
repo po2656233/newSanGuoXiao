@@ -241,7 +241,7 @@ func (self *ActorDB) CreateTable(req *pb.CreateTableReq) (*pb.CreateTableResp, e
 		// 则获取游戏名称
 		req.Name, _ = self.checkGameName(req.Gid)
 	}
-	tid, err := self.addTable(sqlmodel.Table{
+	tid, maxSit, err := self.addTable(sqlmodel.Table{
 		Gid:        req.Gid,
 		Rid:        req.Rid,
 		Name:       req.Name,
@@ -260,6 +260,7 @@ func (self *ActorDB) CreateTable(req *pb.CreateTableReq) (*pb.CreateTableResp, e
 		Commission: req.Commission,
 		Taxation:   req.Taxation,
 		PlayScore:  req.Playscore,
+		MaxSitter:  maxSit,
 	}
 	rpc.SendData(self.App(), SourcePath, GameActor, NodeTypeGame, resp)
 	return resp, err

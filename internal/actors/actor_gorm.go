@@ -122,24 +122,25 @@ func (self *ActorDB) addRoom(room sqlmodel.Room) (int64, error) {
 }
 
 // AddTable 新增桌牌
-func (self *ActorDB) addTable(table sqlmodel.Table) (int64, error) {
+func (self *ActorDB) addTable(table sqlmodel.Table) (id int64, maxSit int32, err error) {
 	self.Lock()
 	defer self.Unlock()
 	count := self.checkTableCount(table.Rid)
 	max := self.checkRoomMaxTable(table.Rid)
 	if max <= count {
-		return 0, fmt.Errorf("%s:%d", StatusText[Room15], max)
+		return 0, 0, fmt.Errorf("%s:%d", StatusText[Room15], max)
 	}
-	maxSit := self.checkGameMaxPlayer(table.Gid)
-	table.MaxSitter = int32(maxSit)
+	maxSit = self.checkGameMaxPlayer(table.Gid)
+	table.MaxSitter = maxSit
 	table.CreatedAt = time.Now()
-	err := self.db.Table(table.TableName()).Create(&table).Error
+	err = self.db.Table(table.TableName()).Create(&table).Error
 	if !CheckError(err) {
-		return 0, err
+		return 0, maxSit, err
 	}
 	room := sqlmodel.Room{}
-	self.db.Table(room.TableName()).Where("id=?", table.Rid).UpdateColumn("table_count", gorm.Expr("table_count + ?", 1))
-	return table.ID, nil
+	err = self.db.Table(room.TableName()).Where("id=?", table.Rid).UpdateColumn("table_count", gorm.Expr("table_count + ?", 1)).Error
+	id = table.ID
+	return
 
 	//// 使用事务来确保操作的原子性
 	//err := self.db.Transaction(func(tx *gorm.DB) error {
@@ -239,7 +240,7 @@ func (self *ActorDB) checkTableRid(tid int64) (rid int64) {
 }
 
 // GetGameMaxPlayer 检测桌牌存在数量
-func (self *ActorDB) checkGameMaxPlayer(gid int64) (max int64) {
+func (self *ActorDB) checkGameMaxPlayer(gid int64) (max int32) {
 	gm := sqlmodel.Game{}
 	err := self.db.Table(gm.TableName()).Select("max_player").Where("id = ? ", gid).Find(&max).Error
 	CheckError(err)
