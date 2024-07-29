@@ -47,8 +47,8 @@ func New(game *mgr.Game) *SanguoxiaoGame {
 	p := &SanguoxiaoGame{
 		Game: game,
 	}
-	p.row = YamlObj.SanGuoXiao.Row
-	p.col = YamlObj.SanGuoXiao.Col
+	p.row = YamlObj.Sanguoxiao.Row
+	p.col = YamlObj.Sanguoxiao.Col
 	p.Init()
 	return p
 }

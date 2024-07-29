@@ -12,12 +12,11 @@ import (
 ////////////////////////////创建游戏////////////////////////////////////////////////
 
 // NewGame 创建游戏
-func NewGame(gid, tid int64) manger.IGameOperate {
+func NewGame(gid int64, tb *manger.Table) manger.IGameOperate {
 	info := manger.GetGameInfoMgr().GetGame(gid)
 	if info == nil || info.State == protoMsg.GameState_InitTB || info.State == protoMsg.GameState_CloseTB {
 		return nil
 	}
-	info.Id = tid
 	game := &manger.Game{
 		GameInfo:   info,
 		IsStart:    true,
@@ -25,11 +24,10 @@ func NewGame(gid, tid int64) manger.IGameOperate {
 		ReadyCount: 0,
 		RunCount:   0,
 		TimeStamp:  time.Now().Unix(),
-		PlayIDList: make([]int64, 0),
 	}
 	switch gid {
 	case cst.ChineseChess:
-		return chinesechess.New(game)
+		return chinesechess.New(game, tb)
 	case cst.Chess:
 	case cst.SanGuoXiao:
 		return sanguoxiao.New(game)

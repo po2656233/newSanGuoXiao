@@ -175,7 +175,10 @@ func (itself *Player) Exit() { //退出
 func (itself *Player) UpdateState(flag protoMsg.PlayerState, args []interface{}) bool {
 	if game := itself.GameHandle; game != nil { //[1-0
 		log.Infof("玩家[%v]:%v-> 操作:%+v", itself.UserID, itself.Name, flag)
-		return game.UpdateInfo([]interface{}{flag, itself.UserID, args})
+		tempArgs := make([]interface{}, 0)
+		tempArgs = append(tempArgs, flag, itself.UserID)
+		tempArgs = append(tempArgs, args...)
+		return game.UpdateInfo(tempArgs)
 	}
 
 	log.Debugf("[error:GameUpdate]\t ->:%v userID:%v", flag, itself.UserID)

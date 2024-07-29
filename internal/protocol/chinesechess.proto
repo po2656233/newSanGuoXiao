@@ -46,11 +46,9 @@ message ChineseChessSceneResp{
   PlayerSimpleInfo blackCamp = 5;   // 蓝方
 }
 // 状态-玩家操作
-// 等待玩家进入
-// 开始
-message ChineseChessStateStartResp {
+// 等待玩家准备
+message ChineseChessStateReadyResp {
   TimeInfo times = 1;
-  int64 uid = 2;         // 当前操作方
 }
 // 设置时长
 message ChineseChessStateSetResp {
@@ -62,32 +60,45 @@ message ChineseChessStateConfirmResp {
   TimeInfo times = 1;
   int64 uid = 2;         // 当前操作方
 }
-// 状态-玩家操作
+// 开始
+message ChineseChessStateStartResp {
+  TimeInfo times = 1;
+  int64 uid = 2;         // 当前操作方
+}
+// 下棋
 message ChineseChessStatePlayingResp {
   TimeInfo times = 1;
   int64 uid = 2;              // 当前操作方
   XQBoardInfo nowBoard = 3;   // 当前盘子信息
 }
-// 状态-玩家操作
+// 结束
 message ChineseChessStateOpenResp {
   TimeInfo times = 1;
   int64 winUid = 2;           // 当前操作方
   XQBoardInfo nowBoard = 3;   // 当前盘子信息
 }
-// 状态-游戏结算
+// 游戏结算
 message ChineseChessStateOverResp {
   TimeInfo times = 1;
   ChineseChessResult result = 2;
 }
 //////////////////////////////////
+//准备
+message ChineseChessReadyReq{
+  bool isReady = 1;
+}
+message ChineseChessReadyResp{
+  bool isReady = 1;
+  int64 uid = 2;
+}
 //设置时长
 message ChineseChessSetTimeReq{
-  int64 timeout = 1;//设置时长
+  int32 timeout = 1;//设置时长
   repeated XQGrid  giveCells = 2; // 设置方让棋子,最多三个
 }
 message ChineseChessSetTimeResp{
   int64 uid = 1;
-  int64 timeout = 2;
+  int32 timeout = 2;
   repeated XQGrid  giveCells = 3; // 设置方让棋子,最多三个
 }
 //是否同意对方设置的时长

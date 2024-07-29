@@ -41,6 +41,8 @@ func init() {
 	handlerMsg(&protoMsg.EnterGameReq{}, enter)
 	handlerMsg(&protoMsg.JoinGameReadyQueueReq{}, join)
 	handlerMsg(&protoMsg.ExitGameReq{}, exit)
+	handlerMsg(&protoMsg.ChineseChessReadyReq{}, ready)
+	handlerMsg(&protoMsg.ChineseChessSetTimeReq{}, setTime)
 	//handlerMsg(&protoMsg.DisbandedGameReq{}, disbandedGame)
 	//handlerMsg(&protoMsg.TrusteeReq{}, trustee)
 	//handlerMsg(&protoMsg.ChangeTableReq{}, changeTable)
@@ -108,10 +110,18 @@ func (p *ActorPlayer) request(session *cproto.Session, req *protoMsg.Request) {
 			}
 		}
 	}
-
-	if person != nil {
+	if person == nil {
+		userData := p.UserData()
+		if userData != nil {
+			person = userData.(*mgr.Player)
+			mgr.GetPlayerMgr().Append(person)
+		}
+	} else {
 		p.SetUserData(person)
 		mgr.GetClientMgr().Append(person.UserID, p)
+	}
+	if !checkArgs([]interface{}{msgData, p}) {
+		return
 	}
 	err = msg.ProcessorProto.Route(msgData, p)
 	utils.CheckError(err)
@@ -188,6 +198,37 @@ func (p *ActorPlayer) UserData() interface{} {
 func (p *ActorPlayer) SetUserData(data interface{}) {
 	p.userData = data
 }
+
+////////////////////////////////////////////////////////////////////////////
+
+func checkArgs(args []interface{}) bool {
+	m := args[0]
+	agent := args[1].(*ActorPlayer)
+	if agent == nil || m == nil {
+		return false
+	}
+	userData := agent.UserData()
+	if userData == nil {
+		clog.Warnf("[checkArgs] params:%+v  err:%s", m, StatusText[Login06])
+		agent.SendResultPop(FAILED, StatusText[Title004], StatusText[User03])
+		return false
+	}
+	person := userData.(*mgr.Player)
+	if person == nil {
+		clog.Warnf("[checkArgs] params:%+v  err:%s", m, StatusText[Login06])
+		agent.SendResultPop(FAILED, StatusText[Title004], StatusText[Login06])
+		return false
+	}
+
+	if play := mgr.GetPlayerMgr().Get(person.UserID); play == nil {
+		clog.Warnf("[checkArgs] params:%+v  uid:%+v err:%s", m, person.UserID, StatusText[User03])
+		agent.SendResultPop(FAILED, StatusText[Title004], StatusText[User03])
+		return false
+	}
+	return true
+}
+
+////////////////////////////////////////////////////////////////////////////
 
 //// playerSelect 玩家查询角色列表
 //func (p *ActorPlayer) playerSelect(session *cproto.Session, _ *protoMsg.None) {

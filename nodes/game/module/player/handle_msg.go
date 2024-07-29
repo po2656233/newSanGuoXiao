@@ -13,19 +13,12 @@ import (
 // enter 进入
 func enter(args []interface{}) {
 	//查找玩家
-	//_ = args[1]
 	m := args[0].(*protoMsg.EnterGameReq)
 	agent := args[1].(*ActorPlayer)
 	uid := agent.Session.Uid
 	clog.Debugf("[enter]params %+v  uid:%+v", m, uid)
 
 	person := mgr.GetPlayerMgr().Get(uid)
-	if person == nil {
-		clog.Warnf("[enter]params %+v  uid:%+v err:%s", m, uid, StatusText[User03])
-		agent.SendResultPop(FAILED, StatusText[Title004], StatusText[User03])
-		return
-	}
-
 	// 玩家仍在游戏中
 	if person.GameHandle != nil {
 		person.GameHandle.Scene([]interface{}{agent})
@@ -58,16 +51,12 @@ func enter(args []interface{}) {
 }
 
 func join(args []interface{}) {
-	_ = args[1]
 	m := args[0].(*protoMsg.JoinGameReadyQueueReq)
 	agent := args[1].(*ActorPlayer)
 	uid := agent.Session.Uid
 	clog.Debugf("[join]params %+v  uid:%+v", m, uid)
+
 	person := mgr.GetPlayerMgr().Get(uid)
-	if person == nil {
-		agent.SendResult(FAILED, StatusText[User03])
-		return
-	}
 	// 玩家仍在游戏中
 	if person.GameHandle != nil {
 		clog.Warnf("[join] [GameHandle] params %+v  uid:%+v FAIL", m, uid)
@@ -150,14 +139,40 @@ func exit(args []interface{}) {
 	_ = args[1]
 	m := args[0].(*protoMsg.ExitGameReq)
 	agent := args[1].(*ActorPlayer)
-	uid := agent.Session.Uid
-	clog.Debugf("[exit]params %+v  uid:%+v", m, uid)
-	person := mgr.GetPlayerMgr().Get(uid)
-	if person == nil {
-		agent.SendResult(FAILED, StatusText[User03])
+	clog.Debugf("[exit]params %+v  uid:%+v", m, agent.Session.Uid)
+	mgr.GetPlayerMgr().Get(agent.Session.Uid).Exit()
+}
+
+func ready(args []interface{}) {
+	//查找玩家
+	//_ = args[1]
+	m := args[0]
+	agent := args[1].(*ActorPlayer)
+	if m == nil {
+		agent.SendResultPop(FAILED, StatusText[Title004], StatusText[User03])
 		return
 	}
-	person.Exit()
+	uid := agent.Session.Uid
+	person := mgr.GetPlayerMgr().Get(uid)
+	if ok := person.UpdateState(protoMsg.PlayerState_PlayerReady, args); !ok {
+		agent.SendResultPop(FAILED, StatusText[Title004], StatusText[User02])
+	}
+}
+
+func setTime(args []interface{}) {
+	//查找玩家
+	//_ = args[1]
+	m := args[0]
+	agent := args[1].(*ActorPlayer)
+	if m == nil {
+		agent.SendResultPop(FAILED, StatusText[Title004], StatusText[User03])
+		return
+	}
+	uid := agent.Session.Uid
+	person := mgr.GetPlayerMgr().Get(uid)
+	if ok := person.UpdateState(protoMsg.PlayerState_PlayerSetTime, args); !ok {
+		agent.SendResultPop(FAILED, StatusText[Title004], StatusText[User02])
+	}
 }
 
 // 意见反馈
@@ -213,3 +228,5 @@ func handleNotifyNotice(args []interface{}) {
 		//GetClientManger().SendPopResult(agent, SUCCESS, StatusText[Title001], StatusText[User22])
 	}
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////

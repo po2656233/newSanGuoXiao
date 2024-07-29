@@ -35,28 +35,30 @@ enum RoomLevel{
 enum PlayerState {
   PlayerLookOn = 0;         //旁观(可作为刚入场时的初始状态)
   PlayerSitDown = 1;        //坐下(此状态下，才能参与游戏)
-  PlayerAgree = 2;          //同意(可作为准备状态)
-  PlayerWaiting = 3;         //旁观(可作为刚入场时的初始状态)
-  PlayerPlaying = 4;        //游戏中
-  PlayerPickUp = 5;         //托管
-  PlayerCall = 6;           //叫分
-  PlayerFollow = 7;         //跟牌
-  PlayerRaise = 8;          //加注
-  PlayerLook = 9;           //看牌
-  PlayerCompare = 10;        //比牌
-  PlayerCompareLose = 11;   //比牌失败
-  PlayerOutCard = 12;       //出牌|摊牌
-  PlayerPass = 13;          //过牌|要不起
-  PlayerChi = 14;           //吃
-  PlayerPong = 15;          //碰
-  PlayerMingGang = 16;      //明杠
-  PlayerAnGang = 17;        //暗杠
-  PlayerTing = 18;          //听
-  PlayerHu = 19;            //胡
-  PlayerZiMo = 20;          //自摸
-  PlayerTrustee = 21;       //托管
-  PlayerGiveUp = 22;        //弃牌
-  PlayerStandUp = 23;       //站起(可作为结束状态)
+  PlayerReady = 2;          //准备
+  PlayerSetTime = 3;        //设置时长
+  PlayerAgree = 4;          //同意(可作为准备状态)
+  PlayerWaiting = 5;        //旁观(可作为刚入场时的初始状态)
+  PlayerPlaying = 6;        //游戏中
+  PlayerPickUp = 7;         //托管
+  PlayerCall = 8;           //叫分
+  PlayerFollow = 9;         //跟牌
+  PlayerRaise = 10;          //加注
+  PlayerLook = 11;           //看牌
+  PlayerCompare = 12;        //比牌
+  PlayerCompareLose = 13;   //比牌失败
+  PlayerOutCard = 14;       //出牌|摊牌
+  PlayerPass = 15;          //过牌|要不起
+  PlayerChi = 16;           //吃
+  PlayerPong = 17;          //碰
+  PlayerMingGang = 18;      //明杠
+  PlayerAnGang = 19;        //暗杠
+  PlayerTing = 20;          //听
+  PlayerHu = 21;            //胡
+  PlayerZiMo = 22;          //自摸
+  PlayerTrustee = 23;       //托管
+  PlayerGiveUp = 24;        //弃牌
+  PlayerStandUp = 25;       //站起(可作为结束状态)
 }
 ////游戏类型
 //enum GameType {
@@ -83,21 +85,22 @@ enum GameState {
 //游戏场景
 enum GameScene {
   Free = 0;           //空闲
-  Start = 1;          //开始
-  Setting = 2;        //设置时长
-  Call = 3;           //叫分
-  Decide = 4;         //定庄
-  Playing = 5;        //游戏中
-  Opening = 6;        //开奖
-  Over = 7;           //结算
-  Closing = 8;        //关闭
-  SitDirect = 9;      //决定方位
-  RollDice = 10;       //掷骰子
-  WaitOperate = 11;   //等待操作
-  ChangeThree = 12;   //换三张
-  DingQue = 13;       //定缺门
-  CheckTing = 14;     //查听
-  CheckHuaZHu = 15;   //查花猪
+  Ready = 1;          //准备
+  Start = 2;          //开始
+  Setting = 3;        //设置时长
+  Call = 4;           //叫分
+  Decide = 5;         //定庄
+  Playing = 6;        //游戏中
+  Opening = 7;        //开奖
+  Over = 8;           //结算
+  Closing = 9;        //关闭
+  SitDirect = 10;      //决定方位
+  RollDice = 11;       //掷骰子
+  WaitOperate = 12;   //等待操作
+  ChangeThree = 13;   //换三张
+  DingQue = 14;       //定缺门
+  CheckTing = 15;     //查听
+  CheckHuaZHu = 16;   //查花猪
 }
 // 方位
 enum Direct {

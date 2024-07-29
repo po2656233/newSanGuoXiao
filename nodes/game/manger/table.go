@@ -52,13 +52,12 @@ func (tb *Table) Init() {
 
 // AddChair 添加椅子
 func (tb *Table) AddChair(player *Player) error {
-	tb.Lock()
-	defer tb.Unlock()
 	// 是否满员了
-	if tb.MaxSitter != Unlimited && tb.MaxSitter < int32(len(tb.sitters)+1) {
+	if tb.MaxSitter != Unlimited && tb.MaxSitter < tb.SitCount()+1 {
 		return fmt.Errorf("已经满员")
 	}
 
+	tb.Lock()
 	playerList := make([]int64, 0)
 	player.PlayerInfo.State = protoMsg.PlayerState_PlayerSitDown
 	resp := &protoMsg.JoinGameReadyQueueResp{
@@ -89,6 +88,8 @@ func (tb *Table) AddChair(player *Player) error {
 		resp.PlayerList = append(resp.PlayerList, sitter.ToSimpleInfo())
 		playerList = append(playerList, info.UserID)
 	}
+	tb.Unlock()
+
 	// 发送给刚坐下的玩家，关于其他玩家的信息
 	player.InRooId = tb.Rid
 	player.InTableId = tb.Id
@@ -169,18 +170,56 @@ func (tb *Table) NextChair(curUid int64) IChair {
 	}
 	for i := 0; i < size; i++ {
 		idx := index + i
-		if idx <= size {
+		if size <= idx {
 			idx -= size
 		}
 		playInfo := tb.sitters[idx].GetPlayerInfo()
-		if playInfo.State < protoMsg.PlayerState_PlayerTrustee && playInfo.State > protoMsg.PlayerState_PlayerAgree {
+		if playInfo.State < protoMsg.PlayerState_PlayerTrustee && playInfo.State >= protoMsg.PlayerState_PlayerSitDown {
 			return tb.sitters[idx]
 		}
 	}
 	return nil
 }
+func (tb *Table) NextChairUID(curUid int64) int64 {
+	chair := tb.NextChair(curUid)
+	if chair == nil {
+		return 0
+	}
+	return chair.GetPlayerInfo().UserID
+}
 func (tb *Table) SitCount() int32 {
 	return atomic.LoadInt32(&tb.sitCount)
+}
+func (tb *Table) GetPlayList() []int64 {
+	tb.RLock()
+	defer tb.RUnlock()
+	list := make([]int64, 0)
+	for _, sit := range tb.sitters {
+		list = append(list, sit.GetPlayerInfo().UserID)
+	}
+	return list
+}
+
+func (tb *Table) GetLookList() []int64 {
+	tb.RLock()
+	defer tb.RUnlock()
+	list := make([]int64, 0)
+	for _, look := range tb.lookers {
+		list = append(list, look.UserID)
+	}
+	return list
+}
+func (tb *Table) GetAllList() []int64 {
+	tb.RLock()
+	defer tb.RUnlock()
+	list := make([]int64, 0)
+	for _, sit := range tb.sitters {
+		list = append(list, sit.GetPlayerInfo().UserID)
+	}
+	for _, look := range tb.lookers {
+		list = append(list, look.UserID)
+	}
+	return utils.Unique(list)
 }
 
 // Reset 重置座位上的玩家
@@ -190,7 +229,7 @@ func (tb *Table) Reset() int64 {
 	tb.Lock()
 	for _, sitter := range tb.sitters {
 		sit, ok := sitter.(*Chair)
-		if ok {
+		if !ok {
 			continue
 		}
 		sit.State = protoMsg.PlayerState_PlayerSitDown
@@ -205,12 +244,6 @@ func (tb *Table) Reset() int64 {
 	}
 	tb.Unlock()
 
-	tb.CorrectCommission()
 	tb.Init()
 	return tb.Id
-}
-
-// CorrectCommission 修正税收
-func (tb *Table) CorrectCommission() {
-
 }

@@ -223,6 +223,8 @@ var StatusText = map[int]string{
 	Game58: "该武将已在阵列,不可重复使用",
 	Game59: "下注金额不得低于底注",
 	Game60: "无效的场景操作",
+	Game61: "设置时长过长",
+	Game62: "设置时长过短",
 
 	Service001: "SDK无效",
 	Service002: "PID无效",
@@ -496,6 +498,8 @@ const (
 	Game58
 	Game59
 	Game60
+	Game61
+	Game62
 )
 
 const (

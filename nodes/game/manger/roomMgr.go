@@ -147,12 +147,12 @@ func (self *Room) AddTable(table *protoMsg.TableInfo, f NewGameFunc) (*Table, er
 		return nil, fmt.Errorf(StatusText[TableInfo08])
 	}
 	tb := &Table{
-		TableInfo:  table,
-		GameHandle: f(table.Gid, table.Id), //创建游戏句柄
-		sitters:    make([]IChair, 0),
-		lookers:    make([]*Player, 0),
-		RWMutex:    sync.RWMutex{},
+		TableInfo: table,
+		sitters:   make([]IChair, 0),
+		lookers:   make([]*Player, 0),
+		RWMutex:   sync.RWMutex{},
 	}
+	tb.GameHandle = f(table.Gid, tb) //创建游戏句柄
 	if tb.GameHandle == nil {
 		return nil, fmt.Errorf("%s 房间ID:%d 牌桌ID:%d(暂不可用) 游戏ID:%d", StatusText[Room17], table.Rid, table.Id, table.Gid)
 	}

@@ -3,7 +3,6 @@ package manger
 import (
 	log "github.com/po2656233/superplace/logger"
 	"strings"
-	. "superman/internal/constant"
 	protoMsg "superman/internal/protocol/gofile"
 	"superman/internal/utils"
 	"sync"
@@ -46,7 +45,7 @@ type IDevice interface {
 }
 
 // NewGameFunc 实例回调(根据桌子号创建游戏)
-type NewGameFunc func(gid, tid int64) IGameOperate
+type NewGameFunc func(gid int64, table *Table) IGameOperate
 type NewSingleGameFunc func(gid, tid int64) IGameOperate
 
 type CalculateSQL func(info CalculateInfo) (nowMoney, factDeduct int64, isOK bool)
@@ -66,13 +65,13 @@ type CalculateInfo struct {
 }
 type Game struct {
 	*protoMsg.GameInfo
-	IsStart    bool    // 第一次启动
-	IsClear    bool    // 是否清场
-	ReadyCount int32   // 已准备人数
-	RunCount   int32   // 运行次数
-	Inning     string  // 牌局号
-	TimeStamp  int64   // 当前状态时刻的时间戳
-	PlayIDList []int64 // 玩家列表
+	IsStart    bool   // 第一次启动
+	IsClear    bool   // 是否清场
+	ReadyCount int32  // 已准备人数
+	RunCount   int32  // 运行次数
+	Inning     string // 牌局号
+	TimeStamp  int64  // 当前状态时刻的时间戳
+	Timer      *time.Timer
 	lk         sync.RWMutex
 }
 
@@ -118,6 +117,10 @@ func (g *Game) Reset() bool {
 	g.RunCount++
 	g.ReadyCount = 0
 	g.IsStart = false
+	if g.Timer == nil {
+		g.Timer = &time.Timer{}
+	}
+	g.Timer.Reset(0)
 	g.TimeStamp = time.Now().Unix()
 	g.Inning = strings.ToUpper(utils.Md5Sum(g.Name + time.Now().String()))
 	return true
@@ -132,12 +135,6 @@ func (self *Game) ChangeState(state protoMsg.GameScene) {
 
 // Ready 准备
 func (g *Game) Ready(args []interface{}) {
-	play := args[0].(*Player)
-	if g.MaxPlayer != Unlimited && g.MaxPlayer < int32(len(g.PlayIDList)) {
-		return
-	}
-	g.PlayIDList = append(g.PlayIDList, play.UserID)
-	g.PlayIDList = utils.Unique(g.PlayIDList)
 }
 
 // Scene 游戏场景
@@ -158,46 +155,17 @@ func (g *Game) Start(args []interface{}) {
 // Playing 游 戏(下分|下注)
 func (g *Game) Playing(args []interface{}) {
 	_ = args
+	g.ChangeState(protoMsg.GameScene_Playing)
 }
 
 // Over 结 算
 func (g *Game) Over(args []interface{}) {
 	_ = args
+	g.ChangeState(protoMsg.GameScene_Over)
 }
 
 // UpdateInfo 更新信息 如玩家进入或离开
 func (g *Game) UpdateInfo(args []interface{}) bool {
-	if len(args) < 2 {
-		return false
-	}
-	flag, ok := args[0].(protoMsg.PlayerState)
-	uid, ok1 := args[1].(int64)
-	if !ok || !ok1 {
-		return false
-	}
-
-	switch flag {
-	case protoMsg.PlayerState_PlayerSitDown: //新增玩家
-		{
-			g.lk.Lock()
-			g.PlayIDList = append(g.PlayIDList, uid)
-			g.lk.Unlock()
-		}
-	case protoMsg.PlayerState_PlayerStandUp: //删除玩家
-		{
-			scene := g.GameInfo.Scene
-			// 空闲  结算 关闭 除了这三种场景，一般不允许玩家离开
-			if scene != protoMsg.GameScene_Free && scene != protoMsg.GameScene_Over && scene != protoMsg.GameScene_Closing {
-				return false
-			}
-			g.lk.Lock()
-			g.PlayIDList = utils.RemoveValue(g.PlayIDList, uid)
-			g.lk.Unlock()
-		}
-	default:
-		return false
-	}
-
 	return true
 }
 

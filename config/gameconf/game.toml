@@ -1,0 +1,82 @@
+[chinesechess]
+col = 9
+row = 10
+
+[chinesechess.duration]
+confirm = 5
+free = 20
+open = 3
+over = 3
+play = 30
+ready = 5
+settime = 15
+start = 5
+
+[chips]
+general = [1, 5, 10, 20, 50, 100]
+high = [50, 100, 200, 500, 1000, 10000]
+middle = [10, 50, 100, 500, 1000, 5000]
+other = [1, 5, 25, 50, 100]
+
+[duration]
+free = 20
+open = 3
+over = 3
+play = 30
+start = 5
+
+[landlord]
+maxperson = 5
+minperson = 3
+
+[landlord.duration]
+call = 5
+deal = 3
+double = 1
+free = 20
+open = 3
+over = 3
+play = 30
+ready = 5
+start = 5
+
+[mahjong]
+maxperson = 4
+minperson = 4
+
+[mahjong.duration]
+deal = 5
+decide = 2
+direct = 3
+free = 20
+open = 3
+operate = 3
+over = 3
+play = 30
+roll = 3
+start = 5
+
+[mahjonger]
+maxperson = 2
+minperson = 2
+
+[mahjonger.duration]
+deal = 5
+decide = 3
+direct = 3
+free = 20
+open = 3
+operate = 3
+over = 3
+play = 30
+roll = 2
+start = 5
+
+[sanguoxiao]
+col = 8
+free = 20
+open = 3
+over = 3
+play = 30
+row = 8
+start = 5
