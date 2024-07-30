@@ -76,6 +76,8 @@ const (
 	Win  = 1 // 赢
 	Draw = 2 // 平局
 
+	Ten       = 10
+	Twenty    = 20
 	Limit     = 99 // 限制
 	Unlimited = -1
 )

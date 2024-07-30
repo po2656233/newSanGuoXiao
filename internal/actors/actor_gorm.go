@@ -311,7 +311,7 @@ func (self *ActorDB) checkClassify() (user []*sqlmodel.Kindinfo, err error) {
 	return
 }
 
-// GetRooms 获取房间列表
+// GetRooms 获取房间列表 校验TableCount
 func (self *ActorDB) checkRooms(hostid, startTime int64) (rooms []*sqlmodel.Room, err error) {
 	rooms = make([]*sqlmodel.Room, 0)
 	room := sqlmodel.Room{}

@@ -4,6 +4,7 @@ import (
 	log "github.com/po2656233/superplace/logger"
 	"google.golang.org/protobuf/proto"
 	"strings"
+	. "superman/internal/constant"
 	protoMsg "superman/internal/protocol/gofile"
 	"superman/internal/utils"
 	"sync"
@@ -159,7 +160,12 @@ func (self *Game) ChangeStateAndWork(state protoMsg.GameScene, resp proto.Messag
 	if resp != nil {
 		GetClientMgr().NotifyOthers(self.PlayerList, resp)
 	}
-	log.Infof("[%v:%v]   \t当前状态:%v ", self.Name, self.Id, protoMsg.GameScene_name[int32(state)])
+	if len(self.PlayerList) < Ten {
+		log.Infof("[%v:%v]   \t当前状态:%v 当前玩家列表%v", self.Name, self.Id, protoMsg.GameScene_name[int32(state)], self.PlayerList)
+	} else {
+		log.Infof("[%v:%v]   \t当前状态:%v ", self.Name, self.Id, protoMsg.GameScene_name[int32(state)])
+	}
+
 }
 
 // Ready 准备

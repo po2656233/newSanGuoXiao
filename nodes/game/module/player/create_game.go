@@ -17,6 +17,8 @@ func NewGame(gid int64, tb *manger.Table) manger.IGameOperate {
 	if info == nil || info.State == protoMsg.GameState_InitTB || info.State == protoMsg.GameState_CloseTB {
 		return nil
 	}
+	// 使用牌桌ID
+	info.Id = tb.Id
 	game := &manger.Game{
 		GameInfo:   info,
 		IsStart:    true,
