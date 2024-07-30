@@ -52,15 +52,14 @@ func (self *Chinesechess) Reset() {
 
 // Scene 场景
 func (self *Chinesechess) Scene(args []interface{}) {
-	agent := args[0].(mgr.Agent)
-	userData := agent.UserData()
-	person := userData.(*mgr.Player)
+	person := args[0].(*mgr.Player)
 	if person == nil {
 		log.Warnf("[%v:%v][Scene:%v] person is nil.", self.Name, self.T.Id, self.GameInfo.Scene)
 		return
 	}
 	//
-	mgr.GetClientMgr().SendTo(person.UserID, &protoMsg.ChineseChessSceneResp{
+	uid := person.UserID
+	mgr.GetClientMgr().SendTo(uid, &protoMsg.ChineseChessSceneResp{
 		TimeStamp: time.Now().Unix(),
 		Inning:    self.Inning,
 		Board:     self.board,
@@ -82,32 +81,32 @@ func (self *Chinesechess) Scene(args []interface{}) {
 	}
 	switch self.GameInfo.Scene {
 	case protoMsg.GameScene_Setting: //
-		mgr.GetClientMgr().SendData(agent, &protoMsg.ChineseChessStateSetResp{
+		mgr.GetClientMgr().SendTo(uid, &protoMsg.ChineseChessStateSetResp{
 			Times: getTimeInfo(YamlObj.Chinesechess.Duration.Settime),
 			Uid:   self.curUid,
 		})
 	case protoMsg.GameScene_WaitOperate: //
-		mgr.GetClientMgr().SendData(agent, &protoMsg.ChineseChessStateConfirmResp{
+		mgr.GetClientMgr().SendTo(uid, &protoMsg.ChineseChessStateConfirmResp{
 			Times: getTimeInfo(YamlObj.Chinesechess.Duration.Confirm),
 			Uid:   self.curUid,
 		})
 	case protoMsg.GameScene_Start: // 开始
-		mgr.GetClientMgr().SendData(agent, &protoMsg.ChineseChessStateStartResp{
+		mgr.GetClientMgr().SendTo(uid, &protoMsg.ChineseChessStateStartResp{
 			Times: getTimeInfo(YamlObj.Chinesechess.Duration.Start),
 			Uid:   self.curUid,
 		})
 	case protoMsg.GameScene_Playing: // 下棋
-		mgr.GetClientMgr().SendData(agent, &protoMsg.ChineseChessStatePlayingResp{
+		mgr.GetClientMgr().SendTo(uid, &protoMsg.ChineseChessStatePlayingResp{
 			Times: getTimeInfo(YamlObj.Chinesechess.Duration.Play),
 			Uid:   self.curUid,
 		})
 	case protoMsg.GameScene_Opening: // 开奖
-		mgr.GetClientMgr().SendData(agent, &protoMsg.ChineseChessStateOpenResp{
+		mgr.GetClientMgr().SendTo(uid, &protoMsg.ChineseChessStateOpenResp{
 			Times:  getTimeInfo(YamlObj.Chinesechess.Duration.Open),
 			WinUid: self.winUid,
 		})
 	case protoMsg.GameScene_Over: // 结算
-		mgr.GetClientMgr().SendData(agent, &protoMsg.ChineseChessStateOverResp{
+		mgr.GetClientMgr().SendTo(uid, &protoMsg.ChineseChessStateOverResp{
 			Times: getTimeInfo(YamlObj.Chinesechess.Duration.Over),
 			Result: &protoMsg.ChineseChessResult{
 				RedCamp:   self.redCamp,
@@ -115,7 +114,7 @@ func (self *Chinesechess) Scene(args []interface{}) {
 			},
 		})
 	default:
-		log.Warnf("[%v:%v][Scene:%v] person:%v no have scence.", self.Name, self.T.Id, self.GameInfo.Scene, person.UserID)
+		log.Warnf("[%v:%v][Scene:%v] person:%v no have scence.", self.Name, self.T.Id, self.GameInfo.Scene, uid)
 	}
 }
 

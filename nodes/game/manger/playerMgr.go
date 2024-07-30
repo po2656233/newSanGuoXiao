@@ -154,7 +154,7 @@ func (itself *Player) Enter(args []interface{}) { //入场
 		return
 	}
 
-	itself.GameHandle.Scene([]interface{}{agent}) // 【进入-> 游戏场景】
+	itself.GameHandle.Scene([]interface{}{itself}) // 【进入-> 游戏场景】
 }
 
 func (itself *Player) Exit() bool { //退出

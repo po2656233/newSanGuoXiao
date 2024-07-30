@@ -21,7 +21,7 @@ func enter(args []interface{}) {
 	person := mgr.GetPlayerMgr().Get(uid)
 	// 玩家仍在游戏中
 	if person.GameHandle != nil {
-		person.GameHandle.Scene([]interface{}{agent})
+		person.GameHandle.Scene([]interface{}{person})
 		return
 	}
 

@@ -109,8 +109,8 @@ func (tb *Table) AddChair(player *Player) error {
 		if (tb.MaxSitter == Unlimited && tb.sitCount == Default) || tb.MaxSitter == tb.sitCount {
 			tb.GameHandle.Start(nil)
 		}
-
 	}
+	tb.GameHandle.Scene([]interface{}{player})
 
 	return nil
 }
