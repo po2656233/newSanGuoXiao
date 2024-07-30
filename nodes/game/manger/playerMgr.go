@@ -52,7 +52,7 @@ func GetPlayerMgr() *PlayerManger {
 	return manger
 }
 
-func ToPlayer(info *protoMsg.PlayerInfo) *Player {
+func ToPlayer(info *protoMsg.UserInfo) *Player {
 	return &Player{
 		PlayerInfo: &protoMsg.PlayerInfo{
 			UserID:    info.UserID,
@@ -60,7 +60,7 @@ func ToPlayer(info *protoMsg.PlayerInfo) *Player {
 			Name:      info.Name,
 			FaceID:    info.FaceID,
 			Age:       info.Age,
-			Sex:       info.Sex,
+			Sex:       info.Gender,
 			YuanBao:   info.YuanBao,
 			Coin:      info.Coin,
 			Level:     info.Level,
@@ -68,9 +68,9 @@ func ToPlayer(info *protoMsg.PlayerInfo) *Player {
 			State:     0,
 			Gold:      0,
 			Money:     info.Money,
-			InRooId:   info.InRooId,
-			InTableId: info.InTableId,
-			InChairId: info.InChairId,
+			InRooId:   0,
+			InTableId: 0,
+			InChairId: 0,
 		},
 	}
 }
@@ -157,19 +157,21 @@ func (itself *Player) Enter(args []interface{}) { //入场
 	itself.GameHandle.Scene([]interface{}{agent}) // 【进入-> 游戏场景】
 }
 
-func (itself *Player) Exit() { //退出
-	if itself.GameHandle != nil && itself.GameHandle.UpdateInfo([]interface{}{protoMsg.PlayerState_PlayerStandUp, itself.UserID}) {
-		itself.State = protoMsg.PlayerState_PlayerStandUp
-		if rm := GetRoomMgr().GetRoom(itself.InRooId); rm != nil {
-			if t := rm.GetTable(itself.InTableId); t != nil {
-				t.RemoveChair(itself.UserID)
-			}
-		}
-		itself.InRooId = INVALID
-		itself.InTableId = INVALID
-		itself.InChairId = INVALID
-		itself.GameHandle = nil
+func (itself *Player) Exit() bool { //退出
+	if itself.GameHandle == nil || false == itself.GameHandle.UpdateInfo([]interface{}{protoMsg.PlayerState_PlayerStandUp, itself.UserID}) {
+		return false
 	}
+	itself.State = protoMsg.PlayerState_PlayerStandUp
+	if rm := GetRoomMgr().GetRoom(itself.InRooId); rm != nil {
+		if t := rm.GetTable(itself.InTableId); t != nil {
+			t.RemoveChair(itself.UserID)
+		}
+	}
+	itself.InRooId = INVALID
+	itself.InTableId = INVALID
+	itself.InChairId = INVALID
+	itself.GameHandle = nil
+	return true
 }
 
 func (itself *Player) UpdateState(flag protoMsg.PlayerState, args []interface{}) bool {

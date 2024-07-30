@@ -127,7 +127,7 @@ func NewChair(id int32, gid int64, player *Player) IChair {
 		score:      player.Gold,
 		total:      0,
 		gain:       0,
-		timer:      &time.Timer{},
+		timer:      time.NewTimer(0),
 	}
 	switch gid {
 	case Mahjong:

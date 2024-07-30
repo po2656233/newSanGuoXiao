@@ -54,7 +54,7 @@ message GetUserInfoReq{
   int64 uid = 1;
 }
 message GetUserInfoResp{
-  UserSimpleInfo info = 1;
+  UserInfo info = 1;
 }
 ////////////////选择分类//////////////////////////////////////
 //选择分类

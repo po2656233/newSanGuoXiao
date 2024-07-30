@@ -44,6 +44,9 @@ func (self *Chinesechess) Reset() {
 	self.Game.Reset()
 	self.winUid = 0
 	self.initBord()
+	self.SetPlaylist(self.T.GetPlayList())
+	self.redCamp = nil
+	self.blackCamp = nil
 	self.timeout = YamlObj.Chinesechess.Duration.Play
 }
 
@@ -163,12 +166,35 @@ func (self *Chinesechess) Playing(args []interface{}) {
 	}
 
 	person := agent.UserData().(*mgr.Player)
+	if person.UserID != self.curUid {
+		mgr.GetClientMgr().SendResult(agent, FAILED, StatusText[Game21])
+		return
+	}
+	if !isValidMove(self.board, m.Origin, m.Target) {
+		mgr.GetClientMgr().SendResult(agent, FAILED, StatusText[Game37])
+		return
+	}
 	msg := &protoMsg.ChineseChessMoveResp{
 		Uid:    person.UserID,
 		Origin: m.Origin,
 		Target: m.Target,
 	}
+	count := 0
+	for _, cell := range self.board.Cells {
+		if cell.Row == m.Origin.Row && cell.Col == m.Origin.Col {
+			cell.Core = protoMsg.XQPiece_NoXQPiece
+			count++
+		} else if cell.Row == m.Target.Row && cell.Col == m.Target.Col {
+			cell.Core = m.Target.Core
+			count++
+		}
+		if count == 2 {
+			break
+		}
+	}
 	mgr.GetClientMgr().NotifyOthers(self.T.GetPlayList(), msg)
+	self.Timer.Stop()
+	self.onPlay()
 }
 
 // Over 结 算
@@ -214,6 +240,9 @@ func (self *Chinesechess) ReadyOP(args []interface{}) {
 		IsReady: m.IsReady,
 	}
 	mgr.GetClientMgr().NotifyOthers(self.T.GetPlayList(), msg)
+	if self.redCamp != nil && self.blackCamp != nil {
+		self.onSetTime()
+	}
 }
 
 // SetTimeOP 设置时长
@@ -230,13 +259,24 @@ func (self *Chinesechess) SetTimeOP(args []interface{}) {
 		mgr.GetClientMgr().SendResult(agent, FAILED, StatusText[Game61])
 		return
 	}
+	if m.Timeout <= INVALID {
+		mgr.GetClientMgr().SendResult(agent, FAILED, StatusText[Game62])
+		return
+	}
+
 	person := agent.UserData().(*mgr.Player)
+	if person.UserID != self.curUid {
+		mgr.GetClientMgr().SendResult(agent, FAILED, StatusText[Game21])
+		return
+	}
+
 	self.timeout = m.Timeout
 	msg := &protoMsg.ChineseChessSetTimeResp{
 		Uid:     person.UserID,
 		Timeout: m.Timeout,
 	}
 	mgr.GetClientMgr().NotifyOthers(self.T.GetPlayList(), msg)
+	self.onConfirmTime()
 }
 
 // ConfirmOP 确认时长
@@ -247,6 +287,14 @@ func (self *Chinesechess) ConfirmOP(args []interface{}) {
 	agent := args[1].(mgr.Agent)
 	if self.GameInfo.Scene != protoMsg.GameScene_WaitOperate {
 		mgr.GetClientMgr().SendResult(agent, FAILED, StatusText[Game04])
+		return
+	}
+	if !m.IsAgree {
+		if self.Timer != nil {
+			self.Timer.Stop()
+		}
+		self.Reset()
+		self.onReady()
 		return
 	}
 
@@ -261,8 +309,6 @@ func (self *Chinesechess) ConfirmOP(args []interface{}) {
 // /////////////////////////[定时器事件]//////////////////////////////////////////
 
 func (self *Chinesechess) onReady() {
-	self.ChangeState(protoMsg.GameScene_Ready)
-	time.AfterFunc(time.Duration(YamlObj.Chinesechess.Duration.Ready)*time.Second, self.onSetTime)
 	list := self.T.GetPlayList()
 	if self.redCamp != nil {
 		list = utils.RemoveValue(list, self.redCamp.Uid)
@@ -270,26 +316,26 @@ func (self *Chinesechess) onReady() {
 	if self.blackCamp != nil {
 		list = utils.RemoveValue(list, self.blackCamp.Uid)
 	}
-	GlobalSender.NotifyOthers(list, &protoMsg.ChineseChessStateReadyResp{
+	self.SetPlaylist(list)
+	resp := &protoMsg.ChineseChessStateReadyResp{
 		Times: &protoMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			OutTime:   0,
 			WaitTime:  YamlObj.Chinesechess.Duration.Ready,
 			TotalTime: YamlObj.Chinesechess.Duration.Ready,
 		},
-	})
+	}
+	self.ChangeStateAndWork(protoMsg.GameScene_Ready, resp, YamlObj.Chinesechess.Duration.Ready, self.onSetTime)
 }
 
 func (self *Chinesechess) onSetTime() {
-	self.ChangeState(protoMsg.GameScene_Setting)
 	if self.blackCamp == nil || self.redCamp == nil {
 		self.onReady()
 		return
 	}
+	self.SetPlaylist(self.T.GetPlayList())
 	self.curUid = self.redCamp.Uid
-	time.AfterFunc(time.Duration(YamlObj.Chinesechess.Duration.Settime)*time.Second, self.onConfirmTime)
-	playList := self.T.GetPlayList()
-	GlobalSender.NotifyOthers(playList, &protoMsg.ChineseChessStateSetResp{
+	resp := &protoMsg.ChineseChessStateSetResp{
 		Times: &protoMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			OutTime:   0,
@@ -297,15 +343,13 @@ func (self *Chinesechess) onSetTime() {
 			TotalTime: YamlObj.Chinesechess.Duration.Settime,
 		},
 		Uid: self.curUid,
-	})
+	}
+	self.ChangeStateAndWork(protoMsg.GameScene_Setting, resp, YamlObj.Chinesechess.Duration.Settime, self.onConfirmTime)
 }
 
 func (self *Chinesechess) onConfirmTime() {
-	self.ChangeState(protoMsg.GameScene_WaitOperate)
 	self.curUid = self.blackCamp.Uid
-	time.AfterFunc(time.Duration(YamlObj.Chinesechess.Duration.Confirm)*time.Second, self.onStart)
-	playList := self.T.GetPlayList()
-	GlobalSender.NotifyOthers(playList, &protoMsg.ChineseChessStateConfirmResp{
+	resp := &protoMsg.ChineseChessStateConfirmResp{
 		Times: &protoMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			OutTime:   0,
@@ -313,13 +357,12 @@ func (self *Chinesechess) onConfirmTime() {
 			TotalTime: YamlObj.Chinesechess.Duration.Confirm,
 		},
 		Uid: self.curUid,
-	})
+	}
+	self.ChangeStateAndWork(protoMsg.GameScene_Confirm, resp, YamlObj.Chinesechess.Duration.Confirm, self.onStart)
+
 }
 func (self *Chinesechess) onStart() {
-	self.ChangeState(protoMsg.GameScene_Start)
-	time.AfterFunc(time.Duration(YamlObj.Chinesechess.Duration.Start)*time.Second, self.onPlay)
-	playList := self.T.GetPlayList()
-	GlobalSender.NotifyOthers(playList, &protoMsg.ChineseChessStateStartResp{
+	resp := &protoMsg.ChineseChessStateStartResp{
 		Times: &protoMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			OutTime:   0,
@@ -327,12 +370,11 @@ func (self *Chinesechess) onStart() {
 			TotalTime: YamlObj.Chinesechess.Duration.Start,
 		},
 		Uid: self.curUid,
-	})
-
+	}
+	self.ChangeStateAndWork(protoMsg.GameScene_Start, resp, YamlObj.Chinesechess.Duration.Start, self.onPlay)
 }
 
 func (self *Chinesechess) onPlay() {
-	self.ChangeState(protoMsg.GameScene_Playing)
 	self.curUid = self.T.NextChairUID(self.curUid)
 	if self.curUid == INVALID {
 		log.Errorf("出现严重错误,当前玩家ID %v 出错", self.curUid)
@@ -342,25 +384,21 @@ func (self *Chinesechess) onPlay() {
 		self.onOpen()
 		return
 	}
-	self.Timer = time.AfterFunc(time.Duration(YamlObj.Chinesechess.Duration.Play)*time.Second, self.onPlay)
-	playList := self.T.GetPlayList()
-	GlobalSender.NotifyOthers(playList, &protoMsg.ChineseChessStatePlayingResp{
+	resp := &protoMsg.ChineseChessStatePlayingResp{
 		Times: &protoMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			OutTime:   0,
-			WaitTime:  YamlObj.Chinesechess.Duration.Play,
-			TotalTime: YamlObj.Chinesechess.Duration.Play,
+			WaitTime:  self.timeout,
+			TotalTime: self.timeout,
 		},
 		Uid:      self.curUid,
 		NowBoard: self.board,
-	})
+	}
+	self.ChangeStateAndWork(protoMsg.GameScene_Playing, resp, self.timeout, self.onPlay)
 }
 
 func (self *Chinesechess) onOpen() {
-	self.ChangeState(protoMsg.GameScene_Opening)
-	time.AfterFunc(time.Duration(YamlObj.Chinesechess.Duration.Open)*time.Second, self.onOver)
-	playList := self.T.GetPlayList()
-	GlobalSender.NotifyOthers(playList, &protoMsg.ChineseChessStateOpenResp{
+	resp := &protoMsg.ChineseChessStateOpenResp{
 		Times: &protoMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			OutTime:   0,
@@ -369,13 +407,11 @@ func (self *Chinesechess) onOpen() {
 		},
 		WinUid:   self.winUid,
 		NowBoard: self.board,
-	})
+	}
+	self.ChangeStateAndWork(protoMsg.GameScene_Opening, resp, YamlObj.Chinesechess.Duration.Open, self.onOver)
 }
 func (self *Chinesechess) onOver() {
-	self.ChangeState(protoMsg.GameScene_Over)
-	time.AfterFunc(time.Duration(YamlObj.Chinesechess.Duration.Over)*time.Second, self.onReady)
-	playList := self.T.GetPlayList()
-	GlobalSender.NotifyOthers(playList, &protoMsg.ChineseChessStateOverResp{
+	resp := &protoMsg.ChineseChessStateOverResp{
 		Times: &protoMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			OutTime:   0,
@@ -386,7 +422,8 @@ func (self *Chinesechess) onOver() {
 			RedCamp:   self.redCamp,
 			BlackCamp: self.blackCamp,
 		},
-	})
+	}
+	self.ChangeStateAndWork(protoMsg.GameScene_Over, resp, YamlObj.Chinesechess.Duration.Over, self.onReady)
 }
 
 // ///////////////////////[初始化]///////////////////////////////////
@@ -395,182 +432,178 @@ func (self *Chinesechess) initBord() {
 	self.board = &protoMsg.XQBoardInfo{
 		Cells: make([]*protoMsg.XQGrid, 0),
 	}
-	rowHalf := RowCount / 2
-	for row := 0; row < rowHalf; row++ {
-		if row == 0 {
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(0),
-				Core: protoMsg.XQPiece_BlackJu,
-			})
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(1),
-				Core: protoMsg.XQPiece_BlackMa,
-			})
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(2),
-				Core: protoMsg.XQPiece_BlackXiang,
-			})
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(3),
-				Core: protoMsg.XQPiece_BlackShi,
-			})
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(4),
-				Core: protoMsg.XQPiece_BlackJiang,
-			})
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(5),
-				Core: protoMsg.XQPiece_BlackShi,
-			})
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(6),
-				Core: protoMsg.XQPiece_BlackXiang,
-			})
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(7),
-				Core: protoMsg.XQPiece_BlackMa,
-			})
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(8),
-				Core: protoMsg.XQPiece_BlackJu,
-			})
-		}
-		if row == 2 {
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(1),
-				Core: protoMsg.XQPiece_BlackPao,
-			})
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(7),
-				Core: protoMsg.XQPiece_BlackPao,
-			})
-		}
-		if row == 3 {
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(0),
-				Core: protoMsg.XQPiece_BlackZu,
-			})
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(2),
-				Core: protoMsg.XQPiece_BlackZu,
-			})
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(4),
-				Core: protoMsg.XQPiece_BlackZu,
-			})
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(6),
-				Core: protoMsg.XQPiece_BlackZu,
-			})
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(8),
-				Core: protoMsg.XQPiece_BlackZu,
-			})
-		}
-	}
-	for row := RowCount - 1; row >= rowHalf; row-- {
-		if row == RowCount-1 {
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(0),
-				Core: protoMsg.XQPiece_RedJu,
-			})
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(1),
-				Core: protoMsg.XQPiece_RedMa,
-			})
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(2),
-				Core: protoMsg.XQPiece_RedXiang,
-			})
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(3),
-				Core: protoMsg.XQPiece_RedShi,
-			})
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(4),
-				Core: protoMsg.XQPiece_RedShuai,
-			})
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(5),
-				Core: protoMsg.XQPiece_RedShi,
-			})
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(6),
-				Core: protoMsg.XQPiece_RedXiang,
-			})
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(7),
-				Core: protoMsg.XQPiece_RedMa,
-			})
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(8),
-				Core: protoMsg.XQPiece_RedJu,
-			})
-		}
-		if row == RowCount-3 {
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(1),
-				Core: protoMsg.XQPiece_RedPao,
-			})
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(7),
-				Core: protoMsg.XQPiece_RedPao,
-			})
-		}
-		if row == RowCount-4 {
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(0),
-				Core: protoMsg.XQPiece_RedBing,
-			})
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(2),
-				Core: protoMsg.XQPiece_RedBing,
-			})
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(4),
-				Core: protoMsg.XQPiece_RedBing,
-			})
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(6),
-				Core: protoMsg.XQPiece_RedBing,
-			})
-			self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
-				Row:  int32(row),
-				Col:  int32(8),
-				Core: protoMsg.XQPiece_RedBing,
-			})
-		}
-	}
+	// 第一排
+	row := 0
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(0),
+		Core: protoMsg.XQPiece_RedJu,
+	})
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(1),
+		Core: protoMsg.XQPiece_RedMa,
+	})
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(2),
+		Core: protoMsg.XQPiece_RedXiang,
+	})
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(3),
+		Core: protoMsg.XQPiece_RedShi,
+	})
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(4),
+		Core: protoMsg.XQPiece_RedShuai,
+	})
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(5),
+		Core: protoMsg.XQPiece_RedShi,
+	})
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(6),
+		Core: protoMsg.XQPiece_RedXiang,
+	})
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(7),
+		Core: protoMsg.XQPiece_RedMa,
+	})
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(8),
+		Core: protoMsg.XQPiece_RedJu,
+	})
+	// 红炮
+	row = 2
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(1),
+		Core: protoMsg.XQPiece_RedPao,
+	})
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(7),
+		Core: protoMsg.XQPiece_RedPao,
+	})
+	// 红兵
+	row = 3
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(0),
+		Core: protoMsg.XQPiece_RedBing,
+	})
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(2),
+		Core: protoMsg.XQPiece_RedBing,
+	})
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(4),
+		Core: protoMsg.XQPiece_RedBing,
+	})
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(6),
+		Core: protoMsg.XQPiece_RedBing,
+	})
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(8),
+		Core: protoMsg.XQPiece_RedBing,
+	})
 
+	// 黑卒
+	row = 6
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(0),
+		Core: protoMsg.XQPiece_BlackZu,
+	})
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(2),
+		Core: protoMsg.XQPiece_BlackZu,
+	})
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(4),
+		Core: protoMsg.XQPiece_BlackZu,
+	})
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(6),
+		Core: protoMsg.XQPiece_BlackZu,
+	})
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(8),
+		Core: protoMsg.XQPiece_BlackZu,
+	})
+	// 黑炮
+	row = 7
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(1),
+		Core: protoMsg.XQPiece_BlackPao,
+	})
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(7),
+		Core: protoMsg.XQPiece_BlackPao,
+	})
+
+	// 最后一排
+	row = 9
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(0),
+		Core: protoMsg.XQPiece_BlackJu,
+	})
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(1),
+		Core: protoMsg.XQPiece_BlackMa,
+	})
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(2),
+		Core: protoMsg.XQPiece_BlackXiang,
+	})
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(3),
+		Core: protoMsg.XQPiece_BlackShi,
+	})
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(4),
+		Core: protoMsg.XQPiece_BlackJiang,
+	})
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(5),
+		Core: protoMsg.XQPiece_BlackShi,
+	})
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(6),
+		Core: protoMsg.XQPiece_BlackXiang,
+	})
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(7),
+		Core: protoMsg.XQPiece_BlackMa,
+	})
+	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+		Row:  int32(row),
+		Col:  int32(8),
+		Core: protoMsg.XQPiece_BlackJu,
+	})
 }

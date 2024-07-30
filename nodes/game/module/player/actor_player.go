@@ -104,7 +104,7 @@ func (p *ActorPlayer) request(session *cproto.Session, req *protoMsg.Request) {
 		if errCode == 0 && data != nil {
 			resp, ok := data.(*protoMsg.GetUserInfoResp)
 			if ok && resp.Info != nil {
-				person = mgr.SimpleToPlayer(resp.Info)
+				person = mgr.ToPlayer(resp.Info)
 				online.BindPlayer(uid, person.UserID, p.PathString())
 				mgr.GetPlayerMgr().Append(person)
 			}
@@ -154,13 +154,14 @@ func (p *ActorPlayer) OnStop() {
 		clog.Warnf("OnStop uid = %d", p.uid)
 		return
 	}
+	// 移除客户端，避免再向其反馈消息
+	mgr.GetClientMgr().DeleteClient(p.Session.Uid)
+	// 玩家退出 并且从玩家管理中删除信息
 	person := mgr.GetPlayerMgr().Get(p.Session.Uid)
-	if person != nil {
-		person.Exit()
-		mgr.GetClientMgr().DeleteClient(person.UserID)
+	if person != nil && person.Exit() {
 		mgr.GetPlayerMgr().Delete(person.UserID)
+		person = nil
 	}
-
 }
 
 //////////////////////////////实现Agent/////////////////////////////////////////////////////////

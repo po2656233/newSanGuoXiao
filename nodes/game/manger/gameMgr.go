@@ -2,6 +2,7 @@ package manger
 
 import (
 	log "github.com/po2656233/superplace/logger"
+	"google.golang.org/protobuf/proto"
 	"strings"
 	protoMsg "superman/internal/protocol/gofile"
 	"superman/internal/utils"
@@ -71,8 +72,9 @@ type Game struct {
 	RunCount   int32  // 运行次数
 	Inning     string // 牌局号
 	TimeStamp  int64  // 当前状态时刻的时间戳
+	PlayerList []int64
 	Timer      *time.Timer
-	lk         sync.RWMutex
+	playlistLK sync.Mutex
 }
 
 type GameMgr struct {
@@ -117,24 +119,52 @@ func (g *Game) Reset() bool {
 	g.RunCount++
 	g.ReadyCount = 0
 	g.IsStart = false
-	if g.Timer == nil {
-		g.Timer = &time.Timer{}
+	if g.Timer != nil {
+		g.Timer.Stop()
 	}
-	g.Timer.Reset(0)
 	g.TimeStamp = time.Now().Unix()
 	g.Inning = strings.ToUpper(utils.Md5Sum(g.Name + time.Now().String()))
 	return true
+}
+
+func (g *Game) SetPlaylist(uids []int64) {
+	g.playlistLK.Lock()
+	defer g.playlistLK.Unlock()
+	g.PlayerList = uids
+}
+
+func (g *Game) RemovePlayer(uid int64) {
+	g.playlistLK.Lock()
+	defer g.playlistLK.Unlock()
+	g.PlayerList = utils.RemoveValue(g.PlayerList, uid)
 }
 
 // ChangeState 改变游戏状态
 func (self *Game) ChangeState(state protoMsg.GameScene) {
 	self.GameInfo.Scene = state
 	self.TimeStamp = time.Now().Unix()
-	log.Debugf("[%v:%v]   \t当前状态:%v ", self.Name, self.Id, protoMsg.GameScene_name[int32(self.GameInfo.Scene)])
+	log.Infof("[%v:%v]   \t当前状态:%v ", self.Name, self.Id, protoMsg.GameScene_name[int32(state)])
+}
+
+// ChangeStateAndWork 改变游戏状态
+func (self *Game) ChangeStateAndWork(state protoMsg.GameScene, resp proto.Message, timeout int32, f func()) {
+	self.GameInfo.Scene = state
+	self.TimeStamp = time.Now().Unix()
+	if timeout > 0 {
+		if self.Timer != nil {
+			self.Timer.Stop()
+		}
+		self.Timer = time.AfterFunc(time.Duration(timeout)*time.Second, f)
+	}
+	if resp != nil {
+		GetClientMgr().NotifyOthers(self.PlayerList, resp)
+	}
+	log.Infof("[%v:%v]   \t当前状态:%v ", self.Name, self.Id, protoMsg.GameScene_name[int32(state)])
 }
 
 // Ready 准备
 func (g *Game) Ready(args []interface{}) {
+	_ = args
 }
 
 // Scene 游戏场景
@@ -166,6 +196,23 @@ func (g *Game) Over(args []interface{}) {
 
 // UpdateInfo 更新信息 如玩家进入或离开
 func (g *Game) UpdateInfo(args []interface{}) bool {
+	flag, ok := args[0].(protoMsg.PlayerState)
+	if !ok {
+		return false
+	}
+	uid, ok1 := args[1].(int64)
+	if !ok1 {
+		return false
+	}
+	switch flag {
+	case protoMsg.PlayerState_PlayerStandUp:
+		if protoMsg.GameScene_Start <= g.GameInfo.Scene && g.GameInfo.Scene <= protoMsg.GameScene_Over {
+			return false
+		}
+	case protoMsg.PlayerState_PlayerGiveUp:
+		g.RemovePlayer(uid)
+
+	}
 	return true
 }
 

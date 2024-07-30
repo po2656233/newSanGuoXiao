@@ -86,21 +86,22 @@ enum GameState {
 enum GameScene {
   Free = 0;           //空闲
   Ready = 1;          //准备
-  Start = 2;          //开始
-  Setting = 3;        //设置时长
-  Call = 4;           //叫分
-  Decide = 5;         //定庄
-  Playing = 6;        //游戏中
-  Opening = 7;        //开奖
-  Over = 8;           //结算
-  Closing = 9;        //关闭
-  SitDirect = 10;      //决定方位
-  RollDice = 11;       //掷骰子
+  Setting = 2;        //设置时长
+  Confirm = 3;        // 确认
+  Start = 4;          //开始---此时,不能随意退桌。除非放弃游戏
+  Call = 5;           //叫分
+  Decide = 6;         //定庄
+  SitDirect = 7;      //决定方位
+  RollDice = 8;       //掷骰子
+  ChangeThree = 9;    //换三张
+  DingQue = 10;       //定缺门
+  Playing = 11;       //游戏中
   WaitOperate = 12;   //等待操作
-  ChangeThree = 13;   //换三张
-  DingQue = 14;       //定缺门
-  CheckTing = 15;     //查听
-  CheckHuaZHu = 16;   //查花猪
+  CheckTing = 13;      //查听
+  CheckHuaZHu = 14;    //查花猪
+  Opening = 15;        //开奖
+  Over = 16;           //结算---此时,才能退桌
+  Closing = 17;        //关闭
 }
 // 方位
 enum Direct {

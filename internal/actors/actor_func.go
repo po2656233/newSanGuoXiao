@@ -312,7 +312,7 @@ func (self *ActorDB) GetUserInfo(req *pb.GetUserInfoReq) (*pb.GetUserInfoResp, e
 	if err != nil {
 		return resp, err
 	}
-	resp.Info = &pb.UserSimpleInfo{
+	resp.Info = &pb.UserInfo{
 		UserID:   info.ID,
 		Name:     info.Name,
 		Account:  info.Account,

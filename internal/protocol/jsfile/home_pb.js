@@ -3571,7 +3571,7 @@ proto.pb.GetUserInfoResp.prototype.toObject = function(opt_includeInstance) {
  */
 proto.pb.GetUserInfoResp.toObject = function(includeInstance, msg) {
   var obj = {
-    info: (f = msg.getInfo()) && baseinfo_pb.UserSimpleInfo.toObject(includeInstance, f)
+    info: (f = msg.getInfo()) && baseinfo_pb.UserInfo.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -3609,8 +3609,8 @@ proto.pb.GetUserInfoResp.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new baseinfo_pb.UserSimpleInfo;
-      reader.readMessage(value,baseinfo_pb.UserSimpleInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.UserInfo;
+      reader.readMessage(value,baseinfo_pb.UserInfo.deserializeBinaryFromReader);
       msg.setInfo(value);
       break;
     default:
@@ -3647,23 +3647,23 @@ proto.pb.GetUserInfoResp.serializeBinaryToWriter = function(message, writer) {
     writer.writeMessage(
       1,
       f,
-      baseinfo_pb.UserSimpleInfo.serializeBinaryToWriter
+      baseinfo_pb.UserInfo.serializeBinaryToWriter
     );
   }
 };
 
 
 /**
- * optional UserSimpleInfo info = 1;
- * @return {?proto.pb.UserSimpleInfo}
+ * optional UserInfo info = 1;
+ * @return {?proto.pb.UserInfo}
  */
 proto.pb.GetUserInfoResp.prototype.getInfo = function() {
-  return /** @type{?proto.pb.UserSimpleInfo} */ (
-    jspb.Message.getWrapperField(this, baseinfo_pb.UserSimpleInfo, 1));
+  return /** @type{?proto.pb.UserInfo} */ (
+    jspb.Message.getWrapperField(this, baseinfo_pb.UserInfo, 1));
 };
 
 
-/** @param {?proto.pb.UserSimpleInfo|undefined} value */
+/** @param {?proto.pb.UserInfo|undefined} value */
 proto.pb.GetUserInfoResp.prototype.setInfo = function(value) {
   jspb.Message.setWrapperField(this, 1, value);
 };

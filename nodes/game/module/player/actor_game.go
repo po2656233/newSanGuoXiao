@@ -104,7 +104,9 @@ func (p *ActorGame) checkTableList(rid int64) {
 			return
 		}
 	}
-	p.checkTableList(rid)
+	p.Timer().AddOnce(p.getGamesTime, func() {
+		p.checkTableList(rid)
+	})
 }
 
 // cron

@@ -142,6 +142,9 @@ func (tb *Table) RemoveChair(uid int64) {
 	defer tb.Unlock()
 	for _, sitter := range tb.sitters {
 		if sitter.GetPlayerInfo().UserID == uid {
+			t := sitter.Timer()
+			t.Stop()
+			t = nil
 			tb.sitters = utils.RemoveValue(tb.sitters, sitter)
 			atomic.SwapInt32(&tb.sitCount, int32(len(tb.sitters)))
 			return
@@ -174,7 +177,7 @@ func (tb *Table) NextChair(curUid int64) IChair {
 			idx -= size
 		}
 		playInfo := tb.sitters[idx].GetPlayerInfo()
-		if playInfo.State < protoMsg.PlayerState_PlayerTrustee && playInfo.State >= protoMsg.PlayerState_PlayerSitDown {
+		if playInfo.State < protoMsg.PlayerState_PlayerGiveUp && playInfo.State >= protoMsg.PlayerState_PlayerSitDown {
 			return tb.sitters[idx]
 		}
 	}
