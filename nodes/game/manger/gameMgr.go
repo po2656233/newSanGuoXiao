@@ -4,7 +4,7 @@ import (
 	log "github.com/po2656233/superplace/logger"
 	"google.golang.org/protobuf/proto"
 	"strings"
-	. "superman/internal/constant"
+	"superman/internal/constant"
 	protoMsg "superman/internal/protocol/gofile"
 	"superman/internal/utils"
 	"sync"
@@ -50,10 +50,10 @@ type IDevice interface {
 type NewGameFunc func(gid int64, table *Table) IGameOperate
 type NewSingleGameFunc func(gid, tid int64) IGameOperate
 
-type CalculateSQL func(info CalculateInfo) (nowMoney, factDeduct int64, isOK bool)
+type CalculateFunc func(info CalculateInfo) (nowMoney, factDeduct int64, isOK bool)
 
-// ClearCallback 清场回调
-type ClearCallback func() (gameID int64)
+// ClearFunc 清场回调
+type ClearFunc func() *Table
 
 // CalculateInfo 结算信息
 type CalculateInfo struct {
@@ -75,7 +75,7 @@ type Game struct {
 	TimeStamp  int64  // 当前状态时刻的时间戳
 	PlayerList []int64
 	Timer      *time.Timer
-	playlistLK sync.Mutex
+	playlistLK sync.RWMutex
 }
 
 type GameMgr struct {
@@ -134,10 +134,28 @@ func (g *Game) SetPlaylist(uids []int64) {
 	g.PlayerList = uids
 }
 
+// AddPlayer [注]一般不用，因为都是等玩家坐满之后，直接SetPlaylist
+func (g *Game) AddPlayer(uid int64) {
+	g.playlistLK.Lock()
+	defer g.playlistLK.Unlock()
+	g.PlayerList = append(g.PlayerList, uid)
+}
+
 func (g *Game) RemovePlayer(uid int64) {
 	g.playlistLK.Lock()
 	defer g.playlistLK.Unlock()
 	g.PlayerList = utils.RemoveValue(g.PlayerList, uid)
+}
+func (g *Game) ClearPlayer() {
+	g.playlistLK.Lock()
+	defer g.playlistLK.Unlock()
+	g.PlayerList = make([]int64, 0)
+}
+
+func (g *Game) GetPlayerCount() int {
+	g.playlistLK.RLock()
+	defer g.playlistLK.RUnlock()
+	return len(g.PlayerList)
 }
 
 // ChangeState 改变游戏状态
@@ -149,6 +167,7 @@ func (self *Game) ChangeState(state protoMsg.GameScene) {
 
 // ChangeStateAndWork 改变游戏状态
 func (self *Game) ChangeStateAndWork(state protoMsg.GameScene, resp proto.Message, timeout int32, f func()) {
+	ok := self.GameInfo.Scene == state
 	self.GameInfo.Scene = state
 	self.TimeStamp = time.Now().Unix()
 	if timeout > 0 {
@@ -157,20 +176,22 @@ func (self *Game) ChangeStateAndWork(state protoMsg.GameScene, resp proto.Messag
 		}
 		self.Timer = time.AfterFunc(time.Duration(timeout)*time.Second, f)
 	}
-	if resp != nil {
+	if resp != nil && 0 < self.GetPlayerCount() {
 		GetClientMgr().NotifyOthers(self.PlayerList, resp)
 	}
-	if len(self.PlayerList) < Ten {
-		log.Infof("[%v:%v]   \t当前状态:%v 当前玩家列表%v", self.Name, self.Id, protoMsg.GameScene_name[int32(state)], self.PlayerList)
-	} else {
-		log.Infof("[%v:%v]   \t当前状态:%v ", self.Name, self.Id, protoMsg.GameScene_name[int32(state)])
+	if !ok {
+		if self.GameInfo.MaxPlayer != constant.Unlimited {
+			log.Infof("[%v:%v]   \t当前状态:%v 当前玩家列表%v", self.Name, self.Id, protoMsg.GameScene_name[int32(state)], self.PlayerList)
+		} else {
+			log.Infof("[%v:%v]   \t当前状态:%v ", self.Name, self.Id, protoMsg.GameScene_name[int32(state)])
+		}
 	}
-
 }
 
 // Ready 准备
 func (g *Game) Ready(args []interface{}) {
 	_ = args
+	g.ChangeState(protoMsg.GameScene_Ready)
 }
 
 // Scene 游戏场景
@@ -240,6 +261,20 @@ func (g *Game) SuperControl(args []interface{}) bool {
 		return false
 	}
 	return true
+}
+
+// Close 关闭游戏
+func (g *Game) Close(f ClearFunc) {
+	g.ChangeState(protoMsg.GameScene_Closing)
+	tb := f()
+	if tb != nil {
+		if rm := GetRoomMgr().GetRoom(tb.Rid); rm != nil {
+			rm.DelTable(tb.Id)
+		}
+		tb.Close()
+		tb = nil
+	}
+
 }
 
 //////////////////////////////////////////////////////////////////////////

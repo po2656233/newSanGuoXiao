@@ -44,7 +44,6 @@ func (self *Chinesechess) Reset() {
 	self.Game.Reset()
 	self.winUid = 0
 	self.initBord()
-	self.SetPlaylist(self.T.GetPlayList())
 	self.redCamp = nil
 	self.blackCamp = nil
 	self.timeout = YamlObj.Chinesechess.Duration.Play
@@ -80,6 +79,7 @@ func (self *Chinesechess) Scene(args []interface{}) {
 		return t
 	}
 	switch self.GameInfo.Scene {
+	case protoMsg.GameScene_Free: //
 	case protoMsg.GameScene_Setting: //
 		mgr.GetClientMgr().SendTo(uid, &protoMsg.ChineseChessStateSetResp{
 			Times: getTimeInfo(YamlObj.Chinesechess.Duration.Settime),
@@ -173,6 +173,30 @@ func (self *Chinesechess) Playing(args []interface{}) {
 		mgr.GetClientMgr().SendResult(agent, FAILED, StatusText[Game37])
 		return
 	}
+	otherUid := self.redCamp.Uid
+	if self.curUid == self.redCamp.Uid {
+		otherUid = self.blackCamp.Uid
+	}
+
+	code := CanMove(self.board, m.Origin, m.Target)
+	can := false
+	switch code {
+	case moveOk:
+		can = true
+	case moveFail:
+	case moveBeJiangJu:
+	case moveJiangJu:
+		mgr.GetClientMgr().NotifyOthers(self.PlayerList, &protoMsg.ChineseChessJiangJuResp{BeJiangUid: otherUid})
+	case moveJueSha:
+		can = true
+		mgr.GetClientMgr().NotifyOthers(self.PlayerList, &protoMsg.ChineseChessJueShaResp{BeJueShaUid: otherUid})
+		self.winUid = self.curUid
+	default:
+	}
+	if !can {
+		mgr.GetClientMgr().SendResult(agent, FAILED, StatusText[Game63])
+		return
+	}
 	msg := &protoMsg.ChineseChessMoveResp{
 		Uid:    person.UserID,
 		Origin: m.Origin,
@@ -191,7 +215,7 @@ func (self *Chinesechess) Playing(args []interface{}) {
 			break
 		}
 	}
-	mgr.GetClientMgr().NotifyOthers(self.T.GetPlayList(), msg)
+	mgr.GetClientMgr().NotifyOthers(self.PlayerList, msg)
 	self.Timer.Stop()
 	self.onPlay()
 }
@@ -238,7 +262,7 @@ func (self *Chinesechess) ReadyOP(args []interface{}) {
 		Uid:     person.UserID,
 		IsReady: m.IsReady,
 	}
-	mgr.GetClientMgr().NotifyOthers(self.T.GetPlayList(), msg)
+	mgr.GetClientMgr().NotifyOthers(self.PlayerList, msg)
 	if self.redCamp != nil && self.blackCamp != nil {
 		self.onSetTime()
 	}
@@ -274,7 +298,7 @@ func (self *Chinesechess) SetTimeOP(args []interface{}) {
 		Uid:     person.UserID,
 		Timeout: m.Timeout,
 	}
-	mgr.GetClientMgr().NotifyOthers(self.T.GetPlayList(), msg)
+	mgr.GetClientMgr().NotifyOthers(self.PlayerList, msg)
 	self.onConfirmTime()
 }
 
@@ -292,7 +316,6 @@ func (self *Chinesechess) ConfirmOP(args []interface{}) {
 		if self.Timer != nil {
 			self.Timer.Stop()
 		}
-		self.Reset()
 		self.onReady()
 		return
 	}
@@ -302,7 +325,7 @@ func (self *Chinesechess) ConfirmOP(args []interface{}) {
 		Uid:     person.UserID,
 		IsAgree: m.IsAgree,
 	}
-	mgr.GetClientMgr().NotifyOthers(self.T.GetPlayList(), msg)
+	mgr.GetClientMgr().NotifyOthers(self.PlayerList, msg)
 }
 
 // /////////////////////////[定时器事件]//////////////////////////////////////////
@@ -393,10 +416,18 @@ func (self *Chinesechess) onPlay() {
 		Uid:      self.curUid,
 		NowBoard: self.board,
 	}
-	self.ChangeStateAndWork(protoMsg.GameScene_Playing, resp, self.timeout, self.onPlay)
+	// 如果时间到了,玩家未操作,则另一方获胜
+	self.ChangeStateAndWork(protoMsg.GameScene_Playing, resp, self.timeout, self.onOpen)
 }
 
 func (self *Chinesechess) onOpen() {
+	if self.winUid == INVALID {
+		// 超时后，玩家胜利
+		self.winUid = self.redCamp.Uid
+		if self.curUid == self.redCamp.Uid {
+			self.winUid = self.blackCamp.Uid
+		}
+	}
 	resp := &protoMsg.ChineseChessStateOpenResp{
 		Times: &protoMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
@@ -422,7 +453,21 @@ func (self *Chinesechess) onOver() {
 			BlackCamp: self.blackCamp,
 		},
 	}
-	self.ChangeStateAndWork(protoMsg.GameScene_Over, resp, YamlObj.Chinesechess.Duration.Over, self.onReady)
+	self.ChangeStateAndWork(protoMsg.GameScene_Over, resp, YamlObj.Chinesechess.Duration.Over, func() {
+		// 结算
+		self.Over(nil)
+		if self.RunCount == self.T.Amount { // 满足运行次数之后,释放资源
+			self.Close(func() *mgr.Table {
+				return self.T
+			})
+			return
+		}
+
+		self.Reset()
+		self.T.ClearChairs()
+		// 重新准备
+		self.onReady()
+	})
 }
 
 // ///////////////////////[初始化]///////////////////////////////////

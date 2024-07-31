@@ -61,6 +61,7 @@ func join(args []interface{}) {
 	if person.GameHandle != nil {
 		clog.Warnf("[join] [GameHandle] params %+v  uid:%+v FAIL", m, uid)
 		agent.SendResultPop(FAILED, StatusText[Title001], StatusText[Login09])
+		person.GameHandle.Scene([]interface{}{person})
 		return
 	}
 	// 获取房间句柄

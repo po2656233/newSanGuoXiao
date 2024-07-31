@@ -148,6 +148,8 @@ func init() {
     RegisterMessage(&protoMsg.ChineseChessStatePlayingResp{})
     RegisterMessage(&protoMsg.ChineseChessStateOpenResp{})
     RegisterMessage(&protoMsg.ChineseChessStateOverResp{})
+    RegisterMessage(&protoMsg.ChineseChessJiangJuResp{})
+    RegisterMessage(&protoMsg.ChineseChessJueShaResp{})
     RegisterMessage(&protoMsg.ChineseChessReadyReq{})
     RegisterMessage(&protoMsg.ChineseChessReadyResp{})
     RegisterMessage(&protoMsg.ChineseChessSetTimeReq{})

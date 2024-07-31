@@ -10,49 +10,139 @@ const (
 	maxRow     = 10
 	maxCol     = 9
 )
+const (
+	moveOk = iota + 1
+	moveFail
+	moveJueSha
+	moveBeJiangJu
+	moveJiangJu
+	moveKunBi
+)
+
+func CanMove(board *protoMsg.XQBoardInfo, origin, target *protoMsg.XQGrid) int {
+	if isValidMove(board, origin, target) {
+		// 绝杀
+		if target.Core == protoMsg.XQPiece_RedShuai || target.Core == protoMsg.XQPiece_BlackJu {
+			return moveJueSha
+		}
+		// 被将军
+		return checkJiang(board, origin, target)
+	}
+	return moveFail
+}
 
 // 校验棋子移动规则
 func isValidMove(board *protoMsg.XQBoardInfo, origin, target *protoMsg.XQGrid) bool {
 	// 根据棋子类型校验移动规则
 	// 同一方不能走
-	if protoMsg.XQPiece_RedShuai < origin.Core && protoMsg.XQPiece_RedShuai < target.Core {
+	if origin.Core == protoMsg.XQPiece_NoXQPiece ||
+		(protoMsg.XQPiece_RedShuai < origin.Core && protoMsg.XQPiece_RedShuai < target.Core) ||
+		(origin.Core <= protoMsg.XQPiece_RedShuai && target.Core <= protoMsg.XQPiece_RedShuai) {
 		return false
 	}
-	if origin.Core <= protoMsg.XQPiece_RedShuai && target.Core <= protoMsg.XQPiece_RedShuai {
-		return false
-	}
+
+	ok := false
 	switch origin.Core {
 	case protoMsg.XQPiece_RedBing:
-		return isRedBingMove(origin, target)
+		ok = isRedBingMove(origin, target)
 	case protoMsg.XQPiece_RedPao:
-		return isPaoMove(board, origin, target)
+		ok = isPaoMove(board, origin, target)
 	case protoMsg.XQPiece_RedJu:
-		return isJuMove(board, origin, target)
+		ok = isJuMove(board, origin, target)
 	case protoMsg.XQPiece_RedMa:
-		return isMaMove(board, origin, target)
+		ok = isMaMove(board, origin, target)
 	case protoMsg.XQPiece_RedXiang:
-		return isXiangMove(board, origin, target)
+		ok = isXiangMove(board, origin, target)
 	case protoMsg.XQPiece_RedShi:
-		return isShiMove(origin, target)
+		ok = isShiMove(origin, target)
 	case protoMsg.XQPiece_RedShuai:
-		return isJiangMove(origin, target)
+		ok = isJiangMove(origin, target)
 	case protoMsg.XQPiece_BlackZu:
-		return isBlackZuMove(origin, target)
+		ok = isBlackZuMove(origin, target)
 	case protoMsg.XQPiece_BlackPao:
-		return isPaoMove(board, origin, target)
+		ok = isPaoMove(board, origin, target)
 	case protoMsg.XQPiece_BlackJu:
-		return isJuMove(board, origin, target)
+		ok = isJuMove(board, origin, target)
 	case protoMsg.XQPiece_BlackMa:
-		return isMaMove(board, origin, target)
+		ok = isMaMove(board, origin, target)
 	case protoMsg.XQPiece_BlackXiang:
-		return isXiangMove(board, origin, target)
+		ok = isXiangMove(board, origin, target)
 	case protoMsg.XQPiece_BlackShi:
-		return isShiMove(origin, target)
+		ok = isShiMove(origin, target)
 	case protoMsg.XQPiece_BlackJiang:
-		return isJiangMove(origin, target)
+		ok = isJiangMove(origin, target)
 	default:
 	}
-	return false
+	return ok
+}
+
+func checkJiang(board *protoMsg.XQBoardInfo, origin, target *protoMsg.XQGrid) int {
+	tempBoard := protoMsg.XQBoardInfo{
+		Cells: make([]*protoMsg.XQGrid, len(board.Cells)),
+	}
+	copy(tempBoard.Cells, board.Cells)
+	defer func() {
+		tempBoard.Cells = nil
+	}()
+	// 红将位置
+	red := protoMsg.XQGrid{}
+	black := protoMsg.XQGrid{}
+	for _, cell := range tempBoard.Cells {
+		if cell.Row == origin.Row && cell.Col == origin.Col {
+			cell.Core = protoMsg.XQPiece_NoXQPiece
+		} else if cell.Row == target.Row && cell.Col == target.Col {
+			cell.Core = origin.Core
+		}
+
+		if cell.Core == protoMsg.XQPiece_BlackJiang {
+			black.Row = cell.Row
+			black.Col = cell.Col
+			black.Core = cell.Core
+		} else if cell.Core == protoMsg.XQPiece_RedShuai {
+			red.Row = cell.Row
+			red.Col = cell.Col
+			red.Core = cell.Core
+		}
+	}
+
+	// 走完之后，两将军是否见面了
+	if red.Col == black.Col && 0 == checkColPassBy(&tempBoard, &red, &black) {
+		return moveBeJiangJu
+	}
+	newPos := protoMsg.XQGrid{
+		Row:  target.Row,
+		Col:  target.Col,
+		Core: origin.Core,
+	}
+
+	var enemy *protoMsg.XQGrid
+	// 对方的棋子(除仕、象外)是否可以吃到我方将军
+	if protoMsg.XQPiece_RedShuai < origin.Core {
+		// 黑方走完，红方是否可以吃到黑方的将军
+		for _, cell := range tempBoard.Cells {
+			if cell.Core <= protoMsg.XQPiece_RedShuai && cell.Core != protoMsg.XQPiece_RedShi && cell.Core != protoMsg.XQPiece_RedXiang {
+				if isValidMove(&tempBoard, cell, &black) {
+					return moveBeJiangJu
+				}
+			}
+		}
+		enemy = &red
+	} else {
+		// 红方走完，黑方是否可以吃到红方的帅
+		for _, cell := range tempBoard.Cells {
+			if protoMsg.XQPiece_RedShuai < cell.Core && cell.Core != protoMsg.XQPiece_BlackShi && cell.Core != protoMsg.XQPiece_BlackXiang {
+				if isValidMove(&tempBoard, cell, &red) {
+					return moveBeJiangJu
+				}
+			}
+		}
+		enemy = &black
+	}
+	if isValidMove(&tempBoard, &newPos, enemy) {
+		return moveJiangJu
+	}
+
+	return moveOk
 }
 
 // 同排途中经过多少个棋子
@@ -94,6 +184,8 @@ func checkRowPassBy(board *protoMsg.XQBoardInfo, origin, target *protoMsg.XQGrid
 	}
 	return count
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////
 
 func isRedBingMove(origin, target *protoMsg.XQGrid) bool {
 	// 红方兵（卒）的初始位置
@@ -137,6 +229,10 @@ func isPaoMove(board *protoMsg.XQBoardInfo, origin, target *protoMsg.XQGrid) boo
 		if target.Core == protoMsg.XQPiece_NoXQPiece {
 			// 不需要炮架
 			if checkColPassBy(board, origin, target) == 0 && checkRowPassBy(board, origin, target) == 0 {
+				return true
+			} else if origin.Row == target.Row && checkColPassBy(board, origin, target) == 1 {
+				return true
+			} else if origin.Col == target.Col && checkRowPassBy(board, origin, target) == 1 {
 				return true
 			}
 		}
@@ -244,7 +340,7 @@ func isXiangMove(board *protoMsg.XQBoardInfo, origin, target *protoMsg.XQGrid) b
 		isOk = true
 	}
 
-	// 检测马脚
+	// 检测象脚
 	if isOk {
 		for _, cell := range board.Cells {
 			if cell.Col == col && cell.Row == row {

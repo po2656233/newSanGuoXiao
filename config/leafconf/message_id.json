@@ -225,6 +225,8 @@
 	"308": "ChineseChessReadyReq",
 	"309": "ChineseChessReadyResp",
 	"31": "TaskList",
+	"310": "ChineseChessJiangJuResp",
+	"311": "ChineseChessJueShaResp",
 	"32": "ClassList",
 	"33": "PlayerList",
 	"34": "GoodsList",

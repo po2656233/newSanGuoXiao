@@ -82,6 +82,14 @@ message ChineseChessStateOverResp {
   TimeInfo times = 1;
   ChineseChessResult result = 2;
 }
+// 被将军
+message ChineseChessJiangJuResp{
+  int64 beJiangUid = 1; //被将军的一方
+}
+// 绝杀或困毙
+message ChineseChessJueShaResp{
+  int64 beJueShaUid = 1; //被将军的一方
+}
 //////////////////////////////////
 //准备
 message ChineseChessReadyReq{

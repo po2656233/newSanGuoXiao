@@ -133,6 +133,8 @@ func init() {
     msg.ProcessorProto.SetRouter(&protoMsg.ChineseChessStatePlayingResp{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.ChineseChessStateOpenResp{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.ChineseChessStateOverResp{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.ChineseChessJiangJuResp{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.ChineseChessJueShaResp{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.ChineseChessReadyReq{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.ChineseChessReadyResp{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.ChineseChessSetTimeReq{}, game.ChanRPC)

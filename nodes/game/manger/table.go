@@ -2,7 +2,6 @@ package manger
 
 import (
 	"fmt"
-	log "github.com/po2656233/superplace/logger"
 	. "superman/internal/constant"
 	protoMsg "superman/internal/protocol/gofile"
 	"superman/internal/utils"
@@ -48,6 +47,31 @@ func (tb *Table) Init() {
 	//settingFixTime = lastFixTime
 
 	//log.Debug("conf:%v", self.Config)
+}
+
+// Reset 重置座位上的玩家
+func (tb *Table) Reset() int64 {
+	// 遍历过程中存在slice的数据删除
+	tb.Lock()
+	for _, sitter := range tb.sitters {
+		sit, ok := sitter.(*Chair)
+		if !ok {
+			continue
+		}
+		sit.State = protoMsg.PlayerState_PlayerSitDown
+		sit.SetGain(INVALID)
+		sit.SetScore(INVALID)
+		sit.SetTotal(INVALID)
+		t := sit.Timer()
+		if t != nil {
+			t.Stop()
+			sit.SetTimer(nil)
+		}
+	}
+	tb.Unlock()
+
+	tb.Init()
+	return tb.Id
 }
 
 // AddChair 添加椅子
@@ -152,6 +176,44 @@ func (tb *Table) RemoveChair(uid int64) {
 	}
 }
 
+func (tb *Table) ClearChairs() {
+	tb.Lock()
+	defer tb.Unlock()
+	for _, sitter := range tb.sitters {
+		uid := sitter.GetPlayerInfo().UserID
+		person := GetPlayerMgr().Get(uid)
+		if person != nil {
+			person.GameHandle = nil
+		}
+		t := sitter.Timer()
+		t.Stop()
+		t = nil
+		tb.sitters = utils.RemoveValue(tb.sitters, sitter)
+	}
+	atomic.SwapInt32(&tb.sitCount, int32(len(tb.sitters)))
+}
+
+func (tb *Table) Close() {
+	tb.Lock()
+	defer tb.Unlock()
+	for _, sitter := range tb.sitters {
+		if t := sitter.Timer(); t != nil {
+			t.Stop()
+			t = nil
+		}
+		tb.sitters = utils.RemoveValue(tb.sitters, sitter)
+		sitter = nil
+	}
+	for _, look := range tb.lookers {
+		tb.lookers = utils.RemoveValue(tb.lookers, look)
+	}
+	atomic.SwapInt32(&tb.sitCount, 0)
+	tb.sitters = nil
+	tb.lookers = nil
+	tb.GameHandle = nil
+	tb.TableInfo = nil
+}
+
 // NextChair 轮换规则
 func (tb *Table) NextChair(curUid int64) IChair {
 	tb.RLock()
@@ -223,30 +285,4 @@ func (tb *Table) GetAllList() []int64 {
 		list = append(list, look.UserID)
 	}
 	return utils.Unique(list)
-}
-
-// Reset 重置座位上的玩家
-func (tb *Table) Reset() int64 {
-	log.Debugf("[%v:%v]   \t扫地僧出来干活了...List %v", tb.Name, tb.Id, tb.sitters)
-	// 遍历过程中存在slice的数据删除
-	tb.Lock()
-	for _, sitter := range tb.sitters {
-		sit, ok := sitter.(*Chair)
-		if !ok {
-			continue
-		}
-		sit.State = protoMsg.PlayerState_PlayerSitDown
-		sit.SetGain(INVALID)
-		sit.SetScore(INVALID)
-		sit.SetTotal(INVALID)
-		t := sit.Timer()
-		if t != nil {
-			t.Stop()
-			sit.SetTimer(nil)
-		}
-	}
-	tb.Unlock()
-
-	tb.Init()
-	return tb.Id
 }

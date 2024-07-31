@@ -225,6 +225,7 @@ var StatusText = map[int]string{
 	Game60: "无效的场景操作",
 	Game61: "设置时长过长",
 	Game62: "设置时长过短",
+	Game63: "操作不符合规则",
 
 	Service001: "SDK无效",
 	Service002: "PID无效",
@@ -500,6 +501,7 @@ const (
 	Game60
 	Game61
 	Game62
+	Game63
 )
 
 const (
