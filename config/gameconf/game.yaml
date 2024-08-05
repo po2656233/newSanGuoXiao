@@ -59,3 +59,8 @@ ChineseChess:
     confirm: 5
   col: 9
   row: 10
+#
+Baccarat:
+  duration:
+    <<: *duration
+  inventory: 100000

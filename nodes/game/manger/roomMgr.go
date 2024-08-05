@@ -119,7 +119,7 @@ func getRandomTable(gid, butTid int64, tables []*Table) *Table {
 	list := make([]*Table, 0)
 	for _, table := range tables {
 		// 不能是之前桌
-		if table.Gid == gid && table.Id != butTid && table.GameHandle != nil && table.SitCount()+1 <= table.MaxSitter {
+		if table.Gid == gid && table.Id != butTid && table.GameHandle != nil && (table.MaxSitter == Unlimited || table.SitCount()+1 <= table.MaxSitter) {
 			list = append(list, table)
 		}
 	}
@@ -148,9 +148,7 @@ func (self *Room) AddTable(table *protoMsg.TableInfo, f NewGameFunc) (*Table, er
 	}
 	tb := &Table{
 		TableInfo: table,
-		sitters:   make([]IChair, 0),
-		lookers:   make([]*Player, 0),
-		RWMutex:   sync.RWMutex{},
+		sitters:   sync.Map{},
 	}
 	tb.GameHandle = f(table.Gid, tb) //创建游戏句柄
 	if tb.GameHandle == nil {

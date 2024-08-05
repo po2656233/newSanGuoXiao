@@ -1,0 +1,16 @@
+syntax = "proto3";
+option go_package = "/pb";
+package pb;
+// 俄罗斯形状
+message TetrisShape{
+  repeated int32 edges = 1;
+}
+// 俄罗斯方块
+message TetrisBlock {
+  int32 left = 1;                   // 向左移动
+  int32 right = 2;                  // 向右移动
+  int32 down = 3;                   // 下降
+  int32 up = 4;                     // 变换角度
+  int32 bottom = 5;                 // 快速到底部
+  repeated TetrisShape values = 6;  // 俄罗斯形状
+}

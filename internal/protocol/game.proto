@@ -107,10 +107,10 @@ message RollDiceResp {
 }
 //请求游戏结束（注:返回牌局记录后,游戏随即销毁）
 message GameOverReq {
-  int64 gameID = 1; //注:不能为0
+  int64 gid = 1; //注:不能为0
 }
 message GameOverResp {
-  int64 gameID = 1; //注:不能为0
+  int64 gid = 1; //注:不能为0
   InningList innings = 2;//牌局信息
   int32 pageNum = 3;//页码 默认20条一页;
 }
@@ -119,25 +119,44 @@ message GameOverResp {
 message UpdateGoldReq{
 }
 message UpdateGoldResp{
-  int64 userID = 1;
+  int64 uid = 1;
   int64 gold = 2;//当前玩家金币
 }
 ///////////////////游戏记录///////////////////////////////
-//获取游戏记录(根据kindID)
+//添加游戏记录
+message AddRecordReq{
+  int64 uid = 1;              // 充值者ID
+  int64 tid = 2;             // 牌桌ID
+  int64 payment = 3;          // 支付
+  int32 code = 4;             // 操作码
+  string order = 5;           // 订单号(牌局号)
+  string remark  = 6;         // 备注信息
+}
+// 添加游戏记录结果
+message AddRecordResp{
+  int64 uid = 1;              // 充值者ID
+  int64 tid = 2;             // 牌桌ID
+  int64 perGold = 3;          // 支付之前
+  int64 payment = 4;          // 支付
+  int64 gold = 5;             // 金币
+  int32 code = 6;             // 操作码
+  string order = 7;           // 订单号(牌局号)
+  string remark  = 8;         // 备注信息
+}
+//获取游戏记录(牌桌ID)
 message GetRecordReq{
-  int64 kindID = 1; //游戏标识 =0时,表示所有参与过的游戏
-  int32 level = 2;      // -1:表示不分级别统计
+  int64 uid = 1;  //玩家ID
+  int64 tid = 2; //牌桌ID
   int64 startTimeStamp = 3; //起始时间戳 = 0默认所有
   int64 endTimeStamp = 4;   //结束时间戳 = 0
 }
 message GetRecordResp{
-  int64 userID = 1;  //玩家ID
-  int64 kindID = 2; //游戏标识 =0时,表示所有参与过的游戏
-  int32 level = 3;      // -1:表示不分级别统计
-  int64 startTimeStamp = 4;
-  int64 endTimeStamp = 5;
-  repeated InningInfo innings = 6;//牌局信息
-  int32 pageNum = 7;//页码 默认20条一页
+  int64 uid = 1;  //玩家ID
+  int64 tid = 2; //牌桌ID
+  int64 startTimeStamp = 3;
+  int64 endTimeStamp = 4;
+  repeated InningInfo innings = 5;//牌局信息
+  int32 pageNum = 6;//页码 默认20条一页
 }
 //获取牌局记录 注: 房主权限
 message GetInningsInfoReq{

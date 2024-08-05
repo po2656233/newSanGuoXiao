@@ -16,12 +16,11 @@ const TableNameRecord = "record"
 type Record struct {
 	ID        int64          `gorm:"column:id;primaryKey;autoIncrement:true;comment:金币变化记录" json:"id"` // 金币变化记录
 	UID       int64          `gorm:"column:uid;comment:充值者ID" json:"uid"`                              // 充值者ID
-	Byid      int64          `gorm:"column:byid;comment:给充值者充值的ID" json:"byid"`                        // 给充值者充值的ID
+	Tid       int64          `gorm:"column:tid;comment:牌桌ID" json:"tid"`                               // 牌桌ID
 	Pergold   int64          `gorm:"column:pergold;comment:支付之前" json:"pergold"`                       // 支付之前
 	Payment   int64          `gorm:"column:payment;comment:支付" json:"payment"`                         // 支付
 	Gold      int64          `gorm:"column:gold;comment:金币" json:"gold"`                               // 金币
 	Code      int32          `gorm:"column:code;comment:操作码" json:"code"`                              // 操作码
-	Success   int32          `gorm:"column:success;comment:是否成功" json:"success"`                       // 是否成功
 	Order     string         `gorm:"column:order;comment:订单号(牌局号)" json:"order"`                       // 订单号(牌局号)
 	Remark    string         `gorm:"column:remark;comment:备注" json:"remark"`                           // 备注
 	CreatedAt time.Time      `gorm:"column:created_at" json:"created_at"`

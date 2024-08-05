@@ -695,7 +695,7 @@ proto.pb.UserInfo.toObject = function(includeInstance, msg) {
     faceid: jspb.Message.getFieldWithDefault(msg, 5, 0),
     gender: jspb.Message.getFieldWithDefault(msg, 6, 0),
     age: jspb.Message.getFieldWithDefault(msg, 7, 0),
-    empirice: jspb.Message.getFieldWithDefault(msg, 8, 0),
+    empiric: jspb.Message.getFieldWithDefault(msg, 8, 0),
     vip: jspb.Message.getFieldWithDefault(msg, 9, 0),
     level: jspb.Message.getFieldWithDefault(msg, 10, 0),
     yuanbao: jspb.Message.getFieldWithDefault(msg, 11, 0),
@@ -778,7 +778,7 @@ proto.pb.UserInfo.deserializeBinaryFromReader = function(msg, reader) {
       break;
     case 8:
       var value = /** @type {number} */ (reader.readInt32());
-      msg.setEmpirice(value);
+      msg.setEmpiric(value);
       break;
     case 9:
       var value = /** @type {number} */ (reader.readInt32());
@@ -922,7 +922,7 @@ proto.pb.UserInfo.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getEmpirice();
+  f = message.getEmpiric();
   if (f !== 0) {
     writer.writeInt32(
       8,
@@ -1150,16 +1150,16 @@ proto.pb.UserInfo.prototype.setAge = function(value) {
 
 
 /**
- * optional int32 empirice = 8;
+ * optional int32 empiric = 8;
  * @return {number}
  */
-proto.pb.UserInfo.prototype.getEmpirice = function() {
+proto.pb.UserInfo.prototype.getEmpiric = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 8, 0));
 };
 
 
 /** @param {number} value */
-proto.pb.UserInfo.prototype.setEmpirice = function(value) {
+proto.pb.UserInfo.prototype.setEmpiric = function(value) {
   jspb.Message.setProto3IntField(this, 8, value);
 };
 

@@ -114,8 +114,8 @@ func (gmr *GameMgr) GetGame(gid int64) *protoMsg.GameInfo {
 
 ///////////////////////////GAME//////////////////////////////////////////////////////
 
-// Reset 重置信息
-func (g *Game) Reset() bool {
+// Init 重置信息
+func (g *Game) Init() {
 	g.ChangeState(protoMsg.GameScene_Free)
 	g.RunCount++
 	g.ReadyCount = 0
@@ -125,7 +125,7 @@ func (g *Game) Reset() bool {
 	}
 	g.TimeStamp = time.Now().Unix()
 	g.Inning = strings.ToUpper(utils.Md5Sum(g.Name + time.Now().String()))
-	return true
+	return
 }
 
 func (g *Game) SetPlaylist(uids []int64) {
@@ -158,6 +158,14 @@ func (g *Game) GetPlayerCount() int {
 	return len(g.PlayerList)
 }
 
+func (g *Game) PlayerWork(f func(int64)) {
+	g.playlistLK.RLock()
+	defer g.playlistLK.RUnlock()
+	for _, uid := range g.PlayerList {
+		f(uid)
+	}
+}
+
 // ChangeState 改变游戏状态
 func (self *Game) ChangeState(state protoMsg.GameScene) {
 	self.GameInfo.Scene = state
@@ -166,26 +174,37 @@ func (self *Game) ChangeState(state protoMsg.GameScene) {
 }
 
 // ChangeStateAndWork 改变游戏状态
-func (self *Game) ChangeStateAndWork(state protoMsg.GameScene, resp proto.Message, timeout int32, f func()) {
-	ok := self.GameInfo.Scene == state
-	self.GameInfo.Scene = state
-	self.TimeStamp = time.Now().Unix()
-	if timeout > 0 {
-		if self.Timer != nil {
-			self.Timer.Stop()
-		}
-		self.Timer = time.AfterFunc(time.Duration(timeout)*time.Second, f)
-	}
-	if resp != nil && 0 < self.GetPlayerCount() {
-		GetClientMgr().NotifyOthers(self.PlayerList, resp)
-	}
-	if !ok {
+func (self *Game) ChangeStateAndWork(state protoMsg.GameScene, resp proto.Message, timeout int32, work func() bool, After func()) {
+	if self.GameInfo.Scene != state {
 		if self.GameInfo.MaxPlayer != constant.Unlimited {
 			log.Infof("[%v:%v]   \t当前状态:%v 当前玩家列表%v", self.Name, self.Id, protoMsg.GameScene_name[int32(state)], self.PlayerList)
 		} else {
 			log.Infof("[%v:%v]   \t当前状态:%v ", self.Name, self.Id, protoMsg.GameScene_name[int32(state)])
 		}
 	}
+	// 变更状态
+	self.GameInfo.Scene = state
+	self.TimeStamp = time.Now().Unix()
+	canAfter := true
+	if work != nil {
+		// 变更时,执行的任务
+		canAfter = work()
+	}
+	// 是否执行后续任务
+	if canAfter {
+		if timeout > 0 {
+			if self.Timer != nil {
+				self.Timer.Stop()
+			}
+			if After != nil {
+				self.Timer = time.AfterFunc(time.Duration(timeout)*time.Second, After)
+			}
+		}
+		if resp != nil && 0 < self.GetPlayerCount() {
+			GetClientMgr().NotifyOthers(self.PlayerList, resp)
+		}
+	}
+
 }
 
 // Ready 准备

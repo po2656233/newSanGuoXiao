@@ -23,7 +23,7 @@ type User struct {
 	Signature    string         `gorm:"column:signature;comment:签名" json:"signature"`                   // 签名
 	Gender       int32          `gorm:"column:gender;comment:性别" json:"gender"`                         // 性别
 	Age          int32          `gorm:"column:age;comment:年龄" json:"age"`                               // 年龄
-	Empirice     int32          `gorm:"column:empirice;comment:经验值" json:"empirice"`                    // 经验值
+	Empiric      int32          `gorm:"column:empiric;comment:经验值" json:"empiric"`                      // 经验值
 	Vip          int32          `gorm:"column:vip;comment:VIP级别" json:"vip"`                            // VIP级别
 	Level        int32          `gorm:"column:level;comment:级别" json:"level"`                           // 级别
 	Yuanbao      int64          `gorm:"column:yuanbao;comment:元宝" json:"yuanbao"`                       // 元宝

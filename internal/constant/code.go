@@ -70,6 +70,7 @@ var StatusText = map[int]string{
 	TableInfo08: "创建失败:已超过房间最大人数",
 	TableInfo09: "无法获取有效牌桌",
 	TableInfo10: "牌桌不足,需房主补充牌桌",
+	TableInfo11: "座椅上的数据出错",
 
 	Setting01: "名字不能为空!",
 	Setting02: "座位数过少!",

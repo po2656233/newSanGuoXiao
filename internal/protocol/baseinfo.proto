@@ -149,7 +149,7 @@ message UserInfo{
   int32 faceID = 5;      //头像
   int32 gender = 6;      //性别
   int32 age = 7;         //年龄
-  int32 empirice = 8;      //经验
+  int32 empiric = 8;      //经验
   int32 vip = 9;         //VIP级别
   int32 level = 10;       //级别
   int64  yuanBao = 11;      //元宝
@@ -305,7 +305,7 @@ message TimeInfo {
 }
 //牌局信息
 message InningInfo{
-  int64 gameID = 1; //游戏ID
+  int64 gameID = 1;     // 游戏ID
   string gameName = 2;  // 游戏名称
   string number = 3;    // 牌局编号
   int64 winnerID = 4;   // 赢家

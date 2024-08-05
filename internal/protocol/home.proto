@@ -107,7 +107,7 @@ message CreateTableReq {
   int64 opentime = 5; // =0表示无限制
   int64 taxation = 6;
   int32 commission = 7;
-  int64 amount = 8; // 等于-1时，表示无限制
+  int32 amount = 8; // 等于-1时，表示无限制
 }
 message CreateTableResp {
   TableInfo table = 1;
@@ -344,14 +344,14 @@ message EmailDelResp {
 }
 ////////////////////notify/////////////////////////////
 // 踢出[暂保留]
-message NotifyBeOut {
+message NotifyBeOutResp {
   int64 userID = 1;  //玩家ID
   int64 gameID = 2; //游戏标识
   int32 code = 3;    //操作码 0:时间到被剔除 1:刷子
   string hints = 4;    //被踢出的原因
 }
 // 财产变化通知
-message NotifyBalanceChange{
+message NotifyBalanceChangeResp{
   int64 userID = 1;
   int64 yuanBao = 2;          // 元宝 (客户端统一 */100)
   int64 alterYuanBao = 3;     // 增减了多少元宝 (客户端统一 */100)

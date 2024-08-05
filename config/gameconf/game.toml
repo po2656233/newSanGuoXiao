@@ -1,3 +1,13 @@
+[baccarat]
+inventory = 100000
+
+[baccarat.duration]
+free = 20
+open = 3
+over = 3
+play = 30
+start = 5
+
 [chinesechess]
 col = 9
 row = 10

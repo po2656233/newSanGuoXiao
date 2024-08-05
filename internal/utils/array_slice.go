@@ -9,17 +9,17 @@ import (
 	"unsafe"
 )
 
-//// CopyInsert 插入某元素
-//func CopyInsert(slice interface{}, pos int, value interface{}) interface{} {
-//	v := reflect.ValueOf(slice)
-//	if v.Kind() != reflect.Slice {
-//		return nil
-//	}
-//	v = reflect.Append(v, reflect.ValueOf(value))
-//	reflect.Copy(v.Slice(pos+1, v.Len()), v.Slice(pos, v.Len()))
-//	v.Index(pos).Set(reflect.ValueOf(value))
-//	return v.Interface()
-//}
+// CopyInsert 插入某元素
+func CopyInsert(slice interface{}, pos int, value interface{}) interface{} {
+	v := reflect.ValueOf(slice)
+	if v.Kind() != reflect.Slice {
+		return nil
+	}
+	v = reflect.Append(v, reflect.ValueOf(value))
+	reflect.Copy(v.Slice(pos+1, v.Len()), v.Slice(pos, v.Len()))
+	v.Index(pos).Set(reflect.ValueOf(value))
+	return v.Interface()
+}
 
 // Contains 检查切片中是否包含指定值
 func Contains[T comparable](s []T, value T) bool {

@@ -19,6 +19,16 @@ func InitConfig() {
 }
 
 type ConfSetting struct {
+	Baccarat struct {
+		Duration struct {
+			Free  int32 `toml:"free"`
+			Open  int32 `toml:"open"`
+			Over  int32 `toml:"over"`
+			Play  int32 `toml:"play"`
+			Start int32 `toml:"start"`
+		} `toml:"duration"`
+		Inventory int64 `toml:"inventory"`
+	} `toml:"baccarat"`
 	Chinesechess struct {
 		Col      int32 `toml:"col"`
 		Row      int32 `toml:"row"`

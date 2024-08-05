@@ -197,7 +197,7 @@ func (p *Controller) tableCreate(c *superGin.Context) {
 		Opentime:   opentime,
 		Taxation:   taxation,
 		Commission: int32(commission),
-		Amount:     amount,
+		Amount:     int32(amount),
 	})
 
 	// 创建房间结果

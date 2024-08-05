@@ -62,6 +62,7 @@ const (
 const (
 	INVALID = 0  //无效(切记有效初始化,不要从零开始)
 	SUCCESS = 0  // 成功
+	FINISH  = 0  // 成功
 	FAILED  = 1  // 失败
 	Fault   = -1 // 故障
 	Default = 1  // 默认
@@ -80,6 +81,22 @@ const (
 	Twenty    = 20
 	Limit     = 99 // 限制
 	Unlimited = -1
+)
+
+// money 0:结算 1:充值 2:平台扣除 3:平台奖励 4:冻结 5:退税 6:提取 7:购买房卡 8:消耗房卡 9:置换房卡
+//
+//	金币结算, 则前8位 置1。 即 Code |= 1 << 8
+const (
+	CodeSettle = iota
+	CodeRecharge
+	CodeDeduct
+	CodeAward
+	CodeFreeze
+	CodeRefund
+	CodeExtract
+	CodeBuyRoomCard
+	CodePayRoomCard
+	CodeBarterCard
 )
 
 // 时间

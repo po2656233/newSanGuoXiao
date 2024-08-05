@@ -46,7 +46,7 @@ type DataEvent struct {
 type DataChannel chan DataEvent
 
 // DataChannelSlice是一个包涵DataChannels 数据切片
-//DataChannelSlice的创建是为了保留DataChannel 的切片并轻松引用他们
+// DataChannelSlice的创建是为了保留DataChannel 的切片并轻松引用他们
 type DatachannelSlice []DataChannel
 
 // 事件总线

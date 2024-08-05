@@ -111,7 +111,7 @@ func (self *ActorDB) GetRoomList(req *pb.GetRoomListReq) (*pb.GetRoomListResp, e
 			Items: make([]*pb.RoomInfo, 0),
 		},
 	}
-	ret, err := self.checkRooms(req.Uid, req.StartTime)
+	ret, err := self.checkRooms(req.Uid, req.StartTime, -1, 0)
 	for _, room := range ret {
 		resp.Items.Items = append(resp.Items.Items, &pb.RoomInfo{
 			Id:         room.ID,
@@ -135,7 +135,7 @@ func (self *ActorDB) GetTableList(req *pb.GetTableListReq) (*pb.GetTableListResp
 			Items: make([]*pb.TableInfo, 0),
 		},
 	}
-	ret, err := self.checkTables(req.Rid)
+	ret, err := self.checkTables(req.Rid, -1, 0)
 	for _, table := range ret {
 		resp.Items.Items = append(resp.Items.Items, &pb.TableInfo{
 			Id:         table.ID,
@@ -159,7 +159,7 @@ func (self *ActorDB) GetGameList(req *pb.GetGameListReq) (*pb.GetGameListResp, e
 			Items: make([]*pb.GameInfo, 0),
 		},
 	}
-	ret, err := self.checkGames(req.Kid)
+	ret, err := self.checkGames(req.Kid, -1, 0)
 	for _, game := range ret {
 		resp.Items.Items = append(resp.Items.Items, &pb.GameInfo{
 			Id:        game.ID,
@@ -248,6 +248,8 @@ func (self *ActorDB) CreateTable(req *pb.CreateTableReq) (*pb.CreateTableResp, e
 		Playscore:  req.Playscore,
 		Taxation:   req.Taxation,
 		Commission: req.Commission,
+		Amount:     req.Amount,
+		Opentime:   req.Opentime,
 	})
 	if err != nil {
 		return resp, err
@@ -261,6 +263,8 @@ func (self *ActorDB) CreateTable(req *pb.CreateTableReq) (*pb.CreateTableResp, e
 		Taxation:   req.Taxation,
 		PlayScore:  req.Playscore,
 		MaxSitter:  maxSit,
+		Amount:     req.Amount,
+		OpenTime:   req.Opentime,
 	}
 	rpc.SendData(self.App(), SourcePath, GameActor, NodeTypeGame, resp)
 	return resp, err
@@ -313,18 +317,18 @@ func (self *ActorDB) GetUserInfo(req *pb.GetUserInfoReq) (*pb.GetUserInfoResp, e
 		return resp, err
 	}
 	resp.Info = &pb.UserInfo{
-		UserID:   info.ID,
-		Name:     info.Name,
-		Account:  info.Account,
-		FaceID:   info.Face,
-		Gender:   info.Gender,
-		Age:      info.Age,
-		Empirice: info.Empirice,
-		Vip:      info.Vip,
-		Level:    info.Level,
-		YuanBao:  info.Yuanbao,
-		Coin:     info.Coin,
-		Money:    info.Money,
+		UserID:  info.ID,
+		Name:    info.Name,
+		Account: info.Account,
+		FaceID:  info.Face,
+		Gender:  info.Gender,
+		Age:     info.Age,
+		Empiric: info.Empiric,
+		Vip:     info.Vip,
+		Level:   info.Level,
+		YuanBao: info.Yuanbao,
+		Coin:    info.Coin,
+		Money:   info.Money,
 	}
 	return resp, nil
 }
@@ -337,5 +341,53 @@ func (self *ActorDB) FixNickName(req *pb.FixNickNameReq) (*pb.FixNickNameResp, e
 	}
 	resp.Uid = req.Uid
 	resp.Name = req.Name
+	return resp, nil
+}
+
+func (self *ActorDB) Recharge(req *pb.RechargeReq) (*pb.RechargeResp, error) {
+	resp := &pb.RechargeResp{}
+	err := self.addRecharge(sqlmodel.Recharge{
+		UID:       req.UserID,
+		Byid:      req.ByiD,
+		Payment:   req.Payment,
+		Premoney:  0,
+		Money:     0,
+		Code:      req.Method,
+		Order:     "",
+		Timestamp: time.Now().Unix(),
+		Remark:    req.Reason,
+		Switch:    req.Switch,
+		CreatedAt: time.Time{},
+		UpdatedAt: time.Time{},
+		DeletedAt: gorm.DeletedAt{},
+		UpdateBy:  0,
+		CreateBy:  0,
+	})
+	if err != nil {
+		return resp, err
+	}
+	return resp, nil
+}
+
+func (self *ActorDB) Record(req *pb.AddRecordReq) (*pb.AddRecordResp, error) {
+	resp := &pb.AddRecordResp{}
+	preGold, gold, err := self.addRecord(sqlmodel.Record{
+		UID:       req.Uid,
+		Tid:       req.Tid,
+		Payment:   req.Payment,
+		Code:      req.Code,
+		Order:     req.Order,
+		Remark:    req.Remark,
+		CreatedAt: time.Time{},
+		UpdatedAt: time.Time{},
+		DeletedAt: gorm.DeletedAt{},
+		UpdateBy:  0,
+		CreateBy:  0,
+	})
+	if err != nil {
+		return resp, err
+	}
+	resp.PerGold = preGold
+	resp.Gold = gold
 	return resp, nil
 }

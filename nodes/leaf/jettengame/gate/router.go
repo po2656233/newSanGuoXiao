@@ -169,6 +169,8 @@ func init() {
     msg.ProcessorProto.SetRouter(&protoMsg.GameOverResp{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.UpdateGoldReq{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.UpdateGoldResp{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.AddRecordReq{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.AddRecordResp{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.GetRecordReq{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.GetRecordResp{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.GetInningsInfoReq{}, game.ChanRPC)
@@ -248,8 +250,8 @@ func init() {
     msg.ProcessorProto.SetRouter(&protoMsg.EmailReadResp{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.EmailDelReq{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.EmailDelResp{}, game.ChanRPC)
-    msg.ProcessorProto.SetRouter(&protoMsg.NotifyBeOut{}, game.ChanRPC)
-    msg.ProcessorProto.SetRouter(&protoMsg.NotifyBalanceChange{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.NotifyBeOutResp{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.NotifyBalanceChangeResp{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.NotifyNoticeReq{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.NotifyNoticeResp{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.ResultResp{}, game.ChanRPC)
@@ -316,6 +318,10 @@ func init() {
     msg.ProcessorProto.SetRouter(&protoMsg.SanguoxiaoSwapReq{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.SanguoxiaoSwapResp{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.SanguoxiaoTriggerResp{}, game.ChanRPC)
+
+    //tetris文件生成的代码
+    msg.ProcessorProto.SetRouter(&protoMsg.TetrisShape{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.TetrisBlock{}, game.ChanRPC)
 
     //tigerXdragon文件生成的代码
     msg.ProcessorProto.SetRouter(&protoMsg.TigerXdragonSceneResp{}, game.ChanRPC)

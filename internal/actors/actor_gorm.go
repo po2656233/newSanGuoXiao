@@ -42,7 +42,8 @@ func (self *ActorDB) OnInit() {
 	self.Remote().Register(self.GetTable)
 	self.Remote().Register(self.GetUserInfo)
 	self.Remote().Register(self.FixNickName)
-
+	self.Remote().Register(self.Recharge)
+	self.Remote().Register(self.Record)
 	self.changeDB(CenterDb)
 	//// 每秒查询一次db
 	//p.Timer().Add(5*time.Second, p.selectDB)
@@ -165,6 +166,48 @@ func (self *ActorDB) addTable(table sqlmodel.Table) (id int64, maxSit int32, err
 	//return table.ID, table.Num, err
 }
 
+func (self *ActorDB) addRecharge(table sqlmodel.Recharge) error {
+	// 使用事务来确保操作的原子性
+	err := self.db.Transaction(func(tx *gorm.DB) error {
+		// 获取充值前的金额
+		money, err := self.checkUserMoney(table.UID)
+		if err != nil {
+			return err
+		}
+		// 插入新的记录
+		table.Premoney = money
+		table.Money = money + table.Payment
+		if table.Money < 0 {
+			table.Money = 0
+		}
+		table.Order = fmt.Sprintf("%v%v%v", time.Now().Unix(), table.UID, RandomStrLetter(4))
+		// 创建一个新的 充值记录
+		if err := tx.Create(&table).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+	return err
+}
+
+func (self *ActorDB) addRecord(table sqlmodel.Record) (int64, int64, error) {
+	// 获取充值前的金额
+	yuanbao, err := self.checkUserYuanBao(table.UID)
+	if err != nil {
+		return 0, 0, err
+	}
+	// 插入新的记录
+	table.Pergold = yuanbao
+	table.Gold = table.Pergold + table.Payment
+	// 创建一个新的 充值记录
+	if err = self.db.Create(&table).Error; err != nil {
+		return 0, 0, err
+	}
+
+	return yuanbao, table.Gold, nil
+}
+
 // DelTable 新增桌牌
 func (self *ActorDB) delTable(rid, tid int64) error {
 	self.Lock()
@@ -260,7 +303,7 @@ func (self *ActorDB) checkUserInfo(account, password string) (*sqlmodel.User, er
 func (self *ActorDB) checkUserSimpInfo(uid int64) (*sqlmodel.User, error) {
 	user := &sqlmodel.User{}
 	query := "`id`= ? "
-	selectField := "id,name,account,head,face,gender,age,empirice,vip,yuanbao,coin,money"
+	selectField := "id,name,account,head,face,gender,age,empiric,vip,yuanbao,coin,money"
 	err := self.db.Table(user.TableName()).Select(selectField).Where(query, uid).Find(user).Error
 	CheckError(err)
 	return user, err
@@ -268,10 +311,13 @@ func (self *ActorDB) checkUserSimpInfo(uid int64) (*sqlmodel.User, error) {
 
 // GetRoomInfo 获取玩家信息
 func (self *ActorDB) checkRoomInfo(rid int64) (*sqlmodel.Room, error) {
-	user := &sqlmodel.Room{}
-	err := self.db.Table(user.TableName()).Select("*").Where("id=?", rid).Find(user).Error
+	rm := &sqlmodel.Room{}
+	err := self.db.Table(rm.TableName()).Select("*").Where("id=?", rid).Find(rm).Error
+	count := int64(0)
+	self.db.Model(&sqlmodel.Table{}).Where("rid = ?", rid).Count(&count)
+	rm.TableCount = int32(count)
 	CheckError(err)
-	return user, err
+	return rm, err
 }
 
 // GetUserID 获取玩家ID
@@ -279,6 +325,32 @@ func (self *ActorDB) checkUserID(account, password string) (uid int64, err error
 	user := &sqlmodel.User{}
 	query := "`account`= ? AND `password` = ?"
 	err = self.db.Table(user.TableName()).Select("id").Where(query, account, password).Find(&uid).Error
+	CheckError(err)
+	return
+}
+
+// GetUserID 获取玩家ID
+func (self *ActorDB) checkUserMoney(uid int64) (money int64, err error) {
+	user := &sqlmodel.User{}
+	err = self.db.Table(user.TableName()).Select("money").Where("id=?", uid).Find(&money).Error
+	CheckError(err)
+	return
+}
+func (self *ActorDB) checkUserYuanBao(uid int64) (yuanbao int64, err error) {
+	user := &sqlmodel.User{}
+	err = self.db.Table(user.TableName()).Select("yuanbao").Where("id=?", uid).Find(&yuanbao).Error
+	CheckError(err)
+	return
+}
+func (self *ActorDB) checkUserEmpiric(uid int64) (empiric int64, err error) {
+	user := &sqlmodel.User{}
+	err = self.db.Table(user.TableName()).Select("empiric").Where("id=?", uid).Find(&empiric).Error
+	CheckError(err)
+	return
+}
+func (self *ActorDB) checkUserCoin(uid int64) (coin int64, err error) {
+	user := &sqlmodel.User{}
+	err = self.db.Table(user.TableName()).Select("coin").Where("id=?", uid).Find(&coin).Error
 	CheckError(err)
 	return
 }
@@ -312,32 +384,49 @@ func (self *ActorDB) checkClassify() (user []*sqlmodel.Kindinfo, err error) {
 }
 
 // GetRooms 获取房间列表 校验TableCount
-func (self *ActorDB) checkRooms(hostid, startTime int64) (rooms []*sqlmodel.Room, err error) {
+func (self *ActorDB) checkRooms(hostId, startTime int64, pageSize, pageNumber int) (rooms []*sqlmodel.Room, err error) {
 	rooms = make([]*sqlmodel.Room, 0)
 	room := sqlmodel.Room{}
-	if 0 < startTime && 0 < hostid {
+	if pageSize < 0 {
+		pageSize = -1
+	}
+	if pageNumber < 1 {
+		pageNumber = 1
+	}
+	if 0 < startTime && 0 < hostId {
 		start := time.Unix(startTime, 0)
-		err = self.db.Table(room.TableName()).Select("*").Where("`created_at` >= ? AND `hostid`=?", start, hostid).Find(&rooms).Error
+		err = self.db.Table(room.TableName()).Select("*").Where("`created_at` >= ? AND `hostid`=?", start, hostId).Limit(pageSize).Offset((pageNumber - 1) * pageSize).Find(&rooms).Error
 	} else if 0 < startTime {
 		start := time.Unix(startTime, 0)
-		err = self.db.Table(room.TableName()).Select("*").Where("`created_at` >= ?", start).Find(&rooms).Error
-	} else if 0 < hostid {
-		err = self.db.Table(room.TableName()).Select("*").Where("`hostid`=?", hostid).Find(&rooms).Error
+		err = self.db.Table(room.TableName()).Select("*").Where("`created_at` >= ?", start).Limit(pageSize).Offset((pageNumber - 1) * pageSize).Find(&rooms).Error
+	} else if 0 < hostId {
+		err = self.db.Table(room.TableName()).Select("*").Where("`hostid`=?", hostId).Limit(pageSize).Offset((pageNumber - 1) * pageSize).Find(&rooms).Error
 	} else {
 		err = self.db.Table(room.TableName()).Select("*").Find(&rooms).Error
+	}
+	count := int64(0)
+	for _, s := range rooms {
+		self.db.Model(&sqlmodel.Table{}).Where("rid = ?", s.ID).Count(&count)
+		s.TableCount = int32(count)
 	}
 	CheckError(err)
 	return
 }
 
 // GetTables 获取牌桌列表
-func (self *ActorDB) checkTables(rid int64) (tables []*sqlmodel.Table, err error) {
+func (self *ActorDB) checkTables(rid int64, pageSize, pageNumber int) (tables []*sqlmodel.Table, err error) {
 	tables = make([]*sqlmodel.Table, 0)
 	table := sqlmodel.Table{}
 	if 0 < rid {
 		err = self.db.Table(table.TableName()).Select("*").Where("rid=?", rid).Find(&tables).Error
 	} else {
-		err = self.db.Table(table.TableName()).Select("*").Find(&tables).Error
+		if pageSize < 0 {
+			pageSize = -1
+		}
+		if pageNumber < 1 {
+			pageNumber = 1
+		}
+		err = self.db.Table(table.TableName()).Limit(pageSize).Offset((pageNumber - 1) * pageSize).Find(&tables).Error
 	}
 	CheckError(err)
 	return
@@ -352,11 +441,17 @@ func (self *ActorDB) checkTable(tid int64) (*sqlmodel.Table, error) {
 }
 
 // GetGames 获取游戏列表
-func (self *ActorDB) checkGames(kid int64) (games []*sqlmodel.Game, err error) {
+func (self *ActorDB) checkGames(kid int64, pageSize, pageNumber int) (games []*sqlmodel.Game, err error) {
 	games = make([]*sqlmodel.Game, 0)
 	game := sqlmodel.Game{}
 	if kid == -1 {
-		err = self.db.Table(game.TableName()).Select("*").Find(&games).Error
+		if pageSize < 0 {
+			pageSize = -1
+		}
+		if pageNumber < 1 {
+			pageNumber = 1
+		}
+		err = self.db.Table(game.TableName()).Limit(pageSize).Offset((pageNumber - 1) * pageSize).Find(&games).Error
 	} else {
 		err = self.db.Table(game.TableName()).Select("*").Where("kid=?", kid).Find(&games).Error
 	}

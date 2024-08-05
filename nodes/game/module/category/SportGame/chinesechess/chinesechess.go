@@ -10,11 +10,6 @@ import (
 	"time"
 )
 
-const (
-	RowCount = 10
-	ColCount = 9
-)
-
 type Chinesechess struct {
 	*mgr.Game
 	T         *mgr.Table
@@ -35,13 +30,13 @@ func New(game *mgr.Game, table *mgr.Table) *Chinesechess {
 			Cells: make([]*protoMsg.XQGrid, 0),
 		},
 	}
-	p.Reset()
+	p.Init()
 	return p
 }
 
-// Reset 重置
-func (self *Chinesechess) Reset() {
-	self.Game.Reset()
+// Init 重置
+func (self *Chinesechess) Init() {
+	self.Game.Init()
 	self.winUid = 0
 	self.initBord()
 	self.redCamp = nil
@@ -312,20 +307,20 @@ func (self *Chinesechess) ConfirmOP(args []interface{}) {
 		mgr.GetClientMgr().SendResult(agent, FAILED, StatusText[Game04])
 		return
 	}
-	if !m.IsAgree {
-		if self.Timer != nil {
-			self.Timer.Stop()
-		}
-		self.onReady()
-		return
-	}
-
 	person := agent.UserData().(*mgr.Player)
 	msg := &protoMsg.ChineseChessAgreeTimeResp{
 		Uid:     person.UserID,
 		IsAgree: m.IsAgree,
 	}
 	mgr.GetClientMgr().NotifyOthers(self.PlayerList, msg)
+	if !m.IsAgree {
+		if self.Timer != nil {
+			self.Timer.Stop()
+		}
+		self.T.RemoveChair(person.UserID)
+		self.onReady()
+		return
+	}
 }
 
 // /////////////////////////[定时器事件]//////////////////////////////////////////
@@ -333,9 +328,11 @@ func (self *Chinesechess) ConfirmOP(args []interface{}) {
 func (self *Chinesechess) onReady() {
 	list := self.T.GetPlayList()
 	if self.redCamp != nil {
+		log.Infof("[%v:%d] 红方玩家:%d 已准备好", self.GameInfo.Name, self.T.Id, self.redCamp.Uid)
 		list = utils.RemoveValue(list, self.redCamp.Uid)
 	}
 	if self.blackCamp != nil {
+		log.Infof("[%v:%d] 黑方玩家:%d 已准备好", self.GameInfo.Name, self.T.Id, self.blackCamp.Uid)
 		list = utils.RemoveValue(list, self.blackCamp.Uid)
 	}
 	self.SetPlaylist(list)
@@ -347,16 +344,10 @@ func (self *Chinesechess) onReady() {
 			TotalTime: YamlObj.Chinesechess.Duration.Ready,
 		},
 	}
-	self.ChangeStateAndWork(protoMsg.GameScene_Ready, resp, YamlObj.Chinesechess.Duration.Ready, self.onSetTime)
+	self.ChangeStateAndWork(protoMsg.GameScene_Ready, resp, YamlObj.Chinesechess.Duration.Ready, nil, self.onSetTime)
 }
 
 func (self *Chinesechess) onSetTime() {
-	if self.blackCamp == nil || self.redCamp == nil {
-		self.onReady()
-		return
-	}
-	self.SetPlaylist(self.T.GetPlayList())
-	self.curUid = self.redCamp.Uid
 	resp := &protoMsg.ChineseChessStateSetResp{
 		Times: &protoMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
@@ -364,9 +355,17 @@ func (self *Chinesechess) onSetTime() {
 			WaitTime:  YamlObj.Chinesechess.Duration.Settime,
 			TotalTime: YamlObj.Chinesechess.Duration.Settime,
 		},
-		Uid: self.curUid,
+		Uid: self.redCamp.Uid,
 	}
-	self.ChangeStateAndWork(protoMsg.GameScene_Setting, resp, YamlObj.Chinesechess.Duration.Settime, self.onConfirmTime)
+	self.ChangeStateAndWork(protoMsg.GameScene_Setting, resp, YamlObj.Chinesechess.Duration.Settime, func() bool {
+		if self.blackCamp == nil || self.redCamp == nil {
+			log.Infof("[%v:%d] 等他其他玩家准备 ", self.GameInfo.Name, self.T.Id)
+			return false
+		}
+		self.SetPlaylist(self.T.GetPlayList())
+		self.curUid = self.redCamp.Uid
+		return true
+	}, self.onConfirmTime)
 }
 
 func (self *Chinesechess) onConfirmTime() {
@@ -380,7 +379,7 @@ func (self *Chinesechess) onConfirmTime() {
 		},
 		Uid: self.curUid,
 	}
-	self.ChangeStateAndWork(protoMsg.GameScene_Confirm, resp, YamlObj.Chinesechess.Duration.Confirm, self.onStart)
+	self.ChangeStateAndWork(protoMsg.GameScene_Confirm, resp, YamlObj.Chinesechess.Duration.Confirm, nil, self.onStart)
 
 }
 func (self *Chinesechess) onStart() {
@@ -393,19 +392,11 @@ func (self *Chinesechess) onStart() {
 		},
 		Uid: self.curUid,
 	}
-	self.ChangeStateAndWork(protoMsg.GameScene_Start, resp, YamlObj.Chinesechess.Duration.Start, self.onPlay)
+	self.ChangeStateAndWork(protoMsg.GameScene_Start, resp, YamlObj.Chinesechess.Duration.Start, nil, self.onPlay)
 }
 
 func (self *Chinesechess) onPlay() {
 	self.curUid = self.T.NextChairUID(self.curUid)
-	if self.curUid == INVALID {
-		log.Errorf("出现严重错误,当前玩家ID %v 出错", self.curUid)
-		return
-	}
-	if self.winUid != INVALID {
-		self.onOpen()
-		return
-	}
 	resp := &protoMsg.ChineseChessStatePlayingResp{
 		Times: &protoMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
@@ -417,7 +408,17 @@ func (self *Chinesechess) onPlay() {
 		NowBoard: self.board,
 	}
 	// 如果时间到了,玩家未操作,则另一方获胜
-	self.ChangeStateAndWork(protoMsg.GameScene_Playing, resp, self.timeout, self.onOpen)
+	self.ChangeStateAndWork(protoMsg.GameScene_Playing, resp, self.timeout, func() bool {
+		if self.curUid == INVALID {
+			log.Errorf("出现严重错误,当前玩家ID %v 出错", self.curUid)
+			return false
+		}
+		if self.winUid != INVALID {
+			self.onOpen()
+			return false
+		}
+		return true
+	}, self.onOpen)
 }
 
 func (self *Chinesechess) onOpen() {
@@ -438,7 +439,7 @@ func (self *Chinesechess) onOpen() {
 		WinUid:   self.winUid,
 		NowBoard: self.board,
 	}
-	self.ChangeStateAndWork(protoMsg.GameScene_Opening, resp, YamlObj.Chinesechess.Duration.Open, self.onOver)
+	self.ChangeStateAndWork(protoMsg.GameScene_Opening, resp, YamlObj.Chinesechess.Duration.Open, nil, self.onOver)
 }
 func (self *Chinesechess) onOver() {
 	resp := &protoMsg.ChineseChessStateOverResp{
@@ -453,21 +454,19 @@ func (self *Chinesechess) onOver() {
 			BlackCamp: self.blackCamp,
 		},
 	}
-	self.ChangeStateAndWork(protoMsg.GameScene_Over, resp, YamlObj.Chinesechess.Duration.Over, func() {
+	self.ChangeStateAndWork(protoMsg.GameScene_Over, resp, YamlObj.Chinesechess.Duration.Over, func() bool {
 		// 结算
 		self.Over(nil)
 		if self.RunCount == self.T.Amount { // 满足运行次数之后,释放资源
 			self.Close(func() *mgr.Table {
 				return self.T
 			})
-			return
+			return false
 		}
-
 		self.Reset()
 		self.T.ClearChairs()
-		// 重新准备
-		self.onReady()
-	})
+		return true
+	}, self.onReady)
 }
 
 // ///////////////////////[初始化]///////////////////////////////////

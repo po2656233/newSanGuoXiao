@@ -184,6 +184,8 @@ func init() {
     RegisterMessage(&protoMsg.GameOverResp{})
     RegisterMessage(&protoMsg.UpdateGoldReq{})
     RegisterMessage(&protoMsg.UpdateGoldResp{})
+    RegisterMessage(&protoMsg.AddRecordReq{})
+    RegisterMessage(&protoMsg.AddRecordResp{})
     RegisterMessage(&protoMsg.GetRecordReq{})
     RegisterMessage(&protoMsg.GetRecordResp{})
     RegisterMessage(&protoMsg.GetInningsInfoReq{})
@@ -263,8 +265,8 @@ func init() {
     RegisterMessage(&protoMsg.EmailReadResp{})
     RegisterMessage(&protoMsg.EmailDelReq{})
     RegisterMessage(&protoMsg.EmailDelResp{})
-    RegisterMessage(&protoMsg.NotifyBeOut{})
-    RegisterMessage(&protoMsg.NotifyBalanceChange{})
+    RegisterMessage(&protoMsg.NotifyBeOutResp{})
+    RegisterMessage(&protoMsg.NotifyBalanceChangeResp{})
     RegisterMessage(&protoMsg.NotifyNoticeReq{})
     RegisterMessage(&protoMsg.NotifyNoticeResp{})
     RegisterMessage(&protoMsg.ResultResp{})
@@ -331,6 +333,10 @@ func init() {
     RegisterMessage(&protoMsg.SanguoxiaoSwapReq{})
     RegisterMessage(&protoMsg.SanguoxiaoSwapResp{})
     RegisterMessage(&protoMsg.SanguoxiaoTriggerResp{})
+
+    //tetris文件生成的代码
+    RegisterMessage(&protoMsg.TetrisShape{})
+    RegisterMessage(&protoMsg.TetrisBlock{})
 
     //tigerXdragon文件生成的代码
     RegisterMessage(&protoMsg.TigerXdragonSceneResp{})

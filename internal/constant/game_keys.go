@@ -7,4 +7,5 @@ const (
 	ThreeKingdoms = 4
 	Landlord      = 5
 	Mahjong       = 6
+	Baccarat      = 23
 )

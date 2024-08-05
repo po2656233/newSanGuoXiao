@@ -2,6 +2,7 @@ package manger
 
 import (
 	"fmt"
+	log "github.com/po2656233/superplace/logger"
 	. "superman/internal/constant"
 	protoMsg "superman/internal/protocol/gofile"
 	"superman/internal/utils"
@@ -13,11 +14,9 @@ import (
 type Table struct {
 	*protoMsg.TableInfo
 	GameHandle IGameOperate
-	sitters    []IChair  // 座位上的玩家
-	lookers    []*Player // 旁观者
-	maxChairID int32     // 便于新增椅子号
+	sitters    sync.Map // 座位上的玩家(根据玩家状态区分，旁观者和正在完的玩家)
+	maxChairID int32    // 便于新增椅子号
 	sitCount   int32
-	sync.RWMutex
 }
 
 // ///////////////////桌牌功能//////////////////////////////////////////////
@@ -52,23 +51,6 @@ func (tb *Table) Init() {
 // Reset 重置座位上的玩家
 func (tb *Table) Reset() int64 {
 	// 遍历过程中存在slice的数据删除
-	tb.Lock()
-	for _, sitter := range tb.sitters {
-		sit, ok := sitter.(*Chair)
-		if !ok {
-			continue
-		}
-		sit.State = protoMsg.PlayerState_PlayerSitDown
-		sit.SetGain(INVALID)
-		sit.SetScore(INVALID)
-		sit.SetTotal(INVALID)
-		t := sit.Timer()
-		if t != nil {
-			t.Stop()
-			sit.SetTimer(nil)
-		}
-	}
-	tb.Unlock()
 
 	tb.Init()
 	return tb.Id
@@ -78,10 +60,9 @@ func (tb *Table) Reset() int64 {
 func (tb *Table) AddChair(player *Player) error {
 	// 是否满员了
 	if tb.MaxSitter != Unlimited && tb.MaxSitter < tb.SitCount()+1 {
-		return fmt.Errorf("已经满员")
+		return fmt.Errorf(StatusText[Game39])
 	}
 
-	tb.Lock()
 	playerList := make([]int64, 0)
 	player.PlayerInfo.State = protoMsg.PlayerState_PlayerSitDown
 	resp := &protoMsg.JoinGameReadyQueueResp{
@@ -90,44 +71,46 @@ func (tb *Table) AddChair(player *Player) error {
 		PlayerList: make([]*protoMsg.PlayerSimpleInfo, 0),
 	}
 	// 检测是否存在了
-	var chair IChair
-	for _, sitter := range tb.sitters {
-		info := sitter.GetPlayerInfo()
-		if info.UserID == player.UserID {
-			chair = sitter
-			break
-		}
-	}
+	sit, ok := tb.sitters.Load(player.UserID)
 	isNew := false
-	if chair == nil {
+	if !ok {
 		isNew = true
-		chair = NewChair(atomic.AddInt32(&tb.maxChairID, 1), tb.Gid, player)
-		tb.sitters = append(tb.sitters, chair)
-		atomic.SwapInt32(&tb.sitCount, int32(len(tb.sitters)))
+		sit = NewChair(atomic.AddInt32(&tb.maxChairID, 1), tb.Gid, player)
+		atomic.AddInt32(&tb.sitCount, 1)
+		tb.sitters.Store(player.UserID, sit)
+	}
+	if sit == nil {
+		return fmt.Errorf(StatusText[User03])
+	}
+	sitter, ok1 := sit.(*Chair)
+	if !ok1 {
+		return fmt.Errorf(StatusText[TableInfo11])
 	}
 
 	// 获取玩家简要信息
-	for _, sitter := range tb.sitters {
-		info := sitter.GetPlayerInfo()
-		resp.PlayerList = append(resp.PlayerList, sitter.ToSimpleInfo())
+	tb.sitters.Range(func(key, value any) bool {
+		alreadyChair := value.(*Chair)
+		info := alreadyChair.PlayerInfo
+		resp.PlayerList = append(resp.PlayerList, alreadyChair.ToSimpleInfo())
 		playerList = append(playerList, info.UserID)
-	}
-	tb.Unlock()
+		return true
+	})
 
 	// 发送给刚坐下的玩家，关于其他玩家的信息
 	player.InRooId = tb.Rid
 	player.InTableId = tb.Id
-	player.InChairId = chair.GetID()
+	player.InChairId = sitter.ID
 	player.GameHandle = tb.GameHandle
 	GetClientMgr().SendTo(player.UserID, resp)
 
 	// 发给其他玩家，当前刚坐下的玩家
-	resp.PlayerList = []*protoMsg.PlayerSimpleInfo{chair.ToSimpleInfo()}
+	resp.PlayerList = []*protoMsg.PlayerSimpleInfo{sitter.ToSimpleInfo()}
 	GetClientMgr().NotifyButOne(playerList, player.UserID, resp)
 
 	// 游戏准备 添加刚坐下的玩家
 	tb.GameHandle.UpdateInfo([]interface{}{player.State, player.UserID})
 	if isNew {
+		log.Infof("房间[%v] 牌桌[%v] 游戏[%v] 新增玩家[%v] 座椅[%v]", tb.Rid, tb.Id, tb.Gid, player.UserID, sitter.ID)
 		tb.GameHandle.Ready([]interface{}{player})
 		// 满员后,开始游戏
 		if (tb.MaxSitter == Unlimited && tb.sitCount == Default) || tb.MaxSitter == tb.sitCount {
@@ -139,150 +122,174 @@ func (tb *Table) AddChair(player *Player) error {
 	return nil
 }
 
+// GetChairData 获取牌桌信息
+func (tb *Table) GetChairData(uid int64) (value any, ok bool) {
+	return tb.sitters.Load(uid)
+}
+
 // GetChair 获取牌桌信息
-func (tb *Table) GetChair(uid int64) IChair {
-	tb.RLock()
-	defer tb.RUnlock()
-	for _, sitter := range tb.sitters {
-		if sitter.GetPlayerInfo().UserID == uid {
-			return sitter
+func (tb *Table) GetChair(uid int64) *Chair {
+	val, ok := tb.sitters.Load(uid)
+	if ok {
+		chair, ok1 := val.(*Chair)
+		if !ok1 {
+			return nil
 		}
+		return chair
 	}
 	return nil
 }
 
 func (tb *Table) GetChairInfos() []*protoMsg.PlayerInfo {
-	tb.RLock()
-	defer tb.RUnlock()
 	list := make([]*protoMsg.PlayerInfo, 0)
-	for _, sitter := range tb.sitters {
-		list = append(list, sitter.GetPlayerInfo())
-	}
+	tb.sitters.Range(func(key, value any) bool {
+		chair, ok1 := value.(*Chair)
+		if !ok1 {
+			return true
+		}
+		list = append(list, chair.PlayerInfo)
+		return true
+	})
 	return list
 }
 
 func (tb *Table) RemoveChair(uid int64) {
-	tb.Lock()
-	defer tb.Unlock()
-	for _, sitter := range tb.sitters {
-		if sitter.GetPlayerInfo().UserID == uid {
-			t := sitter.Timer()
-			t.Stop()
-			t = nil
-			tb.sitters = utils.RemoveValue(tb.sitters, sitter)
-			atomic.SwapInt32(&tb.sitCount, int32(len(tb.sitters)))
-			return
+	tb.sitters.Range(func(key, value any) bool {
+		if tempUid, ok := key.(int64); ok && tempUid == uid {
+			value = nil
 		}
-	}
+		return true
+	})
+	tb.sitters.Delete(uid)
+	atomic.SwapInt32(&tb.sitCount, -1)
 }
 
 func (tb *Table) ClearChairs() {
-	tb.Lock()
-	defer tb.Unlock()
-	for _, sitter := range tb.sitters {
-		uid := sitter.GetPlayerInfo().UserID
-		person := GetPlayerMgr().Get(uid)
-		if person != nil {
-			person.GameHandle = nil
-		}
-		t := sitter.Timer()
-		t.Stop()
-		t = nil
-		tb.sitters = utils.RemoveValue(tb.sitters, sitter)
-	}
-	atomic.SwapInt32(&tb.sitCount, int32(len(tb.sitters)))
+	tb.sitters.Range(func(key, value any) bool {
+		value = nil
+		return true
+	})
+	atomic.SwapInt32(&tb.sitCount, 0)
 }
 
 func (tb *Table) Close() {
-	tb.Lock()
-	defer tb.Unlock()
-	for _, sitter := range tb.sitters {
-		if t := sitter.Timer(); t != nil {
-			t.Stop()
-			t = nil
-		}
-		tb.sitters = utils.RemoveValue(tb.sitters, sitter)
-		sitter = nil
-	}
-	for _, look := range tb.lookers {
-		tb.lookers = utils.RemoveValue(tb.lookers, look)
-	}
-	atomic.SwapInt32(&tb.sitCount, 0)
-	tb.sitters = nil
-	tb.lookers = nil
+	tb.ClearChairs()
+	tb.sitters = sync.Map{}
 	tb.GameHandle = nil
 	tb.TableInfo = nil
 }
 
-// NextChair 轮换规则
-func (tb *Table) NextChair(curUid int64) IChair {
-	tb.RLock()
-	defer tb.RUnlock()
-	size := len(tb.sitters)
-	if 0 == size {
+// NextChair 轮换规则 根据座椅ID大小来轮换
+func (tb *Table) NextChair(curUid int64) *Chair {
+	//
+	val, ok := tb.sitters.Load(curUid)
+	if !ok {
 		return nil
 	}
-	index := 0
-	for i, sitter := range tb.sitters {
-		if sitter.GetPlayerInfo().UserID == curUid {
-			index = i
-			break
+	sitter, ok1 := val.(*Chair)
+	if !ok1 {
+		return nil
+	}
+	curChairID := sitter.ID
+	nextChairID := curChairID + 1
+	if tb.maxChairID < nextChairID {
+		nextChairID = 1
+	}
+	var nextChair *Chair
+	for i := int32(0); i < tb.maxChairID; i++ {
+		nextChairID += i
+		if tb.maxChairID < nextChairID {
+			nextChairID = nextChairID - tb.maxChairID
+			if nextChairID < 1 {
+				nextChairID = 1
+			}
+		}
+		tb.sitters.Range(func(key, value any) bool {
+			if chairInfo, ok2 := value.(*Chair); ok2 && chairInfo.ID == nextChairID {
+				nextChair = chairInfo
+				return false
+			}
+			return true
+		})
+		if nextChair != nil {
+			return nextChair
 		}
 	}
-	index++
-	if index <= size {
-		index = 0
-	}
-	for i := 0; i < size; i++ {
-		idx := index + i
-		if size <= idx {
-			idx -= size
-		}
-		playInfo := tb.sitters[idx].GetPlayerInfo()
-		if playInfo.State < protoMsg.PlayerState_PlayerGiveUp && playInfo.State >= protoMsg.PlayerState_PlayerSitDown {
-			return tb.sitters[idx]
-		}
-	}
-	return nil
+
+	return nextChair
 }
 func (tb *Table) NextChairUID(curUid int64) int64 {
 	chair := tb.NextChair(curUid)
 	if chair == nil {
 		return 0
 	}
-	return chair.GetPlayerInfo().UserID
+	return chair.UserID
 }
+
+func (tb *Table) ChairWork(work func(chair *Chair)) {
+	tb.sitters.Range(func(key, value any) bool {
+		if sitter, ok := value.(*Chair); ok {
+			work(sitter)
+		}
+		return true
+	})
+}
+
+// SitCount 座位总数
 func (tb *Table) SitCount() int32 {
 	return atomic.LoadInt32(&tb.sitCount)
 }
+
+// GetPlayList 获取玩家列表
 func (tb *Table) GetPlayList() []int64 {
-	tb.RLock()
-	defer tb.RUnlock()
 	list := make([]int64, 0)
-	for _, sit := range tb.sitters {
-		list = append(list, sit.GetPlayerInfo().UserID)
-	}
-	return list
+	tb.sitters.Range(func(key, value any) bool {
+		if uid, ok := key.(int64); ok {
+			list = append(list, uid)
+		}
+		return true
+	})
+
+	return utils.Unique(list)
 }
 
+// GetLookList 获取所有旁观玩家列表
 func (tb *Table) GetLookList() []int64 {
-	tb.RLock()
-	defer tb.RUnlock()
 	list := make([]int64, 0)
-	for _, look := range tb.lookers {
-		list = append(list, look.UserID)
-	}
-	return list
+	tb.sitters.Range(func(key, value any) bool {
+		if chair, ok := value.(*Chair); ok {
+			if chair.PlayerInfo.State == protoMsg.PlayerState_PlayerLookOn {
+				list = append(list, chair.PlayerInfo.UserID)
+			}
+		}
+		return true
+	})
+	return utils.Unique(list)
 }
+
+// GetAllList 获取所有玩家列表
 func (tb *Table) GetAllList() []int64 {
-	tb.RLock()
-	defer tb.RUnlock()
 	list := make([]int64, 0)
-	for _, sit := range tb.sitters {
-		list = append(list, sit.GetPlayerInfo().UserID)
-	}
-	for _, look := range tb.lookers {
-		list = append(list, look.UserID)
+	tb.sitters.Range(func(key, value any) bool {
+		if uid, ok := key.(int64); ok {
+			list = append(list, uid)
+		}
+		return true
+	})
+	return utils.Unique(list)
+}
+
+// GetOrderList 获取排序的玩家队列
+func (tb *Table) GetOrderList() []int64 {
+	list := make([]int64, 0)
+	for i := int32(1); i <= tb.maxChairID; i++ {
+		tb.sitters.Range(func(key, value any) bool {
+			if chairInfo, ok := value.(*Chair); ok && chairInfo.ID == i {
+				list = append(list, chairInfo.UserID)
+				return false
+			}
+			return true
+		})
 	}
 	return utils.Unique(list)
 }
