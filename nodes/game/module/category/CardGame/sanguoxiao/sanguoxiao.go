@@ -59,7 +59,10 @@ func (self *SanguoxiaoGame) Init() {
 }
 
 // Scene 场 景
-func (self *SanguoxiaoGame) Scene(args []interface{}) {
+func (self *SanguoxiaoGame) Scene(args []interface{}) bool {
+	if !self.Game.Scene(args) {
+		return false
+	}
 	agent := args[0].(mgr.Agent)
 	userData := agent.UserData()
 	person := userData.(*mgr.Player)
@@ -115,34 +118,28 @@ func (self *SanguoxiaoGame) Scene(args []interface{}) {
 		}
 
 	}
-
+	return true
 }
 
 // Ready 准备
-func (self *SanguoxiaoGame) Ready(args []interface{}) {
-
+func (self *SanguoxiaoGame) Ready(args []interface{}) bool {
+	return self.Game.Ready(args)
 }
 
 // Start 开 始 检测玩家是否
-func (self *SanguoxiaoGame) Start(args []interface{}) {
-
+func (self *SanguoxiaoGame) Start(args []interface{}) bool {
+	return self.Game.Start(args)
 }
 
 // Playing 游 戏
-func (self *SanguoxiaoGame) Playing(args []interface{}) {
+func (self *SanguoxiaoGame) Playing(args []interface{}) bool {
 	//
+	if !self.Game.Playing(args) {
+		return false
+	}
 	m := args[0].(*protoMsg.SanguoxiaoSwapReq)
 	agent := args[1].(mgr.Agent)
-	if protoMsg.GameScene_Playing != self.status {
-		log.Error("[Sanguoxiao][Playing] 场景信息不匹配 %v ", self.status)
-		return
-	}
 	userData := agent.UserData()
-	if userData == nil { //[0
-		//mgr.GetClientMgr().SendResult(agent, FAILED, StatusText[Game37])
-		log.Error("[Sanguoxiao][Playing] 用户数据 %v ", self.status)
-		return
-	}
 	person := userData.(*mgr.Player)
 	cells := make([]*protoMsg.SgxGrid, len(self.board.Cells))
 	for _, item := range self.board.Cells {
@@ -156,7 +153,7 @@ func (self *SanguoxiaoGame) Playing(args []interface{}) {
 	if !self.swapGrid(m.Origin, m.Target) {
 		//mgr.GetClientMgr().SendResult(agent, FAILED, StatusText[Game37])
 		log.Error("[Sanguoxiao][Playing] 用户操作错误 %v ", self.status)
-		return
+		return false
 	}
 
 	// 通知玩家 当前操作
@@ -169,15 +166,11 @@ func (self *SanguoxiaoGame) Playing(args []interface{}) {
 	// 轮值至下个玩家
 	self.status = protoMsg.GameScene_Opening
 	self.OnOpen()
+	return true
 }
 
 // Over 结 算
-func (self *SanguoxiaoGame) Over(args []interface{}) {
-	if protoMsg.GameScene_Over != self.status {
-		log.Error("[Sanguoxiao][Over] 场景信息不匹配 %v ", self.status)
-		return
-	}
-
+func (self *SanguoxiaoGame) Over(args []interface{}) bool {
 	// 玩家1 胜
 	winId := self.redPlay.Info.UserID
 	loseId := self.bluePlay.Info.UserID
@@ -212,16 +205,6 @@ func (self *SanguoxiaoGame) Over(args []interface{}) {
 		heroIds = append(heroIds, info.Id)
 	}
 	//mysql.SqlHandle().ChooseHeros(self.bluePlay.Info.UserID, heroIds, false)
-}
-
-// UpdateInfo 更新信息
-func (self *SanguoxiaoGame) UpdateInfo(args []interface{}) bool {
-
-	return true
-}
-
-// SuperControl 超级控制 在检测到没真实玩家时,且处于空闲状态时,自动关闭
-func (self *SanguoxiaoGame) SuperControl(args []interface{}) bool {
 	return true
 }
 

@@ -20,7 +20,7 @@ func NewGame(gid int64, tb *manger.Table) manger.IGameOperate {
 		return nil
 	}
 	// 剩余次数没有了,则不再创建该牌桌
-	if tb.Amount == cst.FINISH {
+	if tb.Remain == cst.FINISH {
 		log.Infof("牌桌[%d] 已经没有剩余次数了", tb.Id)
 		return nil
 	}
@@ -28,7 +28,7 @@ func NewGame(gid int64, tb *manger.Table) manger.IGameOperate {
 	info.Id = tb.Id
 	game := &manger.Game{
 		GameInfo:   info,
-		IsStart:    true,
+		IsStart:    false,
 		IsClear:    false,
 		ReadyCount: 0,
 		RunCount:   0,

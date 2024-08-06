@@ -4,7 +4,7 @@ import (
 	log "github.com/po2656233/superplace/logger"
 	"google.golang.org/protobuf/proto"
 	"strings"
-	"superman/internal/constant"
+	. "superman/internal/constant"
 	protoMsg "superman/internal/protocol/gofile"
 	"superman/internal/utils"
 	"sync"
@@ -13,22 +13,21 @@ import (
 
 // IGameOperate 子游戏接口
 type IGameOperate interface {
-	Scene(args []interface{}) //场 景
-	Ready(args []interface{})
-	Start(args []interface{})             //开 始
-	Playing(args []interface{})           //游 戏(下分|下注)
-	Over(args []interface{})              //结 算
-	UpdateInfo(args []interface{}) bool   //更新信息 如玩家进入或离开
-	SuperControl(args []interface{}) bool //超级控制 在检测到没真实玩家时,且处于空闲状态时,自动关闭
+	Scene(args []interface{}) bool        // 场 景
+	Start(args []interface{}) bool        // 准备
+	Ready(args []interface{}) bool        // 准备
+	Playing(args []interface{}) bool      // 游 戏(下分|下注)
+	UpdateInfo(args []interface{}) bool   // 更新信息 如玩家进入或离开
+	SuperControl(args []interface{}) bool // 超级控制 在检测到没真实玩家时,且处于空闲状态时,自动关闭
 }
 
 // IAgainst 对战类
 type IAgainst interface {
-	Ready(args []interface{})     //准备
-	DispatchCard()                //发牌
-	CallScore(args []interface{}) //叫分
-	OutCard(args []interface{})   //出牌
-	Discard(args []interface{})   //操作
+	Ready(args []interface{}) bool     //准备
+	DispatchCard() bool                //发牌
+	CallScore(args []interface{}) bool //叫分
+	OutCard(args []interface{}) bool   //出牌
+	Discard(args []interface{}) bool   //操作
 }
 
 // IMultiPlayer 百人类
@@ -39,21 +38,27 @@ type IMultiPlayer interface {
 }
 
 type IDevice interface {
-	Ready() bool              //准备
-	Start(time int64) bool    //开启(游戏)
-	Maintain(time int64) bool //维护(暂停)
-	Clear(time int64) bool    //清场
-	Close() bool              //关闭
+	Start(time int64) bool    // 开启(游戏)
+	Maintain(time int64) bool // 维护(暂停)
+	Over() bool               // 结束
+	Close(time int64) bool    // 关闭
 }
 
 // NewGameFunc 实例回调(根据桌子号创建游戏)
 type NewGameFunc func(gid int64, table *Table) IGameOperate
 type NewSingleGameFunc func(gid, tid int64) IGameOperate
-
 type CalculateFunc func(info CalculateInfo) (nowMoney, factDeduct int64, isOK bool)
 
 // ClearFunc 清场回调
 type ClearFunc func() *Table
+
+type WorkTask struct {
+	sceneInfo proto.Message
+	before    func()      // 事件之前需要做的
+	job       func() bool // 当前场景下需要执行的事情,返回false,则不执行after
+	after     func()      // 事件之后需要处理的事情
+	timeout   int32
+}
 
 // CalculateInfo 结算信息
 type CalculateInfo struct {
@@ -75,6 +80,8 @@ type Game struct {
 	TimeStamp  int64  // 当前状态时刻的时间戳
 	PlayerList []int64
 	Timer      *time.Timer
+	openTime   int64 // 开局时间戳
+	Event      map[protoMsg.GameScene]WorkTask
 	playlistLK sync.RWMutex
 }
 
@@ -112,11 +119,11 @@ func (gmr *GameMgr) GetGame(gid int64) *protoMsg.GameInfo {
 	return val.(*protoMsg.GameInfo)
 }
 
-///////////////////////////GAME//////////////////////////////////////////////////////
+///////////////////////////GAME///////////////////////////////////////////////////////////
+//////////////////////////基础功能//////////////////////////////////////////////////////////
 
 // Init 重置信息
 func (g *Game) Init() {
-	g.ChangeState(protoMsg.GameScene_Free)
 	g.RunCount++
 	g.ReadyCount = 0
 	g.IsStart = false
@@ -139,6 +146,7 @@ func (g *Game) AddPlayer(uid int64) {
 	g.playlistLK.Lock()
 	defer g.playlistLK.Unlock()
 	g.PlayerList = append(g.PlayerList, uid)
+	g.PlayerList = utils.Unique(g.PlayerList)
 }
 
 func (g *Game) RemovePlayer(uid int64) {
@@ -170,74 +178,112 @@ func (g *Game) PlayerWork(f func(int64)) {
 func (self *Game) ChangeState(state protoMsg.GameScene) {
 	self.GameInfo.Scene = state
 	self.TimeStamp = time.Now().Unix()
-	log.Infof("[%v:%v]   \t当前状态:%v ", self.Name, self.Id, protoMsg.GameScene_name[int32(state)])
+	log.Infof("[%v:%v]   \t当前场景:%v ", self.Name, self.Id, protoMsg.GameScene_name[int32(state)])
 }
 
 // ChangeStateAndWork 改变游戏状态
-func (self *Game) ChangeStateAndWork(state protoMsg.GameScene, resp proto.Message, timeout int32, work func() bool, After func()) {
+func (self *Game) ChangeStateAndWork(state protoMsg.GameScene) {
+	nowScene, ok := self.Event[state]
+	if !ok {
+		log.Warnf("[%v:%v]   \t 场景:%v 未注册!!! 可能导致游戏无法运行. ", self.Name, self.Id, protoMsg.GameScene_name[int32(state)])
+		return
+	}
+
+	if nowScene.before != nil {
+		nowScene.before()
+	}
 	if self.GameInfo.Scene != state {
-		if self.GameInfo.MaxPlayer != constant.Unlimited {
-			log.Infof("[%v:%v]   \t当前状态:%v 当前玩家列表%v", self.Name, self.Id, protoMsg.GameScene_name[int32(state)], self.PlayerList)
+		if self.GameInfo.MaxPlayer != Unlimited {
+			log.Infof("[%v:%v]   \t当前场景:%v 当前玩家列表%v", self.Name, self.Id, protoMsg.GameScene_name[int32(state)], self.PlayerList)
 		} else {
-			log.Infof("[%v:%v]   \t当前状态:%v ", self.Name, self.Id, protoMsg.GameScene_name[int32(state)])
+			log.Infof("[%v:%v]   \t当前场景:%v ", self.Name, self.Id, protoMsg.GameScene_name[int32(state)])
 		}
 	}
 	// 变更状态
 	self.GameInfo.Scene = state
 	self.TimeStamp = time.Now().Unix()
 	canAfter := true
-	if work != nil {
+	if nowScene.job != nil {
 		// 变更时,执行的任务
-		canAfter = work()
+		canAfter = nowScene.job()
 	}
 	// 是否执行后续任务
-	if canAfter {
-		if timeout > 0 {
-			if self.Timer != nil {
-				self.Timer.Stop()
-			}
-			if After != nil {
-				self.Timer = time.AfterFunc(time.Duration(timeout)*time.Second, After)
-			}
+	if !canAfter {
+		return
+	}
+	// 继续执行任务
+	if nowScene.timeout > 0 {
+		if self.Timer != nil {
+			self.Timer.Stop()
 		}
-		if resp != nil && 0 < self.GetPlayerCount() {
-			GetClientMgr().NotifyOthers(self.PlayerList, resp)
-		}
+		self.Timer = time.AfterFunc(time.Duration(nowScene.timeout)*time.Second, func() {
+			if self.IsClear { // 如果清场了,则不再执行后续任务
+				return
+			}
+			if nowScene.after != nil {
+				nowScene.after()
+			}
+			self.ToNextScene()
+		})
+	}
+	if nowScene.sceneInfo != nil && 0 < self.GetPlayerCount() {
+		GetClientMgr().NotifyOthers(self.PlayerList, nowScene.sceneInfo)
 	}
 
+}
+
+///////////////////////////////游戏操作//////////////////////////////////////////////
+
+// Scene 游戏场景
+func (g *Game) Scene(args []interface{}) bool {
+	_ = args
+	person, ok := args[0].(*Player)
+	if !ok {
+		return false
+	}
+	g.AddPlayer(person.UserID)
+	now := time.Now().Unix()
+	wait := g.openTime - now
+	if 0 < wait {
+		GetClientMgr().SendTo(person.UserID, &protoMsg.WaitGameStartResp{
+			GameID:      g.Id,
+			WaitTimeOut: wait,
+		})
+		return false
+	}
+	return true
 }
 
 // Ready 准备
-func (g *Game) Ready(args []interface{}) {
+func (g *Game) Ready(args []interface{}) bool {
 	_ = args
-	g.ChangeState(protoMsg.GameScene_Ready)
+	return true
 }
 
-// Scene 游戏场景
-func (g *Game) Scene(args []interface{}) {
-	_ = args
-}
-
-// Start 开 始
-func (g *Game) Start(args []interface{}) {
+// Start 准备
+func (g *Game) Start(args []interface{}) bool {
 	_ = args
 	if g.IsStart {
-		return
+		return false
 	}
 	g.IsStart = true
-	g.ChangeState(protoMsg.GameScene_Start)
+	return true
 }
 
 // Playing 游 戏(下分|下注)
-func (g *Game) Playing(args []interface{}) {
+func (g *Game) Playing(args []interface{}) bool {
 	_ = args
-	g.ChangeState(protoMsg.GameScene_Playing)
-}
-
-// Over 结 算
-func (g *Game) Over(args []interface{}) {
-	_ = args
-	g.ChangeState(protoMsg.GameScene_Over)
+	agent := args[1].(Agent)
+	if g.GameInfo.Scene != protoMsg.GameScene_Playing {
+		GetClientMgr().SendResult(agent, FAILED, StatusText[Game04])
+		return false
+	}
+	userData := agent.UserData()
+	if userData == nil { //[0
+		GetClientMgr().SendResult(agent, FAILED, StatusText[Game37])
+		return false
+	}
+	return true
 }
 
 // UpdateInfo 更新信息 如玩家进入或离开
@@ -251,6 +297,8 @@ func (g *Game) UpdateInfo(args []interface{}) bool {
 		return false
 	}
 	switch flag {
+	case protoMsg.PlayerState_PlayerSitDown:
+		g.AddPlayer(uid)
 	case protoMsg.PlayerState_PlayerStandUp:
 		if protoMsg.GameScene_Start <= g.GameInfo.Scene && g.GameInfo.Scene <= protoMsg.GameScene_Over {
 			return false
@@ -282,15 +330,72 @@ func (g *Game) SuperControl(args []interface{}) bool {
 	return true
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+// 									注册事件
+//////////////////////////////////////////////////////////////////////////////////////
+
+func (g *Game) RegisterEvent(scene protoMsg.GameScene, info proto.Message, timeout int32, work func() bool, before, after func()) {
+	if g.Event == nil {
+		g.Event = make(map[protoMsg.GameScene]WorkTask)
+	}
+	task := WorkTask{}
+	task.timeout = timeout
+	task.sceneInfo = info
+	task.before = before
+	task.job = work
+	task.after = after
+	g.Event[scene] = task
+}
+func (g *Game) Running() {
+	for i := protoMsg.GameScene_Free; i < protoMsg.GameScene_Closing; i++ {
+		if _, ok := g.Event[i]; ok {
+			g.ChangeStateAndWork(i)
+			return
+		}
+	}
+}
+func (g *Game) ToNextScene() bool {
+	if g.IsClear { // 如果清场了,则不再执行后续任务
+		return false
+	}
+	next := int32(g.GameInfo.Scene) + 1
+	if next > int32(protoMsg.GameScene_Closing) {
+		next = int32(protoMsg.GameScene_Free)
+	}
+	max := int32(protoMsg.GameScene_Closing) + next
+	for i := next; i < max; i++ {
+		next = i
+		if int32(protoMsg.GameScene_Closing) < next+1 {
+			next = i - int32(protoMsg.GameScene_Closing)
+		}
+		if _, ok := g.Event[protoMsg.GameScene(next)]; ok {
+			break
+		}
+	}
+	if int32(protoMsg.GameScene_Closing) <= next {
+		return false
+	}
+	g.ChangeStateAndWork(protoMsg.GameScene(next))
+	return true
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+
 // Close 关闭游戏
 func (g *Game) Close(f ClearFunc) {
 	g.ChangeState(protoMsg.GameScene_Closing)
+	//
 	tb := f()
 	if tb != nil {
+		GetClientMgr().NotifyOthers(g.PlayerList, &protoMsg.DisbandedTableResp{
+			RoomID:  tb.Rid,
+			TableID: tb.Id,
+		})
 		if rm := GetRoomMgr().GetRoom(tb.Rid); rm != nil {
 			rm.DelTable(tb.Id)
 		}
 		tb.Close()
+		*tb = Table{}
 		tb = nil
 	}
 

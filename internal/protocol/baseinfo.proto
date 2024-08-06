@@ -288,12 +288,13 @@ message TableInfo{
   string   name = 2;        // 桌牌名称
   int64    rid = 3;         // 房间ID
   int64    gid = 4;         // 绑定的游戏ID
-  int64    openTime = 5;    // 开启时间
-  int64    taxation = 6;    // 固定税收
-  int32    commission = 7;  // 每局税收
-  int32    amount = 8;      // 总共场数
+  int32    commission = 5;  // 每局税收
+  int32    maxRound = 6;    // 最大轮次
+  int32    remain = 7;      // 剩余场次
+  int32    maxSitter = 8;     // 客人数量(即:当前玩家数量)
   int64    playScore = 9;   // 初始积分(携带的积分)
-  int32    maxSitter = 10;     // 客人数量(即:当前玩家数量)
+  int64    openTime = 10;    // 开启时间
+  int64    taxation = 11;    // 固定税收
 }
 //////////////////////////////////[游戏信息]/////////////////////////////////////////
 //时间信息

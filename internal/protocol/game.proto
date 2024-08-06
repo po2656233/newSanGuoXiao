@@ -32,6 +32,13 @@ message JoinGameReadyQueueResp {
   int64 tableID = 2;                // 牌桌信息
   repeated PlayerSimpleInfo playerList = 3;    // 玩家信息
 }
+// 等待游戏开局
+message WaitGameStartResp {
+  int64 roomID = 1;                 // 房间ID 注: =0时,为系统房
+  int64 tableID = 2;                // 牌桌信息
+  int64 gameID = 3;                 // 游戏ID
+  int64 waitTimeOut = 4;            // 等待时长
+}
 //入场协议 对战类 [EnterXXXGameResp]
 //受游戏本身特性影响,PlayerInfo有本地化需求
 //请查看对应的子游戏协议文件 中的 EnterXXXGameResp

@@ -5122,12 +5122,12 @@ proto.pb.CreateTableReq.toObject = function(includeInstance, msg) {
   var obj = {
     rid: jspb.Message.getFieldWithDefault(msg, 1, 0),
     gid: jspb.Message.getFieldWithDefault(msg, 2, 0),
-    playscore: jspb.Message.getFieldWithDefault(msg, 3, 0),
-    name: jspb.Message.getFieldWithDefault(msg, 4, ""),
-    opentime: jspb.Message.getFieldWithDefault(msg, 5, 0),
-    taxation: jspb.Message.getFieldWithDefault(msg, 6, 0),
-    commission: jspb.Message.getFieldWithDefault(msg, 7, 0),
-    amount: jspb.Message.getFieldWithDefault(msg, 8, 0)
+    name: jspb.Message.getFieldWithDefault(msg, 3, ""),
+    taxation: jspb.Message.getFieldWithDefault(msg, 4, 0),
+    commission: jspb.Message.getFieldWithDefault(msg, 5, 0),
+    maxround: jspb.Message.getFieldWithDefault(msg, 6, 0),
+    opentime: jspb.Message.getFieldWithDefault(msg, 7, 0),
+    playscore: jspb.Message.getFieldWithDefault(msg, 8, 0)
   };
 
   if (includeInstance) {
@@ -5173,28 +5173,28 @@ proto.pb.CreateTableReq.deserializeBinaryFromReader = function(msg, reader) {
       msg.setGid(value);
       break;
     case 3:
-      var value = /** @type {number} */ (reader.readInt64());
-      msg.setPlayscore(value);
-      break;
-    case 4:
       var value = /** @type {string} */ (reader.readString());
       msg.setName(value);
       break;
-    case 5:
-      var value = /** @type {number} */ (reader.readInt64());
-      msg.setOpentime(value);
-      break;
-    case 6:
+    case 4:
       var value = /** @type {number} */ (reader.readInt64());
       msg.setTaxation(value);
       break;
-    case 7:
+    case 5:
       var value = /** @type {number} */ (reader.readInt32());
       msg.setCommission(value);
       break;
-    case 8:
+    case 6:
       var value = /** @type {number} */ (reader.readInt32());
-      msg.setAmount(value);
+      msg.setMaxround(value);
+      break;
+    case 7:
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setOpentime(value);
+      break;
+    case 8:
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setPlayscore(value);
       break;
     default:
       reader.skipField();
@@ -5239,44 +5239,44 @@ proto.pb.CreateTableReq.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getPlayscore();
-  if (f !== 0) {
-    writer.writeInt64(
-      3,
-      f
-    );
-  }
   f = message.getName();
   if (f.length > 0) {
     writer.writeString(
-      4,
-      f
-    );
-  }
-  f = message.getOpentime();
-  if (f !== 0) {
-    writer.writeInt64(
-      5,
+      3,
       f
     );
   }
   f = message.getTaxation();
   if (f !== 0) {
     writer.writeInt64(
-      6,
+      4,
       f
     );
   }
   f = message.getCommission();
   if (f !== 0) {
     writer.writeInt32(
+      5,
+      f
+    );
+  }
+  f = message.getMaxround();
+  if (f !== 0) {
+    writer.writeInt32(
+      6,
+      f
+    );
+  }
+  f = message.getOpentime();
+  if (f !== 0) {
+    writer.writeInt64(
       7,
       f
     );
   }
-  f = message.getAmount();
+  f = message.getPlayscore();
   if (f !== 0) {
-    writer.writeInt32(
+    writer.writeInt64(
       8,
       f
     );
@@ -5315,91 +5315,91 @@ proto.pb.CreateTableReq.prototype.setGid = function(value) {
 
 
 /**
- * optional int64 playscore = 3;
- * @return {number}
- */
-proto.pb.CreateTableReq.prototype.getPlayscore = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
-};
-
-
-/** @param {number} value */
-proto.pb.CreateTableReq.prototype.setPlayscore = function(value) {
-  jspb.Message.setProto3IntField(this, 3, value);
-};
-
-
-/**
- * optional string name = 4;
+ * optional string name = 3;
  * @return {string}
  */
 proto.pb.CreateTableReq.prototype.getName = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
 };
 
 
 /** @param {string} value */
 proto.pb.CreateTableReq.prototype.setName = function(value) {
-  jspb.Message.setProto3StringField(this, 4, value);
+  jspb.Message.setProto3StringField(this, 3, value);
 };
 
 
 /**
- * optional int64 opentime = 5;
- * @return {number}
- */
-proto.pb.CreateTableReq.prototype.getOpentime = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 5, 0));
-};
-
-
-/** @param {number} value */
-proto.pb.CreateTableReq.prototype.setOpentime = function(value) {
-  jspb.Message.setProto3IntField(this, 5, value);
-};
-
-
-/**
- * optional int64 taxation = 6;
+ * optional int64 taxation = 4;
  * @return {number}
  */
 proto.pb.CreateTableReq.prototype.getTaxation = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 6, 0));
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 4, 0));
 };
 
 
 /** @param {number} value */
 proto.pb.CreateTableReq.prototype.setTaxation = function(value) {
-  jspb.Message.setProto3IntField(this, 6, value);
+  jspb.Message.setProto3IntField(this, 4, value);
 };
 
 
 /**
- * optional int32 commission = 7;
+ * optional int32 commission = 5;
  * @return {number}
  */
 proto.pb.CreateTableReq.prototype.getCommission = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 7, 0));
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 5, 0));
 };
 
 
 /** @param {number} value */
 proto.pb.CreateTableReq.prototype.setCommission = function(value) {
+  jspb.Message.setProto3IntField(this, 5, value);
+};
+
+
+/**
+ * optional int32 maxRound = 6;
+ * @return {number}
+ */
+proto.pb.CreateTableReq.prototype.getMaxround = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 6, 0));
+};
+
+
+/** @param {number} value */
+proto.pb.CreateTableReq.prototype.setMaxround = function(value) {
+  jspb.Message.setProto3IntField(this, 6, value);
+};
+
+
+/**
+ * optional int64 opentime = 7;
+ * @return {number}
+ */
+proto.pb.CreateTableReq.prototype.getOpentime = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 7, 0));
+};
+
+
+/** @param {number} value */
+proto.pb.CreateTableReq.prototype.setOpentime = function(value) {
   jspb.Message.setProto3IntField(this, 7, value);
 };
 
 
 /**
- * optional int32 amount = 8;
+ * optional int64 playScore = 8;
  * @return {number}
  */
-proto.pb.CreateTableReq.prototype.getAmount = function() {
+proto.pb.CreateTableReq.prototype.getPlayscore = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 8, 0));
 };
 
 
 /** @param {number} value */
-proto.pb.CreateTableReq.prototype.setAmount = function(value) {
+proto.pb.CreateTableReq.prototype.setPlayscore = function(value) {
   jspb.Message.setProto3IntField(this, 8, value);
 };
 

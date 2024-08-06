@@ -8,6 +8,7 @@ import (
 	"superman/internal/utils"
 	"sync"
 	"sync/atomic"
+	"time"
 )
 
 // Table 桌牌
@@ -17,6 +18,7 @@ type Table struct {
 	sitters    sync.Map // 座位上的玩家(根据玩家状态区分，旁观者和正在完的玩家)
 	maxChairID int32    // 便于新增椅子号
 	sitCount   int32
+	isStart    bool
 }
 
 // ///////////////////桌牌功能//////////////////////////////////////////////
@@ -113,12 +115,25 @@ func (tb *Table) AddChair(player *Player) error {
 		log.Infof("房间[%v] 牌桌[%v] 游戏[%v] 新增玩家[%v] 座椅[%v]", tb.Rid, tb.Id, tb.Gid, player.UserID, sitter.ID)
 		tb.GameHandle.Ready([]interface{}{player})
 		// 满员后,开始游戏
-		if (tb.MaxSitter == Unlimited && tb.sitCount == Default) || tb.MaxSitter == tb.sitCount {
-			tb.GameHandle.Start(nil)
+		if !tb.isStart && ((tb.MaxSitter == Unlimited && tb.sitCount == Default) || tb.MaxSitter == tb.sitCount) {
+			tb.isStart = true
+			now := time.Now().Unix()
+			wait := tb.OpenTime - now
+			if wait < INVALID {
+				wait = 1
+			}
+			time.AfterFunc(time.Duration(wait)*time.Second, func() {
+				if tb != nil {
+					if tb.GameHandle != nil {
+						tb.GameHandle.Start(nil)
+					} else {
+						log.Errorf("牌桌[%v] 游戏[%v]启动失败!!! ", tb.Id, tb.Gid)
+					}
+				}
+			})
 		}
 	}
 	tb.GameHandle.Scene([]interface{}{player})
-
 	return nil
 }
 
@@ -156,7 +171,19 @@ func (tb *Table) GetChairInfos() []*protoMsg.PlayerInfo {
 func (tb *Table) RemoveChair(uid int64) {
 	tb.sitters.Range(func(key, value any) bool {
 		if tempUid, ok := key.(int64); ok && tempUid == uid {
-			value = nil
+			person := GetPlayerMgr().Get(uid)
+			person.InChairId = INVALID
+			person.InTableId = INVALID
+			person.GameHandle = nil
+			if chair, ok1 := value.(*Chair); ok1 {
+				if chair.ID == tb.maxChairID {
+					tb.maxChairID--
+					if tb.maxChairID < 1 {
+						tb.maxChairID = 1
+					}
+				}
+				chair = nil
+			}
 		}
 		return true
 	})
@@ -166,9 +193,16 @@ func (tb *Table) RemoveChair(uid int64) {
 
 func (tb *Table) ClearChairs() {
 	tb.sitters.Range(func(key, value any) bool {
-		value = nil
+		if uid, ok := key.(int64); ok {
+			person := GetPlayerMgr().Get(uid)
+			person.InChairId = INVALID
+			person.InTableId = INVALID
+			person.GameHandle = nil
+			value = nil
+		}
 		return true
 	})
+	tb.maxChairID = 0
 	atomic.SwapInt32(&tb.sitCount, 0)
 }
 

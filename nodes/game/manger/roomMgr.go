@@ -149,6 +149,7 @@ func (self *Room) AddTable(table *protoMsg.TableInfo, f NewGameFunc) (*Table, er
 	tb := &Table{
 		TableInfo: table,
 		sitters:   sync.Map{},
+		isStart:   false,
 	}
 	tb.GameHandle = f(table.Gid, tb) //创建游戏句柄
 	if tb.GameHandle == nil {

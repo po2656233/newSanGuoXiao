@@ -104,12 +104,12 @@ func join(args []interface{}) {
 		data, errCode := rpc.SendDataToDB(agent.App(), &protoMsg.CreateTableReq{
 			Rid:        SYSTEMID,
 			Gid:        m.GameID,
-			Playscore:  0,
+			PlayScore:  Unlimited,
 			Name:       "",
 			Opentime:   time.Now().Unix(),
 			Taxation:   0, //系统房没有税收
 			Commission: 0,
-			Amount:     Unlimited,
+			MaxRound:   Unlimited,
 		})
 		if errCode != SUCCESS {
 			clog.Warnf("[join] [SendDataToDB] params %+v  uid:%+v FAIL", m, uid)

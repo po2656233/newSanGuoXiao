@@ -231,6 +231,7 @@
 	"315": "NotifyBalanceChangeResp",
 	"316": "TetrisShape",
 	"317": "TetrisBlock",
+	"318": "WaitGameStartResp",
 	"32": "ClassList",
 	"33": "PlayerList",
 	"34": "GoodsList",

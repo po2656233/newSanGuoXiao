@@ -176,7 +176,7 @@ func (p *Controller) tableCreate(c *superGin.Context) {
 	strOpentime, ok4 := c.GetPostForm("opentime")
 	strTaxation, ok5 := c.GetPostForm("taxation")
 	strCommission, ok6 := c.GetPostForm("commission")
-	strAmount, ok7 := c.GetPostForm("amount")
+	strMaxRound, ok7 := c.GetPostForm("maxround")
 	if !ok1 || !ok2 || !ok3 || !ok4 || !ok5 || !ok6 || !ok7 {
 		sgxLogger.Warnf("roomCreate get hostid fail. current params=%v", c.GetParams())
 		RenderResult(c, Service004, StatusText[Service004])
@@ -188,16 +188,16 @@ func (p *Controller) tableCreate(c *superGin.Context) {
 	opentime, _ := strconv.ParseInt(strOpentime, 10, 64)
 	taxation, _ := strconv.ParseInt(strTaxation, 10, 64)
 	commission, _ := strconv.ParseInt(strCommission, 10, 64)
-	amount, _ := strconv.ParseInt(strAmount, 10, 64)
+	maxRound, _ := strconv.ParseInt(strMaxRound, 10, 64)
 	data, errCode := rpc.SendDataToDB(p.App, &pb.CreateTableReq{
 		Rid:        rid,
 		Gid:        gid,
-		Playscore:  playscore,
+		PlayScore:  playscore,
 		Name:       name,
 		Opentime:   opentime,
 		Taxation:   taxation,
 		Commission: int32(commission),
-		Amount:     int32(amount),
+		MaxRound:   int32(maxRound),
 	})
 
 	// 创建房间结果

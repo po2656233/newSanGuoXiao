@@ -144,7 +144,8 @@ func (self *ActorDB) GetTableList(req *pb.GetTableListReq) (*pb.GetTableListResp
 			OpenTime:   table.Opentime,
 			Taxation:   table.Taxation,
 			Commission: table.Commission,
-			Amount:     table.Amount,
+			Remain:     table.Remain,
+			MaxRound:   table.Maxround,
 			PlayScore:  table.Playscore,
 			MaxSitter:  table.MaxSitter,
 		})
@@ -245,10 +246,10 @@ func (self *ActorDB) CreateTable(req *pb.CreateTableReq) (*pb.CreateTableResp, e
 		Gid:        req.Gid,
 		Rid:        req.Rid,
 		Name:       req.Name,
-		Playscore:  req.Playscore,
+		Playscore:  req.PlayScore,
 		Taxation:   req.Taxation,
 		Commission: req.Commission,
-		Amount:     req.Amount,
+		Maxround:   req.MaxRound,
 		Opentime:   req.Opentime,
 	})
 	if err != nil {
@@ -261,9 +262,10 @@ func (self *ActorDB) CreateTable(req *pb.CreateTableReq) (*pb.CreateTableResp, e
 		Name:       req.Name,
 		Commission: req.Commission,
 		Taxation:   req.Taxation,
-		PlayScore:  req.Playscore,
+		PlayScore:  req.PlayScore,
 		MaxSitter:  maxSit,
-		Amount:     req.Amount,
+		MaxRound:   req.MaxRound,
+		Remain:     req.MaxRound,
 		OpenTime:   req.Opentime,
 	}
 	rpc.SendData(self.App(), SourcePath, GameActor, NodeTypeGame, resp)
@@ -304,7 +306,8 @@ func (self *ActorDB) GetTable(req *pb.GetTableReq) (*pb.GetTableResp, error) {
 		OpenTime:   info.Opentime,
 		Taxation:   info.Taxation,
 		Commission: info.Commission,
-		Amount:     info.Amount,
+		Remain:     info.Remain,
+		MaxRound:   info.Maxround,
 		PlayScore:  info.Playscore,
 		MaxSitter:  info.MaxSitter,
 	}

@@ -149,6 +149,7 @@ func init() {
     msg.ProcessorProto.SetRouter(&protoMsg.EnterGameResp{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.JoinGameReadyQueueReq{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.JoinGameReadyQueueResp{}, game.ChanRPC)
+    msg.ProcessorProto.SetRouter(&protoMsg.WaitGameStartResp{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.ExitGameReq{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.ExitGameResp{}, game.ChanRPC)
     msg.ProcessorProto.SetRouter(&protoMsg.DisbandedTableReq{}, game.ChanRPC)

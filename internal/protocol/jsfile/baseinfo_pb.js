@@ -4815,12 +4815,13 @@ proto.pb.TableInfo.toObject = function(includeInstance, msg) {
     name: jspb.Message.getFieldWithDefault(msg, 2, ""),
     rid: jspb.Message.getFieldWithDefault(msg, 3, 0),
     gid: jspb.Message.getFieldWithDefault(msg, 4, 0),
-    opentime: jspb.Message.getFieldWithDefault(msg, 5, 0),
-    taxation: jspb.Message.getFieldWithDefault(msg, 6, 0),
-    commission: jspb.Message.getFieldWithDefault(msg, 7, 0),
-    amount: jspb.Message.getFieldWithDefault(msg, 8, 0),
+    commission: jspb.Message.getFieldWithDefault(msg, 5, 0),
+    maxround: jspb.Message.getFieldWithDefault(msg, 6, 0),
+    remain: jspb.Message.getFieldWithDefault(msg, 7, 0),
+    maxsitter: jspb.Message.getFieldWithDefault(msg, 8, 0),
     playscore: jspb.Message.getFieldWithDefault(msg, 9, 0),
-    maxsitter: jspb.Message.getFieldWithDefault(msg, 10, 0)
+    opentime: jspb.Message.getFieldWithDefault(msg, 10, 0),
+    taxation: jspb.Message.getFieldWithDefault(msg, 11, 0)
   };
 
   if (includeInstance) {
@@ -4874,28 +4875,32 @@ proto.pb.TableInfo.deserializeBinaryFromReader = function(msg, reader) {
       msg.setGid(value);
       break;
     case 5:
-      var value = /** @type {number} */ (reader.readInt64());
-      msg.setOpentime(value);
-      break;
-    case 6:
-      var value = /** @type {number} */ (reader.readInt64());
-      msg.setTaxation(value);
-      break;
-    case 7:
       var value = /** @type {number} */ (reader.readInt32());
       msg.setCommission(value);
       break;
+    case 6:
+      var value = /** @type {number} */ (reader.readInt32());
+      msg.setMaxround(value);
+      break;
+    case 7:
+      var value = /** @type {number} */ (reader.readInt32());
+      msg.setRemain(value);
+      break;
     case 8:
       var value = /** @type {number} */ (reader.readInt32());
-      msg.setAmount(value);
+      msg.setMaxsitter(value);
       break;
     case 9:
       var value = /** @type {number} */ (reader.readInt64());
       msg.setPlayscore(value);
       break;
     case 10:
-      var value = /** @type {number} */ (reader.readInt32());
-      msg.setMaxsitter(value);
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setOpentime(value);
+      break;
+    case 11:
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setTaxation(value);
       break;
     default:
       reader.skipField();
@@ -4954,28 +4959,28 @@ proto.pb.TableInfo.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getOpentime();
+  f = message.getCommission();
   if (f !== 0) {
-    writer.writeInt64(
+    writer.writeInt32(
       5,
       f
     );
   }
-  f = message.getTaxation();
+  f = message.getMaxround();
   if (f !== 0) {
-    writer.writeInt64(
+    writer.writeInt32(
       6,
       f
     );
   }
-  f = message.getCommission();
+  f = message.getRemain();
   if (f !== 0) {
     writer.writeInt32(
       7,
       f
     );
   }
-  f = message.getAmount();
+  f = message.getMaxsitter();
   if (f !== 0) {
     writer.writeInt32(
       8,
@@ -4989,10 +4994,17 @@ proto.pb.TableInfo.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getMaxsitter();
+  f = message.getOpentime();
   if (f !== 0) {
-    writer.writeInt32(
+    writer.writeInt64(
       10,
+      f
+    );
+  }
+  f = message.getTaxation();
+  if (f !== 0) {
+    writer.writeInt64(
+      11,
       f
     );
   }
@@ -5060,61 +5072,61 @@ proto.pb.TableInfo.prototype.setGid = function(value) {
 
 
 /**
- * optional int64 openTime = 5;
+ * optional int32 commission = 5;
  * @return {number}
  */
-proto.pb.TableInfo.prototype.getOpentime = function() {
+proto.pb.TableInfo.prototype.getCommission = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 5, 0));
 };
 
 
 /** @param {number} value */
-proto.pb.TableInfo.prototype.setOpentime = function(value) {
+proto.pb.TableInfo.prototype.setCommission = function(value) {
   jspb.Message.setProto3IntField(this, 5, value);
 };
 
 
 /**
- * optional int64 taxation = 6;
+ * optional int32 maxRound = 6;
  * @return {number}
  */
-proto.pb.TableInfo.prototype.getTaxation = function() {
+proto.pb.TableInfo.prototype.getMaxround = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 6, 0));
 };
 
 
 /** @param {number} value */
-proto.pb.TableInfo.prototype.setTaxation = function(value) {
+proto.pb.TableInfo.prototype.setMaxround = function(value) {
   jspb.Message.setProto3IntField(this, 6, value);
 };
 
 
 /**
- * optional int32 commission = 7;
+ * optional int32 remain = 7;
  * @return {number}
  */
-proto.pb.TableInfo.prototype.getCommission = function() {
+proto.pb.TableInfo.prototype.getRemain = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 7, 0));
 };
 
 
 /** @param {number} value */
-proto.pb.TableInfo.prototype.setCommission = function(value) {
+proto.pb.TableInfo.prototype.setRemain = function(value) {
   jspb.Message.setProto3IntField(this, 7, value);
 };
 
 
 /**
- * optional int32 amount = 8;
+ * optional int32 maxSitter = 8;
  * @return {number}
  */
-proto.pb.TableInfo.prototype.getAmount = function() {
+proto.pb.TableInfo.prototype.getMaxsitter = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 8, 0));
 };
 
 
 /** @param {number} value */
-proto.pb.TableInfo.prototype.setAmount = function(value) {
+proto.pb.TableInfo.prototype.setMaxsitter = function(value) {
   jspb.Message.setProto3IntField(this, 8, value);
 };
 
@@ -5135,17 +5147,32 @@ proto.pb.TableInfo.prototype.setPlayscore = function(value) {
 
 
 /**
- * optional int32 maxSitter = 10;
+ * optional int64 openTime = 10;
  * @return {number}
  */
-proto.pb.TableInfo.prototype.getMaxsitter = function() {
+proto.pb.TableInfo.prototype.getOpentime = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 10, 0));
 };
 
 
 /** @param {number} value */
-proto.pb.TableInfo.prototype.setMaxsitter = function(value) {
+proto.pb.TableInfo.prototype.setOpentime = function(value) {
   jspb.Message.setProto3IntField(this, 10, value);
+};
+
+
+/**
+ * optional int64 taxation = 11;
+ * @return {number}
+ */
+proto.pb.TableInfo.prototype.getTaxation = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 11, 0));
+};
+
+
+/** @param {number} value */
+proto.pb.TableInfo.prototype.setTaxation = function(value) {
+  jspb.Message.setProto3IntField(this, 11, value);
 };
 
 

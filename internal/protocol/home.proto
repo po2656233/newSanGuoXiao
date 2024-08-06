@@ -102,12 +102,12 @@ message CreateRoomResp {
 message CreateTableReq {
   int64 rid = 1;          // 房间ID
   int64 gid = 2;          // 游戏ID
-  int64 playscore = 3;
-  string name = 4;
-  int64 opentime = 5; // =0表示无限制
-  int64 taxation = 6;
-  int32 commission = 7;
-  int32 amount = 8; // 等于-1时，表示无限制
+  string name = 3;
+  int64 taxation = 4;
+  int32 commission = 5;
+  int32 maxRound = 6; // 等于-1时，表示无限制
+  int64 opentime = 7; // =0表示无限制
+  int64 playScore = 8;
 }
 message CreateTableResp {
   TableInfo table = 1;

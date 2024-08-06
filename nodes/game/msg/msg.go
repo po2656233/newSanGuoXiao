@@ -164,6 +164,7 @@ func init() {
     RegisterMessage(&protoMsg.EnterGameResp{})
     RegisterMessage(&protoMsg.JoinGameReadyQueueReq{})
     RegisterMessage(&protoMsg.JoinGameReadyQueueResp{})
+    RegisterMessage(&protoMsg.WaitGameStartResp{})
     RegisterMessage(&protoMsg.ExitGameReq{})
     RegisterMessage(&protoMsg.ExitGameResp{})
     RegisterMessage(&protoMsg.DisbandedTableReq{})

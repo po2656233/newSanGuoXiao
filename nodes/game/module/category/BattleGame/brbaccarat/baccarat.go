@@ -75,7 +75,6 @@ func (self *BaccaratGame) Init() {
 	self.cbBankerCards = &protoMsg.CardInfo{
 		Cards: make([]byte, CardCountBanker),
 	}
-
 }
 
 //获取玩家列表
@@ -91,11 +90,14 @@ func (self *BaccaratGame) Init() {
 // //////////////////////////////////////////////////////////////
 
 // Scene 场景信息
-func (self *BaccaratGame) Scene(args []interface{}) {
+func (self *BaccaratGame) Scene(args []interface{}) bool {
+	if !self.Game.Scene(args) {
+		return false
+	}
 	person := args[0].(*Player)
 	if person == nil {
 		log.Warnf("[%v:%v][Scene:%v] person is nil.", self.Name, self.T.Id, self.GameInfo.Scene)
-		return
+		return false
 	}
 
 	//场景信息
@@ -105,7 +107,7 @@ func (self *BaccaratGame) Scene(args []interface{}) {
 	//定时器
 	StateInfo.TimeStamp = self.TimeStamp //////已过时长 应当该为传时间戳
 	//筹码
-	log.Debugf("[%v:%v场景] [当前人数:%v] ", self.GameInfo.Name, self.T.Id, self.T.SitCount())
+	log.Debugf("[%v:%v] [Scene:%v] [当前人数:%v] ", self.GameInfo.Name, self.T.Id, self.GameInfo.Scene, self.T.SitCount())
 
 	//下注情况
 	StateInfo.AreaBets = make([]int64, AREA_MAX)
@@ -163,20 +165,105 @@ func (self *BaccaratGame) Scene(args []interface{}) {
 			Times: timeInfo,
 		})
 	}
+	return true
 }
 
 // Start 开始下注前定庄
-func (self *BaccaratGame) Start(args []interface{}) {
+func (self *BaccaratGame) Start(args []interface{}) bool {
 	_ = args
 	log.Infof("[%v:%v]游戏創建成功", self.GameInfo.Name, self.T.Id)
-	if self.IsStart {
-		self.onStart()
-		self.IsStart = false
+	if !self.IsStart {
+		self.IsStart = true
+		// 游戏开始事件
+		// 开始状态
+		startResp := &protoMsg.BaccaratStateStartResp{
+			Times: &protoMsg.TimeInfo{
+				OutTime:   0,
+				WaitTime:  YamlObj.Baccarat.Duration.Start,
+				TotalTime: YamlObj.Baccarat.Duration.Start,
+			},
+		}
+		self.Game.RegisterEvent(protoMsg.GameScene_Start, startResp, startResp.Times.TotalTime, func() bool {
+			// 校准库存
+			if self.confInventory != YamlObj.Baccarat.Inventory {
+				self.confInventory = YamlObj.Baccarat.Inventory
+				//此处会重置以往的库存值
+				self.inventory = self.confInventory
+			}
+			return true
+		}, func() {
+			startResp.Inning = self.Inning
+			startResp.Times.TimeStamp = self.TimeStamp
+			self.reset()
+		}, nil)
+
+		// 游戏中
+		playResp := &protoMsg.BaccaratStatePlayingResp{
+			Times: &protoMsg.TimeInfo{
+				OutTime:   0,
+				WaitTime:  YamlObj.Baccarat.Duration.Play,
+				TotalTime: YamlObj.Baccarat.Duration.Play,
+			},
+		}
+		self.Game.RegisterEvent(protoMsg.GameScene_Playing, playResp, playResp.Times.TotalTime, func() bool {
+			if self.T.SitCount() == 0 {
+				self.ChangeStateAndWork(protoMsg.GameScene_Start)
+				return false
+			}
+			return true
+		}, func() {
+			playResp.Times.TimeStamp = self.TimeStamp
+			self.reset()
+		}, nil)
+
+		// 开牌
+		openResp := &protoMsg.BaccaratStateOpenResp{
+			Times: &protoMsg.TimeInfo{
+				OutTime:   0,
+				WaitTime:  YamlObj.Baccarat.Duration.Open,
+				TotalTime: YamlObj.Baccarat.Duration.Open,
+			},
+		}
+		self.Game.RegisterEvent(protoMsg.GameScene_Opening, openResp, openResp.Times.TotalTime, func() bool {
+			//【发牌】
+			self.DispatchCard()
+			return true
+		}, func() {
+			openResp.Times.TimeStamp = self.TimeStamp
+		}, nil)
+
+		// 结算
+		overResp := &protoMsg.BaccaratStateOpenResp{
+			Times: &protoMsg.TimeInfo{
+				OutTime:   0,
+				WaitTime:  YamlObj.Baccarat.Duration.Over,
+				TotalTime: YamlObj.Baccarat.Duration.Over,
+			},
+		}
+		self.Game.RegisterEvent(protoMsg.GameScene_Over, overResp, openResp.Times.TotalTime, func() bool {
+			self.Over(nil)
+			if self.T.Remain <= self.RunCount { // 满足运行次数之后,释放资源
+				self.Close(func() *Table {
+					return self.T
+				})
+				*self = BaccaratGame{}
+				self = nil
+				return false
+			}
+			return true
+		}, func() {
+			openResp.Times.TimeStamp = self.TimeStamp
+		}, nil)
 	}
+	self.ChangeStateAndWork(protoMsg.GameScene_Start)
+	return true
 }
 
 // Playing 下注 直接扣除金币
-func (self *BaccaratGame) Playing(args []interface{}) {
+func (self *BaccaratGame) Playing(args []interface{}) bool {
+	if !self.Game.Playing(args) {
+		return false
+	}
 	_ = args[1]
 	//【消息】
 	m := args[0].(*protoMsg.BaccaratBetReq)
@@ -187,22 +274,22 @@ func (self *BaccaratGame) Playing(args []interface{}) {
 	if nil == userData {
 		log.Debugf("[%v:%v][%v] Playing:->%v ", self.GameInfo.Name, self.T.Id, StatusText[User02], m)
 		GlobalSender.SendResult(agent, FAILED, StatusText[User02])
-		return
+		return false
 	}
 	if self.GameInfo.Scene == protoMsg.GameScene_Start {
 		log.Debugf("[%v:%v][%v] Playing:->%v ", self.GameInfo.Name, self.T.Id, StatusText[Game24], m)
 		GlobalSender.SendResult(agent, FAILED, StatusText[Game24])
-		return
+		return false
 	}
 	if self.GameInfo.Scene != protoMsg.GameScene_Playing {
 		log.Debugf("[%v:%v][%v] Playing:->%v ", self.GameInfo.Name, self.T.Id, StatusText[Game03], m)
 		GlobalSender.SendResult(agent, FAILED, StatusText[Game03])
-		return
+		return false
 	}
 	if m.BetScore <= 0 {
 		log.Debugf("[%v:%v][%v] Playing:->%v ", self.GameInfo.Name, self.T.Id, StatusText[Game07], m)
 		GlobalSender.SendResult(agent, FAILED, StatusText[Game07])
-		return
+		return false
 	}
 
 	person := userData.(*Player)
@@ -211,23 +298,23 @@ func (self *BaccaratGame) Playing(args []interface{}) {
 	if sitter == nil {
 		log.Debugf("[%v:%v][%v] Playing:->%v ", self.GameInfo.Name, self.T.Id, StatusText[Game33], m)
 		GlobalSender.SendResult(agent, FAILED, StatusText[Game33])
-		return
+		return false
 	}
 	if self.bankerID == uid {
 		log.Debugf("[%v:%v][%v:%v] Playing:->%v ", self.GameInfo.Name, self.T.Id, person.UserID, StatusText[Game27], m)
 		GlobalSender.SendResult(agent, FAILED, StatusText[Game27])
-		return
+		return false
 	}
 	gold := sitter.Gold
 	if gold < m.BetScore+sitter.Total {
 		log.Debugf("[%v:%v][%v:%v] %v Playing:->%v ", self.GameInfo.Name, self.T.Id, person.UserID, StatusText[Game05], gold, m)
 		GlobalSender.SendResult(agent, FAILED, StatusText[Game05])
-		return
+		return false
 	}
 	if AREA_MAX <= m.BetArea {
 		log.Debugf("[%v:%v][%v:%v] Playing:->%v ", self.GameInfo.Name, self.T.Id, person.UserID, StatusText[Game06], m)
 		GlobalSender.SendResult(agent, FAILED, StatusText[Game06])
-		return
+		return false
 	}
 	// log.Debugf("[%v:%v] 玩家:%v Playing:->%v ", self.GameInfo.Name, self.T.Id, sitter.UserID, m)
 
@@ -263,10 +350,11 @@ func (self *BaccaratGame) Playing(args []interface{}) {
 	self.bankerScore += msg.BetScore
 	//通知其他玩家
 	GlobalSender.NotifyOthers(self.PlayerList, msg)
+	return true
 }
 
 // Over 结算
-func (self *BaccaratGame) Over(args []interface{}) {
+func (self *BaccaratGame) Over(args []interface{}) bool {
 	_ = args
 	allAreaInfo := make([]int64, AREA_MAX)
 	self.personBetInfo.Range(func(key, value any) bool {
@@ -339,6 +427,7 @@ func (self *BaccaratGame) Over(args []interface{}) {
 		}
 	})
 	log.Debugf("[%v:%v]   \t结算注单... 各区域情况:%v", self.GameInfo.Name, self.T.Id, allAreaInfo)
+	return true
 }
 
 // 发牌
@@ -522,90 +611,6 @@ func (self *BaccaratGame) BonusArea(area int32, betScore int64) int64 {
 	return -betScore
 }
 
-//开始|下注|结算|空闲
-
-func (self *BaccaratGame) onStart() {
-	// 开始状态
-	resp := &protoMsg.BaccaratStateStartResp{
-		Times: &protoMsg.TimeInfo{
-			TimeStamp: self.TimeStamp,
-			OutTime:   0,
-			WaitTime:  YamlObj.Baccarat.Duration.Start,
-			TotalTime: YamlObj.Baccarat.Duration.Start,
-		},
-		Inning: self.Inning,
-	}
-	self.ChangeStateAndWork(protoMsg.GameScene_Start, resp, YamlObj.Baccarat.Duration.Start, func() bool {
-		self.Reset()
-		// 校准库存
-		if self.confInventory != YamlObj.Baccarat.Inventory {
-			self.confInventory = YamlObj.Baccarat.Inventory
-			//此处会重置以往的库存值
-			self.inventory = self.confInventory
-		}
-		return true
-	}, self.onPlay)
-}
-
-// [下注减法]
-func (self *BaccaratGame) onPlay() {
-	resp := &protoMsg.BaccaratStatePlayingResp{
-		Times: &protoMsg.TimeInfo{
-			TimeStamp: self.TimeStamp,
-			OutTime:   0,
-			WaitTime:  YamlObj.Baccarat.Duration.Play,
-			TotalTime: YamlObj.Baccarat.Duration.Play,
-		},
-	}
-	self.ChangeStateAndWork(protoMsg.GameScene_Playing, resp, YamlObj.Baccarat.Duration.Play, nil, self.onOpen)
-}
-
-func (self *BaccaratGame) onOpen() {
-	self.ChangeState(protoMsg.GameScene_Opening)
-
-	// 开始状态
-	//m := self.permitHost() //反馈定庄信息
-	//GlobalSender.NotifyOthers(self.PlayerList, MainGameState, protoMsg.GameScene_Start, m)
-	GlobalSender.NotifyOthers(self.PlayerList, &protoMsg.BaccaratStateOpenResp{
-		Times: &protoMsg.TimeInfo{
-			TimeStamp: self.TimeStamp,
-			OutTime:   0,
-			WaitTime:  YamlObj.Baccarat.Duration.Open,
-			TotalTime: YamlObj.Baccarat.Duration.Open,
-		},
-	})
-
-	//【发牌】
-	self.DispatchCard()
-	time.AfterFunc(time.Duration(YamlObj.Baccarat.Duration.Open)*time.Second, self.onOver)
-
-}
-
-// [结算加法]
-func (self *BaccaratGame) onOver() {
-
-	// 开奖状态
-	resp := &protoMsg.BaccaratStateOverResp{
-		Times: &protoMsg.TimeInfo{
-			TimeStamp: self.TimeStamp,
-			OutTime:   0,
-			WaitTime:  YamlObj.Baccarat.Duration.Over,
-			TotalTime: YamlObj.Baccarat.Duration.Over,
-		},
-	}
-	self.ChangeStateAndWork(protoMsg.GameScene_Over, resp, YamlObj.Baccarat.Duration.Over, func() bool {
-		self.Over(nil)
-		if self.RunCount == self.T.Amount { // 满足运行次数之后,释放资源
-			self.Close(func() *Table {
-				return self.T
-			})
-			return false
-		}
-		self.Reset()
-		return true
-	}, self.onStart)
-}
-
 // 抢庄
 func (self *BaccaratGame) host(args []interface{}) {
 	//【消息】
@@ -751,8 +756,9 @@ func (self *BaccaratGame) permitHost() *protoMsg.BaccaratHostResp {
 }
 
 // -----------------------逻辑层---------------------------
-// 重新初始化[返回结果提供给外部清场用]
-func (self *BaccaratGame) Reset() {
+
+// reset 重新初始化[返回结果提供给外部清场用]
+func (self *BaccaratGame) reset() {
 	self.cbCardCount = []byte{2, 2}              // 首次拿牌张数
 	self.openInfo = &protoMsg.BaccaratOpenResp{} // 结算结果
 
