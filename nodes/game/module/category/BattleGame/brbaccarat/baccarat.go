@@ -54,9 +54,6 @@ func New(game *Game, tb *Table) *BaccaratGame {
 
 // Init 初始化信息
 func (self *BaccaratGame) Init() {
-	self.IsStart = true  // 是否启动
-	self.IsClear = false // 不进行清场
-
 	self.bankerID = 0         // 庄家ID
 	self.superHostID = 0      // 超级抢庄ID
 	self.keepTwice = 0        // 连续抢庄次数
@@ -213,7 +210,6 @@ func (self *BaccaratGame) Start(args []interface{}) bool {
 			return true
 		}, func() {
 			playResp.Times.TimeStamp = self.TimeStamp
-			self.reset()
 		}, nil)
 
 		// 开牌
