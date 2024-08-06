@@ -49,11 +49,6 @@ func (self *Chinesechess) Scene(args []interface{}) bool {
 		return false
 	}
 	person := args[0].(*mgr.Player)
-	if person == nil {
-		log.Warnf("[%v:%v][Scene:%v] person is nil.", self.Name, self.T.Id, self.GameInfo.Scene)
-		return false
-	}
-	//
 	uid := person.UserID
 	mgr.GetClientMgr().SendTo(uid, &protoMsg.ChineseChessSceneResp{
 		TimeStamp: time.Now().Unix(),

@@ -92,10 +92,6 @@ func (self *BaccaratGame) Scene(args []interface{}) bool {
 		return false
 	}
 	person := args[0].(*Player)
-	if person == nil {
-		log.Warnf("[%v:%v][Scene:%v] person is nil.", self.Name, self.T.Id, self.GameInfo.Scene)
-		return false
-	}
 
 	//场景信息
 	StateInfo := &protoMsg.BaccaratSceneResp{}
@@ -258,6 +254,7 @@ func (self *BaccaratGame) Start(args []interface{}) bool {
 // Playing 下注 直接扣除金币
 func (self *BaccaratGame) Playing(args []interface{}) bool {
 	if !self.Game.Playing(args) {
+		log.Debugf("[%v:%v][%v] Playing data fail! ", self.GameInfo.Name, self.T.Id, StatusText[User02])
 		return false
 	}
 	_ = args[1]
@@ -267,48 +264,33 @@ func (self *BaccaratGame) Playing(args []interface{}) bool {
 	agent := args[1].(gate.Agent)
 
 	userData := agent.UserData()
-	if nil == userData {
-		log.Debugf("[%v:%v][%v] Playing:->%v ", self.GameInfo.Name, self.T.Id, StatusText[User02], m)
-		GlobalSender.SendResult(agent, FAILED, StatusText[User02])
-		return false
-	}
-	if self.GameInfo.Scene == protoMsg.GameScene_Start {
-		log.Debugf("[%v:%v][%v] Playing:->%v ", self.GameInfo.Name, self.T.Id, StatusText[Game24], m)
-		GlobalSender.SendResult(agent, FAILED, StatusText[Game24])
-		return false
-	}
-	if self.GameInfo.Scene != protoMsg.GameScene_Playing {
-		log.Debugf("[%v:%v][%v] Playing:->%v ", self.GameInfo.Name, self.T.Id, StatusText[Game03], m)
-		GlobalSender.SendResult(agent, FAILED, StatusText[Game03])
-		return false
-	}
+	person := userData.(*Player)
+	uid := person.UserID
 	if m.BetScore <= 0 {
 		log.Debugf("[%v:%v][%v] Playing:->%v ", self.GameInfo.Name, self.T.Id, StatusText[Game07], m)
 		GlobalSender.SendResult(agent, FAILED, StatusText[Game07])
 		return false
 	}
 
-	person := userData.(*Player)
-	uid := person.UserID
-	sitter := self.T.GetChair(person.UserID)
+	sitter := self.T.GetChair(uid)
 	if sitter == nil {
 		log.Debugf("[%v:%v][%v] Playing:->%v ", self.GameInfo.Name, self.T.Id, StatusText[Game33], m)
 		GlobalSender.SendResult(agent, FAILED, StatusText[Game33])
 		return false
 	}
 	if self.bankerID == uid {
-		log.Debugf("[%v:%v][%v:%v] Playing:->%v ", self.GameInfo.Name, self.T.Id, person.UserID, StatusText[Game27], m)
+		log.Debugf("[%v:%v][%v:%v] Playing:->%v ", self.GameInfo.Name, self.T.Id, uid, StatusText[Game27], m)
 		GlobalSender.SendResult(agent, FAILED, StatusText[Game27])
 		return false
 	}
 	gold := sitter.Gold
 	if gold < m.BetScore+sitter.Total {
-		log.Debugf("[%v:%v][%v:%v] %v Playing:->%v ", self.GameInfo.Name, self.T.Id, person.UserID, StatusText[Game05], gold, m)
+		log.Debugf("[%v:%v][%v:%v] %v Playing:->%v ", self.GameInfo.Name, self.T.Id, uid, StatusText[Game05], gold, m)
 		GlobalSender.SendResult(agent, FAILED, StatusText[Game05])
 		return false
 	}
 	if AREA_MAX <= m.BetArea {
-		log.Debugf("[%v:%v][%v:%v] Playing:->%v ", self.GameInfo.Name, self.T.Id, person.UserID, StatusText[Game06], m)
+		log.Debugf("[%v:%v][%v:%v] Playing:->%v ", self.GameInfo.Name, self.T.Id, uid, StatusText[Game06], m)
 		GlobalSender.SendResult(agent, FAILED, StatusText[Game06])
 		return false
 	}
@@ -327,7 +309,7 @@ func (self *BaccaratGame) Playing(args []interface{}) bool {
 		for index, betItem := range areaBetInfos {
 			if betItem.BetArea == m.BetArea {
 				areaBetInfos[index].BetScore = betItem.BetScore + m.BetScore
-				log.Debugf("[%v:%v]\t玩家:%v 区域:%v 累加:->%v", self.GameInfo.Name, self.T.Id, person.UserID, m.BetArea, areaBetInfos[index].BetScore)
+				log.Debugf("[%v:%v]\t玩家:%v 区域:%v 累加:->%v", self.GameInfo.Name, self.T.Id, uid, m.BetArea, areaBetInfos[index].BetScore)
 				ok = true
 				break
 			}
@@ -335,9 +317,9 @@ func (self *BaccaratGame) Playing(args []interface{}) bool {
 		if !ok || !ok1 {
 			areaBetInfos = utils.CopyInsert(areaBetInfos, len(areaBetInfos), msg).([]*protoMsg.BaccaratBetResp)
 		}
-		self.personBetInfo.Store(person.UserID, areaBetInfos)
+		self.personBetInfo.Store(uid, areaBetInfos)
 	} else {
-		log.Debugf("[%v:%v]\t玩家:%v 下注:%v", self.GameInfo.Name, self.T.Id, person.UserID, m)
+		log.Debugf("[%v:%v]\t玩家:%v 下注:%v", self.GameInfo.Name, self.T.Id, uid, m)
 		areaBetInfos := make([]*protoMsg.BaccaratBetResp, 0)
 		areaBetInfos = utils.CopyInsert(areaBetInfos, len(areaBetInfos), msg).([]*protoMsg.BaccaratBetResp)
 		self.personBetInfo.Store(sitter, areaBetInfos)

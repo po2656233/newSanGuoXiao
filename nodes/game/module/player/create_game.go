@@ -6,6 +6,7 @@ import (
 	protoMsg "superman/internal/protocol/gofile"
 	"superman/nodes/game/manger"
 	"superman/nodes/game/module/category/BattleGame/brbaccarat"
+	"superman/nodes/game/module/category/BattleGame/brcowcow"
 	"superman/nodes/game/module/category/CardGame/sanguoxiao"
 	"superman/nodes/game/module/category/SportGame/chinesechess"
 	"time"
@@ -42,7 +43,8 @@ func NewGame(gid int64, tb *manger.Table) manger.IGameOperate {
 		return sanguoxiao.New(game)
 	case cst.Baccarat:
 		return brbaccarat.New(game, tb)
-
+	case cst.BrCowcow:
+		return brcowcow.New(game, tb)
 	default:
 	}
 	return nil

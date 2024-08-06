@@ -198,6 +198,7 @@ func (tb *Table) ClearChairs() {
 			person.InChairId = INVALID
 			person.InTableId = INVALID
 			person.GameHandle = nil
+			person.State = protoMsg.PlayerState_PlayerStandUp
 			value = nil
 		}
 		return true

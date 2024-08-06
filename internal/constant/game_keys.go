@@ -8,4 +8,5 @@ const (
 	Landlord      = 5
 	Mahjong       = 6
 	Baccarat      = 23
+	BrCowcow      = 24
 )
