@@ -2,7 +2,6 @@ package brbaccarat
 
 import (
 	"fmt"
-	"github.com/po2656233/superplace/facade"
 	log "github.com/po2656233/superplace/logger"
 	. "superman/internal/constant"
 	protoMsg "superman/internal/protocol/gofile"
@@ -235,7 +234,7 @@ func (self *BaccaratGame) Start(args []interface{}) bool {
 		}
 		self.Game.RegisterEvent(protoMsg.GameScene_Over, overResp, openResp.Times.TotalTime, func() bool {
 			self.Over(nil)
-			if self.T.Remain <= self.RunCount { // 满足运行次数之后,释放资源
+			if self.T.Remain <= INVALID { // 剩余次数为零,释放资源
 				self.Close(func() *Table {
 					return self.T
 				})
@@ -364,26 +363,21 @@ func (self *BaccaratGame) Over(args []interface{}) bool {
 	checkout.Acquires = allAreaInfo
 
 	// 对平局的先结算
+	app := GetClientMgr().GetApp()
 	self.T.ChairWork(func(chair *Chair) {
+		chair.PlayerInfo.State = protoMsg.PlayerState_PlayerStandUp
 		if chair.Total == INVALID || chair.Gain == INVALID {
 			return
 		}
-
 		if INVALID < chair.Gain {
 			// 税收
-			chair.Gain -= self.T.Taxation
+			//chair.Gain -= self.T.Taxation
 			if INVALID < self.T.Commission {
-				chair.Gain = int64(100-self.T.Commission) / 100 * chair.Gain
+				chair.Gain = int64(100-self.T.Commission) * chair.Gain / 100
 			}
 		}
 		//通知金币变化
-		agent, ok := GetClientMgr().Get(chair.UserID)
-		if !ok {
-			log.Errorf("[%v:%v] [Over] uid:%v agent is nil", self.GameInfo.Name, self.T.Id, chair.UserID)
-			return
-		}
-		play := agent.(facade.IActor)
-		data, code := rpc.SendData(play.App(), SourcePath, DBActor, NodeTypeCenter, &protoMsg.AddRecordReq{
+		data, code := rpc.SendData(app, SourcePath, DBActor, NodeTypeCenter, &protoMsg.AddRecordReq{
 			Uid:     chair.UserID,
 			Tid:     self.T.Id,
 			Payment: chair.Gain,
@@ -401,12 +395,21 @@ func (self *BaccaratGame) Over(args []interface{}) bool {
 					Coin:      resp.Gold,
 					Reason:    resp.Order,
 				}
-				agent.WriteMsg(changeGold)
+				GetClientMgr().SendTo(chair.UserID, changeGold)
 				checkout.MyAcquire = chair.Gain
-				agent.WriteMsg(checkout)
+				GetClientMgr().SendTo(chair.UserID, checkout)
 			}
 		}
 	})
+	data, code := rpc.SendData(app, SourcePath, DBActor, NodeTypeCenter, &protoMsg.DecreaseGameRunReq{
+		Amount: FAILED,
+		Tid:    self.T.Id,
+	})
+	if code == SUCCESS {
+		if resp, ok1 := data.(*protoMsg.DecreaseGameRunResp); ok1 {
+			self.T.Remain = resp.Remain
+		}
+	}
 	log.Infof("[%v:%v]   \t结算注单... 各区域情况:%v", self.GameInfo.Name, self.T.Id, allAreaInfo)
 	return true
 }
@@ -488,19 +491,19 @@ Dispatch:
 	personAwardScore, ok := self.simulatedResult()
 	if !ok && timeoutCount < 10000 {
 		timeoutCount++
-		//log.Error("[库存警告][%v:%v]\t当前库存:%v 庄家积分:%v 扣算之前:%v 尝试次数:%v[库存警告]", self.GameInfo.Name, self.T.Id, self.inventory, personAwardScore, self.bankerScore, timeoutCount)
+		//log.Errorf("[库存警告][%v:%v]\t当前库存:%v 庄家积分:%v 扣算之前:%v 尝试次数:%v[库存警告]", self.GameInfo.Name, self.T.Id, self.inventory, personAwardScore, self.bankerScore, timeoutCount)
 		goto Dispatch
 	}
 	log.Infof("[%v:%v]\t当前开奖区域:%v 闲家:[%v]  庄家:[%v]", self.GameInfo.Name, self.T.Id, strOpen, self.openInfo.PlayerCard.Cards, self.openInfo.BankerCard.Cards)
 
-	log.Debugf("[%v:%v]\t当前库存:%v 庄家积分:%v 扣算之前:%v", self.GameInfo.Name, self.T.Id, self.inventory, personAwardScore, self.bankerScore)
+	log.Debugf("[%v:%v]\t当前库存:%v 结算后:%v 扣算前:%v", self.GameInfo.Name, self.T.Id, self.inventory, personAwardScore, self.bankerScore)
 	self.inventory = personAwardScore
 	self.bankerScore = personAwardScore - self.inventory
 	if self.bankerScore < INVALID {
 		self.bankerScore = INVALID
 	}
 	if self.inventory < INVALID {
-		log.Error("[库存警告][%v:%v]\t当前库存:%v 庄家积分:%v [库存警告]", self.GameInfo.Name, self.T.Id, self.inventory, self.bankerScore)
+		log.Errorf("[库存警告][%v:%v]\t当前库存:%v 庄家积分:%v [库存警告]", self.GameInfo.Name, self.T.Id, self.inventory, self.bankerScore)
 	}
 	//// ===>>>
 	//self.bankerScore = INVALID

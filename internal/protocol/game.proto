@@ -138,9 +138,8 @@ message AddRecordReq{
   int32 code = 4;             // 操作码
   string order = 5;           // 订单号(牌局号)
   string result = 6;          // 游戏结果信息
-  string remark  = 7;         // 备注信息
+  string remark = 7;         // 备注信息
 }
-// 添加游戏记录结果
 message AddRecordResp{
   int64 uid = 1;              // 充值者ID
   int64 tid = 2;             // 牌桌ID
@@ -150,15 +149,18 @@ message AddRecordResp{
   int32 code = 6;             // 操作码
   string order = 7;           // 订单号(牌局号)
   string result = 8;          // 游戏结果信息
-  string remark  = 9;         // 备注信息
+  string remark = 9;         // 备注信息
+}
+//减少游戏局数
+message DecreaseGameRunReq{
+  int64 tid = 1;             // 牌桌ID
+  int32 amount = 2;
+}
+message DecreaseGameRunResp{
+  int64 tid = 1;             // 牌桌ID
+  int32 remain = 2;          // 剩余次数
 }
 //获取游戏记录(牌桌ID)
-message GetRecordReq{
-  int64 uid = 1;  //玩家ID
-  int64 tid = 2; //牌桌ID
-  int64 startTimeStamp = 3; //起始时间戳 = 0默认所有
-  int64 endTimeStamp = 4;   //结束时间戳 = 0
-}
 message GetRecordResp{
   int64 uid = 1;  //玩家ID
   int64 tid = 2; //牌桌ID

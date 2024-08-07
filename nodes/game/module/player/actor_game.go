@@ -35,6 +35,7 @@ func (p *ActorGame) OnInit() {
 	p.getGamesTime = time.Second * 5
 	p.getRoomsTime = time.Minute * 1
 	category.InitConfig()
+	mgr.GetClientMgr().SetApp(p.App())
 
 	// 注册角色登陆事件
 	p.Event().Register(p.onLoginEvent)

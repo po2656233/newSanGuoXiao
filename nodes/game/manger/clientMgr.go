@@ -2,6 +2,7 @@ package manger
 
 import (
 	"encoding/binary"
+	"github.com/po2656233/superplace/facade"
 	log "github.com/po2656233/superplace/logger"
 	"google.golang.org/protobuf/proto"
 	"math/rand"
@@ -26,6 +27,7 @@ type Agent interface {
 // userID agent
 type ClientManger struct {
 	sync.Map
+	app facade.IApplication
 }
 
 var clientManger *ClientManger = nil
@@ -35,10 +37,20 @@ var clientOnce sync.Once
 func GetClientMgr() *ClientManger {
 	clientOnce.Do(func() {
 		clientManger = &ClientManger{
-			sync.Map{},
+			Map: sync.Map{},
+			app: nil,
 		}
 	})
 	return clientManger
+}
+
+func (self *ClientManger) SetApp(app facade.IApplication) {
+	if clientManger.app == nil {
+		clientManger.app = app
+	}
+}
+func (self *ClientManger) GetApp() facade.IApplication {
+	return clientManger.app
 }
 
 // Append 添加玩家

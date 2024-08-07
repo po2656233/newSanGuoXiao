@@ -65,6 +65,7 @@ func (tb *Table) AddChair(player *Player) error {
 		return fmt.Errorf(StatusText[Game39])
 	}
 	if player.PlayerInfo.Coin < tb.PlayScore {
+		GetClientMgr().SendPopResultX(player.UserID, FAILED, StatusText[Title009], StatusText[Game15])
 		return fmt.Errorf(StatusText[Game15])
 	}
 

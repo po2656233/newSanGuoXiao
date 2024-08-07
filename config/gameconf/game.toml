@@ -1,11 +1,11 @@
 [baccarat]
-inventory = 100000
+inventory = -100000
 
 [baccarat.duration]
 free = 20
 open = 3
 over = 3
-play = 30
+play = 10
 start = 5
 
 [brcowcow]
@@ -17,7 +17,7 @@ maxhost = 8
 free = 20
 open = 3
 over = 3
-play = 30
+play = 10
 start = 5
 
 [chinesechess]
@@ -29,7 +29,7 @@ confirm = 5
 free = 20
 open = 3
 over = 3
-play = 30
+play = 10
 ready = 5
 settime = 15
 start = 5
@@ -44,7 +44,7 @@ other = [1, 5, 25, 50, 100]
 free = 20
 open = 3
 over = 3
-play = 30
+play = 10
 start = 5
 
 [landlord]
@@ -58,7 +58,7 @@ double = 1
 free = 20
 open = 3
 over = 3
-play = 30
+play = 10
 ready = 5
 start = 5
 
@@ -74,7 +74,7 @@ free = 20
 open = 3
 operate = 3
 over = 3
-play = 30
+play = 10
 roll = 3
 start = 5
 
@@ -90,7 +90,7 @@ free = 20
 open = 3
 operate = 3
 over = 3
-play = 30
+play = 10
 roll = 2
 start = 5
 
@@ -99,7 +99,7 @@ col = 8
 free = 20
 open = 3
 over = 3
-play = 30
+play = 10
 row = 8
 start = 5
 
@@ -110,5 +110,5 @@ inventory = 100000
 free = 20
 open = 3
 over = 3
-play = 30
+play = 10
 start = 5

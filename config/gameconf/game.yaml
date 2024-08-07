@@ -7,7 +7,7 @@ Chips:
 duration: &duration
   free: 20    #空闲时长(满时后，将被踢出)
   start: 5    #准备后等待开始的时长
-  play: 30    #默认移动时长 如果设置时长了，则安装设置时长的来
+  play: 10    #默认移动时长 如果设置时长了，则安装设置时长的来
   open: 3     #消除时长
   over: 3     #结算时长
 
@@ -63,7 +63,7 @@ ChineseChess:
 Baccarat:
   duration:
     <<: *duration
-  inventory: 100000
+  inventory: -100000
 #
 BrCowcow:
   duration:

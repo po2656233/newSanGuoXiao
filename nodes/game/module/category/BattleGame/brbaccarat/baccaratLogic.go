@@ -2,7 +2,6 @@ package brbaccarat
 
 import (
 	"math/rand"
-	"time"
 )
 
 const (
@@ -79,8 +78,8 @@ func RandCardList(cbBufferCount int32) []byte {
 
 	//混乱扑克
 	for {
-		rand.Seed(time.Now().UnixNano())
-		cbPosition = rand.Int31n(CardCount-cbRandCount-1) + 1
+		s := rand.New(rand.NewSource(CardCount))
+		cbPosition = s.Int31n(CardCount-cbRandCount-1) + 1
 		cbCardBuffer[cbRandCount] = tempCardListData[cbPosition]
 		cbRandCount++
 		tempCardListData[cbPosition] = tempCardListData[CardCount-cbRandCount]

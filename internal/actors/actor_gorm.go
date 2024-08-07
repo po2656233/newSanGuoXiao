@@ -41,9 +41,11 @@ func (self *ActorDB) OnInit() {
 
 	self.Remote().Register(self.GetTable)
 	self.Remote().Register(self.GetUserInfo)
+
 	self.Remote().Register(self.FixNickName)
 	self.Remote().Register(self.Recharge)
 	self.Remote().Register(self.AddRecord)
+	self.Remote().Register(self.DecreaseGameRun)
 	self.changeDB(CenterDb)
 	//// 每秒查询一次db
 	//p.Timer().Add(5*time.Second, p.selectDB)
@@ -216,6 +218,18 @@ func (self *ActorDB) addRecord(table *sqlmodel.Record) error {
 		return nil
 	})
 	return err
+}
+
+// DelTable 新增桌牌Decrease
+func (self *ActorDB) eraseRemain(tid int64, amount int32) (int32, error) {
+	self.Lock()
+	defer self.Unlock()
+	tb := sqlmodel.Table{
+		ID: tid,
+	}
+	err := self.db.Model(tb).Select("remain").Where("0 < maxround AND 0 < remain").
+		UpdateColumn("remain", gorm.Expr("remain - ?", amount)).First(&tb).Error
+	return tb.Remain, err
 }
 
 // DelTable 新增桌牌

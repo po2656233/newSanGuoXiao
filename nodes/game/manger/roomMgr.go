@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	log "github.com/po2656233/superplace/logger"
+	"strings"
 	. "superman/internal/constant"
 	protoMsg "superman/internal/protocol/gofile"
 	"superman/internal/utils"
@@ -103,7 +104,7 @@ func Create(info *protoMsg.RoomInfo) *Room {
 	} else {
 		rm.waiting = make(chan Waiter, rm.MaxPerson)
 	}
-	log.Infof("开启房间-游戏队列检测[%v:%v] 牌桌数:%v 最大牌桌数:%v 最大人数:%v", rm.Id, rm.Name, rm.TableCount, rm.MaxTable, rm.MaxPerson)
+	log.Infof("开启房间[%v:%v]-游戏队列检测 牌桌数:%v 最大牌桌数:%v 最大人数:%v", rm.Id, rm.Name, rm.TableCount, rm.MaxTable, rm.MaxPerson)
 	// 创建一个独立的上下文用于这个Room的处理
 	ctx, cancel := context.WithCancel(context.Background())
 	// 启动协程处理Room的等待队列
@@ -197,8 +198,10 @@ func (self *Room) ProcessWaitingQueue(ctx context.Context) {
 			if player := GetPlayerMgr().Get(waiter.Uid); player != nil {
 				err := tb.AddChair(player)
 				if err != nil {
+					if strings.Contains(err.Error(), StatusText[Game15]) {
+						continue
+					}
 					self.waiting <- waiter
-					continue
 				}
 				log.Infof("[ProcessWaitingQueue]玩家:(%d) [gid:%d]配桌成功  [rid:%v][tid:%d] [chair:%d] ", waiter.Uid, waiter.Gid, self.Id, tb.Id, player.InChairId)
 			}

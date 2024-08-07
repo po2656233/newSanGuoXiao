@@ -396,3 +396,10 @@ func (self *ActorDB) AddRecord(req *pb.AddRecordReq) (*pb.AddRecordResp, error) 
 	resp.Gold = record.Gold
 	return resp, nil
 }
+func (self *ActorDB) DecreaseGameRun(req *pb.DecreaseGameRunReq) (*pb.DecreaseGameRunResp, error) {
+	resp := &pb.DecreaseGameRunResp{}
+	remain, err := self.eraseRemain(req.Tid, req.Amount)
+	resp.Tid = req.Tid
+	resp.Remain = remain
+	return resp, err
+}
