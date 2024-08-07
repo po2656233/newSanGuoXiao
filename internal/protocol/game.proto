@@ -137,7 +137,8 @@ message AddRecordReq{
   int64 payment = 3;          // 支付
   int32 code = 4;             // 操作码
   string order = 5;           // 订单号(牌局号)
-  string remark  = 6;         // 备注信息
+  string result = 6;          // 游戏结果信息
+  string remark  = 7;         // 备注信息
 }
 // 添加游戏记录结果
 message AddRecordResp{
@@ -148,7 +149,8 @@ message AddRecordResp{
   int64 gold = 5;             // 金币
   int32 code = 6;             // 操作码
   string order = 7;           // 订单号(牌局号)
-  string remark  = 8;         // 备注信息
+  string result = 8;          // 游戏结果信息
+  string remark  = 9;         // 备注信息
 }
 //获取游戏记录(牌桌ID)
 message GetRecordReq{

@@ -43,7 +43,7 @@ func (self *ActorDB) OnInit() {
 	self.Remote().Register(self.GetUserInfo)
 	self.Remote().Register(self.FixNickName)
 	self.Remote().Register(self.Recharge)
-	self.Remote().Register(self.Record)
+	self.Remote().Register(self.AddRecord)
 	self.changeDB(CenterDb)
 	//// 每秒查询一次db
 	//p.Timer().Add(5*time.Second, p.selectDB)
@@ -191,21 +191,31 @@ func (self *ActorDB) addRecharge(table sqlmodel.Recharge) error {
 	return err
 }
 
-func (self *ActorDB) addRecord(table sqlmodel.Record) (int64, int64, error) {
-	// 获取充值前的金额
-	yuanbao, err := self.checkUserYuanBao(table.UID)
-	if err != nil {
-		return 0, 0, err
-	}
-	// 插入新的记录
-	table.Pergold = yuanbao
-	table.Gold = table.Pergold + table.Payment
-	// 创建一个新的 充值记录
-	if err = self.db.Create(&table).Error; err != nil {
-		return 0, 0, err
-	}
+func (self *ActorDB) addRecord(table *sqlmodel.Record) error {
+	err := self.db.Transaction(func(tx *gorm.DB) error {
+		// 获取充值前的金额
+		coin, err := self.checkUserCoin(table.UID)
+		// 获取充值前的金额
+		if err != nil {
+			return err
+		}
+		table.Pergold = coin
+		// 插入新的记录
+		table.Gold = table.Pergold + table.Payment
+		// 创建一个新的 充值记录
+		if err = self.db.Create(&table).Error; err != nil {
+			return err
+		}
+		user := sqlmodel.User{
+			ID: table.UID,
+		}
+		if err = self.db.Model(user).UpdateColumn("coin", gorm.Expr("coin + ?", table.Payment)).Error; err != nil {
+			return err
+		}
 
-	return yuanbao, table.Gold, nil
+		return nil
+	})
+	return err
 }
 
 // DelTable 新增桌牌
@@ -225,8 +235,8 @@ func (self *ActorDB) delTable(rid, tid int64) error {
 func (self *ActorDB) updateNickName(uid int64, nickname string) error {
 	self.Lock()
 	defer self.Unlock()
-	room := sqlmodel.User{}
-	return self.db.Table(room.TableName()).Where("id=?", uid).UpdateColumn("name", nickname).Error
+	user := sqlmodel.User{}
+	return self.db.Table(user.TableName()).Where("id=?", uid).UpdateColumn("name", nickname).Error
 }
 
 ///////////////////////Check//////////////////////////////////////////////

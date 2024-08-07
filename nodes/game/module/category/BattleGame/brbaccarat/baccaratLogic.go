@@ -25,7 +25,6 @@ const (
 	CardCount = 52 * 8 //牌数目
 
 	BaccaratHostMax = 12
-	MaxLoadNum      = 20
 )
 
 // 赔率

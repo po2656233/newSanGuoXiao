@@ -11,14 +11,14 @@ import (
 	"time"
 )
 
-// IGameOperate 子游戏接口
+// IGameOperate 子游戏接口 在检测到没真实玩家时,回归空闲状态
 type IGameOperate interface {
 	Scene(args []interface{}) bool        // 场 景
-	Start(args []interface{}) bool        // 准备
-	Ready(args []interface{}) bool        // 准备
+	Start(args []interface{}) bool        // 开始
+	Ready(args []interface{}) bool        // 玩家准备
 	Playing(args []interface{}) bool      // 游 戏(下分|下注)
-	UpdateInfo(args []interface{}) bool   // 更新信息 如玩家进入或离开
-	SuperControl(args []interface{}) bool // 超级控制 在检测到没真实玩家时,且处于空闲状态时,自动关闭
+	UpdateInfo(args []interface{}) bool   // 更新信息 如玩家进入、准备或离开等操作
+	SuperControl(args []interface{}) bool // 超级控制
 }
 
 // IAgainst 对战类
@@ -374,6 +374,10 @@ func (g *Game) ToNextScene() bool {
 	}
 	if int32(protoMsg.GameScene_Closing) <= next {
 		return false
+	}
+	// 如果当前没有玩家,游戏回归空闲状态
+	if int32(protoMsg.GameScene_Start) == next && g.GetPlayerCount() == INVALID {
+		next = int32(protoMsg.GameScene_Free)
 	}
 	g.ChangeStateAndWork(protoMsg.GameScene(next))
 	return true

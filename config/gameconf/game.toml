@@ -8,6 +8,18 @@ over = 3
 play = 30
 start = 5
 
+[brcowcow]
+bankerscore = 10000
+inventory = 100000
+maxhost = 8
+
+[brcowcow.duration]
+free = 20
+open = 3
+over = 3
+play = 30
+start = 5
+
 [chinesechess]
 col = 9
 row = 10
@@ -89,4 +101,14 @@ open = 3
 over = 3
 play = 30
 row = 8
+start = 5
+
+[tigerxdragon]
+inventory = 100000
+
+[tigerxdragon.duration]
+free = 20
+open = 3
+over = 3
+play = 30
 start = 5

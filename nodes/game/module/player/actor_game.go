@@ -2,7 +2,7 @@ package player
 
 import (
 	cfacade "github.com/po2656233/superplace/facade"
-	clog "github.com/po2656233/superplace/logger"
+	log "github.com/po2656233/superplace/logger"
 	"github.com/po2656233/superplace/net/parser/simple"
 	cst "superman/internal/constant"
 	event2 "superman/internal/event"
@@ -30,7 +30,7 @@ func (p *ActorGame) AliasID() string {
 	return "game"
 }
 func (p *ActorGame) OnInit() {
-	clog.Debugf("[ActorGame] path = %s init!", p.PathString())
+	log.Debugf("[ActorGame] path = %s init!", p.PathString())
 	p.childExitTime = time.Minute * 30
 	p.getGamesTime = time.Second * 5
 	p.getRoomsTime = time.Minute * 1
@@ -67,7 +67,7 @@ func (p *ActorGame) OnFindChild(msg *cfacade.Message) (cfacade.IActor, bool) {
 }
 
 func (p *ActorGame) OnStop() {
-	clog.Debugf("[ActorGame] path = %s exit!", p.PathString())
+	log.Debugf("[ActorGame] path = %s exit!", p.PathString())
 }
 
 // cron
@@ -95,14 +95,20 @@ func (p *ActorGame) checkTableList(rid int64) {
 	data, errCode := rpc.SendData(p.App(), cst.SourcePath, cst.DBActor, cst.NodeTypeCenter, req)
 	if errCode == 0 {
 		resp, ok := data.(*pb.GetTableListResp)
-		if ok && resp != nil && resp.Items != nil {
-			for _, item := range resp.Items.Items {
-				if room := mgr.GetRoomMgr().GetRoom(item.Rid); room != nil {
-					room.AddTable(item, NewGame)
-				}
-			}
+		if !ok || resp == nil || resp.Items == nil {
 			return
 		}
+		for _, item := range resp.Items.Items {
+			room := mgr.GetRoomMgr().GetRoom(item.Rid)
+			if room == nil {
+				continue
+			}
+			if _, err := room.AddTable(item, NewGame); err != nil {
+				log.Errorf("rid:%v add table:%v is err:%v !!!!", room.Id, item.Id, err)
+			}
+
+		}
+		return
 	}
 	p.Timer().AddOnce(p.getGamesTime, func() {
 		p.checkTableList(rid)
@@ -154,17 +160,17 @@ func (p *ActorGame) checkChild() {
 
 func (p *ActorGame) CreateRoomResp(resp *pb.CreateRoomResp) {
 	if _, ok := mgr.GetRoomMgr().Create(resp.Info); !ok {
-		clog.Errorf("[ActorGame][CreateRoomResp] [Create] no good!")
+		log.Errorf("[ActorGame][CreateRoomResp] [Create] no good!")
 	}
 }
 func (p *ActorGame) CreateTableResp(resp *pb.CreateTableResp) {
 	if resp.Table == nil {
-		clog.Errorf("[ActorGame][CreateTableResp] no resp!")
+		log.Errorf("[ActorGame][CreateTableResp] no resp!")
 		return
 	}
 	if rm := mgr.GetRoomMgr().GetRoom(resp.Table.Rid); rm != nil {
 		if _, err := rm.AddTable(resp.Table, NewGame); err != nil {
-			clog.Errorf("[ActorGame][CreateTableResp] [AddTable] no resp!")
+			log.Errorf("[ActorGame][CreateTableResp] [AddTable] no resp!")
 		}
 	}
 }
@@ -183,7 +189,7 @@ func (p *ActorGame) onLoginEvent(e cfacade.IEventData) {
 		return
 	}
 
-	clog.Infof("[PlayerLoginEvent] [playerId = %d, onlineCount = %d]",
+	log.Infof("[PlayerLoginEvent] [playerId = %d, onlineCount = %d]",
 		evt.PlayerId,
 		online.Count(),
 	)
@@ -196,7 +202,7 @@ func (p *ActorGame) onLogoutEvent(e cfacade.IEventData) {
 		return
 	}
 
-	clog.Infof("[PlayerLogoutEvent] [playerId = %d, onlineCount = %d]",
+	log.Infof("[PlayerLogoutEvent] [playerId = %d, onlineCount = %d]",
 		evt.PlayerId,
 		online.Count(),
 	)
@@ -209,5 +215,5 @@ func (p *ActorGame) onPlayerCreateEvent(e cfacade.IEventData) {
 		return
 	}
 
-	clog.Infof("[PlayerCreateEvent] [%+v]", evt)
+	log.Infof("[PlayerCreateEvent] [%+v]", evt)
 }

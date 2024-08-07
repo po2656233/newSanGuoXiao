@@ -155,6 +155,7 @@ func (self *Room) AddTable(table *protoMsg.TableInfo, f NewGameFunc) (*Table, er
 	if tb.GameHandle == nil {
 		return nil, fmt.Errorf("%s 房间ID:%d 牌桌ID:%d(暂不可用) 游戏ID:%d", StatusText[Room17], table.Rid, table.Id, table.Gid)
 	}
+	log.Debugf("[%v:%v]游戏創建成功", self.Name, tb.Id)
 	self.tables = append(self.tables, tb)
 	return tb, nil
 }

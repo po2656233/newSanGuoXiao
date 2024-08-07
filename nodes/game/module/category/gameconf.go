@@ -41,6 +41,17 @@ type ConfSetting struct {
 		BankerScore int64 `toml:"bankerscore"`
 		MaxHost     uint8 `toml:"maxhost"`
 	} `toml:"brcowcow"`
+	//龙虎斗
+	TigerXdragon struct {
+		Duration struct {
+			Free  int32 `toml:"free"`
+			Open  int32 `toml:"open"`
+			Over  int32 `toml:"over"`
+			Play  int32 `toml:"play"`
+			Start int32 `toml:"start"`
+		} `toml:"duration"`
+		Inventory int64 `yaml:"inventory"`
+	} ` yaml:"TigerXdragon"`
 	Chinesechess struct {
 		Col      int32 `toml:"col"`
 		Row      int32 `toml:"row"`

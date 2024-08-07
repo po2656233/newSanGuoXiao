@@ -4656,7 +4656,8 @@ proto.pb.AddRecordReq.toObject = function(includeInstance, msg) {
     payment: jspb.Message.getFieldWithDefault(msg, 3, 0),
     code: jspb.Message.getFieldWithDefault(msg, 4, 0),
     order: jspb.Message.getFieldWithDefault(msg, 5, ""),
-    remark: jspb.Message.getFieldWithDefault(msg, 6, "")
+    result: jspb.Message.getFieldWithDefault(msg, 6, ""),
+    remark: jspb.Message.getFieldWithDefault(msg, 7, "")
   };
 
   if (includeInstance) {
@@ -4714,6 +4715,10 @@ proto.pb.AddRecordReq.deserializeBinaryFromReader = function(msg, reader) {
       msg.setOrder(value);
       break;
     case 6:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setResult(value);
+      break;
+    case 7:
       var value = /** @type {string} */ (reader.readString());
       msg.setRemark(value);
       break;
@@ -4781,10 +4786,17 @@ proto.pb.AddRecordReq.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getRemark();
+  f = message.getResult();
   if (f.length > 0) {
     writer.writeString(
       6,
+      f
+    );
+  }
+  f = message.getRemark();
+  if (f.length > 0) {
+    writer.writeString(
+      7,
       f
     );
   }
@@ -4867,17 +4879,32 @@ proto.pb.AddRecordReq.prototype.setOrder = function(value) {
 
 
 /**
- * optional string remark = 6;
+ * optional string result = 6;
  * @return {string}
  */
-proto.pb.AddRecordReq.prototype.getRemark = function() {
+proto.pb.AddRecordReq.prototype.getResult = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 6, ""));
 };
 
 
 /** @param {string} value */
-proto.pb.AddRecordReq.prototype.setRemark = function(value) {
+proto.pb.AddRecordReq.prototype.setResult = function(value) {
   jspb.Message.setProto3StringField(this, 6, value);
+};
+
+
+/**
+ * optional string remark = 7;
+ * @return {string}
+ */
+proto.pb.AddRecordReq.prototype.getRemark = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 7, ""));
+};
+
+
+/** @param {string} value */
+proto.pb.AddRecordReq.prototype.setRemark = function(value) {
+  jspb.Message.setProto3StringField(this, 7, value);
 };
 
 
@@ -4918,7 +4945,8 @@ proto.pb.AddRecordResp.toObject = function(includeInstance, msg) {
     gold: jspb.Message.getFieldWithDefault(msg, 5, 0),
     code: jspb.Message.getFieldWithDefault(msg, 6, 0),
     order: jspb.Message.getFieldWithDefault(msg, 7, ""),
-    remark: jspb.Message.getFieldWithDefault(msg, 8, "")
+    result: jspb.Message.getFieldWithDefault(msg, 8, ""),
+    remark: jspb.Message.getFieldWithDefault(msg, 9, "")
   };
 
   if (includeInstance) {
@@ -4984,6 +5012,10 @@ proto.pb.AddRecordResp.deserializeBinaryFromReader = function(msg, reader) {
       msg.setOrder(value);
       break;
     case 8:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setResult(value);
+      break;
+    case 9:
       var value = /** @type {string} */ (reader.readString());
       msg.setRemark(value);
       break;
@@ -5065,10 +5097,17 @@ proto.pb.AddRecordResp.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getRemark();
+  f = message.getResult();
   if (f.length > 0) {
     writer.writeString(
       8,
+      f
+    );
+  }
+  f = message.getRemark();
+  if (f.length > 0) {
+    writer.writeString(
+      9,
       f
     );
   }
@@ -5181,17 +5220,32 @@ proto.pb.AddRecordResp.prototype.setOrder = function(value) {
 
 
 /**
- * optional string remark = 8;
+ * optional string result = 8;
  * @return {string}
  */
-proto.pb.AddRecordResp.prototype.getRemark = function() {
+proto.pb.AddRecordResp.prototype.getResult = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 8, ""));
 };
 
 
 /** @param {string} value */
-proto.pb.AddRecordResp.prototype.setRemark = function(value) {
+proto.pb.AddRecordResp.prototype.setResult = function(value) {
   jspb.Message.setProto3StringField(this, 8, value);
+};
+
+
+/**
+ * optional string remark = 9;
+ * @return {string}
+ */
+proto.pb.AddRecordResp.prototype.getRemark = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 9, ""));
+};
+
+
+/** @param {string} value */
+proto.pb.AddRecordResp.prototype.setRemark = function(value) {
+  jspb.Message.setProto3StringField(this, 9, value);
 };
 
 

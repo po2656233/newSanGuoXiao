@@ -173,8 +173,8 @@ func (self *BrcowcowGame) Scene(args []interface{}) bool {
 // 开始下注前定庄
 func (self *BrcowcowGame) Start(args []interface{}) bool {
 	_ = args
-	log.Debugf("[%v:%v]游戏創建成功", self.Name, self.T.Id)
 	if !self.IsStart {
+		log.Infof("[%v] [%v:%v]  游戏成功启动!!! ", self.T.Name, self.GameInfo.Name, self.T.Id)
 		self.onDecide()
 		self.IsStart = true
 	}
@@ -308,6 +308,13 @@ func (self *BrcowcowGame) Over(args []interface{}) {
 	checkout.TotalSettlement = append(checkout.TotalSettlement, bankerAwardScore)
 
 	// 统一结算 todo
+	self.T.ChairWork(func(chair *Chair) {
+		if chair.Gain != INVALID {
+
+			checkout.MyAcquire = chair.Gain
+			GlobalSender.SendTo(chair.UserID, checkout)
+		}
+	})
 	//self.Calculate(GlobalSqlHandle.DeductMoney, false, false)
 	//for _, chair := range self.GetAllSitter() {
 	//	if chair.Code == CodeSettle {
@@ -702,19 +709,16 @@ func (self *BrcowcowGame) host(args []interface{}) {
 // 抢庄
 func (self *BrcowcowGame) hostlist(args []interface{}) {
 	//【消息】
+	_ = args
 	//a := args[0].([]interface{})
 	person := GlobalPlayerMgr.Get(self.bankerID)
 	msg := &protoMsg.BrcowcowHostListResp{}
 	if person != nil {
 		msg.CurHost = person.PlayerInfo
-	} else {
-		//msg.CurHost = &protoMsg.PlayerInfo{
-		//    UserID: INVALID,
-		//    Name: "系统",
-		//}
+		msg.Waitlist = self.hostList
+		GlobalSender.SendTo(person.UserID, msg)
 	}
-	msg.Waitlist = self.hostList
-	GlobalSender.SendTo(person.UserID, msg)
+
 }
 
 // 超级抢庄

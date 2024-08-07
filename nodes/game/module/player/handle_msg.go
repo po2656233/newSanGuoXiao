@@ -36,7 +36,13 @@ func enter(args []interface{}) {
 		data, errCode := rpc.SendData(agent.App(), SourcePath, DBActor, NodeTypeCenter, &protoMsg.GetTableReq{Tid: m.TableID})
 		if errCode == 0 {
 			if tbResp, ok := data.(*protoMsg.GetTableResp); ok {
-				tb, _ = room.AddTable(tbResp.Info, NewGame)
+				var err error
+				tb, err = room.AddTable(tbResp.Info, NewGame)
+				if err != nil {
+					clog.Warnf("[enter] params %+v  uid:%+v AddTable err:%v", m, uid, err)
+					agent.SendResultPop(FAILED, StatusText[Title004], StatusText[Room17])
+					return
+				}
 			}
 		}
 	}
@@ -160,6 +166,7 @@ func ready(args []interface{}) {
 	}
 }
 
+// 设置时长
 func setTime(args []interface{}) {
 	//查找玩家
 	//_ = args[1]
@@ -173,6 +180,22 @@ func setTime(args []interface{}) {
 	person := mgr.GetPlayerMgr().Get(uid)
 	if ok := person.UpdateState(protoMsg.PlayerState_PlayerSetTime, args); !ok {
 		agent.SendResultPop(FAILED, StatusText[Title004], StatusText[User02])
+	}
+}
+
+// 玩法操作
+func playing(args []interface{}) {
+	//查找玩家
+	//_ = args[1]
+	m := args[0]
+	agent := args[1].(*ActorPlayer)
+	if m == nil {
+		agent.SendResultPop(FAILED, StatusText[Title004], StatusText[User03])
+		return
+	}
+	person := mgr.GetPlayerMgr().Get(agent.Session.Uid)
+	if person.GameHandle != nil {
+		person.GameHandle.Playing(args)
 	}
 }
 

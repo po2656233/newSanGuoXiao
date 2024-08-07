@@ -64,9 +64,9 @@ func NewChair(id int32, gid int64, player *Player) any {
 		PlayerInfo: player.PlayerInfo,
 		ID:         id,
 		HandCard:   make([]byte, 0),
-		Score:      player.Gold,
-		Total:      0,
-		Gain:       0,
+		Score:      INVALID,
+		Total:      INVALID,
+		Gain:       INVALID,
 		Timer:      time.NewTimer(0),
 	}
 	switch gid {

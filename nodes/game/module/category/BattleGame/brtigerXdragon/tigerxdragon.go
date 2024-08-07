@@ -1,17 +1,14 @@
 package brtigerXdragon
 
 import (
+	log "github.com/po2656233/superplace/logger"
+	. "superman/internal/constant"
 	protoMsg "superman/internal/protocol/gofile"
-	. "superman/nodes/leaf/jettengame/base"
-	"superman/nodes/leaf/jettengame/conf"
-	. "superman/nodes/leaf/jettengame/game/internal/category"
-	. "superman/nodes/leaf/jettengame/manger"
-	_ "superman/nodes/leaf/jettengame/sql/mysql" //仅仅希望导入 包内的init函数
+	. "superman/internal/utils"
+	. "superman/nodes/game/manger"
+	. "superman/nodes/game/module/category"
 	"sync"
 	"time"
-
-	"github.com/po2656233/goleaf/gate"
-	"github.com/po2656233/goleaf/log"
 )
 
 //var lock *sync.Mutex = &sync.Mutex{} //锁
@@ -19,6 +16,7 @@ import (
 // TigerXdragonGame 继承于GameItem
 type TigerXdragonGame struct {
 	*Game
+	T *Table
 
 	personBetInfo *sync.Map                      //map[int64][]*protoMsg.TigerXdragonBetResp //下注信息
 	openAreas     [][]byte                       //开奖纪录
@@ -35,13 +33,13 @@ type TigerXdragonGame struct {
 }
 
 // NewTigerXdragon 创建%v:%v实例
-func NewTigerXdragon(game *Game) *TigerXdragonGame {
+func New(game *Game, table *Table) *TigerXdragonGame {
 	p := &TigerXdragonGame{
 		Game: game,
+		T:    table,
 	}
 
 	p.bankerScore = 0
-	p.Config = conf.YamlObj
 	p.Init()
 	return p
 }
@@ -65,56 +63,20 @@ func (self *TigerXdragonGame) Init() {
 
 }
 
-//获取玩家列表
-//func (self *TigerXdragonGame) getPlayersName() []string {
-//	var name []string
-//	for _, pid := range self.PlayerList {
-//		log.Debug("----玩家：%v", pid)
-//		name = append(name, sqlhandle.CheckName(pid))
-//	}
-//	return name
-//}
-
 // //////////////////////////////////////////////////////////////
 
 // Scene 场景信息
-func (self *TigerXdragonGame) Scene(args []interface{}) {
-	_ = args[1]
-	level := args[0].(int32)
-	agent := args[1].(gate.Agent)
-	userData := agent.UserData()
-	if userData == nil {
-		GlobalSender.SendResult(agent, FAILED, StatusText[Game02])
-		log.Debug("[Error][%v:%v场景] [未能查找到相关玩家] ")
-		return
+func (self *TigerXdragonGame) Scene(args []interface{}) bool {
+	if !self.Game.Scene(args) {
+		return false
 	}
-	if level != self.G.Level {
-		GlobalSender.SendResult(agent, FAILED, StatusText[Game01])
-		log.Debug("[Error][%v:%v场景] [房间等级不匹配] ")
-		return
-	}
-
-	person := userData.(*Player)
-
+	person := args[0].(*Player)
 	//场景信息
 	StateInfo := &protoMsg.TigerXdragonSceneResp{}
-	StateInfo.Inning = self.InningInfo.Number
+	StateInfo.Inning = self.Inning
 	StateInfo.AwardAreas = self.openAreas // 录单
 	//定时器
 	StateInfo.TimeStamp = self.TimeStamp //////已过时长 应当该为传时间戳
-	//筹码
-	switch level {
-	case RoomGeneral:
-		StateInfo.Chips = self.Config.Chips.General //筹码
-	case RoomMiddle:
-		StateInfo.Chips = self.Config.Chips.Middle //筹码
-	case RoomHigh:
-		StateInfo.Chips = self.Config.Chips.High //筹码
-	default:
-		StateInfo.Chips = self.Config.Chips.Other //筹码
-	}
-	//玩家列表
-	StateInfo.AllPlayers = self.GetSitterListMsg()
 
 	//下注情况
 	StateInfo.AreaBets = make([]int64, AREA_MAX)
@@ -138,47 +100,48 @@ func (self *TigerXdragonGame) Scene(args []interface{}) {
 	})
 
 	//反馈场景信息
-	GlobalSender.SendData(agent, StateInfo)
+	uid := person.UserID
+	GlobalSender.SendTo(uid, StateInfo)
 
 	//通知游戏状态
 	timeInfo := &protoMsg.TimeInfo{}
 	timeInfo.TimeStamp = self.TimeStamp
 	timeInfo.OutTime = int32(time.Now().Unix() - self.TimeStamp)
-	switch self.G.Scene {
+	switch self.GameInfo.Scene {
 	case protoMsg.GameScene_Start: //准备
-		timeInfo.TotalTime = self.Config.TigerXdragon.Duration.StartTime
+		timeInfo.TotalTime = YamlObj.TigerXdragon.Duration.Start
 		timeInfo.WaitTime = timeInfo.TotalTime - timeInfo.OutTime
-		GlobalSender.SendData(agent, &protoMsg.TigerXdragonStateStartResp{
+		GlobalSender.SendTo(uid, &protoMsg.TigerXdragonStateStartResp{
 			Times:  timeInfo,
-			Inning: self.InningInfo.Number,
+			Inning: self.Inning,
 		})
 	case protoMsg.GameScene_Playing: //下注
-		timeInfo.TotalTime = self.Config.TigerXdragon.Duration.BetTime
+		timeInfo.TotalTime = YamlObj.TigerXdragon.Duration.Play
 		timeInfo.WaitTime = timeInfo.TotalTime - timeInfo.OutTime
-		GlobalSender.SendData(agent, &protoMsg.TigerXdragonStatePlayingResp{
+		GlobalSender.SendTo(uid, &protoMsg.TigerXdragonStatePlayingResp{
 			Times: timeInfo,
 		})
 	case protoMsg.GameScene_Opening: //开奖
-		timeInfo.TotalTime = self.Config.TigerXdragon.Duration.OpenTime
+		timeInfo.TotalTime = YamlObj.TigerXdragon.Duration.Open
 		timeInfo.WaitTime = timeInfo.TotalTime - timeInfo.OutTime
-		GlobalSender.SendData(agent, &protoMsg.TigerXdragonStateOpenResp{
+		GlobalSender.SendTo(uid, &protoMsg.TigerXdragonStateOpenResp{
 			Times:    timeInfo,
 			OpenInfo: self.openInfo,
 		})
 	case protoMsg.GameScene_Over: //结算
-		timeInfo.TotalTime = self.Config.TigerXdragon.Duration.OverTime
+		timeInfo.TotalTime = YamlObj.TigerXdragon.Duration.Over
 		timeInfo.WaitTime = timeInfo.TotalTime - timeInfo.OutTime
-		GlobalSender.SendData(agent, &protoMsg.TigerXdragonStateOverResp{
+		GlobalSender.SendTo(uid, &protoMsg.TigerXdragonStateOverResp{
 			Times: timeInfo,
 		})
 	}
-
+	return true
 }
 
 // 开始下注前定庄
 func (self *TigerXdragonGame) Start(args []interface{}) {
 	_ = args
-	log.Release("[%v:%v]游戏創建成功", self.G.Name, self.ID)
+	log.Infof("[%v:%v]游戏創建成功", self.Name, self.T.Id)
 	if self.IsStart {
 		self.onStart()
 		self.IsStart = false
@@ -186,58 +149,44 @@ func (self *TigerXdragonGame) Start(args []interface{}) {
 }
 
 // 下注 直接扣除金币
-func (self *TigerXdragonGame) Playing(args []interface{}) {
+func (self *TigerXdragonGame) Playing(args []interface{}) bool {
 	_ = args[1]
+	if !self.Game.Playing(args) {
+		return false
+	}
 	//【消息】
 	m := args[0].(*protoMsg.TigerXdragonBetReq)
 	//【传输对象】
-	agent := args[1].(gate.Agent)
-
-	userData := agent.UserData()
-	if nil == userData {
-		log.Debug("[%v:%v][%v] Playing:->%v ", self.G.Name, self.ID, StatusText[User02], m)
-		GlobalSender.SendResult(agent, FAILED, StatusText[User02])
-		return
-	}
-	if self.G.Scene == protoMsg.GameScene_Start {
-		log.Debug("[%v:%v][%v] Playing:->%v ", self.G.Name, self.ID, StatusText[Game24], m)
-		GlobalSender.SendResult(agent, FAILED, StatusText[Game24])
-		return
-	}
-	if self.G.Scene != protoMsg.GameScene_Playing {
-		log.Debug("[%v:%v][%v] Playing:->%v ", self.G.Name, self.ID, StatusText[Game03], m)
-		GlobalSender.SendResult(agent, FAILED, StatusText[Game03])
-		return
-	}
+	agent := args[1].(Agent)
 	if m.BetScore <= 0 {
-		log.Debug("[%v:%v][%v] Playing:->%v ", self.G.Name, self.ID, StatusText[Game07], m)
+		log.Debugf("[%v:%v][%v] Playing:->%v ", self.Name, self.T.Id, StatusText[Game07], m)
 		GlobalSender.SendResult(agent, FAILED, StatusText[Game07])
-		return
+		return false
 	}
-
+	userData := agent.UserData()
 	person := userData.(*Player)
-	sitter, ok := self.GetSitter(person.UserID)
-	if !ok {
-		log.Debug("[%v:%v][%v] Playing:->%v ", self.G.Name, self.ID, StatusText[Game33], m)
+	sitter := self.T.GetChair(person.UserID)
+	if sitter == nil {
+		log.Debugf("[%v:%v][%v] Playing:->%v ", self.Name, self.T.Id, StatusText[Game33], m)
 		GlobalSender.SendResult(agent, FAILED, StatusText[Game33])
-		return
+		return false
 	}
 	if self.bankerID == sitter.UserID {
-		log.Debug("[%v:%v][%v:%v] Playing:->%v ", self.G.Name, self.ID, sitter.UserID, StatusText[Game27], m)
+		log.Debugf("[%v:%v][%v:%v] Playing:->%v ", self.Name, self.T.Id, sitter.UserID, StatusText[Game27], m)
 		GlobalSender.SendResult(agent, FAILED, StatusText[Game27])
-		return
+		return false
 	}
 	if sitter.Gold < m.BetScore+sitter.Total {
-		log.Debug("[%v:%v][%v:%v] %v Playing:->%v ", self.G.Name, self.ID, sitter.UserID, StatusText[Game05], sitter.Gold, m)
+		log.Debugf("[%v:%v][%v:%v] %v Playing:->%v ", self.Name, self.T.Id, sitter.UserID, StatusText[Game05], sitter.Gold, m)
 		GlobalSender.SendResult(agent, FAILED, StatusText[Game05])
-		return
+		return false
 	}
 	if AREA_MAX <= m.BetArea {
-		log.Debug("[%v:%v][%v:%v] Playing:->%v ", self.G.Name, self.ID, sitter.UserID, StatusText[Game06], m)
+		log.Debugf("[%v:%v][%v:%v] Playing:->%v ", self.Name, self.T.Id, sitter.UserID, StatusText[Game06], m)
 		GlobalSender.SendResult(agent, FAILED, StatusText[Game06])
-		return
+		return false
 	}
-	// log.Debug("[%v:%v] 玩家:%v Playing:->%v ", self.G.Name, self.ID, sitter.UserID, m)
+	// log.Debugf("[%v:%v] 玩家:%v Playing:->%v ", self.Name, self.T.Id, sitter.UserID, m)
 
 	//下注成功
 	msg := &protoMsg.TigerXdragonBetResp{}
@@ -253,7 +202,7 @@ func (self *TigerXdragonGame) Playing(args []interface{}) {
 		for index, betItem := range areaBetInfos {
 			if betItem.BetArea == m.BetArea {
 				areaBetInfos[index].BetScore = betItem.BetScore + m.BetScore
-				log.Debug("[%v:%v]\t玩家:%v 区域:%v 累加:->%v", self.G.Name, self.ID, sitter.UserID, m.BetArea, areaBetInfos[index].BetScore)
+				log.Debugf("[%v:%v]\t玩家:%v 区域:%v 累加:->%v", self.Name, self.T.Id, sitter.UserID, m.BetArea, areaBetInfos[index].BetScore)
 				ok = true
 				break
 			}
@@ -263,7 +212,7 @@ func (self *TigerXdragonGame) Playing(args []interface{}) {
 		}
 		self.personBetInfo.Store(sitter.UserID, areaBetInfos)
 	} else {
-		log.Debug("[%v:%v]\t玩家:%v 下注:%v", self.G.Name, self.ID, sitter.UserID, m)
+		log.Debugf("[%v:%v]\t玩家:%v 下注:%v", self.Name, self.T.Id, sitter.UserID, m)
 		areaBetInfos := make([]*protoMsg.TigerXdragonBetResp, 0)
 		areaBetInfos = CopyInsert(areaBetInfos, len(areaBetInfos), msg).([]*protoMsg.TigerXdragonBetResp)
 		self.personBetInfo.Store(sitter.UserID, areaBetInfos)
@@ -273,85 +222,52 @@ func (self *TigerXdragonGame) Playing(args []interface{}) {
 	self.bankerScore += msg.BetScore
 	//通知其他玩家
 	GlobalSender.NotifyOthers(self.PlayerList, msg)
+	return true
 }
 
 // 结算
 func (self *TigerXdragonGame) Over(args []interface{}) {
 	_ = args
 	allAreaInfo := make([]int64, AREA_MAX)
-	for _, sitter := range self.GetAllSitter() {
-		uid := sitter.UserID
-		if value, ok := self.personBetInfo.Load(sitter.UserID); ok {
-			betInfos, ok1 := value.([]*protoMsg.TigerXdragonBetResp)
-			if !ok1 {
-				continue
-			}
-			//每一次的下注信息
-			for _, betInfo := range betInfos {
-				log.Debug("[%v:%v]玩家:%v,下注区域:%v 下注金额:%v", self.G.Name, self.ID, uid, betInfo.BetArea, betInfo.BetScore)
-				//玩家奖金
-				bonusScore := self.BonusArea(betInfo.BetArea, betInfo.BetScore)
-				sitter.Gain += bonusScore
-				if bonusScore < 0 {
-					allAreaInfo[betInfo.BetArea] -= betInfo.BetScore
-				} else {
-					allAreaInfo[betInfo.BetArea] += betInfo.BetScore
-				}
-
-			}
+	self.personBetInfo.Range(func(key, value any) bool {
+		uid, ok := key.(int64)
+		betInfos, ok1 := value.([]*protoMsg.TigerXdragonBetResp)
+		if !ok || !ok1 {
+			return true
 		}
-	}
+		//每一次的下注信息
+		sitter := self.T.GetChair(uid)
+		if sitter == nil {
+			return true
+		}
+		for _, betInfo := range betInfos {
+			log.Debugf("[%v:%v]玩家:%v,下注区域:%v 下注金额:%v", self.Name, self.T.Id, uid, betInfo.BetArea, betInfo.BetScore)
+			//玩家奖金
+			bonusScore := self.BonusArea(betInfo.BetArea, betInfo.BetScore)
+			sitter.Gain += bonusScore
+			if bonusScore < 0 {
+				allAreaInfo[betInfo.BetArea] -= betInfo.BetScore
+			} else {
+				allAreaInfo[betInfo.BetArea] += betInfo.BetScore
+			}
+
+		}
+		return true
+	})
 
 	//派奖
 	checkout := &protoMsg.TigerXdragonCheckoutResp{}
 	checkout.Acquires = allAreaInfo
 	// 统一结算
-	self.Calculate(GlobalSqlHandle.DeductMoney, false, false)
-	for _, chair := range self.GetAllSitter() {
-		if chair.Code == CodeSettle {
-			checkout.MyAcquire = chair.Gain
-		}
-		GlobalSender.SendTo(chair.UserID, checkout)
-	}
+	//self.Calculate(GlobalSqlHandle.DeductMoney, false, false)
+	//for _, chair := range self.GetAllSitter() {
+	//	if chair.Code == CodeSettle {
+	//		checkout.MyAcquire = chair.Gain
+	//	}
+	//	GlobalSender.SendTo(chair.UserID, checkout)
+	//}
 
-	log.Debug("[%v:%v]   \t结算注单... 各区域情况:%v", self.G.Name, self.ID, allAreaInfo)
-}
-
-// 更新
-func (self *TigerXdragonGame) UpdateInfo(args []interface{}) { //更新玩家列表[目前]
-	_ = args[1]
-
-	flag := args[0].(int32)
-	userID := args[1].(int64)
-	switch int(flag) {
-	case GameUpdateOut: //玩家离开 不再向该玩家广播消息[] 删除
-		self.UpdatePlayerList(DEL, userID, true)
-	case GameUpdateEnter: //更新玩家列表
-		self.UpdatePlayerList(ADD, userID, true)
-	case GameUpdateHost: //更新玩家抢庄信息
-		_ = args[2]
-		self.host(args[2:])
-	case GameUpdateSuperHost: //更新玩家超级抢庄信息
-		_ = args[2]
-		self.superHost(args[2:])
-	case GameUpdateOffline: //更新玩家超级抢庄信息
-	case GameUpdateReconnect: //更新玩家超级抢庄信息
-	case GameUpdateGold:
-		_ = args[2]
-		GlobalSender.NotifyOthers(self.PlayerList, args[2].(*protoMsg.NotifyBalanceChange))
-	case GameUpdateDisbanded:
-		self.IsClear = true
-	}
-}
-
-// 超级控制
-func (self *TigerXdragonGame) SuperControl(args []interface{}) {
-	_ = args[0]
-	flag := args[0].(int32)
-	switch flag {
-	case GameControlClear:
-		self.IsClear = true
-	}
+	log.Debugf("[%v:%v]   \t结算注单... 各区域情况:%v", self.Name, self.T.Id, allAreaInfo)
 }
 
 // 发牌
@@ -361,7 +277,7 @@ Dispatch:
 	//2张牌
 	cards := Shuffle(CardListData[:])
 	self.openInfo.Cards = Deal(cards, CardAmount, IndexStart)
-	log.Debug("[%v:%v]\t发牌 龙:%v  虎:%v", self.G.Name, self.ID, GetCardText(self.openInfo.Cards[0]), GetCardText(self.openInfo.Cards[1]))
+	log.Debugf("[%v:%v]\t发牌 龙:%v  虎:%v", self.Name, self.T.Id, GetCardText(self.openInfo.Cards[0]), GetCardText(self.openInfo.Cards[1]))
 	// 中奖区域
 	self.DeduceWin()
 
@@ -369,22 +285,22 @@ Dispatch:
 	personAwardScore, ok := self.simulatedResult()
 	if !ok && timeoutCount < 1000 {
 		timeoutCount++
-		//log.Error("[库存警告][%v:%v]\t当前库存:%v 庄家积分:%v 扣算之前:%v 尝试次数:%v[库存警告]", self.G.Name, self.ID, self.inventory, personAwardScore, self.bankerScore, timeoutCount)
+		//log.Error("[库存警告][%v:%v]\t当前库存:%v 庄家积分:%v 扣算之前:%v 尝试次数:%v[库存警告]", self.Name, self.T.Id, self.inventory, personAwardScore, self.bankerScore, timeoutCount)
 		goto Dispatch
 	}
-	log.Debug("[%v:%v]\t当前库存:%v 庄家积分:%v 扣算之前:%v", self.G.Name, self.ID, self.inventory, personAwardScore, self.bankerScore)
+	log.Debugf("[%v:%v]\t当前库存:%v 庄家积分:%v 扣算之前:%v", self.Name, self.T.Id, self.inventory, personAwardScore, self.bankerScore)
 	self.inventory = personAwardScore
 	self.bankerScore = personAwardScore - self.inventory
 	if self.bankerScore < INVALID {
 		self.bankerScore = INVALID
 	}
 	if self.inventory < INVALID {
-		log.Error("[库存警告][%v:%v]\t当前库存:%v 庄家积分:%v [库存警告]", self.G.Name, self.ID, self.inventory, self.bankerScore)
+		log.Error("[库存警告][%v:%v]\t当前库存:%v 庄家积分:%v [库存警告]", self.Name, self.T.Id, self.inventory, self.bankerScore)
 	}
 	// ===>>>
 	//self.bankerScore = INVALID
 	//self.inventory = INVALID
-	log.Debug("[%v:%v]\t 库存信息 当前:%v 配置:%v 盈利:[%v]", self.G.Name, self.ID, self.inventory, self.confInventory, self.inventory-self.confInventory)
+	log.Debugf("[%v:%v]\t 库存信息 当前:%v 配置:%v 盈利:[%v]", self.Name, self.T.Id, self.inventory, self.confInventory, self.inventory-self.confInventory)
 
 	//录单记录
 	self.openAreas = append(self.openAreas, self.openInfo.AwardArea)
@@ -469,16 +385,16 @@ func (self *TigerXdragonGame) BonusArea(area int32, betScore int64) int64 {
 
 // 开始|下注|结算|空闲
 func (self *TigerXdragonGame) onStart() {
-	self.Reset()
+	self.reset()
 	// 校准库存
-	if self.confInventory != self.Config.TigerXdragon.Inventory {
-		self.confInventory = self.Config.TigerXdragon.Inventory
+	if self.confInventory != YamlObj.TigerXdragon.Inventory {
+		self.confInventory = YamlObj.TigerXdragon.Inventory
 		//此处会重置以往的库存值
 		self.inventory = self.confInventory
 	}
 
 	self.ChangeState(protoMsg.GameScene_Start)
-	time.AfterFunc(time.Duration(self.Config.TigerXdragon.Duration.StartTime)*time.Second, self.onPlay)
+	time.AfterFunc(time.Duration(YamlObj.TigerXdragon.Duration.Start)*time.Second, self.onPlay)
 
 	// 开始状态
 	//m := self.permitHost() //反馈定庄信息
@@ -487,10 +403,10 @@ func (self *TigerXdragonGame) onStart() {
 		Times: &protoMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			OutTime:   0,
-			WaitTime:  self.Config.TigerXdragon.Duration.StartTime,
-			TotalTime: self.Config.TigerXdragon.Duration.StartTime,
+			WaitTime:  YamlObj.TigerXdragon.Duration.Start,
+			TotalTime: YamlObj.TigerXdragon.Duration.Start,
 		},
-		Inning: self.InningInfo.Number,
+		Inning: self.Inning,
 	})
 
 }
@@ -498,15 +414,15 @@ func (self *TigerXdragonGame) onStart() {
 // [下注减法]
 func (self *TigerXdragonGame) onPlay() {
 	self.ChangeState(protoMsg.GameScene_Playing)
-	time.AfterFunc(time.Duration(self.Config.TigerXdragon.Duration.BetTime)*time.Second, self.onOpen)
+	time.AfterFunc(time.Duration(YamlObj.TigerXdragon.Duration.Play)*time.Second, self.onOpen)
 
 	// 下注状态
 	GlobalSender.NotifyOthers(self.PlayerList, &protoMsg.TigerXdragonStatePlayingResp{
 		Times: &protoMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			OutTime:   0,
-			WaitTime:  self.Config.TigerXdragon.Duration.BetTime,
-			TotalTime: self.Config.TigerXdragon.Duration.BetTime,
+			WaitTime:  YamlObj.TigerXdragon.Duration.Play,
+			TotalTime: YamlObj.TigerXdragon.Duration.Play,
 		},
 	})
 }
@@ -525,14 +441,14 @@ func (self *TigerXdragonGame) onOpen() {
 		Times: &protoMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			OutTime:   0,
-			WaitTime:  self.Config.TigerXdragon.Duration.OpenTime,
-			TotalTime: self.Config.TigerXdragon.Duration.OpenTime,
+			WaitTime:  YamlObj.TigerXdragon.Duration.Open,
+			TotalTime: YamlObj.TigerXdragon.Duration.Open,
 		},
 		OpenInfo: self.openInfo,
 	})
 
-	time.AfterFunc(time.Duration(self.Config.TigerXdragon.Duration.OpenTime)*time.Second, self.onOver)
-	log.Debug("[%v:%v]\t开奖中===>牌值:%v......区域:%v", self.G.Name, self.ID, self.openInfo.Cards, self.openInfo.AwardArea)
+	time.AfterFunc(time.Duration(YamlObj.TigerXdragon.Duration.Open)*time.Second, self.onOver)
+	log.Debugf("[%v:%v]\t开奖中===>牌值:%v......区域:%v", self.Name, self.T.Id, self.openInfo.Cards, self.openInfo.AwardArea)
 }
 
 // [结算加法]
@@ -544,28 +460,21 @@ func (self *TigerXdragonGame) onOver() {
 	self.Over(nil)
 
 	//自动清场
-	if self.IsClear || (SYSTEMID != self.T.HostID && self.T.Amount <= self.RunCount) {
-		err := GlobalSqlHandle.DelGame(self.ID, INVALID)
-		log.Release("[%v:%v]清场结果:%v", self.G.Name, self.ID, err)
-		time.AfterFunc(time.Duration(WAITTIME)*time.Second, self.GameOver)
+	if self.IsClear || (SYSTEMID != self.T.Rid && self.T.Remain <= self.RunCount) {
+		self.Close(func() *Table {
+			return self.T
+		})
 		return
-	} else if SYSTEMID != self.T.HostID {
-		remainCount := self.T.Amount - self.RunCount
-		if self.T.Amount < self.RunCount {
-			remainCount = 0
-		}
-		err := GlobalSqlHandle.UpdateGameAmount(self.ID, remainCount)
-		log.Release("[%v:%v]第%v局结束 err:%v", self.G.Name, self.ID, self.RunCount, err)
 	}
 
 	// 开奖状态
-	time.AfterFunc(time.Duration(self.Config.TigerXdragon.Duration.OverTime)*time.Second, self.onStart)
+	time.AfterFunc(time.Duration(YamlObj.TigerXdragon.Duration.Over)*time.Second, self.onStart)
 	GlobalSender.NotifyOthers(self.PlayerList, &protoMsg.TigerXdragonStateOverResp{
 		Times: &protoMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			OutTime:   0,
-			WaitTime:  self.Config.TigerXdragon.Duration.OverTime,
-			TotalTime: self.Config.TigerXdragon.Duration.OverTime,
+			WaitTime:  YamlObj.TigerXdragon.Duration.Over,
+			TotalTime: YamlObj.TigerXdragon.Duration.Over,
 		},
 	})
 }
@@ -574,7 +483,7 @@ func (self *TigerXdragonGame) onOver() {
 func (self *TigerXdragonGame) host(args []interface{}) {
 	//【消息】
 	_ = args[2]
-	agent := args[1].(gate.Agent)
+	agent := args[1].(Agent)
 
 	userData := agent.UserData()
 	if nil == userData {
@@ -619,7 +528,7 @@ func (self *TigerXdragonGame) host(args []interface{}) {
 		}
 	}
 
-	log.Debug("[%v:%v]\t有人来抢庄啦:%d 列表人数%d", self.G.Name, self.ID, userID, len(self.hostList))
+	log.Debugf("[%v:%v]\t有人来抢庄啦:%d 列表人数%d", self.Name, self.T.Id, userID, len(self.hostList))
 	GlobalSender.NotifyOthers(self.PlayerList, &protoMsg.TigerXdragonHostResp{
 		UserID: userID,
 		IsWant: host.IsWant,
@@ -630,7 +539,7 @@ func (self *TigerXdragonGame) host(args []interface{}) {
 func (self *TigerXdragonGame) superHost(args []interface{}) {
 	//【消息】
 	_ = args[2]
-	agent := args[1].(gate.Agent)
+	agent := args[1].(Agent)
 	host := args[2].(*protoMsg.TigerXdragonSuperHostReq)
 
 	userData := agent.UserData()
@@ -639,12 +548,8 @@ func (self *TigerXdragonGame) superHost(args []interface{}) {
 		return
 	}
 	user := userData.(*Player)
-	if user.Level < LessLevel {
-		GlobalSender.SendResult(agent, FAILED, StatusText[User11])
-		return
-	}
 	userID := user.UserID
-	log.Debug("[%v:%v]\t有人要超级抢庄--->:%d", self.G.Name, self.ID, userID)
+	log.Debugf("[%v:%v]\t有人要超级抢庄--->:%d", self.Name, self.T.Id, userID)
 
 	if host.IsWant {
 		if self.superHostID == 0 {
@@ -669,20 +574,20 @@ func (self *TigerXdragonGame) superHost(args []interface{}) {
 func (self *TigerXdragonGame) permitHost() *protoMsg.TigerXdragonHostResp {
 	//校验是否满足庄家条件 [5000 < 金额] 不可连续坐庄15次
 	tempList := self.hostList
-	log.Debug("[%v:%v]\t定庄.... 列表数据:%v", self.G.Name, self.ID, self.hostList)
+	log.Debugf("[%v:%v]\t定庄.... 列表数据:%v", self.Name, self.T.Id, self.hostList)
 
 	//befBankerID := self.bankerID 避免重复
 	for index, pid := range tempList {
-		person := GlobalPlayerManger.Get(pid)
+		person := GlobalPlayerMgr.Get(pid)
 		if person == nil {
 			continue
 		}
 		if 2 == self.keepTwice && self.bankerID == person.UserID {
-			log.Debug("[%v:%v]\t不再连续坐庄：%v", self.G.Name, self.ID, person.Gold)
+			log.Debugf("[%v:%v]\t不再连续坐庄：%v", self.Name, self.T.Id, person.Gold)
 			self.hostList = append(self.hostList[:index], self.hostList[index+1:]...)
 			self.keepTwice = 0
 		} else if person.Gold < 5000 {
-			log.Debug("[%v:%v]\t玩家%d 金币%lf 少于5000不能申请坐庄", self.G.Name, self.ID, person.UserID, person.Gold)
+			log.Debugf("[%v:%v]\t玩家%d 金币%lf 少于5000不能申请坐庄", self.Name, self.T.Id, person.UserID, person.Gold)
 			self.hostList = append(self.hostList[:index], self.hostList[index+1:]...)
 		}
 
@@ -691,22 +596,22 @@ func (self *TigerXdragonGame) permitHost() *protoMsg.TigerXdragonHostResp {
 	//取第一个作为庄家
 	if 0 < len(self.hostList) {
 		if self.bankerID == self.hostList[0] {
-			log.Debug("[%v:%v]\t连续坐庄次数:%d", self.G.Name, self.ID, self.keepTwice)
+			log.Debugf("[%v:%v]\t连续坐庄次数:%d", self.Name, self.T.Id, self.keepTwice)
 			self.keepTwice++
 		} else {
 			self.keepTwice = 0
 		}
 		self.bankerID = self.hostList[0]
 
-		if banker := GlobalPlayerManger.Get(self.bankerID); banker != nil {
+		if banker := GlobalPlayerMgr.Get(self.bankerID); banker != nil {
 			self.bankerScore = banker.Gold
 		}
 
-		log.Debug("[%v:%v]\t确定庄家:%d", self.G.Name, self.ID, self.bankerID)
+		log.Debugf("[%v:%v]\t确定庄家:%d", self.Name, self.T.Id, self.bankerID)
 	} else {
 		self.bankerID = 0 //系统坐庄
 		//self.bankerScore = 1000000
-		log.Debug("[%v:%v]\t系统坐庄", self.G.Name, self.ID)
+		log.Debugf("[%v:%v]\t系统坐庄", self.Name, self.T.Id)
 	}
 	//完成定庄后,初始化超级抢庄ID
 	self.superHostID = 0
@@ -714,18 +619,19 @@ func (self *TigerXdragonGame) permitHost() *protoMsg.TigerXdragonHostResp {
 		UserID: self.bankerID,
 		IsWant: true,
 	}
-	log.Debug("[%v:%v]\t广播上庄")
+	log.Debugf("[%v:%v]\t广播上庄")
 	return msg
 }
 
 // -----------------------逻辑层---------------------------
 // 重新初始化[返回结果提供给外部清场用]
-func (self *TigerXdragonGame) Reset() int64 {
+func (self *TigerXdragonGame) reset() {
 	self.personBetInfo.Range(func(key, value any) bool {
 		self.personBetInfo.Delete(key)
 		return true
 	})
-	return self.Game.Reset()
+	self.Game.Init()
+	return
 }
 
 func (self *TigerXdragonGame) winScroe() int64 {
@@ -743,35 +649,28 @@ func (self *TigerXdragonGame) winScroe() int64 {
 				//玩家奖金
 				if Win == self.openInfo.AwardArea[betInfo.BetArea] {
 					personScroe += int64(Odds[int(betInfo.BetArea)]*100) * betInfo.BetScore / 100
-					//log.Debug("[%v:%v]\t闲家:%v", self.G.Name, self.ID, personScroe)
+					//log.Debugf("[%v:%v]\t闲家:%v", self.Name, self.T.Id, personScroe)
 				} else {
 					bankerScroe += betInfo.BetScore
-					//log.Debug("[%v:%v]\t庄家:%v ", self.G.Name, self.ID, bankerScroe)
+					//log.Debugf("[%v:%v]\t庄家:%v ", self.Name, self.T.Id, bankerScroe)
 				}
 			}
 		}
 		return true
 	})
-	//log.Debug("[%v:%v] 庄家:%v 闲家:%v", bankerScroe, personScroe)
+	//log.Debugf("[%v:%v] 庄家:%v 闲家:%v", bankerScroe, personScroe)
 	return bankerScroe - personScroe
 }
 
 func (self *TigerXdragonGame) simulatedResult() (int64, bool) {
 	//var personAwardScore int64 = self.bankerScore + self.inventory
-	if self.T.HostID != SYSTEMID {
+	if self.T.Rid != SYSTEMID {
 		return self.bankerScore, true
 	}
-	var personAwardScore int64 = self.inventory
+	personAwardScore := self.inventory
 	self.personBetInfo.Range(func(key, value any) bool {
-		uid, ok := key.(int64)
-		if !ok {
-			return true
-		}
 		betInfos, ok1 := value.([]*protoMsg.TigerXdragonBetResp)
 		if !ok1 {
-			return true
-		}
-		if GetPlayerManger().CheckRobot(uid) {
 			return true
 		}
 		for _, betInfo := range betInfos {
@@ -783,6 +682,6 @@ func (self *TigerXdragonGame) simulatedResult() (int64, bool) {
 		return true
 	})
 
-	log.Debug("[%v:%v]\t模拟结算...前:%v 后:%v   当前库存:%v", self.G.Name, self.ID, self.bankerScore, personAwardScore, self.inventory)
+	log.Debugf("[%v:%v]\t模拟结算...前:%v 后:%v   当前库存:%v", self.Name, self.T.Id, self.bankerScore, personAwardScore, self.inventory)
 	return personAwardScore, 0 <= personAwardScore
 }

@@ -372,25 +372,27 @@ func (self *ActorDB) Recharge(req *pb.RechargeReq) (*pb.RechargeResp, error) {
 	return resp, nil
 }
 
-func (self *ActorDB) Record(req *pb.AddRecordReq) (*pb.AddRecordResp, error) {
+func (self *ActorDB) AddRecord(req *pb.AddRecordReq) (*pb.AddRecordResp, error) {
 	resp := &pb.AddRecordResp{}
-	preGold, gold, err := self.addRecord(sqlmodel.Record{
+	record := &sqlmodel.Record{
 		UID:       req.Uid,
 		Tid:       req.Tid,
 		Payment:   req.Payment,
 		Code:      req.Code,
 		Order:     req.Order,
+		Result:    req.Result,
 		Remark:    req.Remark,
 		CreatedAt: time.Time{},
 		UpdatedAt: time.Time{},
 		DeletedAt: gorm.DeletedAt{},
 		UpdateBy:  0,
 		CreateBy:  0,
-	})
+	}
+	err := self.addRecord(record)
 	if err != nil {
 		return resp, err
 	}
-	resp.PerGold = preGold
-	resp.Gold = gold
+	resp.PerGold = record.Pergold
+	resp.Gold = record.Gold
 	return resp, nil
 }

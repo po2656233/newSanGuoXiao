@@ -81,6 +81,8 @@ const (
 	Twenty    = 20
 	Limit     = 99 // 限制
 	Unlimited = -1
+
+	MaxLoadNum = 20 //最大录单
 )
 
 // money 0:结算 1:充值 2:平台扣除 3:平台奖励 4:冻结 5:退税 6:提取 7:购买房卡 8:消耗房卡 9:置换房卡

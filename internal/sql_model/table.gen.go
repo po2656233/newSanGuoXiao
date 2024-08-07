@@ -23,7 +23,7 @@ type Table struct {
 	Maxround   int32          `gorm:"column:maxround;comment:游戏最大轮次(=-1不受限)" json:"maxround"`                        // 游戏最大轮次(=-1不受限)
 	Commission int32          `gorm:"column:commission;comment:台费(单位:万分之一,每局都会收取)" json:"commission"`                // 台费(单位:万分之一,每局都会收取)
 	Remain     int32          `gorm:"column:remain;comment:剩余场次(=-1不受限)" json:"remain"`                              // 剩余场次(=-1不受限)
-	Playscore  int64          `gorm:"column:playscore;comment:初始积分(携带的积分)" json:"playscore"`                         // 初始积分(携带的积分)
+	Playscore  int64          `gorm:"column:playscore;comment:初始积分(携带的积分=-1不受限)" json:"playscore"`                   // 初始积分(携带的积分=-1不受限)
 	MaxSitter  int32          `gorm:"column:max_sitter;default:-1;comment:客人(即:可容纳玩家数量 =-1时,不受限)" json:"max_sitter"` // 客人(即:可容纳玩家数量 =-1时,不受限)
 	Remark     string         `gorm:"column:remark;comment:备注" json:"remark"`                                        // 备注
 	CreatedAt  time.Time      `gorm:"column:created_at" json:"created_at"`

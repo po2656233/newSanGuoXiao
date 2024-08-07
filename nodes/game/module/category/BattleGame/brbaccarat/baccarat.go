@@ -1,7 +1,7 @@
 package brbaccarat
 
 import (
-	"github.com/po2656233/goleaf/gate"
+	"fmt"
 	"github.com/po2656233/superplace/facade"
 	log "github.com/po2656233/superplace/logger"
 	. "superman/internal/constant"
@@ -164,8 +164,9 @@ func (self *BaccaratGame) Scene(args []interface{}) bool {
 // Start 开始下注前定庄
 func (self *BaccaratGame) Start(args []interface{}) bool {
 	_ = args
-	log.Infof("[%v:%v]游戏創建成功", self.GameInfo.Name, self.T.Id)
+
 	if !self.IsStart {
+		log.Infof("[%v] [%v:%v]  游戏成功启动!!! ", self.T.Name, self.GameInfo.Name, self.T.Id)
 		self.IsStart = true
 		// 游戏开始事件
 		// 开始状态
@@ -261,7 +262,7 @@ func (self *BaccaratGame) Playing(args []interface{}) bool {
 	//【消息】
 	m := args[0].(*protoMsg.BaccaratBetReq)
 	//【传输对象】
-	agent := args[1].(gate.Agent)
+	agent := args[1].(Agent)
 
 	userData := agent.UserData()
 	person := userData.(*Player)
@@ -283,7 +284,7 @@ func (self *BaccaratGame) Playing(args []interface{}) bool {
 		GlobalSender.SendResult(agent, FAILED, StatusText[Game27])
 		return false
 	}
-	gold := sitter.Gold
+	gold := sitter.PlayerInfo.Gold
 	if gold < m.BetScore+sitter.Total {
 		log.Debugf("[%v:%v][%v:%v] %v Playing:->%v ", self.GameInfo.Name, self.T.Id, uid, StatusText[Game05], gold, m)
 		GlobalSender.SendResult(agent, FAILED, StatusText[Game05])
@@ -322,7 +323,7 @@ func (self *BaccaratGame) Playing(args []interface{}) bool {
 		log.Debugf("[%v:%v]\t玩家:%v 下注:%v", self.GameInfo.Name, self.T.Id, uid, m)
 		areaBetInfos := make([]*protoMsg.BaccaratBetResp, 0)
 		areaBetInfos = utils.CopyInsert(areaBetInfos, len(areaBetInfos), msg).([]*protoMsg.BaccaratBetResp)
-		self.personBetInfo.Store(sitter, areaBetInfos)
+		self.personBetInfo.Store(uid, areaBetInfos)
 	}
 	person.State = protoMsg.PlayerState_PlayerPlaying
 	self.bankerScore += msg.BetScore
@@ -344,7 +345,7 @@ func (self *BaccaratGame) Over(args []interface{}) bool {
 		sitter := self.T.GetChair(uid)
 		//每一次的下注信息
 		for _, betInfo := range betInfos {
-			log.Debugf("[%v:%v]玩家:%v,下注区域:%v 下注金额:%v", self.GameInfo.Name, self.T.Id, uid, betInfo.BetArea, betInfo.BetScore)
+			log.Infof("[%v:%v]玩家:%v,下注区域:%v 下注金额:%v", self.GameInfo.Name, self.T.Id, uid, betInfo.BetArea, betInfo.BetScore)
 			//玩家奖金
 			bonusScore := self.BonusArea(betInfo.BetArea, betInfo.BetScore)
 			sitter.Gain += bonusScore
@@ -364,21 +365,22 @@ func (self *BaccaratGame) Over(args []interface{}) bool {
 
 	// 对平局的先结算
 	self.T.ChairWork(func(chair *Chair) {
-		if chair.Total == INVALID {
+		if chair.Total == INVALID || chair.Gain == INVALID {
 			return
+		}
+
+		if INVALID < chair.Gain {
+			// 税收
+			chair.Gain -= self.T.Taxation
+			if INVALID < self.T.Commission {
+				chair.Gain = int64(100-self.T.Commission) / 100 * chair.Gain
+			}
 		}
 		//通知金币变化
 		agent, ok := GetClientMgr().Get(chair.UserID)
 		if !ok {
 			log.Errorf("[%v:%v] [Over] uid:%v agent is nil", self.GameInfo.Name, self.T.Id, chair.UserID)
 			return
-		}
-		if INVALID < chair.Gain {
-			// 税收
-			chair.Gain -= self.T.Taxation
-			if INVALID < self.T.Commission {
-				chair.Gain = int64(100-self.T.Commission) * chair.Gain
-			}
 		}
 		play := agent.(facade.IActor)
 		data, code := rpc.SendData(play.App(), SourcePath, DBActor, NodeTypeCenter, &protoMsg.AddRecordReq{
@@ -387,7 +389,8 @@ func (self *BaccaratGame) Over(args []interface{}) bool {
 			Payment: chair.Gain,
 			Code:    CodeSettle,
 			Order:   self.Inning,
-			Remark:  self.GameInfo.Name,
+			Result:  fmt.Sprintf("闲:%v 庄:%v", GetCardsText(self.cbPlayerCards.Cards), GetCardsText(self.cbBankerCards.Cards)),
+			Remark:  self.T.Name,
 		})
 		if code == SUCCESS {
 			if resp, ok1 := data.(*protoMsg.AddRecordResp); ok1 {
@@ -404,7 +407,7 @@ func (self *BaccaratGame) Over(args []interface{}) bool {
 			}
 		}
 	})
-	log.Debugf("[%v:%v]   \t结算注单... 各区域情况:%v", self.GameInfo.Name, self.T.Id, allAreaInfo)
+	log.Infof("[%v:%v]   \t结算注单... 各区域情况:%v", self.GameInfo.Name, self.T.Id, allAreaInfo)
 	return true
 }
 
@@ -593,7 +596,7 @@ func (self *BaccaratGame) BonusArea(area int32, betScore int64) int64 {
 func (self *BaccaratGame) host(args []interface{}) {
 	//【消息】
 	_ = args[2]
-	agent := args[1].(gate.Agent)
+	agent := args[1].(Agent)
 
 	userData := agent.UserData()
 	if nil == userData {
@@ -650,7 +653,7 @@ func (self *BaccaratGame) host(args []interface{}) {
 func (self *BaccaratGame) superHost(args []interface{}) {
 	//【消息】
 	_ = args[2]
-	agent := args[1].(gate.Agent)
+	agent := args[1].(Agent)
 	host := args[2].(*protoMsg.BaccaratSuperHostReq)
 
 	userData := agent.UserData()

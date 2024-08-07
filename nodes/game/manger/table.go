@@ -64,6 +64,9 @@ func (tb *Table) AddChair(player *Player) error {
 	if tb.MaxSitter != Unlimited && tb.MaxSitter < tb.SitCount()+1 {
 		return fmt.Errorf(StatusText[Game39])
 	}
+	if player.PlayerInfo.Coin < tb.PlayScore {
+		return fmt.Errorf(StatusText[Game15])
+	}
 
 	playerList := make([]int64, 0)
 	player.PlayerInfo.State = protoMsg.PlayerState_PlayerSitDown
@@ -112,6 +115,13 @@ func (tb *Table) AddChair(player *Player) error {
 	// 游戏准备 添加刚坐下的玩家
 	tb.GameHandle.UpdateInfo([]interface{}{player.State, player.UserID})
 	if isNew {
+		// 玩家积分转换
+		if tb.PlayScore == Unlimited {
+			sitter.PlayerInfo.Gold = sitter.PlayerInfo.Coin + 100*sitter.PlayerInfo.YuanBao
+		} else {
+			sitter.PlayerInfo.Gold = tb.PlayScore
+		}
+
 		log.Infof("房间[%v] 牌桌[%v] 游戏[%v] 新增玩家[%v] 座椅[%v]", tb.Rid, tb.Id, tb.Gid, player.UserID, sitter.ID)
 		tb.GameHandle.Ready([]interface{}{player})
 		// 满员后,开始游戏

@@ -58,6 +58,10 @@ func init() {
 	////slotGame
 	//// zhaocaimiao
 	//handlerMsg(&protoMsg.ZhaocaimiaoBetReq{}, playing)
+
+	//more people Game
+	handlerMsg(&protoMsg.BaccaratBetReq{}, playing)
+
 	go func() {
 		for {
 			msg.ServerChanRPC.Exec(<-msg.ServerChanRPC.ChanCall)

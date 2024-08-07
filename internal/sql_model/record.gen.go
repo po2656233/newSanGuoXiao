@@ -22,6 +22,7 @@ type Record struct {
 	Gold      int64          `gorm:"column:gold;comment:金币" json:"gold"`                               // 金币
 	Code      int32          `gorm:"column:code;comment:操作码" json:"code"`                              // 操作码
 	Order     string         `gorm:"column:order;comment:订单号(牌局号)" json:"order"`                       // 订单号(牌局号)
+	Result    string         `gorm:"column:result;comment:开奖结果" json:"result"`                         // 开奖结果
 	Remark    string         `gorm:"column:remark;comment:备注" json:"remark"`                           // 备注
 	CreatedAt time.Time      `gorm:"column:created_at" json:"created_at"`
 	UpdatedAt time.Time      `gorm:"column:updated_at" json:"updated_at"`

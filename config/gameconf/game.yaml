@@ -64,10 +64,15 @@ Baccarat:
   duration:
     <<: *duration
   inventory: 100000
-
+#
 BrCowcow:
   duration:
     <<: *duration
   maxhost: 8
   bankerScore: 10000
+  inventory: 100000
+#
+TigerXdragon:
+  duration:
+    <<: *duration
   inventory: 100000

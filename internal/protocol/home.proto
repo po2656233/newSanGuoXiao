@@ -248,6 +248,36 @@ message UpdateMoneyResp{
   int64 userID = 1;
   int64 money = 2;//当前玩家余额
 }
+//换成金币
+message BarterCoinReq{
+  int64 toCoin = 1;       // 转成数额
+}
+message BarterCoinResp{
+  int64 userID = 1;
+  int64 coin = 2;
+  int64 yuanbao = 3;
+  int64 money = 4;//当前玩家余额
+}
+//换成元宝
+message BarterYuanBaoReq{
+  int64 toYuanbao = 1;       // 转成数额
+}
+message BarterYuanBaoResp{
+  int64 userID = 1;
+  int64 coin = 2;
+  int64 yuanbao = 3;
+  int64 money = 4;//当前玩家余额
+}
+////换成money
+//message BarterMoneyReq{
+//  int64 toMoney = 1;       // 转成数额
+//}
+//message BarterMoneyResp{
+//  int64 userID = 1;
+//  int64 coin = 2;
+//  int64 yuanbao = 3;
+//  int64 money = 4;//当前玩家余额
+//}
 /////////////////物品/////////////////////////
 //获取商品信息
 message GetGoodsReq {
