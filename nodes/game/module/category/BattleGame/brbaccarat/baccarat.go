@@ -5,7 +5,6 @@ import (
 	log "github.com/po2656233/superplace/logger"
 	. "superman/internal/constant"
 	protoMsg "superman/internal/protocol/gofile"
-	"superman/internal/rpc"
 	"superman/internal/utils"
 	. "superman/nodes/game/manger"
 	. "superman/nodes/game/module/category"
@@ -93,17 +92,21 @@ func (self *BaccaratGame) Scene(args []interface{}) bool {
 	person := args[0].(*Player)
 
 	//场景信息
-	StateInfo := &protoMsg.BaccaratSceneResp{}
-	StateInfo.Inning = self.Inning
-	StateInfo.AwardAreas = self.openAreas // 录单
-	//定时器
-	StateInfo.TimeStamp = self.TimeStamp //////已过时长 应当该为传时间戳
-	//筹码
-	log.Debugf("[%v:%v] [Scene:%v] [当前人数:%v] ", self.GameInfo.Name, self.T.Id, self.GameInfo.Scene, self.T.SitCount())
+	StateInfo := &protoMsg.BaccaratSceneResp{
+		AllPlayers: &protoMsg.PlayerList{
+			Items: make([]*protoMsg.PlayerInfo, 0),
+		},
+		Inning:     self.Inning,
+		TimeStamp:  self.TimeStamp,
+		AwardAreas: self.openAreas,
+		AreaBets:   make([]int64, AREA_MAX),
+		MyBets:     make([]int64, AREA_MAX),
+	}
 
-	//下注情况
-	StateInfo.AreaBets = make([]int64, AREA_MAX)
-	StateInfo.MyBets = make([]int64, AREA_MAX)
+	log.Infof("[%v:%v] [Scene:%v] [当前人数:%v] ", self.GameInfo.Name, self.T.Id, self.GameInfo.Scene, self.T.SitCount())
+	self.T.ChairWork(func(chair *Chair) {
+		StateInfo.AllPlayers.Items = append(StateInfo.AllPlayers.Items, chair.PlayerInfo)
+	})
 	self.personBetInfo.Range(func(key, value any) bool {
 		uid, ok := key.(int64)
 		if !ok {
@@ -126,9 +129,10 @@ func (self *BaccaratGame) Scene(args []interface{}) bool {
 	GlobalSender.SendTo(person.UserID, StateInfo)
 
 	//通知游戏状态
-	timeInfo := &protoMsg.TimeInfo{}
-	timeInfo.TimeStamp = self.TimeStamp
-	timeInfo.OutTime = int32(time.Now().Unix() - self.TimeStamp)
+	timeInfo := &protoMsg.TimeInfo{
+		TimeStamp: self.TimeStamp,
+		OutTime:   int32(time.Now().Unix() - self.TimeStamp),
+	}
 	switch self.GameInfo.Scene {
 	case protoMsg.GameScene_Start: //准备
 		timeInfo.TotalTime = YamlObj.Baccarat.Duration.Start
@@ -244,6 +248,8 @@ func (self *BaccaratGame) Start(args []interface{}) bool {
 			}
 			return true
 		}, func() {
+			// 校准剩余次数
+			self.T.CalibratingRemain(Default)
 			openResp.Times.TimeStamp = self.TimeStamp
 		}, nil)
 	}
@@ -319,7 +325,7 @@ func (self *BaccaratGame) Playing(args []interface{}) bool {
 		}
 		self.personBetInfo.Store(uid, areaBetInfos)
 	} else {
-		log.Debugf("[%v:%v]\t玩家:%v 下注:%v", self.GameInfo.Name, self.T.Id, uid, m)
+		log.Debugf("[%v:%v]\t玩家:%v 下注:%+v", self.GameInfo.Name, self.T.Id, uid, m)
 		areaBetInfos := make([]*protoMsg.BaccaratBetResp, 0)
 		areaBetInfos = utils.CopyInsert(areaBetInfos, len(areaBetInfos), msg).([]*protoMsg.BaccaratBetResp)
 		self.personBetInfo.Store(uid, areaBetInfos)
@@ -363,53 +369,16 @@ func (self *BaccaratGame) Over(args []interface{}) bool {
 	checkout.Acquires = allAreaInfo
 
 	// 对平局的先结算
-	app := GetClientMgr().GetApp()
+	result := fmt.Sprintf("闲:[%v] 庄:[%v] 中奖区域:%v", GetCardsText(self.cbPlayerCards.Cards), GetCardsText(self.cbBankerCards.Cards), self.openInfo.AwardArea)
+	self.T.ChairSettle(self.Name, self.Inning, result)
 	self.T.ChairWork(func(chair *Chair) {
-		chair.PlayerInfo.State = protoMsg.PlayerState_PlayerStandUp
-		if chair.Total == INVALID || chair.Gain == INVALID {
+		if chair.Total == INVALID {
 			return
 		}
-		if INVALID < chair.Gain {
-			// 税收
-			//chair.Gain -= self.T.Taxation
-			if INVALID < self.T.Commission {
-				chair.Gain = int64(100-self.T.Commission) * chair.Gain / 100
-			}
-		}
-		//通知金币变化
-		data, code := rpc.SendData(app, SourcePath, DBActor, NodeTypeCenter, &protoMsg.AddRecordReq{
-			Uid:     chair.UserID,
-			Tid:     self.T.Id,
-			Payment: chair.Gain,
-			Code:    CodeSettle,
-			Order:   self.Inning,
-			Result:  fmt.Sprintf("闲:%v 庄:%v", GetCardsText(self.cbPlayerCards.Cards), GetCardsText(self.cbBankerCards.Cards)),
-			Remark:  self.T.Name,
-		})
-		if code == SUCCESS {
-			if resp, ok1 := data.(*protoMsg.AddRecordResp); ok1 {
-				changeGold := &protoMsg.NotifyBalanceChangeResp{
-					UserID:    chair.UserID,
-					Code:      CodeSettle,
-					AlterCoin: chair.Gain,
-					Coin:      resp.Gold,
-					Reason:    resp.Order,
-				}
-				GetClientMgr().SendTo(chair.UserID, changeGold)
-				checkout.MyAcquire = chair.Gain
-				GetClientMgr().SendTo(chair.UserID, checkout)
-			}
-		}
+		checkout.MyAcquire = chair.Gain
+		GetClientMgr().SendTo(chair.UserID, checkout)
 	})
-	data, code := rpc.SendData(app, SourcePath, DBActor, NodeTypeCenter, &protoMsg.DecreaseGameRunReq{
-		Amount: FAILED,
-		Tid:    self.T.Id,
-	})
-	if code == SUCCESS {
-		if resp, ok1 := data.(*protoMsg.DecreaseGameRunResp); ok1 {
-			self.T.Remain = resp.Remain
-		}
-	}
+
 	log.Infof("[%v:%v]   \t结算注单... 各区域情况:%v", self.GameInfo.Name, self.T.Id, allAreaInfo)
 	return true
 }
@@ -784,8 +753,9 @@ func (self *BaccaratGame) simulatedResult() (int64, bool) {
 		for _, betInfo := range betInfos {
 			if self.openInfo.AwardArea[AREA_PING] == Win &&
 				(betInfo.BetArea == AREA_XIAN || betInfo.BetArea == AREA_ZHUANG) {
-				personAwardScore -= betInfo.BetScore
-			} else if Win == self.openInfo.AwardArea[betInfo.BetArea] { //玩家奖金
+				continue
+			}
+			if Win == self.openInfo.AwardArea[betInfo.BetArea] { //玩家奖金
 				// 需扣除本金
 				personAwardScore -= self.BonusArea(betInfo.BetArea, betInfo.BetScore) + betInfo.BetScore
 			}

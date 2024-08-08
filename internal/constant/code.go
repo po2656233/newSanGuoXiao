@@ -71,6 +71,7 @@ var StatusText = map[int]string{
 	TableInfo09: "无法获取有效牌桌",
 	TableInfo10: "牌桌不足,需房主补充牌桌",
 	TableInfo11: "座椅上的数据出错",
+	TableInfo12: "金币不足,配桌失败",
 
 	Setting01: "名字不能为空!",
 	Setting02: "座位数过少!",
@@ -356,6 +357,7 @@ const (
 	TableInfo09
 	TableInfo10
 	TableInfo11
+	TableInfo12
 )
 
 const (

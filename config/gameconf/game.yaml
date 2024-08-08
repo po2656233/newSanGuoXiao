@@ -59,11 +59,13 @@ ChineseChess:
     confirm: 5
   col: 9
   row: 10
+
+#百人
 #
 Baccarat:
   duration:
     <<: *duration
-  inventory: -100000
+  inventory: -100
 #
 BrCowcow:
   duration:
@@ -73,6 +75,18 @@ BrCowcow:
   inventory: 100000
 #
 TigerXdragon:
+  duration:
+    <<: *duration
+  inventory: 100000
+
+#
+Brtoubao:
+  duration:
+    <<: *duration
+  inventory: 100000
+
+#
+Brtuitongzi:
   duration:
     <<: *duration
   inventory: 100000

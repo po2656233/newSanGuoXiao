@@ -93,7 +93,10 @@ message CreateRoomReq {
   string  name = 3;   // 房间名称
   string  roomKey = 4;// 房间钥匙
   int64  enterScore = 5;// 准入分数
-  string  remark = 6;//备注
+  int64 taxation = 6;
+  int64 maxTable = 7;
+  int64 maxPerson = 8;
+  string  remark = 9;//备注
 }
 message CreateRoomResp {
     RoomInfo info = 1;
@@ -103,11 +106,10 @@ message CreateTableReq {
   int64 rid = 1;          // 房间ID
   int64 gid = 2;          // 游戏ID
   string name = 3;
-  int64 taxation = 4;
-  int32 commission = 5;
-  int32 maxRound = 6; // 等于-1时，表示无限制
-  int64 opentime = 7; // =0表示无限制
-  int64 playScore = 8;
+  int32 commission = 4;
+  int32 maxRound = 5; // 等于-1时，表示无限制
+  int64 opentime = 6; // =0表示无限制
+  int64 playScore = 7;
 }
 message CreateTableResp {
   TableInfo table = 1;

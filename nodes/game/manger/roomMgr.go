@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	log "github.com/po2656233/superplace/logger"
-	"strings"
 	. "superman/internal/constant"
 	protoMsg "superman/internal/protocol/gofile"
 	"superman/internal/utils"
@@ -104,7 +103,7 @@ func Create(info *protoMsg.RoomInfo) *Room {
 	} else {
 		rm.waiting = make(chan Waiter, rm.MaxPerson)
 	}
-	log.Infof("开启房间[%v:%v]-游戏队列检测 牌桌数:%v 最大牌桌数:%v 最大人数:%v", rm.Id, rm.Name, rm.TableCount, rm.MaxTable, rm.MaxPerson)
+	log.Infof("开启房间[%v] (游戏队列检测) [%v]牌桌数:%v 最大牌桌数:%v 最大人数:%v", rm.Id, rm.Name, rm.TableCount, rm.MaxTable, rm.MaxPerson)
 	// 创建一个独立的上下文用于这个Room的处理
 	ctx, cancel := context.WithCancel(context.Background())
 	// 启动协程处理Room的等待队列
@@ -154,9 +153,9 @@ func (self *Room) AddTable(table *protoMsg.TableInfo, f NewGameFunc) (*Table, er
 	}
 	tb.GameHandle = f(table.Gid, tb) //创建游戏句柄
 	if tb.GameHandle == nil {
-		return nil, fmt.Errorf("%s 房间ID:%d 牌桌ID:%d(暂不可用) 游戏ID:%d", StatusText[Room17], table.Rid, table.Id, table.Gid)
+		return nil, fmt.Errorf("房间ID:%d 牌桌ID:%d(暂不可用) 游戏ID:%d %s!!! ", table.Rid, table.Id, table.Gid, StatusText[Room17])
 	}
-	log.Debugf("[%v:%v]游戏創建成功", self.Name, tb.Id)
+	log.Infof("[%v:%v]房 [%v:%v]牌桌 游戏[%v] 創建成功!", self.Id, self.Name, tb.Id, tb.Name, table.Gid)
 	self.tables = append(self.tables, tb)
 	return tb, nil
 }
@@ -196,11 +195,11 @@ func (self *Room) ProcessWaitingQueue(ctx context.Context) {
 		// 尝试加入房间，如果失败则重新加入队列
 		if tb := getRandomTable(waiter.Gid, Unlimited, self.tables); tb != nil {
 			if player := GetPlayerMgr().Get(waiter.Uid); player != nil {
-				err := tb.AddChair(player)
-				if err != nil {
-					if strings.Contains(err.Error(), StatusText[Game15]) {
-						continue
-					}
+				code := tb.AddChair(player)
+				if code == TableInfo12 {
+					continue
+				}
+				if code != SUCCESS {
 					self.waiting <- waiter
 				}
 				log.Infof("[ProcessWaitingQueue]玩家:(%d) [gid:%d]配桌成功  [rid:%v][tid:%d] [chair:%d] ", waiter.Uid, waiter.Gid, self.Id, tb.Id, player.InChairId)
@@ -227,7 +226,7 @@ func (self *Room) Join(tid int64, person *Player) *Table {
 		}
 	}
 	if tb != nil {
-		if err := tb.AddChair(person); err != nil {
+		if code := tb.AddChair(person); code != SUCCESS {
 			return nil
 		}
 		atomic.AddInt32(&self.onlineCount, 1)
@@ -246,8 +245,8 @@ func (self *Room) Match(gid int64, person *Player, isChange bool) *Table {
 	}
 	tb := getRandomTable(gid, tid, self.tables) // 不限制
 	if tb != nil {
-		if err := tb.AddChair(person); err != nil {
-			log.Warnf("[room][Match]玩家:(%d) %s失败 rid:%d  gid:%d err:%v", person.UserID, strOp, self.Id, gid, err)
+		if code := tb.AddChair(person); code != SUCCESS {
+			log.Warnf("[room][Match]玩家:(%d) %s失败 rid:%d  gid:%d err:%v", person.UserID, strOp, self.Id, gid, StatusText[code])
 			return nil
 		}
 		atomic.AddInt32(&self.onlineCount, 1)

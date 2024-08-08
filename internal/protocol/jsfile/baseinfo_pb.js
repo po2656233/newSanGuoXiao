@@ -4476,9 +4476,10 @@ proto.pb.RoomInfo.toObject = function(includeInstance, msg) {
     name: jspb.Message.getFieldWithDefault(msg, 4, ""),
     roomkey: jspb.Message.getFieldWithDefault(msg, 5, ""),
     enterscore: jspb.Message.getFieldWithDefault(msg, 6, 0),
-    maxperson: jspb.Message.getFieldWithDefault(msg, 7, 0),
-    tablecount: jspb.Message.getFieldWithDefault(msg, 8, 0),
-    maxtable: jspb.Message.getFieldWithDefault(msg, 9, 0)
+    taxation: jspb.Message.getFieldWithDefault(msg, 7, 0),
+    maxperson: jspb.Message.getFieldWithDefault(msg, 8, 0),
+    tablecount: jspb.Message.getFieldWithDefault(msg, 9, 0),
+    maxtable: jspb.Message.getFieldWithDefault(msg, 10, 0)
   };
 
   if (includeInstance) {
@@ -4540,14 +4541,18 @@ proto.pb.RoomInfo.deserializeBinaryFromReader = function(msg, reader) {
       msg.setEnterscore(value);
       break;
     case 7:
-      var value = /** @type {number} */ (reader.readInt32());
-      msg.setMaxperson(value);
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setTaxation(value);
       break;
     case 8:
       var value = /** @type {number} */ (reader.readInt32());
-      msg.setTablecount(value);
+      msg.setMaxperson(value);
       break;
     case 9:
+      var value = /** @type {number} */ (reader.readInt32());
+      msg.setTablecount(value);
+      break;
+    case 10:
       var value = /** @type {number} */ (reader.readInt32());
       msg.setMaxtable(value);
       break;
@@ -4622,24 +4627,31 @@ proto.pb.RoomInfo.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getMaxperson();
+  f = message.getTaxation();
   if (f !== 0) {
-    writer.writeInt32(
+    writer.writeInt64(
       7,
       f
     );
   }
-  f = message.getTablecount();
+  f = message.getMaxperson();
   if (f !== 0) {
     writer.writeInt32(
       8,
       f
     );
   }
-  f = message.getMaxtable();
+  f = message.getTablecount();
   if (f !== 0) {
     writer.writeInt32(
       9,
+      f
+    );
+  }
+  f = message.getMaxtable();
+  if (f !== 0) {
+    writer.writeInt32(
+      10,
       f
     );
   }
@@ -4737,47 +4749,62 @@ proto.pb.RoomInfo.prototype.setEnterscore = function(value) {
 
 
 /**
- * optional int32 maxPerson = 7;
+ * optional int64 taxation = 7;
  * @return {number}
  */
-proto.pb.RoomInfo.prototype.getMaxperson = function() {
+proto.pb.RoomInfo.prototype.getTaxation = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 7, 0));
 };
 
 
 /** @param {number} value */
-proto.pb.RoomInfo.prototype.setMaxperson = function(value) {
+proto.pb.RoomInfo.prototype.setTaxation = function(value) {
   jspb.Message.setProto3IntField(this, 7, value);
 };
 
 
 /**
- * optional int32 tableCount = 8;
+ * optional int32 maxPerson = 8;
  * @return {number}
  */
-proto.pb.RoomInfo.prototype.getTablecount = function() {
+proto.pb.RoomInfo.prototype.getMaxperson = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 8, 0));
 };
 
 
 /** @param {number} value */
-proto.pb.RoomInfo.prototype.setTablecount = function(value) {
+proto.pb.RoomInfo.prototype.setMaxperson = function(value) {
   jspb.Message.setProto3IntField(this, 8, value);
 };
 
 
 /**
- * optional int32 maxTable = 9;
+ * optional int32 tableCount = 9;
  * @return {number}
  */
-proto.pb.RoomInfo.prototype.getMaxtable = function() {
+proto.pb.RoomInfo.prototype.getTablecount = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 9, 0));
 };
 
 
 /** @param {number} value */
-proto.pb.RoomInfo.prototype.setMaxtable = function(value) {
+proto.pb.RoomInfo.prototype.setTablecount = function(value) {
   jspb.Message.setProto3IntField(this, 9, value);
+};
+
+
+/**
+ * optional int32 maxTable = 10;
+ * @return {number}
+ */
+proto.pb.RoomInfo.prototype.getMaxtable = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 10, 0));
+};
+
+
+/** @param {number} value */
+proto.pb.RoomInfo.prototype.setMaxtable = function(value) {
+  jspb.Message.setProto3IntField(this, 10, value);
 };
 
 
@@ -4820,8 +4847,7 @@ proto.pb.TableInfo.toObject = function(includeInstance, msg) {
     remain: jspb.Message.getFieldWithDefault(msg, 7, 0),
     maxsitter: jspb.Message.getFieldWithDefault(msg, 8, 0),
     playscore: jspb.Message.getFieldWithDefault(msg, 9, 0),
-    opentime: jspb.Message.getFieldWithDefault(msg, 10, 0),
-    taxation: jspb.Message.getFieldWithDefault(msg, 11, 0)
+    opentime: jspb.Message.getFieldWithDefault(msg, 10, 0)
   };
 
   if (includeInstance) {
@@ -4897,10 +4923,6 @@ proto.pb.TableInfo.deserializeBinaryFromReader = function(msg, reader) {
     case 10:
       var value = /** @type {number} */ (reader.readInt64());
       msg.setOpentime(value);
-      break;
-    case 11:
-      var value = /** @type {number} */ (reader.readInt64());
-      msg.setTaxation(value);
       break;
     default:
       reader.skipField();
@@ -4998,13 +5020,6 @@ proto.pb.TableInfo.serializeBinaryToWriter = function(message, writer) {
   if (f !== 0) {
     writer.writeInt64(
       10,
-      f
-    );
-  }
-  f = message.getTaxation();
-  if (f !== 0) {
-    writer.writeInt64(
-      11,
       f
     );
   }
@@ -5158,21 +5173,6 @@ proto.pb.TableInfo.prototype.getOpentime = function() {
 /** @param {number} value */
 proto.pb.TableInfo.prototype.setOpentime = function(value) {
   jspb.Message.setProto3IntField(this, 10, value);
-};
-
-
-/**
- * optional int64 taxation = 11;
- * @return {number}
- */
-proto.pb.TableInfo.prototype.getTaxation = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 11, 0));
-};
-
-
-/** @param {number} value */
-proto.pb.TableInfo.prototype.setTaxation = function(value) {
-  jspb.Message.setProto3IntField(this, 11, value);
 };
 
 

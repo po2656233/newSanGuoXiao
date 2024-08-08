@@ -12,6 +12,7 @@ func (p *Controller) Init() {
 	group.GET("/server/list/:pid", p.serverList) //服务器网关地址
 	group.POST("/register", p.register)          //用户注册
 	group.POST("/login", p.login)                //用户登录
+	group.POST("/recharge", p.recharge)                //用户登录
 
 	list := &superGin.Group{
 		RouterGroup: group.Group("/list"),

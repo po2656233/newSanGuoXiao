@@ -14,17 +14,17 @@ const TableNameRecharge = "recharge"
 
 // Recharge mapped from table <recharge>
 type Recharge struct {
-	ID        int64          `gorm:"column:id;primaryKey;comment:充值ID" json:"id"`               // 充值ID
-	UID       int64          `gorm:"column:uid;comment:接受充值的人" json:"uid"`                      // 接受充值的人
-	Byid      int64          `gorm:"column:byid;comment:代充者" json:"byid"`                       // 代充者
-	Payment   int64          `gorm:"column:payment;comment:支付费用" json:"payment"`                // 支付费用
-	Premoney  int64          `gorm:"column:premoney;comment:充值前" json:"premoney"`               // 充值前
-	Money     int64          `gorm:"column:money;comment:充值后" json:"money"`                     // 充值后
-	Code      int32          `gorm:"column:code;comment:充值码[充值方式]" json:"code"`                 // 充值码[充值方式]
-	Order     string         `gorm:"column:order;comment:订单号" json:"order"`                     // 订单号
-	Timestamp int64          `gorm:"column:timestamp;comment:充值时间" json:"timestamp"`            // 充值时间
-	Remark    string         `gorm:"column:remark;comment:备注" json:"remark"`                    // 备注
-	Switch    int32          `gorm:"column:switch;comment:0:(余额)不转换 1:转元宝 2:转铜钱" json:"switch"` // 0:(余额)不转换 1:转元宝 2:转铜钱
+	ID        int64          `gorm:"column:id;primaryKey;autoIncrement:true;comment:充值ID" json:"id"` // 充值ID
+	UID       int64          `gorm:"column:uid;comment:接受充值的人" json:"uid"`                           // 接受充值的人
+	Byid      int64          `gorm:"column:byid;comment:代充者" json:"byid"`                            // 代充者
+	Payment   int64          `gorm:"column:payment;comment:支付费用" json:"payment"`                     // 支付费用
+	Premoney  int64          `gorm:"column:premoney;comment:充值前" json:"premoney"`                    // 充值前
+	Money     int64          `gorm:"column:money;comment:充值后" json:"money"`                          // 充值后
+	Code      int32          `gorm:"column:code;comment:充值码[充值方式]" json:"code"`                      // 充值码[充值方式]
+	Order     string         `gorm:"column:order;comment:订单号" json:"order"`                          // 订单号
+	Timestamp int64          `gorm:"column:timestamp;comment:充值时间" json:"timestamp"`                 // 充值时间
+	Remark    string         `gorm:"column:remark;comment:备注" json:"remark"`                         // 备注
+	Switch    int32          `gorm:"column:switch;comment:0:(余额)不转换 1:转元宝 2:转铜钱" json:"switch"`      // 0:(余额)不转换 1:转元宝 2:转铜钱
 	CreatedAt time.Time      `gorm:"column:created_at" json:"created_at"`
 	UpdatedAt time.Time      `gorm:"column:updated_at" json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at" json:"deleted_at"`

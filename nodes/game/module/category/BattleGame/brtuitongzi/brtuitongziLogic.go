@@ -2,7 +2,7 @@ package brtuitongzi
 
 import (
 	protoMsg "superman/internal/protocol/gofile"
-	. "superman/nodes/leaf/jettengame/game/internal/category" // 注意这里不能这样导入 "../../category" 因为本地导入是根据gopath路径设定的
+	. "superman/nodes/game/module/category" // 注意这里不能这样导入 "../../category" 因为本地导入是根据gopath路径设定的
 )
 
 const (

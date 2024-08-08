@@ -19,9 +19,8 @@ type Table struct {
 	Rid        int64          `gorm:"column:rid;not null;comment:房间ID" json:"rid"`                                   // 房间ID
 	Gid        int64          `gorm:"column:gid;not null;comment:游戏ID" json:"gid"`                                   // 游戏ID
 	Opentime   int64          `gorm:"column:opentime;comment:开桌时间(时间戳)" json:"opentime"`                             // 开桌时间(时间戳)
-	Taxation   int64          `gorm:"column:taxation;comment:固定收税" json:"taxation"`                                  // 固定收税
 	Maxround   int32          `gorm:"column:maxround;comment:游戏最大轮次(=-1不受限)" json:"maxround"`                        // 游戏最大轮次(=-1不受限)
-	Commission int32          `gorm:"column:commission;comment:台费(单位:万分之一,每局都会收取)" json:"commission"`                // 台费(单位:万分之一,每局都会收取)
+	Commission int32          `gorm:"column:commission;comment:税收(仅针对赢者收取,千分之一)" json:"commission"`                  // 税收(仅针对赢者收取,千分之一)
 	Remain     int32          `gorm:"column:remain;comment:剩余场次(=-1不受限)" json:"remain"`                              // 剩余场次(=-1不受限)
 	Playscore  int64          `gorm:"column:playscore;comment:初始积分(携带的积分=-1不受限)" json:"playscore"`                   // 初始积分(携带的积分=-1不受限)
 	MaxSitter  int32          `gorm:"column:max_sitter;default:-1;comment:客人(即:可容纳玩家数量 =-1时,不受限)" json:"max_sitter"` // 客人(即:可容纳玩家数量 =-1时,不受限)

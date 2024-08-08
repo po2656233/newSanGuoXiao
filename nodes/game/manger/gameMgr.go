@@ -71,7 +71,7 @@ type CalculateInfo struct {
 	Remark   string // 备注
 }
 type Game struct {
-	*protoMsg.GameInfo
+	protoMsg.GameInfo
 	IsStart    bool   // 第一次启动
 	IsClear    bool   // 是否清场
 	ReadyCount int32  // 已准备人数

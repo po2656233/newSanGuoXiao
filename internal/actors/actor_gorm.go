@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	superGorm "github.com/po2656233/superplace/components/gorm"
+	exSnowflake "github.com/po2656233/superplace/extend/snowflake"
 	clog "github.com/po2656233/superplace/logger"
 	cactor "github.com/po2656233/superplace/net/actor"
 	"gorm.io/gorm"
@@ -141,7 +142,7 @@ func (self *ActorDB) addTable(table sqlmodel.Table) (id int64, maxSit int32, err
 		return 0, maxSit, err
 	}
 	room := sqlmodel.Room{}
-	err = self.db.Table(room.TableName()).Where("id=?", table.Rid).UpdateColumn("table_count", gorm.Expr("table_count + ?", 1)).Error
+	err = self.db.Table(room.TableName()).Where("id=?", table.Rid).UpdateColumn("table_count", count+1).Error
 	id = table.ID
 	return
 
@@ -168,7 +169,7 @@ func (self *ActorDB) addTable(table sqlmodel.Table) (id int64, maxSit int32, err
 	//return table.ID, table.Num, err
 }
 
-func (self *ActorDB) addRecharge(table sqlmodel.Recharge) error {
+func (self *ActorDB) addRecharge(table *sqlmodel.Recharge) error {
 	// 使用事务来确保操作的原子性
 	err := self.db.Transaction(func(tx *gorm.DB) error {
 		// 获取充值前的金额
@@ -177,14 +178,31 @@ func (self *ActorDB) addRecharge(table sqlmodel.Recharge) error {
 			return err
 		}
 		// 插入新的记录
-		table.Premoney = money
-		table.Money = money + table.Payment
-		if table.Money < 0 {
-			table.Money = 0
+		user := sqlmodel.User{
+			ID: table.UID,
 		}
-		table.Order = fmt.Sprintf("%v%v%v", time.Now().Unix(), table.UID, RandomStrLetter(4))
+		switch table.Switch {
+		case 1:
+			yuanbao := table.Payment * 100
+			err = self.db.Model(user).Select("yuanbao").UpdateColumn("yuanbao", gorm.Expr("yuanbao+?", yuanbao)).First(&user).Error
+		case 2:
+			coin := table.Payment * 100 * 100
+			err = self.db.Model(user).Select("coin").UpdateColumn("coin", gorm.Expr("coin+?", coin)).First(&user).Error
+		default:
+			err = self.db.Model(user).Select("money").UpdateColumn("money", gorm.Expr("money+?", table.Payment)).First(&user).Error
+		}
+		table.Premoney = money
+		if user.Money < 0 {
+			user.Money = 0
+		}
+		table.Money = user.Money
+		node, err := exSnowflake.NewNode(1)
+		if err != nil {
+			return err
+		}
+		table.Order = fmt.Sprintf("%v%v%v", table.Timestamp, RandomStrLetter(4), node.Generate())
 		// 创建一个新的 充值记录
-		if err := tx.Create(&table).Error; err != nil {
+		if err = tx.Create(&table).Error; err != nil {
 			return err
 		}
 

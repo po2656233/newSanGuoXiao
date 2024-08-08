@@ -123,25 +123,44 @@ func (p *Controller) roomCreate(c *superGin.Context) {
 	if clms, ok := claims.(*jwt.RegisteredClaims); ok {
 		uid, _ = strconv.ParseInt(clms.ID, 10, 64)
 	}
-	name, ok1 := c.GetPostForm("name")
-	roomKey, ok2 := c.GetPostForm("roomkey")
-	enterScore, ok3 := c.GetPostForm("enterscore")
-	level, ok5 := c.GetPostForm("level")
-	if !ok1 || !ok2 || !ok3 || !ok5 {
+	req := &pb.CreateRoomReq{
+		HostId: uid,
+	}
+	if name, ok := c.GetPostForm("name"); ok {
+		req.Name = name
+	} else {
 		sgxLogger.Warnf("roomCreate get hostid fail. current params=%v", c.GetParams())
 		RenderResult(c, Service004, StatusText[Service004])
 		return
 	}
-	enScore, _ := strconv.ParseInt(enterScore, 10, 64)
-	//mCount, _ := strconv.ParseInt(maxCount, 10, 64)
-	lev, _ := strconv.ParseInt(level, 10, 64)
-	data, errCode := rpc.SendDataToDB(p.App, &pb.CreateRoomReq{
-		HostId:     uid,
-		Name:       name,
-		RoomKey:    roomKey,
-		EnterScore: enScore,
-		Level:      pb.RoomLevel(lev),
-	})
+	if roomKey, ok := c.GetPostForm("roomkey"); ok {
+		req.RoomKey = roomKey
+	}
+	if enterScore, ok := c.GetPostForm("enterscore"); ok {
+		enScore, _ := strconv.ParseInt(enterScore, 10, 64)
+		req.EnterScore = enScore
+	}
+	if level, ok := c.GetPostForm("level"); ok {
+		lev, _ := strconv.ParseInt(level, 10, 64)
+		req.Level = pb.RoomLevel(lev)
+	}
+	if taxation, ok := c.GetPostForm("taxation"); ok {
+		tax, _ := strconv.ParseInt(taxation, 10, 64)
+		req.Taxation = tax
+	}
+	if maxtable, ok := c.GetPostForm("maxtable"); ok {
+		maxTb, _ := strconv.ParseInt(maxtable, 10, 64)
+		req.MaxTable = maxTb
+	}
+	if maxperson, ok := c.GetPostForm("maxperson"); ok {
+		maxPerson, _ := strconv.ParseInt(maxperson, 10, 64)
+		req.MaxTable = maxPerson
+	}
+	if remark, ok := c.GetPostForm("remark"); ok {
+		req.Remark = remark
+	}
+
+	data, errCode := rpc.SendDataToDB(p.App, req)
 
 	// 创建房间结果
 	if errCode != code.OK {
@@ -174,10 +193,9 @@ func (p *Controller) tableCreate(c *superGin.Context) {
 	name, ok2 := c.GetPostForm("name")
 	strPlayscore, ok3 := c.GetPostForm("playscore")
 	strOpentime, ok4 := c.GetPostForm("opentime")
-	strTaxation, ok5 := c.GetPostForm("taxation")
 	strCommission, ok6 := c.GetPostForm("commission")
 	strMaxRound, ok7 := c.GetPostForm("maxround")
-	if !ok1 || !ok2 || !ok3 || !ok4 || !ok5 || !ok6 || !ok7 {
+	if !ok1 || !ok2 || !ok3 || !ok4 || !ok6 || !ok7 {
 		sgxLogger.Warnf("roomCreate get hostid fail. current params=%v", c.GetParams())
 		RenderResult(c, Service004, StatusText[Service004])
 		return
@@ -186,7 +204,6 @@ func (p *Controller) tableCreate(c *superGin.Context) {
 	gid, _ := strconv.ParseInt(strGid, 10, 64)
 	playscore, _ := strconv.ParseInt(strPlayscore, 10, 64)
 	opentime, _ := strconv.ParseInt(strOpentime, 10, 64)
-	taxation, _ := strconv.ParseInt(strTaxation, 10, 64)
 	commission, _ := strconv.ParseInt(strCommission, 10, 64)
 	maxRound, _ := strconv.ParseInt(strMaxRound, 10, 64)
 	data, errCode := rpc.SendDataToDB(p.App, &pb.CreateTableReq{
@@ -195,7 +212,6 @@ func (p *Controller) tableCreate(c *superGin.Context) {
 		PlayScore:  playscore,
 		Name:       name,
 		Opentime:   opentime,
-		Taxation:   taxation,
 		Commission: int32(commission),
 		MaxRound:   int32(maxRound),
 	})
@@ -418,4 +434,66 @@ func (p *Controller) pidList(c *superGin.Context) {
 	pidList.Pids = data2.SdkConfig.GetPidList()
 	RenderResult(c, http.StatusOK, pidList)
 
+}
+
+func (p *Controller) recharge(c *superGin.Context) {
+	claims, ok := c.Get("claims")
+	if !ok || claims == nil {
+		sgxLogger.Warnf("roomCreate get claims fail. current params=%v", c.GetParams())
+		RenderResult(c, Login15, StatusText[Login15])
+		return
+	}
+	byUid := int64(0)
+	if clms, ok := claims.(*jwt.RegisteredClaims); ok {
+		byUid, _ = strconv.ParseInt(clms.ID, 10, 64)
+	} else {
+		RenderResult(c, Login11, StatusText[Login11])
+		return
+	}
+	req := &pb.RechargeReq{
+		ByiD: byUid,
+	}
+	strUID, ok := c.GetPostForm("uid")
+	if !ok {
+		RenderResult(c, Service004, StatusText[Service004])
+		return
+	}
+	uid, err := strconv.ParseInt(strUID, 10, 64)
+	if err != nil {
+		RenderResult(c, Service004, StatusText[Service004])
+		return
+	}
+	req.UserID = uid
+
+	strPayment, ok := c.GetPostForm("payment")
+	if !ok {
+		RenderResult(c, Service004, StatusText[Service004])
+		return
+	}
+	payment, err := strconv.ParseInt(strPayment, 10, 64)
+	if err != nil || payment < 0 {
+		RenderResult(c, Service004, StatusText[Service004])
+		return
+	}
+	req.Payment = payment
+
+	strMethod, ok := c.GetPostForm("method")
+	if ok {
+		method, _ := strconv.ParseInt(strMethod, 10, 64)
+		req.Method = int32(method)
+	}
+
+	strSwitch, ok := c.GetPostForm("switch")
+	if ok {
+		swit, _ := strconv.ParseInt(strSwitch, 10, 64)
+		req.Switch = int32(swit)
+	}
+
+	data, errCode := rpc.SendDataToDB(p.App, req)
+	//获取房间列表
+	if errCode != code.OK {
+		RenderResult(c, errCode, code.CodeTxt[errCode])
+		return
+	}
+	RenderResult(c, http.StatusOK, data)
 }

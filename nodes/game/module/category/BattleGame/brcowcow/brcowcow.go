@@ -56,8 +56,6 @@ func New(game *Game, tb *Table) *BrcowcowGame {
 
 // Init 初始化信息
 func (self *BrcowcowGame) Init() {
-	self.IsStart = true  // 是否启动
-	self.IsClear = false // 不进行清场
 	self.logic.Init()
 	self.bankerID = 0         // 庄家ID
 	self.superHostID = 0      // 超级抢庄ID
@@ -97,16 +95,21 @@ func (self *BrcowcowGame) Scene(args []interface{}) bool {
 	}
 	person := args[0].(*Player)
 	//场景信息
-	StateInfo := &protoMsg.BrcowcowSceneResp{}
-	StateInfo.Inning = self.Inning
-	StateInfo.AwardAreas = self.openAreas // 录单
-	StateInfo.HostID = self.bankerID
-	//定时器
-	StateInfo.TimeStamp = self.TimeStamp //////已过时长 应当该为传时间戳
+	StateInfo := &protoMsg.BrcowcowSceneResp{
+		AllPlayers: &protoMsg.PlayerList{
+			Items: make([]*protoMsg.PlayerInfo, 0),
+		},
+		Inning:     self.Inning,
+		TimeStamp:  self.TimeStamp,
+		AwardAreas: self.openAreas,
+		AreaBets:   make([]int64, AREA_MAX),
+		MyBets:     make([]int64, AREA_MAX),
+	}
 
-	//下注情况
-	StateInfo.AreaBets = make([]int64, AREA_MAX)
-	StateInfo.MyBets = make([]int64, AREA_MAX)
+	log.Infof("[%v:%v] [Scene:%v] [当前人数:%v] ", self.GameInfo.Name, self.T.Id, self.GameInfo.Scene, self.T.SitCount())
+	self.T.ChairWork(func(chair *Chair) {
+		StateInfo.AllPlayers.Items = append(StateInfo.AllPlayers.Items, chair.PlayerInfo)
+	})
 	self.personBetInfo.Range(func(key, value any) bool {
 		uid, ok := key.(int64)
 		if !ok {
@@ -130,9 +133,10 @@ func (self *BrcowcowGame) Scene(args []interface{}) bool {
 	GlobalSender.SendTo(uid, StateInfo)
 
 	//通知游戏状态
-	timeInfo := &protoMsg.TimeInfo{}
-	timeInfo.TimeStamp = self.TimeStamp
-	timeInfo.OutTime = int32(time.Now().Unix() - self.TimeStamp)
+	timeInfo := &protoMsg.TimeInfo{
+		TimeStamp: self.TimeStamp,
+		OutTime:   int32(time.Now().Unix() - self.TimeStamp),
+	}
 	switch self.GameInfo.Scene {
 	case protoMsg.GameScene_Free:
 		timeInfo.TotalTime = YamlObj.BrCowcow.Duration.Free
@@ -191,7 +195,7 @@ func (self *BrcowcowGame) Playing(args []interface{}) bool {
 
 	userData := agent.UserData()
 	if m.BetScore <= 0 {
-		log.Debug("[%v:%v][%v] Playing:->%v ", self.Name, self.T.Id, StatusText[Game07], m)
+		log.Infof("[%v:%v][%v] Playing:->%v ", self.Name, self.T.Id, StatusText[Game07], m)
 		GlobalSender.SendResult(agent, FAILED, StatusText[Game07])
 		return false
 	}
@@ -199,26 +203,26 @@ func (self *BrcowcowGame) Playing(args []interface{}) bool {
 	person := userData.(*Player)
 	sitter := self.T.GetChair(person.UserID)
 	if sitter == nil {
-		log.Debug("[%v:%v][%v] Playing:->%v ", self.Name, self.T.Id, StatusText[Game33], m)
+		log.Infof("[%v:%v][%v] Playing:->%v ", self.Name, self.T.Id, StatusText[Game33], m)
 		GlobalSender.SendResult(agent, FAILED, StatusText[Game33])
 		return false
 	}
 	if self.bankerID == sitter.UserID {
-		log.Debug("[%v:%v][%v:%v] Playing:->%v ", self.Name, self.T.Id, sitter.UserID, StatusText[Game27], m)
+		log.Infof("[%v:%v][%v:%v] Playing:->%v ", self.Name, self.T.Id, sitter.UserID, StatusText[Game27], m)
 		GlobalSender.SendResult(agent, FAILED, StatusText[Game27])
 		return false
 	}
 	if sitter.Gold < m.BetScore+sitter.Total {
-		log.Debug("[%v:%v][%v:%v] %v Playing:->%v ", self.Name, self.T.Id, sitter.UserID, StatusText[Game05], sitter.Gold, m)
+		log.Infof("[%v:%v][%v:%v] %v Playing:->%v ", self.Name, self.T.Id, sitter.UserID, StatusText[Game05], sitter.Gold, m)
 		GlobalSender.SendResult(agent, FAILED, StatusText[Game05])
 		return false
 	}
 	if AREA_MAX <= m.BetArea {
-		log.Debug("[%v:%v][%v:%v] Playing:->%v ", self.Name, self.T.Id, sitter.UserID, StatusText[Game06], m)
+		log.Infof("[%v:%v][%v:%v] Playing:->%v ", self.Name, self.T.Id, sitter.UserID, StatusText[Game06], m)
 		GlobalSender.SendResult(agent, FAILED, StatusText[Game06])
 		return false
 	}
-	//log.Debug("[%v:%v] 玩家:%v Playing:->%v ", self.Name, self.T.Id, sitter.UserID, m)
+	//log.Infof("[%v:%v] 玩家:%v Playing:->%v ", self.Name, self.T.Id, sitter.UserID, m)
 
 	//下注成功
 	//下注数目累加
@@ -234,7 +238,7 @@ func (self *BrcowcowGame) Playing(args []interface{}) bool {
 		for index, betItem := range areaBetInfos {
 			if betItem.BetArea == m.BetArea {
 				areaBetInfos[index].BetScore = betItem.BetScore + m.BetScore
-				log.Debug("[%v:%v]\t玩家:%v 区域:%v 累加:->%v", self.Name, self.T.Id, sitter.UserID, m.BetArea, areaBetInfos[index].BetScore)
+				log.Infof("[%v:%v]\t玩家:%v 区域:%v 累加:->%v", self.Name, self.T.Id, sitter.UserID, m.BetArea, areaBetInfos[index].BetScore)
 				ok = true
 				break
 			}
@@ -244,7 +248,7 @@ func (self *BrcowcowGame) Playing(args []interface{}) bool {
 		}
 		self.personBetInfo.Store(sitter.UserID, areaBetInfos)
 	} else {
-		log.Debug("[%v:%v]\t玩家:%v 下注:%v", self.Name, self.T.Id, sitter.UserID, m)
+		log.Infof("[%v:%v]\t玩家:%v 下注:%+v", self.Name, self.T.Id, sitter.UserID, m)
 		areaBetInfos := make([]*protoMsg.BrcowcowBetResp, 0)
 		areaBetInfos = utils.CopyInsert(areaBetInfos, len(areaBetInfos), msg).([]*protoMsg.BrcowcowBetResp)
 		self.personBetInfo.Store(sitter.UserID, areaBetInfos)
@@ -275,7 +279,7 @@ func (self *BrcowcowGame) Over(args []interface{}) {
 		sitter := self.T.GetChair(uid)
 		//每一次的下注信息
 		for _, betInfo := range betInfos {
-			log.Debug("[%v:%v]玩家:%v,下注区域:%v 下注金额:%v", self.Name, self.T.Id, uid, betInfo.BetArea, betInfo.BetScore)
+			log.Infof("[%v:%v]玩家:%v,下注区域:%v 下注金额:%v", self.Name, self.T.Id, uid, betInfo.BetArea, betInfo.BetScore)
 			//玩家奖金
 			bonusScore := self.BonusArea(betInfo.BetArea, betInfo.BetScore)
 			if sitter != nil {
@@ -304,26 +308,27 @@ func (self *BrcowcowGame) Over(args []interface{}) {
 			sitter.Gain = bankerAwardScore
 		}
 	}
+	// 结算
+	result := fmt.Sprintf("Banker[%v] T[%v] D[%v] X[%v] H[%v] 中奖区域:%v",
+		self.openInfo.BankerCard.CardValue,
+		self.openInfo.TianCard.CardValue,
+		self.openInfo.DiCard.CardValue,
+		self.openInfo.XuanCard.CardValue,
+		self.openInfo.HuangCard.CardValue,
+		self.openInfo.AwardArea)
+	self.T.ChairSettle(self.Name, self.Inning, result)
+
+	// 派奖信息
 	checkout.TotalSettlement = allAreaInfo[:]
 	checkout.TotalSettlement = append(checkout.TotalSettlement, bankerAwardScore)
-
-	// 统一结算 todo
 	self.T.ChairWork(func(chair *Chair) {
 		if chair.Gain != INVALID {
-
 			checkout.MyAcquire = chair.Gain
 			GlobalSender.SendTo(chair.UserID, checkout)
 		}
 	})
-	//self.Calculate(GlobalSqlHandle.DeductMoney, false, false)
-	//for _, chair := range self.GetAllSitter() {
-	//	if chair.Code == CodeSettle {
-	//		checkout.MyAcquire = chair.Gain
-	//	}
-	//	GlobalSender.SendTo(chair.UserID, checkout)
-	//}
 
-	log.Debug("[%v:%v]   \t结算注单... 各区域情况:%v", self.Name, self.T.Id, allAreaInfo)
+	log.Infof("[%v:%v]   \t结算注单... 各区域情况:%v", self.Name, self.T.Id, allAreaInfo)
 }
 
 // 发牌
@@ -340,9 +345,9 @@ Dispatch:
 	self.openInfo.HuangCard.Cards = Deal(cards, CardAmount, IndexStart+Area_Huang)
 	self.openInfo.BankerCard.Cards = Deal(cards, CardAmount, IndexStart+Area_Banker)
 
-	//	log.Debug("[百人牛牛]-->开始发牌啦<---  \n牌堆中取牌:%v ", GetCardsText(cards))
+	//	log.Infof("[百人牛牛]-->开始发牌啦<---  \n牌堆中取牌:%v ", GetCardsText(cards))
 
-	log.Debug("[%v:%v]\t各家牌值：庄家:%v \t天:%v\t玄:%v\t地:%v\t黄:%v", self.Name, self.T.Id, GetCardsText(self.openInfo.BankerCard.Cards),
+	log.Infof("[%v:%v]\t各家牌值：庄家:%v \t天:%v\t玄:%v\t地:%v\t黄:%v", self.Name, self.T.Id, GetCardsText(self.openInfo.BankerCard.Cards),
 		GetCardsText(self.openInfo.TianCard.Cards), GetCardsText(self.openInfo.DiCard.Cards),
 		GetCardsText(self.openInfo.XuanCard.Cards), GetCardsText(self.openInfo.HuangCard.Cards))
 
@@ -403,7 +408,7 @@ Dispatch:
 		//log.Error("[库存警告][%v:%v]\t当前库存:%v 庄家积分:%v 扣算之前:%v 尝试次数:%v[库存警告]", self.Name, self.T.Id, self.inventory, personAwardScore, self.bankerScore, timeoutCount)
 		goto Dispatch
 	}
-	log.Debug("[%v:%v]\t当前库存:%v 庄家积分:%v 扣算之前:%v", self.Name, self.T.Id, self.inventory, personAwardScore, self.bankerScore)
+	log.Infof("[%v:%v]\t当前库存:%v 庄家积分:%v 扣算之前:%v", self.Name, self.T.Id, self.inventory, personAwardScore, self.bankerScore)
 	self.inventory = personAwardScore
 	self.bankerScore = personAwardScore - self.inventory
 	if self.bankerScore < INVALID {
@@ -415,10 +420,10 @@ Dispatch:
 	// ===>>>
 	//self.bankerScore = INVALID
 	//self.inventory = INVALID
-	log.Debug("[%v:%v]\t 库存信息 当前:%v 配置:%v 盈利:[%v]", self.Name, self.T.Id, self.inventory, self.confInventory, self.inventory-self.confInventory)
+	log.Infof("[%v:%v]\t 库存信息 当前:%v 配置:%v 盈利:[%v]", self.Name, self.T.Id, self.inventory, self.confInventory, self.inventory-self.confInventory)
 
 	GlobalSender.NotifyOthers(self.PlayerList, self.openInfo)
-	log.Debug("[%v:%v]\t庄家牌值:Banker:%v,T:%v D:%v X:%v H:%v 中奖区域:%v ", self.Name, self.T.Id,
+	log.Infof("[%v:%v]\t庄家牌值:Banker:%v,T:%v D:%v X:%v H:%v 中奖区域:%v ", self.Name, self.T.Id,
 		self.openInfo.BankerCard.CardValue,
 		self.openInfo.TianCard.CardValue,
 		self.openInfo.DiCard.CardValue,
@@ -441,7 +446,7 @@ func (self *BrcowcowGame) DeduceWin() []byte {
 	if betTianInfo.IsWin {
 		pWinArea[Area_Tian] = Win
 		self.odds[Area_Tian] = betTianInfo.WinOdds
-		log.Debug("[%v:%v] 天赢:%v ->%v", self.Name, self.T.Id, betTianInfo.WinOdds, betTianInfo.LoseOdds)
+		log.Infof("[%v:%v] 天赢:%v ->%v", self.Name, self.T.Id, betTianInfo.WinOdds, betTianInfo.LoseOdds)
 	} else {
 		self.odds[Area_Tian] = 0.0
 	}
@@ -449,7 +454,7 @@ func (self *BrcowcowGame) DeduceWin() []byte {
 	if betDiInfo.IsWin {
 		pWinArea[Area_Di] = Win
 		self.odds[Area_Di] = betDiInfo.WinOdds
-		log.Debug("[%v:%v] 地赢:%v ->%v", self.Name, self.T.Id, betDiInfo.WinOdds, betDiInfo.LoseOdds)
+		log.Infof("[%v:%v] 地赢:%v ->%v", self.Name, self.T.Id, betDiInfo.WinOdds, betDiInfo.LoseOdds)
 	} else {
 		self.odds[Area_Di] = 0.0
 	}
@@ -457,7 +462,7 @@ func (self *BrcowcowGame) DeduceWin() []byte {
 	if betXuanInfo.IsWin {
 		pWinArea[Area_Xuan] = Win
 		self.odds[Area_Xuan] = betXuanInfo.WinOdds
-		log.Debug("[%v:%v] 玄赢:%v ->%v", self.Name, self.T.Id, betXuanInfo.WinOdds, betXuanInfo.LoseOdds)
+		log.Infof("[%v:%v] 玄赢:%v ->%v", self.Name, self.T.Id, betXuanInfo.WinOdds, betXuanInfo.LoseOdds)
 	} else {
 		self.odds[Area_Xuan] = 0.0
 	}
@@ -465,7 +470,7 @@ func (self *BrcowcowGame) DeduceWin() []byte {
 	if betHuangInfo.IsWin {
 		pWinArea[Area_Huang] = Win
 		self.odds[Area_Huang] = betHuangInfo.WinOdds
-		log.Debug("[%v:%v] 黄赢:%v ->%v", self.Name, self.T.Id, betHuangInfo.WinOdds, betHuangInfo.LoseOdds)
+		log.Infof("[%v:%v] 黄赢:%v ->%v", self.Name, self.T.Id, betHuangInfo.WinOdds, betHuangInfo.LoseOdds)
 	} else {
 		self.odds[Area_Huang] = 0.0
 	}
@@ -485,7 +490,7 @@ func (self *BrcowcowGame) BonusArea(area int32, betScore int64) int64 {
 
 // 定庄
 func (self *BrcowcowGame) onDecide() {
-	self.Reset()
+	self.reset()
 	// 校准库存
 	if self.confInventory != YamlObj.BrCowcow.Inventory {
 		self.confInventory = YamlObj.BrCowcow.Inventory
@@ -605,8 +610,10 @@ func (self *BrcowcowGame) onOver() {
 	// 玩家结算(框架消息)
 	self.Over(nil)
 
+	self.T.CalibratingRemain(Default)
+
 	//自动清场
-	if self.IsClear || (SYSTEMID != self.T.Rid && self.T.Remain <= self.RunCount) {
+	if self.IsClear || (SYSTEMID != self.T.Rid && self.T.Remain <= INVALID) {
 		self.Close(func() *Table {
 			return self.T
 		})
@@ -699,7 +706,7 @@ func (self *BrcowcowGame) host(args []interface{}) {
 		GlobalSender.SendResultX(userID, SUCCESS, StatusText[User16])
 	}
 
-	log.Debug("[%v:%v]有人来抢庄啦:%d 列表人数%d", self.Name, self.T.Id, userID, len(self.hostList))
+	log.Infof("[%v:%v]有人来抢庄啦:%d 列表人数%d", self.Name, self.T.Id, userID, len(self.hostList))
 	GlobalSender.NotifyOthers(self.PlayerList, &protoMsg.BrcowcowHostResp{
 		UserID: userID,
 		IsWant: host.IsWant,
@@ -740,7 +747,7 @@ func (self *BrcowcowGame) superHost(args []interface{}) {
 	//	return
 	//}
 	//userID := user.UserID
-	//log.Debug("[百人牛牛]有人要超级抢庄--->:%d", userID)
+	//log.Infof("[百人牛牛]有人要超级抢庄--->:%d", userID)
 	//
 	//if host.IsWant {
 	//	if self.superHostID == 0 {
@@ -765,7 +772,7 @@ func (self *BrcowcowGame) superHost(args []interface{}) {
 func (self *BrcowcowGame) permitHost() *protoMsg.BrcowcowHostResp {
 	//校验是否满足庄家条件 [5000 < 金额] 不可连续坐庄15次
 	tempList := self.hostList
-	log.Debug("[%v:%v]定庄.... 列表数据:%v", self.Name, self.T.Id, self.hostList)
+	log.Infof("[%v:%v]定庄.... 列表数据:%v", self.Name, self.T.Id, self.hostList)
 
 	//befBankerID := self.bankerID 避免重复
 	for index, pid := range tempList {
@@ -774,11 +781,11 @@ func (self *BrcowcowGame) permitHost() *protoMsg.BrcowcowHostResp {
 			continue
 		}
 		if 2 == self.keepTwice && self.bankerID == person.UserID {
-			log.Debug("[%v:%v]不再连续坐庄：%v", self.Name, self.T.Id, person.Gold)
+			log.Infof("[%v:%v]不再连续坐庄：%v", self.Name, self.T.Id, person.Gold)
 			self.hostList = append(self.hostList[:index], self.hostList[index+1:]...)
 			self.keepTwice = 0
 		} else if person.Gold < 5000 {
-			log.Debug("[%v:%v]玩家%d 金币%lf 少于5000不能申请坐庄", self.Name, self.T.Id, person.UserID, person.Gold)
+			log.Infof("[%v:%v]玩家%d 金币%lf 少于5000不能申请坐庄", self.Name, self.T.Id, person.UserID, person.Gold)
 			self.hostList = append(self.hostList[:index], self.hostList[index+1:]...)
 		}
 
@@ -787,7 +794,7 @@ func (self *BrcowcowGame) permitHost() *protoMsg.BrcowcowHostResp {
 	//取第一个作为庄家
 	if 0 < len(self.hostList) {
 		if self.bankerID == self.hostList[0] {
-			log.Debug("[%v:%v]连续坐庄次数:%d", self.Name, self.T.Id, self.keepTwice)
+			log.Infof("[%v:%v]连续坐庄次数:%d", self.Name, self.T.Id, self.keepTwice)
 			self.keepTwice++
 		} else {
 			self.keepTwice = 0
@@ -805,11 +812,11 @@ func (self *BrcowcowGame) permitHost() *protoMsg.BrcowcowHostResp {
 			sit.Score = banker.Gold
 		}
 
-		log.Debug("[%v:%v]确定庄家:%d", self.Name, self.T.Id, self.bankerID)
+		log.Infof("[%v:%v]确定庄家:%d", self.Name, self.T.Id, self.bankerID)
 	} else {
 		self.bankerID = 0 //系统坐庄
 		//self.bankerScore = 1000000
-		log.Debug("[%v:%v]系统坐庄", self.Name, self.T.Id)
+		log.Infof("[%v:%v]系统坐庄", self.Name, self.T.Id)
 	}
 	//完成定庄后,初始化超级抢庄ID
 	self.superHostID = 0
@@ -817,13 +824,13 @@ func (self *BrcowcowGame) permitHost() *protoMsg.BrcowcowHostResp {
 		UserID: self.bankerID,
 		IsWant: true,
 	}
-	log.Debug("[%v:%v]广播上庄", self.Name, self.T.Id)
+	log.Infof("[%v:%v]广播上庄", self.Name, self.T.Id)
 	return msg
 }
 
 // -----------------------逻辑层---------------------------
-// 重新初始化[返回结果提供给外部清场用]
-func (self *BrcowcowGame) Reset() {
+// reset 重新初始化[返回结果提供给外部清场用]
+func (self *BrcowcowGame) reset() {
 	self.openInfo.BankerCard.Cards = make([]byte, CardAmount)
 	self.openInfo.TianCard.Cards = make([]byte, CardAmount)
 	self.openInfo.DiCard.Cards = make([]byte, CardAmount)
@@ -834,6 +841,7 @@ func (self *BrcowcowGame) Reset() {
 		self.personBetInfo.Delete(key)
 		return true
 	})
+	self.Game.Init()
 	return
 }
 
@@ -857,6 +865,6 @@ func (self *BrcowcowGame) simulatedResult() (int64, bool) {
 		return true
 	})
 	//
-	log.Debug("[百人牛牛]模拟结算...前:%v 后:%v   当前库存:%v", self.bankerScore, personAwardScore, self.inventory)
+	log.Infof("[百人牛牛]模拟结算...前:%v 后:%v   当前库存:%v", self.bankerScore, personAwardScore, self.inventory)
 	return personAwardScore, 0 <= personAwardScore
 }

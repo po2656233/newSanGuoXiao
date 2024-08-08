@@ -105,7 +105,7 @@ func (p *ActorGame) checkTableList(rid int64) {
 				continue
 			}
 			if _, err := room.AddTable(item, NewGame); err != nil {
-				log.Errorf("rid:%v add table:%v is err:%v !!!!", room.Id, item.Id, err)
+				log.Errorf("%v", err)
 			}
 
 		}

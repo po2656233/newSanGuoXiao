@@ -113,8 +113,7 @@ func join(args []interface{}) {
 			PlayScore:  Unlimited,
 			Name:       "",
 			Opentime:   time.Now().Unix(),
-			Taxation:   0, //系统房没有税收
-			Commission: 0,
+			Commission: INVALID, //系统房没有税收
 			MaxRound:   Unlimited,
 		})
 		if errCode != SUCCESS {

@@ -140,9 +140,9 @@ func (self *ActorDB) GetTableList(req *pb.GetTableListReq) (*pb.GetTableListResp
 		resp.Items.Items = append(resp.Items.Items, &pb.TableInfo{
 			Id:         table.ID,
 			Rid:        table.Rid,
+			Name:       table.Name,
 			Gid:        table.Gid,
 			OpenTime:   table.Opentime,
-			Taxation:   table.Taxation,
 			Commission: table.Commission,
 			Remain:     table.Remain,
 			MaxRound:   table.Maxround,
@@ -209,6 +209,7 @@ func (self *ActorDB) CreateRoom(req *pb.CreateRoomReq) (*pb.CreateRoomResp, erro
 		Name:       req.Name,
 		Roomkey:    req.RoomKey,
 		Enterscore: req.EnterScore,
+		Taxation:   req.Taxation,
 		MaxTable:   maxTable,
 		TableCount: 0,
 		MaxPerson:  maxCount,
@@ -247,9 +248,9 @@ func (self *ActorDB) CreateTable(req *pb.CreateTableReq) (*pb.CreateTableResp, e
 		Rid:        req.Rid,
 		Name:       req.Name,
 		Playscore:  req.PlayScore,
-		Taxation:   req.Taxation,
 		Commission: req.Commission,
 		Maxround:   req.MaxRound,
+		Remain:     req.MaxRound,
 		Opentime:   req.Opentime,
 	})
 	if err != nil {
@@ -261,11 +262,10 @@ func (self *ActorDB) CreateTable(req *pb.CreateTableReq) (*pb.CreateTableResp, e
 		Gid:        req.Gid,
 		Name:       req.Name,
 		Commission: req.Commission,
-		Taxation:   req.Taxation,
 		PlayScore:  req.PlayScore,
 		MaxSitter:  maxSit,
 		MaxRound:   req.MaxRound,
-		Remain:     req.MaxRound,
+		Remain:     req.MaxRound, // 剩余以最大局数为准
 		OpenTime:   req.Opentime,
 	}
 	rpc.SendData(self.App(), SourcePath, GameActor, NodeTypeGame, resp)
@@ -304,7 +304,6 @@ func (self *ActorDB) GetTable(req *pb.GetTableReq) (*pb.GetTableResp, error) {
 		Rid:        info.Rid,
 		Gid:        info.Gid,
 		OpenTime:   info.Opentime,
-		Taxation:   info.Taxation,
 		Commission: info.Commission,
 		Remain:     info.Remain,
 		MaxRound:   info.Maxround,
@@ -348,8 +347,7 @@ func (self *ActorDB) FixNickName(req *pb.FixNickNameReq) (*pb.FixNickNameResp, e
 }
 
 func (self *ActorDB) Recharge(req *pb.RechargeReq) (*pb.RechargeResp, error) {
-	resp := &pb.RechargeResp{}
-	err := self.addRecharge(sqlmodel.Recharge{
+	info := &sqlmodel.Recharge{
 		UID:       req.UserID,
 		Byid:      req.ByiD,
 		Payment:   req.Payment,
@@ -365,11 +363,25 @@ func (self *ActorDB) Recharge(req *pb.RechargeReq) (*pb.RechargeResp, error) {
 		DeletedAt: gorm.DeletedAt{},
 		UpdateBy:  0,
 		CreateBy:  0,
-	})
-	if err != nil {
-		return resp, err
 	}
-	return resp, nil
+	err := self.addRecharge(info)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.RechargeResp{
+		UserID:    info.UID,
+		ByiD:      info.Byid,
+		PreMoney:  info.Premoney,
+		Payment:   info.Payment,
+		Money:     info.Money,
+		YuanBao:   info.Payment * 100,
+		Coin:      info.Payment * 10000,
+		Method:    info.Switch,
+		IsSuccess: true,
+		Order:     info.Order,
+		TimeStamp: info.Timestamp,
+		Reason:    info.Remark,
+	}, nil
 }
 
 func (self *ActorDB) AddRecord(req *pb.AddRecordReq) (*pb.AddRecordResp, error) {

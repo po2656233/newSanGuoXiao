@@ -1,10 +1,10 @@
 package manger
 
 import (
-	"fmt"
 	log "github.com/po2656233/superplace/logger"
 	. "superman/internal/constant"
 	protoMsg "superman/internal/protocol/gofile"
+	"superman/internal/rpc"
 	"superman/internal/utils"
 	"sync"
 	"sync/atomic"
@@ -59,14 +59,14 @@ func (tb *Table) Reset() int64 {
 }
 
 // AddChair 添加椅子
-func (tb *Table) AddChair(player *Player) error {
+func (tb *Table) AddChair(player *Player) (errCode int) {
 	// 是否满员了
 	if tb.MaxSitter != Unlimited && tb.MaxSitter < tb.SitCount()+1 {
-		return fmt.Errorf(StatusText[Game39])
+		return Game39
 	}
 	if player.PlayerInfo.Coin < tb.PlayScore {
-		GetClientMgr().SendPopResultX(player.UserID, FAILED, StatusText[Title009], StatusText[Game15])
-		return fmt.Errorf(StatusText[Game15])
+		GetClientMgr().SendPopResultX(player.UserID, FAILED, StatusText[Title009], StatusText[TableInfo12])
+		return TableInfo12
 	}
 
 	playerList := make([]int64, 0)
@@ -86,11 +86,11 @@ func (tb *Table) AddChair(player *Player) error {
 		tb.sitters.Store(player.UserID, sit)
 	}
 	if sit == nil {
-		return fmt.Errorf(StatusText[User03])
+		return User03
 	}
 	sitter, ok1 := sit.(*Chair)
 	if !ok1 {
-		return fmt.Errorf(StatusText[TableInfo11])
+		return TableInfo11
 	}
 
 	// 获取玩家简要信息
@@ -145,7 +145,7 @@ func (tb *Table) AddChair(player *Player) error {
 		}
 	}
 	tb.GameHandle.Scene([]interface{}{player})
-	return nil
+	return SUCCESS
 }
 
 // GetChairData 获取牌桌信息
@@ -280,6 +280,49 @@ func (tb *Table) ChairWork(work func(chair *Chair)) {
 		return true
 	})
 }
+func (tb *Table) ChairSettle(name, inning, result string) {
+	tb.sitters.Range(func(key, value any) bool {
+		chair, ok := value.(*Chair)
+		if !ok {
+			return true
+		}
+		chair.PlayerInfo.State = protoMsg.PlayerState_PlayerStandUp
+		if chair.Total == INVALID || chair.Gain == INVALID {
+			return true
+		}
+		if INVALID < chair.Gain && INVALID < tb.Commission {
+			// 收取税收 千分之一
+			chair.Gain = int64(1000-tb.Commission) * chair.Gain / 1000
+		}
+		//通知金币变化
+		data, code := rpc.SendDataToDB(GetClientMgr().GetApp(), &protoMsg.AddRecordReq{
+			Uid:     chair.UserID,
+			Tid:     tb.Id,
+			Payment: chair.Gain,
+			Code:    CodeSettle,
+			Order:   inning,
+			Result:  result,
+			Remark:  name,
+		})
+		if code != SUCCESS {
+			log.Warnf("[%v:%v] inning:[%v] AddRecordReq is failed. code:%v", name, tb.Id, inning, code)
+			return true
+		}
+		resp, ok := data.(*protoMsg.AddRecordResp)
+		if !ok {
+			return true
+		}
+		changeGold := &protoMsg.NotifyBalanceChangeResp{
+			UserID:    chair.UserID,
+			Code:      CodeSettle,
+			AlterCoin: chair.Gain,
+			Coin:      resp.Gold,
+			Reason:    resp.Order,
+		}
+		GetClientMgr().SendTo(chair.UserID, changeGold)
+		return true
+	})
+}
 
 // SitCount 座位总数
 func (tb *Table) SitCount() int32 {
@@ -339,3 +382,21 @@ func (tb *Table) GetOrderList() []int64 {
 	}
 	return utils.Unique(list)
 }
+
+// CalibratingRemain 校准剩余次数
+func (tb *Table) CalibratingRemain(delCount int32) {
+	if tb.MaxRound == Unlimited {
+		return
+	}
+	data, code := rpc.SendDataToDB(GetClientMgr().GetApp(), &protoMsg.DecreaseGameRunReq{
+		Amount: delCount,
+		Tid:    tb.Id,
+	})
+	if code == SUCCESS {
+		if resp, ok := data.(*protoMsg.DecreaseGameRunResp); ok {
+			tb.Remain = resp.Remain
+		}
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////

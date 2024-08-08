@@ -1,5 +1,5 @@
 [baccarat]
-inventory = -100000
+inventory = -100
 
 [baccarat.duration]
 free = 20
@@ -14,6 +14,26 @@ inventory = 100000
 maxhost = 8
 
 [brcowcow.duration]
+free = 20
+open = 3
+over = 3
+play = 10
+start = 5
+
+[brtoubao]
+inventory = 100000
+
+[brtoubao.duration]
+free = 20
+open = 3
+over = 3
+play = 10
+start = 5
+
+[brtuitongzi]
+inventory = 100000
+
+[brtuitongzi.duration]
 free = 20
 open = 3
 over = 3

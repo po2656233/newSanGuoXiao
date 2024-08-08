@@ -61,6 +61,10 @@ func init() {
 
 	//more people Game
 	handlerMsg(&protoMsg.BaccaratBetReq{}, playing)
+	handlerMsg(&protoMsg.BrcowcowBetReq{}, playing)
+	handlerMsg(&protoMsg.TigerXdragonBetReq{}, playing)
+	handlerMsg(&protoMsg.BrtoubaoBetReq{}, playing)
+	handlerMsg(&protoMsg.BrTuitongziBetReq{}, playing)
 
 	go func() {
 		for {

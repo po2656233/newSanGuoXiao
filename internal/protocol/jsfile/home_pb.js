@@ -4808,7 +4808,10 @@ proto.pb.CreateRoomReq.toObject = function(includeInstance, msg) {
     name: jspb.Message.getFieldWithDefault(msg, 3, ""),
     roomkey: jspb.Message.getFieldWithDefault(msg, 4, ""),
     enterscore: jspb.Message.getFieldWithDefault(msg, 5, 0),
-    remark: jspb.Message.getFieldWithDefault(msg, 6, "")
+    taxation: jspb.Message.getFieldWithDefault(msg, 6, 0),
+    maxtable: jspb.Message.getFieldWithDefault(msg, 7, 0),
+    maxperson: jspb.Message.getFieldWithDefault(msg, 8, 0),
+    remark: jspb.Message.getFieldWithDefault(msg, 9, "")
   };
 
   if (includeInstance) {
@@ -4866,6 +4869,18 @@ proto.pb.CreateRoomReq.deserializeBinaryFromReader = function(msg, reader) {
       msg.setEnterscore(value);
       break;
     case 6:
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setTaxation(value);
+      break;
+    case 7:
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setMaxtable(value);
+      break;
+    case 8:
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setMaxperson(value);
+      break;
+    case 9:
       var value = /** @type {string} */ (reader.readString());
       msg.setRemark(value);
       break;
@@ -4933,10 +4948,31 @@ proto.pb.CreateRoomReq.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
+  f = message.getTaxation();
+  if (f !== 0) {
+    writer.writeInt64(
+      6,
+      f
+    );
+  }
+  f = message.getMaxtable();
+  if (f !== 0) {
+    writer.writeInt64(
+      7,
+      f
+    );
+  }
+  f = message.getMaxperson();
+  if (f !== 0) {
+    writer.writeInt64(
+      8,
+      f
+    );
+  }
   f = message.getRemark();
   if (f.length > 0) {
     writer.writeString(
-      6,
+      9,
       f
     );
   }
@@ -5019,17 +5055,62 @@ proto.pb.CreateRoomReq.prototype.setEnterscore = function(value) {
 
 
 /**
- * optional string remark = 6;
+ * optional int64 taxation = 6;
+ * @return {number}
+ */
+proto.pb.CreateRoomReq.prototype.getTaxation = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 6, 0));
+};
+
+
+/** @param {number} value */
+proto.pb.CreateRoomReq.prototype.setTaxation = function(value) {
+  jspb.Message.setProto3IntField(this, 6, value);
+};
+
+
+/**
+ * optional int64 maxTable = 7;
+ * @return {number}
+ */
+proto.pb.CreateRoomReq.prototype.getMaxtable = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 7, 0));
+};
+
+
+/** @param {number} value */
+proto.pb.CreateRoomReq.prototype.setMaxtable = function(value) {
+  jspb.Message.setProto3IntField(this, 7, value);
+};
+
+
+/**
+ * optional int64 maxPerson = 8;
+ * @return {number}
+ */
+proto.pb.CreateRoomReq.prototype.getMaxperson = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 8, 0));
+};
+
+
+/** @param {number} value */
+proto.pb.CreateRoomReq.prototype.setMaxperson = function(value) {
+  jspb.Message.setProto3IntField(this, 8, value);
+};
+
+
+/**
+ * optional string remark = 9;
  * @return {string}
  */
 proto.pb.CreateRoomReq.prototype.getRemark = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 6, ""));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 9, ""));
 };
 
 
 /** @param {string} value */
 proto.pb.CreateRoomReq.prototype.setRemark = function(value) {
-  jspb.Message.setProto3StringField(this, 6, value);
+  jspb.Message.setProto3StringField(this, 9, value);
 };
 
 
@@ -5211,11 +5292,10 @@ proto.pb.CreateTableReq.toObject = function(includeInstance, msg) {
     rid: jspb.Message.getFieldWithDefault(msg, 1, 0),
     gid: jspb.Message.getFieldWithDefault(msg, 2, 0),
     name: jspb.Message.getFieldWithDefault(msg, 3, ""),
-    taxation: jspb.Message.getFieldWithDefault(msg, 4, 0),
-    commission: jspb.Message.getFieldWithDefault(msg, 5, 0),
-    maxround: jspb.Message.getFieldWithDefault(msg, 6, 0),
-    opentime: jspb.Message.getFieldWithDefault(msg, 7, 0),
-    playscore: jspb.Message.getFieldWithDefault(msg, 8, 0)
+    commission: jspb.Message.getFieldWithDefault(msg, 4, 0),
+    maxround: jspb.Message.getFieldWithDefault(msg, 5, 0),
+    opentime: jspb.Message.getFieldWithDefault(msg, 6, 0),
+    playscore: jspb.Message.getFieldWithDefault(msg, 7, 0)
   };
 
   if (includeInstance) {
@@ -5265,22 +5345,18 @@ proto.pb.CreateTableReq.deserializeBinaryFromReader = function(msg, reader) {
       msg.setName(value);
       break;
     case 4:
-      var value = /** @type {number} */ (reader.readInt64());
-      msg.setTaxation(value);
-      break;
-    case 5:
       var value = /** @type {number} */ (reader.readInt32());
       msg.setCommission(value);
       break;
-    case 6:
+    case 5:
       var value = /** @type {number} */ (reader.readInt32());
       msg.setMaxround(value);
       break;
-    case 7:
+    case 6:
       var value = /** @type {number} */ (reader.readInt64());
       msg.setOpentime(value);
       break;
-    case 8:
+    case 7:
       var value = /** @type {number} */ (reader.readInt64());
       msg.setPlayscore(value);
       break;
@@ -5334,38 +5410,31 @@ proto.pb.CreateTableReq.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getTaxation();
-  if (f !== 0) {
-    writer.writeInt64(
-      4,
-      f
-    );
-  }
   f = message.getCommission();
   if (f !== 0) {
     writer.writeInt32(
-      5,
+      4,
       f
     );
   }
   f = message.getMaxround();
   if (f !== 0) {
     writer.writeInt32(
-      6,
+      5,
       f
     );
   }
   f = message.getOpentime();
   if (f !== 0) {
     writer.writeInt64(
-      7,
+      6,
       f
     );
   }
   f = message.getPlayscore();
   if (f !== 0) {
     writer.writeInt64(
-      8,
+      7,
       f
     );
   }
@@ -5418,77 +5487,62 @@ proto.pb.CreateTableReq.prototype.setName = function(value) {
 
 
 /**
- * optional int64 taxation = 4;
+ * optional int32 commission = 4;
  * @return {number}
  */
-proto.pb.CreateTableReq.prototype.getTaxation = function() {
+proto.pb.CreateTableReq.prototype.getCommission = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 4, 0));
 };
 
 
 /** @param {number} value */
-proto.pb.CreateTableReq.prototype.setTaxation = function(value) {
+proto.pb.CreateTableReq.prototype.setCommission = function(value) {
   jspb.Message.setProto3IntField(this, 4, value);
 };
 
 
 /**
- * optional int32 commission = 5;
+ * optional int32 maxRound = 5;
  * @return {number}
  */
-proto.pb.CreateTableReq.prototype.getCommission = function() {
+proto.pb.CreateTableReq.prototype.getMaxround = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 5, 0));
 };
 
 
 /** @param {number} value */
-proto.pb.CreateTableReq.prototype.setCommission = function(value) {
+proto.pb.CreateTableReq.prototype.setMaxround = function(value) {
   jspb.Message.setProto3IntField(this, 5, value);
 };
 
 
 /**
- * optional int32 maxRound = 6;
+ * optional int64 opentime = 6;
  * @return {number}
  */
-proto.pb.CreateTableReq.prototype.getMaxround = function() {
+proto.pb.CreateTableReq.prototype.getOpentime = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 6, 0));
 };
 
 
 /** @param {number} value */
-proto.pb.CreateTableReq.prototype.setMaxround = function(value) {
+proto.pb.CreateTableReq.prototype.setOpentime = function(value) {
   jspb.Message.setProto3IntField(this, 6, value);
 };
 
 
 /**
- * optional int64 opentime = 7;
+ * optional int64 playScore = 7;
  * @return {number}
  */
-proto.pb.CreateTableReq.prototype.getOpentime = function() {
+proto.pb.CreateTableReq.prototype.getPlayscore = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 7, 0));
 };
 
 
 /** @param {number} value */
-proto.pb.CreateTableReq.prototype.setOpentime = function(value) {
-  jspb.Message.setProto3IntField(this, 7, value);
-};
-
-
-/**
- * optional int64 playScore = 8;
- * @return {number}
- */
-proto.pb.CreateTableReq.prototype.getPlayscore = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 8, 0));
-};
-
-
-/** @param {number} value */
 proto.pb.CreateTableReq.prototype.setPlayscore = function(value) {
-  jspb.Message.setProto3IntField(this, 8, value);
+  jspb.Message.setProto3IntField(this, 7, value);
 };
 
 

@@ -278,9 +278,10 @@ message RoomInfo{
   string name = 4;        // 房间名称
   string roomKey = 5;     // 房间密钥
   int64  enterScore = 6;  // 进场分
-  int32  maxPerson = 7;   // 最大人数
-  int32  tableCount = 8;  // 当前桌牌数
-  int32  maxTable = 9;    // 最大牌桌数
+  int64  taxation = 7;   // 台费
+  int32  maxPerson = 8;   // 最大人数
+  int32  tableCount = 9;  // 当前桌牌数
+  int32  maxTable = 10;    // 最大牌桌数
 }
 //桌子信息
 message TableInfo{
@@ -291,10 +292,9 @@ message TableInfo{
   int32    commission = 5;  // 每局税收
   int32    maxRound = 6;    // 最大轮次
   int32    remain = 7;      // 剩余场次
-  int32    maxSitter = 8;     // 客人数量(即:当前玩家数量)
+  int32    maxSitter = 8;   // 客人数量(即:当前玩家数量)
   int64    playScore = 9;   // 初始积分(携带的积分)
-  int64    openTime = 10;    // 开启时间
-  int64    taxation = 11;    // 固定税收
+  int64    openTime = 10;   // 开启时间
 }
 //////////////////////////////////[游戏信息]/////////////////////////////////////////
 //时间信息

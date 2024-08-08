@@ -19,6 +19,7 @@ type Room struct {
 	Level      int32          `gorm:"column:level;comment:房间级别(类型:=1普通级别20人 =2中等级别100人)" json:"level"`              // 房间级别(类型:=1普通级别20人 =2中等级别100人)
 	Name       string         `gorm:"column:name;not null;comment:房间名称" json:"name"`                                // 房间名称
 	Roomkey    string         `gorm:"column:roomkey;comment:房间钥匙" json:"roomkey"`                                   // 房间钥匙
+	Taxation   int64          `gorm:"column:taxation;comment:固定台费" json:"taxation"`                                 // 固定台费
 	Enterscore int64          `gorm:"column:enterscore;default:-1;comment:准入分数(=-1不受限制)" json:"enterscore"`         // 准入分数(=-1不受限制)
 	TableCount int32          `gorm:"column:table_count;comment:当前牌桌数" json:"table_count"`                          // 当前牌桌数
 	MaxPerson  int32          `gorm:"column:max_person;default:-1;comment:最大人数(=-1时不受限，仅限于系统房)" json:"max_person"`  // 最大人数(=-1时不受限，仅限于系统房)

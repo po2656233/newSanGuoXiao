@@ -4,14 +4,14 @@ import (
 	log "github.com/po2656233/superplace/logger"
 	. "superman/internal/constant"
 	protoMsg "superman/internal/protocol/gofile"
-	mgr "superman/nodes/game/manger"
+	. "superman/nodes/game/manger"
 	. "superman/nodes/game/module/category"
 	"time"
 )
 
 type Chinesechess struct {
-	*mgr.Game
-	T         *mgr.Table
+	*Game
+	T         *Table
 	board     *protoMsg.XQBoardInfo
 	redCamp   *protoMsg.PlayerSimpleInfo
 	blackCamp *protoMsg.PlayerSimpleInfo
@@ -21,7 +21,7 @@ type Chinesechess struct {
 }
 
 // New 棋盘 Chinesechess
-func New(game *mgr.Game, table *mgr.Table) *Chinesechess {
+func New(game *Game, table *Table) *Chinesechess {
 	p := &Chinesechess{
 		Game: game,
 		T:    table,
@@ -48,9 +48,9 @@ func (self *Chinesechess) Scene(args []interface{}) bool {
 	if !self.Game.Scene(args) {
 		return false
 	}
-	person := args[0].(*mgr.Player)
+	person := args[0].(*Player)
 	uid := person.UserID
-	mgr.GetClientMgr().SendTo(uid, &protoMsg.ChineseChessSceneResp{
+	GetClientMgr().SendTo(uid, &protoMsg.ChineseChessSceneResp{
 		TimeStamp: time.Now().Unix(),
 		Inning:    self.Inning,
 		Board:     self.board,
@@ -73,32 +73,32 @@ func (self *Chinesechess) Scene(args []interface{}) bool {
 	switch self.GameInfo.Scene {
 	case protoMsg.GameScene_Free: //
 	case protoMsg.GameScene_Setting: //
-		mgr.GetClientMgr().SendTo(uid, &protoMsg.ChineseChessStateSetResp{
+		GetClientMgr().SendTo(uid, &protoMsg.ChineseChessStateSetResp{
 			Times: getTimeInfo(YamlObj.Chinesechess.Duration.Settime),
 			Uid:   self.curUid,
 		})
 	case protoMsg.GameScene_WaitOperate: //
-		mgr.GetClientMgr().SendTo(uid, &protoMsg.ChineseChessStateConfirmResp{
+		GetClientMgr().SendTo(uid, &protoMsg.ChineseChessStateConfirmResp{
 			Times: getTimeInfo(YamlObj.Chinesechess.Duration.Confirm),
 			Uid:   self.curUid,
 		})
 	case protoMsg.GameScene_Start: // 开始
-		mgr.GetClientMgr().SendTo(uid, &protoMsg.ChineseChessStateStartResp{
+		GetClientMgr().SendTo(uid, &protoMsg.ChineseChessStateStartResp{
 			Times: getTimeInfo(YamlObj.Chinesechess.Duration.Start),
 			Uid:   self.curUid,
 		})
 	case protoMsg.GameScene_Playing: // 下棋
-		mgr.GetClientMgr().SendTo(uid, &protoMsg.ChineseChessStatePlayingResp{
+		GetClientMgr().SendTo(uid, &protoMsg.ChineseChessStatePlayingResp{
 			Times: getTimeInfo(YamlObj.Chinesechess.Duration.Play),
 			Uid:   self.curUid,
 		})
 	case protoMsg.GameScene_Opening: // 开奖
-		mgr.GetClientMgr().SendTo(uid, &protoMsg.ChineseChessStateOpenResp{
+		GetClientMgr().SendTo(uid, &protoMsg.ChineseChessStateOpenResp{
 			Times:  getTimeInfo(YamlObj.Chinesechess.Duration.Open),
 			WinUid: self.winUid,
 		})
 	case protoMsg.GameScene_Over: // 结算
-		mgr.GetClientMgr().SendTo(uid, &protoMsg.ChineseChessStateOverResp{
+		GetClientMgr().SendTo(uid, &protoMsg.ChineseChessStateOverResp{
 			Times: getTimeInfo(YamlObj.Chinesechess.Duration.Over),
 			Result: &protoMsg.ChineseChessResult{
 				RedCamp:   self.redCamp,
@@ -263,7 +263,7 @@ func (self *Chinesechess) Start(args []interface{}) bool {
 		// 结算
 		self.Over(nil)
 		if self.T.Remain <= self.RunCount { // 满足运行次数之后,释放资源
-			self.Close(func() *mgr.Table {
+			self.Close(func() *Table {
 				return self.T
 			})
 			return false
@@ -279,7 +279,7 @@ func (self *Chinesechess) Start(args []interface{}) bool {
 
 // Ready 准备
 func (self *Chinesechess) Ready(args []interface{}) bool {
-	person, ok := args[0].(*mgr.Player)
+	person, ok := args[0].(*Player)
 	if !ok || person == nil {
 		return false
 	}
@@ -308,19 +308,19 @@ func (self *Chinesechess) Playing(args []interface{}) bool {
 	_ = args[1]
 	//【消息】
 	m := args[0].(*protoMsg.ChineseChessMoveReq)
-	agent := args[1].(mgr.Agent)
+	agent := args[1].(Agent)
 	if self.GameInfo.Scene != protoMsg.GameScene_Playing {
-		mgr.GetClientMgr().SendResult(agent, FAILED, StatusText[Game04])
+		GetClientMgr().SendResult(agent, FAILED, StatusText[Game04])
 		return false
 	}
 
-	person := agent.UserData().(*mgr.Player)
+	person := agent.UserData().(*Player)
 	if person.UserID != self.curUid {
-		mgr.GetClientMgr().SendResult(agent, FAILED, StatusText[Game21])
+		GetClientMgr().SendResult(agent, FAILED, StatusText[Game21])
 		return false
 	}
 	if !isValidMove(self.board, m.Origin, m.Target) {
-		mgr.GetClientMgr().SendResult(agent, FAILED, StatusText[Game37])
+		GetClientMgr().SendResult(agent, FAILED, StatusText[Game37])
 		return false
 	}
 	otherUid := self.redCamp.Uid
@@ -336,15 +336,15 @@ func (self *Chinesechess) Playing(args []interface{}) bool {
 	case moveFail:
 	case moveBeJiangJu:
 	case moveJiangJu:
-		mgr.GetClientMgr().NotifyOthers(self.PlayerList, &protoMsg.ChineseChessJiangJuResp{BeJiangUid: otherUid})
+		GetClientMgr().NotifyOthers(self.PlayerList, &protoMsg.ChineseChessJiangJuResp{BeJiangUid: otherUid})
 	case moveJueSha:
 		can = true
-		mgr.GetClientMgr().NotifyOthers(self.PlayerList, &protoMsg.ChineseChessJueShaResp{BeJueShaUid: otherUid})
+		GetClientMgr().NotifyOthers(self.PlayerList, &protoMsg.ChineseChessJueShaResp{BeJueShaUid: otherUid})
 		self.winUid = self.curUid
 	default:
 	}
 	if !can {
-		mgr.GetClientMgr().SendResult(agent, FAILED, StatusText[Game63])
+		GetClientMgr().SendResult(agent, FAILED, StatusText[Game63])
 		return false
 	}
 	msg := &protoMsg.ChineseChessMoveResp{
@@ -365,7 +365,7 @@ func (self *Chinesechess) Playing(args []interface{}) bool {
 			break
 		}
 	}
-	mgr.GetClientMgr().NotifyOthers(self.PlayerList, msg)
+	GetClientMgr().NotifyOthers(self.PlayerList, msg)
 	self.Timer.Stop()
 	self.ChangeStateAndWork(protoMsg.GameScene_Playing)
 	return true
@@ -405,18 +405,18 @@ func (self *Chinesechess) ReadyOP(args []interface{}) {
 	_ = args[1]
 	//【消息】
 	m := args[0].(*protoMsg.ChineseChessReadyReq)
-	agent := args[1].(mgr.Agent)
+	agent := args[1].(Agent)
 	if protoMsg.GameScene_Start <= self.GameInfo.Scene {
-		mgr.GetClientMgr().SendResult(agent, FAILED, StatusText[Game04])
+		GetClientMgr().SendResult(agent, FAILED, StatusText[Game04])
 		return
 	}
 
-	person := agent.UserData().(*mgr.Player)
+	person := agent.UserData().(*Player)
 	msg := &protoMsg.ChineseChessReadyResp{
 		Uid:     person.UserID,
 		IsReady: m.IsReady,
 	}
-	mgr.GetClientMgr().NotifyOthers(self.PlayerList, msg)
+	GetClientMgr().NotifyOthers(self.PlayerList, msg)
 	if self.redCamp != nil && self.blackCamp != nil {
 		self.ChangeStateAndWork(protoMsg.GameScene_Setting)
 	}
@@ -427,23 +427,23 @@ func (self *Chinesechess) SetTimeOP(args []interface{}) {
 	_ = args[1]
 	//【消息】
 	m := args[0].(*protoMsg.ChineseChessSetTimeReq)
-	agent := args[1].(mgr.Agent)
+	agent := args[1].(Agent)
 	if self.GameInfo.Scene != protoMsg.GameScene_Setting {
-		mgr.GetClientMgr().SendResult(agent, FAILED, StatusText[Game04])
+		GetClientMgr().SendResult(agent, FAILED, StatusText[Game04])
 		return
 	}
 	if maxTimeout < m.Timeout {
-		mgr.GetClientMgr().SendResult(agent, FAILED, StatusText[Game61])
+		GetClientMgr().SendResult(agent, FAILED, StatusText[Game61])
 		return
 	}
 	if m.Timeout <= INVALID {
-		mgr.GetClientMgr().SendResult(agent, FAILED, StatusText[Game62])
+		GetClientMgr().SendResult(agent, FAILED, StatusText[Game62])
 		return
 	}
 
-	person := agent.UserData().(*mgr.Player)
+	person := agent.UserData().(*Player)
 	if person.UserID != self.curUid {
-		mgr.GetClientMgr().SendResult(agent, FAILED, StatusText[Game21])
+		GetClientMgr().SendResult(agent, FAILED, StatusText[Game21])
 		return
 	}
 
@@ -452,7 +452,7 @@ func (self *Chinesechess) SetTimeOP(args []interface{}) {
 		Uid:     person.UserID,
 		Timeout: m.Timeout,
 	}
-	mgr.GetClientMgr().NotifyOthers(self.PlayerList, msg)
+	GetClientMgr().NotifyOthers(self.PlayerList, msg)
 	self.ChangeStateAndWork(protoMsg.GameScene_Confirm)
 }
 
@@ -461,17 +461,17 @@ func (self *Chinesechess) ConfirmOP(args []interface{}) {
 	_ = args[1]
 	//【消息】
 	m := args[0].(*protoMsg.ChineseChessAgreeTimeReq)
-	agent := args[1].(mgr.Agent)
+	agent := args[1].(Agent)
 	if self.GameInfo.Scene != protoMsg.GameScene_WaitOperate {
-		mgr.GetClientMgr().SendResult(agent, FAILED, StatusText[Game04])
+		GetClientMgr().SendResult(agent, FAILED, StatusText[Game04])
 		return
 	}
-	person := agent.UserData().(*mgr.Player)
+	person := agent.UserData().(*Player)
 	msg := &protoMsg.ChineseChessAgreeTimeResp{
 		Uid:     person.UserID,
 		IsAgree: m.IsAgree,
 	}
-	mgr.GetClientMgr().NotifyOthers(self.PlayerList, msg)
+	GetClientMgr().NotifyOthers(self.PlayerList, msg)
 	if !m.IsAgree {
 		if self.Timer != nil {
 			self.Timer.Stop()
