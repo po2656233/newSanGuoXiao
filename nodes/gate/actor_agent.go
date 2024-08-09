@@ -224,7 +224,7 @@ func (p *ActorAgent) onSimpleSessionClose(agent *simple.Agent) {
 	childId := cstring.ToString(session.Uid)
 	if childId != "" {
 		targetPath := cfacade.NewChildPath(serverId, ActIdGame, childId)
-		p.Call(targetPath, SessionClose, nil)
+		p.Call(targetPath, FuncSessionClose, nil)
 	}
 
 	// 自己退出

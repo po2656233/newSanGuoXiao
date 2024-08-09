@@ -4,10 +4,12 @@ import (
 	"errors"
 	"fmt"
 	superGorm "github.com/po2656233/superplace/components/gorm"
+	superConst "github.com/po2656233/superplace/const"
 	exSnowflake "github.com/po2656233/superplace/extend/snowflake"
 	clog "github.com/po2656233/superplace/logger"
 	cactor "github.com/po2656233/superplace/net/actor"
 	"gorm.io/gorm"
+	"strings"
 	. "superman/internal/constant"
 	sqlmodel "superman/internal/sql_model"
 	. "superman/internal/utils"
@@ -23,7 +25,7 @@ type ActorDB struct {
 }
 
 func (self *ActorDB) AliasID() string {
-	return "db"
+	return strings.Trim(DBActor, superConst.DOT)
 }
 
 // OnInit Actor初始化前触发该函数
@@ -254,9 +256,10 @@ func (self *ActorDB) eraseRemain(tid int64, amount int32) (int32, error) {
 func (self *ActorDB) delTable(rid, tid int64) error {
 	self.Lock()
 	defer self.Unlock()
-	tb := sqlmodel.Table{}
-	db := self.db.Table(tb.TableName()).Select("rid").Where("id=?", tid).Find(&rid)
-	err := db.Delete(tb).Error
+	tb := sqlmodel.Table{
+		ID: tid,
+	}
+	err := self.db.Model(tb).Delete(tb).Error
 	if !CheckError(err) {
 		return err
 	}
@@ -291,11 +294,13 @@ func (self *ActorDB) checkRoom(hostid int64, name string) (rid int64) {
 	return
 }
 
-func (self *ActorDB) checkRoomHost(hostid, rid int64) (count int64) {
+// checkRoomCount查看房间数目
+func (self *ActorDB) checkRoomExist(hostid, rid int64) (bool, error) {
 	room := sqlmodel.Room{}
-	err := self.db.Table(room.TableName()).Select("id").Where("hostid = ? AND id = ?", hostid, rid).Count(&count).Error
+	count := int64(0)
+	err := self.db.Table(room.TableName()).Where("hostid = ? AND id = ? ", hostid, rid).Count(&count).Error
 	CheckError(err)
-	return
+	return 0 < count, err
 }
 
 ////////////////////////////////////////////////////////////

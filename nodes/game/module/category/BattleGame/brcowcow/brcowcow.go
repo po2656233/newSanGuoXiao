@@ -310,11 +310,11 @@ func (self *BrcowcowGame) Over(args []interface{}) {
 	}
 	// 结算
 	result := fmt.Sprintf("Banker[%v] T[%v] D[%v] X[%v] H[%v] 中奖区域:%v",
-		self.openInfo.BankerCard.CardValue,
-		self.openInfo.TianCard.CardValue,
-		self.openInfo.DiCard.CardValue,
-		self.openInfo.XuanCard.CardValue,
-		self.openInfo.HuangCard.CardValue,
+		GetCardsText(self.openInfo.BankerCard.Cards),
+		GetCardsText(self.openInfo.TianCard.Cards),
+		GetCardsText(self.openInfo.DiCard.Cards),
+		GetCardsText(self.openInfo.XuanCard.Cards),
+		GetCardsText(self.openInfo.HuangCard.Cards),
 		self.openInfo.AwardArea)
 	self.T.ChairSettle(self.Name, self.Inning, result)
 

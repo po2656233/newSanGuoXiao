@@ -38,18 +38,18 @@ const (
 )
 
 const (
-	FuncLogin     = "login"
-	FuncEnter     = "enter"
-	FuncRequest   = "request"
-	FuncSimpLogin = "simpleLogin"
+	FuncLogin        = "login"
+	FuncEnter        = "enter"
+	FuncRequest      = "request"
+	FuncSimpLogin    = "simpleLogin"
+	FuncSessionClose = "sessionClose"
 )
 
 const (
-	DbList       = "db_id_list"
-	CenterDb     = "center_db_id"
-	GameDb       = "game_db_id"
-	TcpAddr      = ":10011"
-	SessionClose = "sessionClose"
+	DbList   = "db_id_list"
+	CenterDb = "center_db_id"
+	GameDb   = "game_db_id"
+	TcpAddr  = ":10011"
 )
 
 // sdk平台类型

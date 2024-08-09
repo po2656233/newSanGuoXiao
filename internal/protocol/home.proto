@@ -122,6 +122,7 @@ message DeleteTableReq {
 message DeleteTableResp {
   int64 tid = 1;
   int64 rid = 2;
+  int64 hostId = 3;
 }
 // 修改用户昵称
 message FixNickNameReq{

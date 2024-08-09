@@ -2,9 +2,9 @@ package game
 
 import (
 	"github.com/po2656233/superplace"
-	sgxCron "github.com/po2656233/superplace/components/cron"
-	sgxGops "github.com/po2656233/superplace/components/gops"
-	sgxSnowflake "github.com/po2656233/superplace/extend/snowflake"
+	"github.com/po2656233/superplace/components/cron"
+	"github.com/po2656233/superplace/components/gops"
+	"github.com/po2656233/superplace/extend/snowflake"
 	cstring "github.com/po2656233/superplace/extend/string"
 	sgxUtils "github.com/po2656233/superplace/extend/utils"
 	"superman/internal/component/check_center"
@@ -20,15 +20,15 @@ func Run(profileFilePath, nodeId string) {
 
 	// snowflake global id
 	serverId, _ := cstring.ToInt64(nodeId)
-	sgxSnowflake.SetDefaultNode(serverId)
+	exSnowflake.SetDefaultNode(serverId)
 
 	// 配置sgx引擎
 	app := superplace.Configure(profileFilePath, nodeId, false, superplace.Cluster)
 
 	// diagnose
-	app.Register(sgxGops.New())
+	app.Register(superGops.New())
 	// 注册调度组件
-	app.Register(sgxCron.New())
+	app.Register(superCron.New())
 	// 注册数据配置组件
 	app.Register(conf.New())
 	// 注册检测中心节点组件，确认中心节点启动后，再启动当前节点

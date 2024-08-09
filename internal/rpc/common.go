@@ -51,7 +51,7 @@ func (ms *MessageSender) SendData(req proto.Message) interface{} {
 
 // Ping 实现了Ping功能
 func Ping(app facade.IApplication) bool {
-	_, errCode := SendData(app, SourcePath, OpsActor, NodeTypeCenter, &pb.PingReq{})
+	_, errCode := SendDataToOps(app, &pb.PingReq{})
 	return errCode == code.OK
 }
 
@@ -97,10 +97,12 @@ func SendData(app facade.IApplication, source, actorID, nodeType string, req pro
 	}
 	return resp, errCode
 }
+
 // SendDataToDB 发送给数据库节点
 func SendDataToDB(app facade.IApplication, req proto.Message) (interface{}, int32) {
 	return SendData(app, SourcePath, DBActor, NodeTypeCenter, req)
 }
+
 // SendDataToAcc 发送给账号节点
 func SendDataToAcc(app facade.IApplication, req proto.Message) (interface{}, int32) {
 	return SendData(app, SourcePath, AccActor, NodeTypeCenter, req)
@@ -108,7 +110,9 @@ func SendDataToAcc(app facade.IApplication, req proto.Message) (interface{}, int
 func SendDataToOps(app facade.IApplication, req proto.Message) (interface{}, int32) {
 	return SendData(app, SourcePath, OpsActor, NodeTypeCenter, req)
 }
-
+func SendDataToGame(app facade.IApplication, req proto.Message) (interface{}, int32) {
+	return SendData(app, SourcePath, GameActor, NodeTypeCenter, req)
+}
 func GetTargetPath(app facade.IApplication, actorID, nodeType string) string {
 	list := app.Discovery().ListByType(nodeType)
 	if len(list) == 0 {

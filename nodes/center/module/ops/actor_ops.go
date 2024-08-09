@@ -1,8 +1,10 @@
 package ops
 
 import (
-	"github.com/po2656233/superplace/const/code"
+	superConst "github.com/po2656233/superplace/const"
 	cactor "github.com/po2656233/superplace/net/actor"
+	"strings"
+	. "superman/internal/constant"
 	"superman/internal/protocol/gofile"
 )
 
@@ -17,7 +19,7 @@ type (
 )
 
 func (p *ActorOps) AliasID() string {
-	return "ops"
+	return strings.Trim(OpsActor, superConst.DOT)
 }
 
 // OnInit 注册remote函数
@@ -27,5 +29,5 @@ func (p *ActorOps) OnInit() {
 
 // Ping 请求center是否响应
 func (p *ActorOps) Ping() (*pb.Bool, int32) {
-	return pingReturn, code.OK
+	return pingReturn, SUCCESS
 }

@@ -27,7 +27,6 @@ type Agent interface {
 // userID agent
 type ClientManger struct {
 	sync.Map
-	app facade.IApplication
 }
 
 var clientManger *ClientManger = nil
@@ -38,19 +37,23 @@ func GetClientMgr() *ClientManger {
 	clientOnce.Do(func() {
 		clientManger = &ClientManger{
 			Map: sync.Map{},
-			app: nil,
 		}
 	})
 	return clientManger
 }
 
 func (self *ClientManger) SetApp(app facade.IApplication) {
-	if clientManger.app == nil {
-		clientManger.app = app
+	val, ok := self.Load("app")
+	if !ok || val == nil {
+		self.Store("app", app)
 	}
 }
 func (self *ClientManger) GetApp() facade.IApplication {
-	return clientManger.app
+	val, ok := self.Load("app")
+	if !ok {
+		return nil
+	}
+	return val.(facade.IApplication)
 }
 
 // Append 添加玩家

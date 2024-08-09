@@ -17,7 +17,7 @@ func New() *Component {
 }
 
 func (c *Component) Name() string {
-	return "run_check_component"
+	return "check_heart"
 }
 
 func (c *Component) OnAfterInit() {

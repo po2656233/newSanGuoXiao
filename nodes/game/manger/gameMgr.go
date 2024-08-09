@@ -178,6 +178,7 @@ func (g *Game) PlayerWork(f func(int64)) {
 func (self *Game) ChangeState(state protoMsg.GameScene) {
 	self.GameInfo.Scene = state
 	self.TimeStamp = time.Now().Unix()
+
 	log.Infof("[%v:%v]   \t当前场景:%v ", self.Name, self.Id, protoMsg.GameScene_name[int32(state)])
 }
 

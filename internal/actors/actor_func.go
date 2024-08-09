@@ -233,7 +233,7 @@ func (self *ActorDB) CreateRoom(req *pb.CreateRoomReq) (*pb.CreateRoomResp, erro
 		TableCount: 0,
 		MaxTable:   maxTable,
 	}
-	rpc.SendData(self.App(), SourcePath, GameActor, NodeTypeGame, resp)
+	rpc.SendDataToGame(self.App(), resp)
 	return resp, nil
 }
 
@@ -268,7 +268,7 @@ func (self *ActorDB) CreateTable(req *pb.CreateTableReq) (*pb.CreateTableResp, e
 		Remain:     req.MaxRound, // 剩余以最大局数为准
 		OpenTime:   req.Opentime,
 	}
-	rpc.SendData(self.App(), SourcePath, GameActor, NodeTypeGame, resp)
+	rpc.SendDataToGame(self.App(), resp)
 	return resp, err
 }
 
@@ -278,15 +278,15 @@ func (self *ActorDB) DeleteTable(req *pb.DeleteTableReq) (*pb.DeleteTableResp, e
 	if rid == 0 {
 		return resp, fmt.Errorf("tid:%d no have rid", req.Tid)
 	}
-	count := self.checkRoomHost(req.HostId, rid)
-	if count == 0 {
-		return resp, fmt.Errorf("hostid:%d rid:%d no exist", req.HostId, rid)
+	ok, err := self.checkRoomExist(req.HostId, rid)
+	if !ok || err != nil {
+		return resp, fmt.Errorf("hostid:%d rid:%d no exist err:%v", req.HostId, rid, err)
 	}
 	// 检测游戏是否处于关闭状态，才能
-	err := self.delTable(req.HostId, req.Tid)
+	err = self.delTable(req.HostId, req.Tid)
 	resp.Tid = req.Tid
 	resp.Rid = rid
-	rpc.SendData(self.App(), SourcePath, GameActor, NodeTypeGame, resp)
+	rpc.SendDataToGame(self.App(), resp)
 	return resp, err
 }
 

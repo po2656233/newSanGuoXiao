@@ -1,9 +1,9 @@
 package db
 
 import (
-	sgxUtils "github.com/po2656233/superplace/extend/utils"
-	sgxFacade "github.com/po2656233/superplace/facade"
-	sgxLogger "github.com/po2656233/superplace/logger"
+	"github.com/po2656233/superplace/extend/utils"
+	"github.com/po2656233/superplace/facade"
+	log "github.com/po2656233/superplace/logger"
 )
 
 var (
@@ -11,7 +11,7 @@ var (
 )
 
 type Component struct {
-	sgxFacade.Component
+	facade.Component
 }
 
 func (c *Component) Name() string {
@@ -27,8 +27,8 @@ func (c *Component) OnAfterInit() {
 	//addOnload(loadDevAccount)
 
 	for _, fn := range onLoadFuncList {
-		sgxUtils.Try(fn, func(errString string) {
-			sgxLogger.Warnf(errString)
+		exUtils.Try(fn, func(errString string) {
+			log.Warnf(errString)
 		})
 	}
 }

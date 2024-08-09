@@ -2,7 +2,7 @@ package account
 
 import "C"
 import (
-	"github.com/po2656233/superplace/const/code"
+	superConst "github.com/po2656233/superplace/const"
 	cactor "github.com/po2656233/superplace/net/actor"
 	"strings"
 	. "superman/internal/constant"
@@ -18,7 +18,7 @@ type (
 )
 
 func (p *ActorAccount) AliasID() string {
-	return "account"
+	return strings.Trim(AccActor, superConst.DOT)
 }
 
 // OnInit center为后端节点，不直接与客户端通信，所以了一些remote函数，供RPC调用
@@ -76,5 +76,5 @@ func (p *ActorAccount) GetUserID(req *pb.GetUserIDReq) (*pb.GetUserIDResp, int32
 		return nil, Login07
 	}
 
-	return &pb.GetUserIDResp{Uid: uid}, code.OK
+	return &pb.GetUserIDResp{Uid: uid}, SUCCESS
 }

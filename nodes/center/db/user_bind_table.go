@@ -2,7 +2,7 @@ package db
 
 import (
 	"fmt"
-	sgxTime "github.com/po2656233/superplace/extend/time"
+	"github.com/po2656233/superplace/extend/time"
 	"superman/internal/guid"
 )
 
@@ -46,7 +46,7 @@ func BindUID(sdkId, pid int32, openId string) (int64, bool) {
 		SdkId:    sdkId,
 		PID:      pid,
 		OpenId:   openId,
-		BindTime: sgxTime.Now().ToMillisecond(),
+		BindTime: exTime.Now().ToMillisecond(),
 	}
 
 	cacheKey := fmt.Sprintf(uidKey, pid, openId)

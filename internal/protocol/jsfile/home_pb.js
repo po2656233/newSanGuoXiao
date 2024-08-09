@@ -5874,7 +5874,8 @@ proto.pb.DeleteTableResp.prototype.toObject = function(opt_includeInstance) {
 proto.pb.DeleteTableResp.toObject = function(includeInstance, msg) {
   var obj = {
     tid: jspb.Message.getFieldWithDefault(msg, 1, 0),
-    rid: jspb.Message.getFieldWithDefault(msg, 2, 0)
+    rid: jspb.Message.getFieldWithDefault(msg, 2, 0),
+    hostid: jspb.Message.getFieldWithDefault(msg, 3, 0)
   };
 
   if (includeInstance) {
@@ -5919,6 +5920,10 @@ proto.pb.DeleteTableResp.deserializeBinaryFromReader = function(msg, reader) {
       var value = /** @type {number} */ (reader.readInt64());
       msg.setRid(value);
       break;
+    case 3:
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setHostid(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -5962,6 +5967,13 @@ proto.pb.DeleteTableResp.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
+  f = message.getHostid();
+  if (f !== 0) {
+    writer.writeInt64(
+      3,
+      f
+    );
+  }
 };
 
 
@@ -5992,6 +6004,21 @@ proto.pb.DeleteTableResp.prototype.getRid = function() {
 /** @param {number} value */
 proto.pb.DeleteTableResp.prototype.setRid = function(value) {
   jspb.Message.setProto3IntField(this, 2, value);
+};
+
+
+/**
+ * optional int64 hostId = 3;
+ * @return {number}
+ */
+proto.pb.DeleteTableResp.prototype.getHostid = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 3, 0));
+};
+
+
+/** @param {number} value */
+proto.pb.DeleteTableResp.prototype.setHostid = function(value) {
+  jspb.Message.setProto3IntField(this, 3, value);
 };
 
 
