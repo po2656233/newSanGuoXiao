@@ -309,7 +309,7 @@ func (self *BrcowcowGame) Over(args []interface{}) {
 		}
 	}
 	// 结算
-	result := fmt.Sprintf("Banker[%v] T[%v] D[%v] X[%v] H[%v] 中奖区域:%v",
+	result := fmt.Sprintf("庄[%v] T[%v] D[%v] X[%v] H[%v] 中奖区域:%v",
 		GetCardsText(self.openInfo.BankerCard.Cards),
 		GetCardsText(self.openInfo.TianCard.Cards),
 		GetCardsText(self.openInfo.DiCard.Cards),
@@ -322,10 +322,10 @@ func (self *BrcowcowGame) Over(args []interface{}) {
 	checkout.TotalSettlement = allAreaInfo[:]
 	checkout.TotalSettlement = append(checkout.TotalSettlement, bankerAwardScore)
 	self.T.ChairWork(func(chair *Chair) {
-		if chair.Gain != INVALID {
+		if chair.Total != INVALID {
 			checkout.MyAcquire = chair.Gain
-			GlobalSender.SendTo(chair.UserID, checkout)
 		}
+		GlobalSender.SendTo(chair.UserID, checkout)
 	})
 
 	log.Infof("[%v:%v]   \t结算注单... 各区域情况:%v", self.Name, self.T.Id, allAreaInfo)

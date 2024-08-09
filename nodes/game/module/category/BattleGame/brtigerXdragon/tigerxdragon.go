@@ -267,10 +267,10 @@ func (self *TigerXdragonGame) Over(args []interface{}) {
 	checkout := &protoMsg.TigerXdragonCheckoutResp{}
 	checkout.Acquires = allAreaInfo
 	self.T.ChairWork(func(chair *Chair) {
-		if chair.Gain != INVALID {
+		if chair.Total != INVALID {
 			checkout.MyAcquire = chair.Gain
-			GlobalSender.SendTo(chair.UserID, checkout)
 		}
+		GlobalSender.SendTo(chair.UserID, checkout)
 	})
 
 	// 统一结算

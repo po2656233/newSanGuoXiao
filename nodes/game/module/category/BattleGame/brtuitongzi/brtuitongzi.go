@@ -289,10 +289,9 @@ func (self *BrTuitongziGame) Over(args []interface{}) {
 	checkout.Acquires = allAreaInfo
 	// 统一结算
 	self.T.ChairWork(func(chair *Chair) {
-		if chair.Total == INVALID {
-			return
+		if chair.Total != INVALID {
+			checkout.MyAcquire = chair.Gain
 		}
-		checkout.MyAcquire = chair.Gain
 		GetClientMgr().SendTo(chair.UserID, checkout)
 	})
 	log.Infof("[%v:%v]   \t结算注单... 各区域情况:%v", self.GameInfo.Name, self.T.Id, allAreaInfo)

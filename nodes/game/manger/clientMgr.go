@@ -87,6 +87,10 @@ func (self *ClientManger) DeleteClient(userID int64) {
 // 全网广播
 func (self *ClientManger) NotifyAll(msg proto.Message) {
 	self.Range(func(key, value interface{}) bool {
+		if _, ok := key.(int64); !ok {
+			return true
+		}
+
 		agent := value.(Agent)
 		if nil == agent {
 			log.Debugf("无效客户端:%v", value)
@@ -174,6 +178,10 @@ func (self *ClientManger) SendTo(userID int64, msg proto.Message) {
 	//defer wait.Done()
 	//wait.Add(1)
 	self.Range(func(key, value interface{}) bool {
+		uid, ok := key.(int64)
+		if !ok {
+			return true
+		}
 		agent := value.(Agent)
 		if nil == agent {
 			log.Debugf("无效客户端:%v", value)
@@ -182,7 +190,7 @@ func (self *ClientManger) SendTo(userID int64, msg proto.Message) {
 
 		//获取用户ID
 		//userData := agent.UserData()
-		if key.(int64) == userID {
+		if uid == userID {
 			//广播给客户端
 			agent.WriteMsg(msg)
 			//log.Debugf("发送[指定]玩家：%v", userID)
@@ -197,7 +205,10 @@ func (self *ClientManger) NotifyButOthers(userIDs []int64, msg proto.Message) {
 	//defer wait.Done()
 	//wait.Add(1)
 	self.Range(func(key, value interface{}) bool {
-		uid_k := key.(int64)
+		uid, ok := key.(int64)
+		if !ok {
+			return true
+		}
 		agent := value.(Agent)
 		if nil == agent {
 			log.Debugf("无效客户端:%v", value)
@@ -205,13 +216,13 @@ func (self *ClientManger) NotifyButOthers(userIDs []int64, msg proto.Message) {
 		}
 
 		//获取用户ID
-		for _, uid := range userIDs {
-			if uid == uid_k {
+		for _, item := range userIDs {
+			if item == uid {
 				return true
 			}
 		}
 
-		log.Debugf("通知[部分]玩家：%v", uid_k)
+		log.Debugf("通知[部分]玩家：%v", uid)
 		//广播给客户端
 		agent.WriteMsg(msg)
 		return true
@@ -221,19 +232,22 @@ func (self *ClientManger) NotifyButOthers(userIDs []int64, msg proto.Message) {
 // 发送这批玩家,但除某一个外
 func (self *ClientManger) NotifyButOne(userIDs []int64, noNeedToSend int64, msg proto.Message) {
 	self.Range(func(key, value interface{}) bool {
-		uid_k := key.(int64)
+		uid, ok := key.(int64)
+		if !ok {
+			return true
+		}
 		agent := value.(Agent)
 		if nil == agent {
 			log.Debugf("无效客户端:%v", value)
 			return true
 		}
 
-		for _, uid := range userIDs {
-			if uid == uid_k && uid != noNeedToSend {
+		for _, item := range userIDs {
+			if item == uid && uid != noNeedToSend {
 				//广播给客户端
 				agent.WriteMsg(msg)
 				break
-				//log.Debugf("通知[指定]玩家：%v", uid_k)
+				//log.Debugf("通知[指定]玩家：%v", uid)
 			}
 		}
 		return true
@@ -243,7 +257,10 @@ func (self *ClientManger) NotifyButOne(userIDs []int64, noNeedToSend int64, msg 
 // 发给这部分玩家
 func (self *ClientManger) NotifyOthers(userIDs []int64, msg proto.Message) {
 	self.Range(func(key, value interface{}) bool {
-		uidKey := key.(int64)
+		uid, ok := key.(int64)
+		if !ok {
+			return true
+		}
 		agent := value.(Agent)
 		if nil == agent {
 			log.Debugf("无效客户端:%v", value)
@@ -251,13 +268,13 @@ func (self *ClientManger) NotifyOthers(userIDs []int64, msg proto.Message) {
 		}
 
 		//获取用户ID
-		for _, uid := range userIDs {
-			if uid == uidKey {
+		for _, item := range userIDs {
+			if uid == item {
 				//广播给客户端
 				agent.WriteMsg(msg)
 				break
 				//				l
-				// og.Debugf("通知[指定]玩家：%v", uid_k)
+				// og.Debugf("通知[指定]玩家：%v", uid)
 			}
 		}
 		return true

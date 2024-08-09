@@ -17,7 +17,10 @@ var dbCmpt *db.Component
 
 func GetDBCmpt() *db.Component {
 	if dbCmpt == nil {
-		dbCmpt, _ = GetClientMgr().GetApp().Find(GameDb).(*db.Component)
+		var ok bool
+		if dbCmpt, ok = GetClientMgr().GetApp().Find(GameDb).(*db.Component); !ok {
+			panic("DB NOT init!!!")
+		}
 	}
 	return dbCmpt
 }
@@ -306,11 +309,6 @@ func (tb *Table) ChairSettle(name, inning, result string) {
 			chair.Gain = int64(1000-tb.Commission) * chair.Gain / 1000
 		}
 		//通知金币变化
-		cmpt := GetDBCmpt()
-		if cmpt == nil {
-			log.Errorf("[%v:%v] inning:[%v] ChairSettle NO dbCmpt!!!", name, tb.Id, inning)
-			return true
-		}
 		record := &sql_model.Record{
 			UID:       chair.UserID,
 			Tid:       tb.Id,
@@ -325,7 +323,7 @@ func (tb *Table) ChairSettle(name, inning, result string) {
 			UpdateBy:  0,
 			CreateBy:  0,
 		}
-		err := dbCmpt.AddRecord(record)
+		err := GetDBCmpt().AddRecord(record)
 		if err != nil {
 			log.Errorf("[%v:%v] inning:[%v] AddRecordReq is failed. code:CodeSettle", name, tb.Id, inning)
 			return true
@@ -406,12 +404,7 @@ func (tb *Table) CalibratingRemain(delCount int32) {
 	if tb.MaxRound == Unlimited {
 		return
 	}
-
-	cmpt := GetDBCmpt()
-	if cmpt == nil {
-		return
-	}
-	remain, err := cmpt.EraseRemain(tb.Id, delCount)
+	remain, err := GetDBCmpt().EraseRemain(tb.Id, delCount)
 	if err != nil {
 		log.Errorf("tid[%v] CalibratingRemain", tb.Id)
 		return

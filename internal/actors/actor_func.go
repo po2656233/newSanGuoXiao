@@ -6,7 +6,7 @@ import (
 	clog "github.com/po2656233/superplace/logger"
 	"gorm.io/gorm"
 	"strconv"
-	. "superman/internal/constant"
+	//. "superman/internal/constant"
 	pb "superman/internal/protocol/gofile"
 	"superman/internal/rpc"
 	sqlmodel "superman/internal/sql_model"

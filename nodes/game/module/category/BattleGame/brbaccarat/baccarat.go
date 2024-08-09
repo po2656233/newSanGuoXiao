@@ -372,10 +372,10 @@ func (self *BaccaratGame) Over(args []interface{}) bool {
 	result := fmt.Sprintf("闲:[%v] 庄:[%v] 中奖区域:%v", GetCardsText(self.cbPlayerCards.Cards), GetCardsText(self.cbBankerCards.Cards), self.openInfo.AwardArea)
 	self.T.ChairSettle(self.Name, self.Inning, result)
 	self.T.ChairWork(func(chair *Chair) {
-		if chair.Total == INVALID {
-			return
+		if chair.Total != INVALID {
+			checkout.MyAcquire = chair.Gain
 		}
-		checkout.MyAcquire = chair.Gain
+
 		GetClientMgr().SendTo(chair.UserID, checkout)
 	})
 

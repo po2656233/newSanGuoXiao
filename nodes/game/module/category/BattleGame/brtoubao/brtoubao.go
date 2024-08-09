@@ -293,10 +293,9 @@ func (self *BrToubaoGame) Over(args []interface{}) {
 	checkout.Acquires = allAreaInfo
 	// 统一结算
 	self.T.ChairWork(func(chair *Chair) {
-		if chair.Total == INVALID {
-			return
+		if chair.Total != INVALID {
+			checkout.MyAcquire = chair.Gain
 		}
-		checkout.MyAcquire = chair.Gain
 		GetClientMgr().SendTo(chair.UserID, checkout)
 	})
 
