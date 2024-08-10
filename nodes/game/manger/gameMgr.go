@@ -45,8 +45,8 @@ type IDevice interface {
 }
 
 // NewGameFunc 实例回调(根据桌子号创建游戏)
-type NewGameFunc func(gid int64, table *Table) IGameOperate
-type NewSingleGameFunc func(gid, tid int64) IGameOperate
+type NewGameFunc func(gid int64, table *Table) (IGameOperate, string)
+type NewSingleGameFunc func(gid, tid int64) (IGameOperate, string)
 type CalculateFunc func(info CalculateInfo) (nowMoney, factDeduct int64, isOK bool)
 
 // ClearFunc 清场回调

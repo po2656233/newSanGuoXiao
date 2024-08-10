@@ -9,19 +9,20 @@ type Controller struct {
 func (p *Controller) Init() {
 	group := p.Group("/")
 	group.GET("/", p.index)
-	group.GET("/server/list/:pid", p.serverList) //服务器网关地址
-	group.POST("/register", p.register)          //用户注册
-	group.POST("/login", p.login)                //用户登录
-	group.POST("/recharge", p.recharge)                //用户登录
+
+	group.POST("/register", p.register) //用户注册
+	group.POST("/login", p.login)       //用户登录
+	group.POST("/recharge", p.recharge) //用户登录
 
 	list := &superGin.Group{
 		RouterGroup: group.Group("/list"),
 	}
-	list.GET("/pid", p.pidList)     //包列表
-	list.GET("/class", p.classList) //分类列表
-	list.GET("/room", p.roomList)   //房间列表
-	list.GET("/table", p.tableList) //牌桌列表
-	list.GET("/game", p.gameList)   //游戏列表
+	list.GET("/pid", p.pidList)            //包列表
+	list.GET("/server/:pid", p.serverList) //服务器网关地址
+	list.GET("/class", p.classList)        //分类列表
+	list.GET("/room", p.roomList)          //房间列表
+	list.GET("/table", p.tableList)        //牌桌列表
+	list.GET("/game", p.gameList)          //游戏列表
 
 	create := &superGin.Group{
 		RouterGroup: group.Group("/create"),

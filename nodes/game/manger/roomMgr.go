@@ -103,7 +103,7 @@ func Create(info *protoMsg.RoomInfo) *Room {
 	} else {
 		rm.waiting = make(chan Waiter, rm.MaxPerson)
 	}
-	log.Infof("开启房间[%v] (游戏队列检测) [%v]牌桌数:%v 最大牌桌数:%v 最大人数:%v", rm.Id, rm.Name, rm.TableCount, rm.MaxTable, rm.MaxPerson)
+	log.Infof("[%v:%v] >>>开启游戏队列检测<<< 牌桌数:%v 最大牌桌数:%v 最大人数:%v", rm.Id, rm.Name, rm.TableCount, rm.MaxTable, rm.MaxPerson)
 	// 创建一个独立的上下文用于这个Room的处理
 	ctx, cancel := context.WithCancel(context.Background())
 	// 启动协程处理Room的等待队列
@@ -151,11 +151,12 @@ func (self *Room) AddTable(table *protoMsg.TableInfo, f NewGameFunc) (*Table, er
 		sitters:   sync.Map{},
 		isStart:   false,
 	}
-	tb.GameHandle = f(table.Gid, tb) //创建游戏句柄
+	var gameName string
+	tb.GameHandle, gameName = f(table.Gid, tb) //创建游戏句柄
 	if tb.GameHandle == nil {
-		return nil, fmt.Errorf("房间ID:%d 牌桌ID:%d(暂不可用) 游戏ID:%d %s!!! ", table.Rid, table.Id, table.Gid, StatusText[Room17])
+		return nil, fmt.Errorf("房间ID:%d 牌桌ID:%d 游戏ID:%d err:%s!!! ", table.Rid, table.Id, table.Gid, StatusText[Room17])
 	}
-	log.Infof("[%v:%v]房 [%v:%v]牌桌 游戏[%v] 創建成功!", self.Id, self.Name, tb.Id, tb.Name, table.Gid)
+	log.Infof("[%v:%v]房->(%v:%v)桌 <%v:%v> 游戏創建成功!", self.Id, self.Name, tb.Id, tb.Name, table.Gid, gameName)
 	self.tables = append(self.tables, tb)
 	return tb, nil
 }

@@ -9,7 +9,6 @@ import (
 	sgxUtils "github.com/po2656233/superplace/extend/utils"
 	"superman/internal/component/check_center"
 	"superman/internal/conf"
-	"superman/nodes/game/db"
 	"superman/nodes/game/module/player"
 )
 
@@ -33,8 +32,8 @@ func Run(profileFilePath, nodeId string) {
 	app.Register(conf.New())
 	// 注册检测中心节点组件，确认中心节点启动后，再启动当前节点
 	app.Register(checkCenter.New())
-	// 注册db组件
-	app.Register(db.New())
+	// 注册db组件[废弃]:方便扩展部署,移除游戏服直接操作db数据库
+	// app.Register(db.New())
 
 	app.AddActors(
 		&player.ActorGame{},

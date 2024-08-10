@@ -50,6 +50,7 @@ const (
 	CenterDb = "center_db_id"
 	GameDb   = "game_db_id"
 	TcpAddr  = ":10011"
+	KcpAddr  = ":10021"
 )
 
 // sdk平台类型

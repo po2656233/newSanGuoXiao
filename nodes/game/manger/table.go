@@ -2,28 +2,26 @@ package manger
 
 import (
 	log "github.com/po2656233/superplace/logger"
-	"gorm.io/gorm"
 	. "superman/internal/constant"
 	protoMsg "superman/internal/protocol/gofile"
-	"superman/internal/sql_model"
+	"superman/internal/rpc"
 	"superman/internal/utils"
-	"superman/nodes/game/db"
 	"sync"
 	"sync/atomic"
 	"time"
 )
 
-var dbCmpt *db.Component
-
-func GetDBCmpt() *db.Component {
-	if dbCmpt == nil {
-		var ok bool
-		if dbCmpt, ok = GetClientMgr().GetApp().Find(GameDb).(*db.Component); !ok {
-			panic("DB NOT init!!!")
-		}
-	}
-	return dbCmpt
-}
+// 废弃
+//var dbCmpt *db.Component
+//func GetDBCmpt() *db.Component {
+//	if dbCmpt == nil {
+//		var ok bool
+//		if dbCmpt, ok = GetClientMgr().GetApp().Find(GameDb).(*db.Component); !ok {
+//			panic("DB NOT init!!!")
+//		}
+//	}
+//	return dbCmpt
+//}
 
 // Table 桌牌
 type Table struct {
@@ -309,31 +307,30 @@ func (tb *Table) ChairSettle(name, inning, result string) {
 			chair.Gain = int64(1000-tb.Commission) * chair.Gain / 1000
 		}
 		//通知金币变化
-		record := &sql_model.Record{
-			UID:       chair.UserID,
-			Tid:       tb.Id,
-			Payment:   chair.Gain,
-			Code:      CodeSettle,
-			Order:     inning,
-			Result:    result,
-			Remark:    name,
-			CreatedAt: time.Time{},
-			UpdatedAt: time.Time{},
-			DeletedAt: gorm.DeletedAt{},
-			UpdateBy:  0,
-			CreateBy:  0,
+		data, code := rpc.SendDataToDB(GetClientMgr().GetApp(), &protoMsg.AddRecordReq{
+			Uid:     chair.UserID,
+			Tid:     tb.Id,
+			Payment: chair.Gain,
+			Code:    CodeSettle,
+			Order:   inning,
+			Result:  result,
+			Remark:  name,
+		})
+		if code != SUCCESS {
+			log.Warnf("[%v:%v] inning:[%v] AddRecordReq is failed. code:%v", name, tb.Id, inning, code)
+			return true
 		}
-		err := GetDBCmpt().AddRecord(record)
-		if err != nil {
-			log.Errorf("[%v:%v] inning:[%v] AddRecordReq is failed. code:CodeSettle", name, tb.Id, inning)
+		resp, ok := data.(*protoMsg.AddRecordResp)
+		if !ok {
+			log.Warnf("[%v:%v] inning:[%v] AddRecordReq is failed. to AddRecordResp", name, tb.Id, inning)
 			return true
 		}
 		changeGold := &protoMsg.NotifyBalanceChangeResp{
 			UserID:    chair.UserID,
 			Code:      CodeSettle,
 			AlterCoin: chair.Gain,
-			Coin:      record.Gold,
-			Reason:    record.Order,
+			Coin:      resp.Gold,
+			Reason:    resp.Order,
 		}
 		GetClientMgr().SendTo(chair.UserID, changeGold)
 		return true
@@ -404,12 +401,15 @@ func (tb *Table) CalibratingRemain(delCount int32) {
 	if tb.MaxRound == Unlimited {
 		return
 	}
-	remain, err := GetDBCmpt().EraseRemain(tb.Id, delCount)
-	if err != nil {
-		log.Errorf("tid[%v] CalibratingRemain", tb.Id)
-		return
+	data, code := rpc.SendDataToDB(GetClientMgr().GetApp(), &protoMsg.DecreaseGameRunReq{
+		Amount: delCount,
+		Tid:    tb.Id,
+	})
+	if code == SUCCESS {
+		if resp, ok := data.(*protoMsg.DecreaseGameRunResp); ok {
+			tb.Remain = resp.Remain
+		}
 	}
-	tb.Remain = remain
 }
 
 /////////////////////////////////////////////////////////////////////////

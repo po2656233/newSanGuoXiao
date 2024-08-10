@@ -50,6 +50,7 @@ func buildPomeloParser(app *superplace.AppBuilder) cfacade.INetParser {
 	agentActor := pomelo.NewActor(ActIdGate)
 	//创建一个tcp监听，用于client/robot压测机器人连接网关tcp
 	agentActor.AddConnector(cconnector.NewTCP(TcpAddr))
+	agentActor.AddConnector(cconnector.NewKCP(KcpAddr))
 	//再创建一个websocket监听，用于h5客户端建立连接
 	agentActor.AddConnector(cconnector.NewWS(app.Address()))
 	//当有新连接创建Agent时，启动一个自定义(ActorAgent)的子actor
@@ -69,6 +70,7 @@ func buildPomeloParser(app *superplace.AppBuilder) cfacade.INetParser {
 func buildSimpleParser(app *superplace.AppBuilder) cfacade.INetParser {
 	agentActor := simple.NewActor(ActIdGate)
 	agentActor.AddConnector(cconnector.NewTCP(TcpAddr))
+	agentActor.AddConnector(cconnector.NewKCP(KcpAddr))
 	agentActor.AddConnector(cconnector.NewWS(app.Address()))
 
 	agentActor.SetOnNewAgent(func(newAgent *simple.Agent) {

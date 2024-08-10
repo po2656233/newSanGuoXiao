@@ -4,7 +4,6 @@ go 1.20
 
 require (
 	github.com/gin-gonic/gin v1.10.0
-	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/goburrow/cache v0.1.4
@@ -12,7 +11,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/nacos-group/nacos-sdk-go v1.1.4
 	github.com/po2656233/goleaf v0.0.0-20240617091014-ede6cdcd76b7
-	github.com/po2656233/superplace v1.2.11
+	github.com/po2656233/superplace v1.2.12
 	github.com/po2656233/superplace/components/cron v0.0.0-20240707013405-d96b3ef2803b
 	github.com/po2656233/superplace/components/data-config v0.0.0-20240707013405-d96b3ef2803b
 	github.com/po2656233/superplace/components/gin v0.0.0-20240707013405-d96b3ef2803b
@@ -57,7 +56,7 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.17.9 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.8 // indirect
-	github.com/klauspost/reedsolomon v1.12.2 // indirect
+	github.com/klauspost/reedsolomon v1.12.3 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/lestrrat-go/strftime v1.0.6 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect

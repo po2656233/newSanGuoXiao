@@ -12,7 +12,7 @@ import (
 func AuthRequired() superGin.GinHandlerFunc {
 	return func(ctx *superGin.Context) {
 		uri := ctx.Request.RequestURI
-		if uri == "/" || uri == "/register" || uri == "/login" {
+		if uri == "/" || uri == "/register" || uri == "/login" || uri == "/list/pid" || strings.Contains(uri, "/list/server") {
 			return
 		}
 		tokenString := strings.TrimPrefix(ctx.GetHeader("Authorization"), "Bearer ")

@@ -9,8 +9,7 @@ import (
 
 var LenStackBuf = 4096
 
-// one server per goroutine (goroutine not safe)
-// one client per goroutine (goroutine not safe)
+// Server one server per goroutine (goroutine not safe)
 type Server struct {
 	// id -> function
 	//
