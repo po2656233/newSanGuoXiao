@@ -8,8 +8,9 @@ import (
 	"math/rand"
 	"net"
 	"strconv"
+	. "superman/internal/constant"
 	protoMsg "superman/internal/protocol/gofile"
-	"superman/nodes/leaf/jettengame/base"
+	"superman/internal/utils"
 	"sync"
 	"time"
 )
@@ -124,7 +125,7 @@ func (self *ClientManger) SendData(agent Agent, msg proto.Message) {
 		agent.WriteMsg(msg)
 	} else {
 		agent.WriteMsg(&protoMsg.ResultResp{
-			State: base.FAILED,
+			State: FAILED,
 			Hints: string("无效请求,请重新登录!"),
 		})
 	}
@@ -163,14 +164,14 @@ func (self *ClientManger) SendPopResultX(uid int64, state int32, title, hints st
 
 func (self *ClientManger) SendError(agent Agent) {
 	agent.WriteMsg(&protoMsg.ResultResp{
-		State: base.FAILED,
-		Hints: base.StatusText[base.Login06],
+		State: FAILED,
+		Hints: StatusText[Login06],
 	})
 }
 func (self *ClientManger) SendErrorX(uid int64) {
 	self.SendTo(uid, &protoMsg.ResultResp{
-		State: base.FAILED,
-		Hints: base.StatusText[base.Login06],
+		State: FAILED,
+		Hints: StatusText[Login06],
 	})
 }
 
@@ -312,7 +313,7 @@ func DynamicEncode(data []byte) []byte {
 	//fmt.Println("加密 随机数:", ranNum)
 	endatas = append(endatas, byte(ranNum))
 
-	byteSize := base.Int16ToBytes(int16(dataLen))
+	byteSize := utils.Int16ToBytes(int16(dataLen))
 	endatas = append(endatas, byteSize...)
 	//fmt.Println("已用长度:", len(endatas), " 数据长度:", dataLen, " 时间戳:", timestamp, " 转换后的字节:", btTime)
 

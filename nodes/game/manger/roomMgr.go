@@ -7,7 +7,6 @@ import (
 	. "superman/internal/constant"
 	protoMsg "superman/internal/protocol/gofile"
 	"superman/internal/utils"
-	"superman/nodes/leaf/jettengame/gamedata/goclib/util"
 	"sync"
 	"sync/atomic"
 )
@@ -128,7 +127,7 @@ func getRandomTable(gid, butTid int64, tables []*Table) *Table {
 	if 0 == size {
 		return nil
 	}
-	return list[util.RandIntn(size)]
+	return list[utils.RandIntn(size)]
 }
 
 // AddTable 新增桌子(tid == gid 即桌子ID和游戏ID共用)

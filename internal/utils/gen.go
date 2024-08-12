@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/binary"
 	"strconv"
 	"strings"
 	"time"
@@ -43,4 +44,10 @@ func ReplaceLast(s, old, new string) string {
 	}
 
 	return string(result)
+}
+
+func Int16ToBytes(i int16) []byte {
+	var buf = make([]byte, 2)
+	binary.BigEndian.PutUint16(buf, uint16(i))
+	return buf
 }
