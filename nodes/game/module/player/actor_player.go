@@ -81,7 +81,6 @@ func (p *ActorPlayer) OnInit() {
 	// 注册 session关闭的remote函数(网关触发连接断开后，会调用RPC发送该消息)
 	p.Remote().Register(p.sessionClose)
 	p.Local().Register(p.request)
-
 }
 
 // sessionClose 接收角色session关闭处理
@@ -108,7 +107,7 @@ func (p *ActorPlayer) request(session *cproto.Session, req *protoMsg.Request) {
 	person := mgr.GetPlayerMgr().Get(uid)
 	if person == nil {
 		// 获取玩家信息
-		data, errCode := rpc.SendData(p.App(), SourcePath, DBActor, NodeTypeCenter, &protoMsg.GetUserInfoReq{Uid: uid})
+		data, errCode := rpc.SendDataToDB(p.App(), &protoMsg.GetUserInfoReq{Uid: uid})
 		if errCode == 0 && data != nil {
 			resp, ok := data.(*protoMsg.GetUserInfoResp)
 			if ok && resp.Info != nil {

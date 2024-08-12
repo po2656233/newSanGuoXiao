@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/po2656233/goleaf/log"
+	log "github.com/po2656233/superplace/logger"
 	"reflect"
 )
 
@@ -35,8 +35,9 @@ func NewProcessorJson() *ProcessorJson {
 // Register It's dangerous to call the method on routing or marshaling (unmarshaling)
 func (p *ProcessorJson) Register(msg interface{}) string {
 	msgType := reflect.TypeOf(msg)
-	if msgType == nil || msgType.Kind() != reflect.Ptr {
+	if msgType == nil || msgType.Elem() == nil || msgType.Kind() != reflect.Ptr {
 		log.Fatal("json message pointer required")
+		return ""
 	}
 	msgID := msgType.Elem().Name()
 	if msgID == "" {
@@ -49,15 +50,15 @@ func (p *ProcessorJson) Register(msg interface{}) string {
 	i := new(MsgInfoJson)
 	i.msgType = msgType
 	p.msgInfo[msgID] = i
-	log.Release("json message id:%v type:%v", msgID, msgType)
 	return msgID
 }
 
-// It's dangerous to call the method on routing or marshaling (unmarshaling)
+// SetRouter It's dangerous to call the method on routing or marshaling (unmarshaling)
 func (p *ProcessorJson) SetRouter(msg interface{}, msgRouter *Server) {
 	msgType := reflect.TypeOf(msg)
-	if msgType == nil || msgType.Kind() != reflect.Ptr {
+	if msgType == nil || msgType.Elem() == nil || msgType.Kind() != reflect.Ptr {
 		log.Fatal("json message pointer required")
+		return
 	}
 	msgID := msgType.Elem().Name()
 	i, ok := p.msgInfo[msgID]
@@ -68,11 +69,12 @@ func (p *ProcessorJson) SetRouter(msg interface{}, msgRouter *Server) {
 	i.msgRouter = msgRouter
 }
 
-// It's dangerous to call the method on routing or marshaling (unmarshaling)
+// SetHandler It's dangerous to call the method on routing or marshaling (unmarshaling)
 func (p *ProcessorJson) SetHandler(msg interface{}, msgHandler MsgHandlerJson) {
 	msgType := reflect.TypeOf(msg)
-	if msgType == nil || msgType.Kind() != reflect.Ptr {
+	if msgType == nil || msgType.Elem() == nil || msgType.Kind() != reflect.Ptr {
 		log.Fatal("json message pointer required")
+		return
 	}
 	msgID := msgType.Elem().Name()
 	i, ok := p.msgInfo[msgID]
@@ -83,7 +85,7 @@ func (p *ProcessorJson) SetHandler(msg interface{}, msgHandler MsgHandlerJson) {
 	i.msgHandler = msgHandler
 }
 
-// It's dangerous to call the method on routing or marshaling (unmarshaling)
+// SetRawHandler It's dangerous to call the method on routing or marshaling (unmarshaling)
 func (p *ProcessorJson) SetRawHandler(msgID string, msgRawHandler MsgHandlerJson) {
 	i, ok := p.msgInfo[msgID]
 	if !ok {
@@ -93,7 +95,7 @@ func (p *ProcessorJson) SetRawHandler(msgID string, msgRawHandler MsgHandlerJson
 	i.msgRawHandler = msgRawHandler
 }
 
-// goroutine safe
+// Route goroutine safe
 func (p *ProcessorJson) Route(msg interface{}, userData interface{}) error {
 	// raw
 	if msgRaw, ok := msg.(MsgRawJson); ok {
@@ -126,7 +128,7 @@ func (p *ProcessorJson) Route(msg interface{}, userData interface{}) error {
 	return nil
 }
 
-// goroutine safe
+// Unmarshal goroutine safe
 func (p *ProcessorJson) Unmarshal(data []byte) (interface{}, error) {
 	var m map[string]json.RawMessage
 	err := json.Unmarshal(data, &m)
@@ -155,7 +157,7 @@ func (p *ProcessorJson) Unmarshal(data []byte) (interface{}, error) {
 	panic("bug")
 }
 
-// goroutine safe
+// Marshal goroutine safe
 func (p *ProcessorJson) Marshal(msg interface{}) ([][]byte, error) {
 	msgType := reflect.TypeOf(msg)
 	if msgType == nil || msgType.Kind() != reflect.Ptr {

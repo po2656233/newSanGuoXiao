@@ -21,10 +21,11 @@ const (
 )
 
 const (
-	MIDGate = 1
-	MIDLeaf = 2
-	MIDGame = 3
-	MIDPing = 4
+	MIDGate  = 1
+	MIDLeaf  = 2
+	MIDGame  = 3
+	MIDPing  = 4
+	MIDMatch = 5 //匹配服
 )
 const (
 	NodeTypeCenter = "center"

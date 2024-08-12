@@ -15,6 +15,7 @@ import (
 )
 
 // !!! 注意 ---->节点名称包含pomelo则表示启动该协议，否则使用simple协议(即: mid+数据长度[不含mid和长度本身]+数据)
+
 // Run 运行gate节点
 // gate 主要用于对外提供网络连接、管理用户连接、消息转发
 func Run(profileFilePath, nodeId string) {

@@ -62,9 +62,11 @@ func (p *Processor) Register(msg proto.Message) (uint16, string) {
 	msgType := reflect.TypeOf(msg)
 	if msgType == nil || msgType.Kind() != reflect.Ptr {
 		log.Fatal("protobuf message pointer required")
+		return 0, ""
 	}
 	if _, ok := p.msgID[msgType]; ok {
 		log.Fatal("message %s is already registered", msgType)
+		return 0, ""
 	}
 
 	// 获取最大消息ID
@@ -81,7 +83,7 @@ func (p *Processor) Register(msg proto.Message) (uint16, string) {
 	// 结构体最大判断
 	size := len(p.msgInfo)
 	if 0 == size {
-		p.msgInfo = make(map[uint16]*MsgInfo, 0)
+		p.msgInfo = make(map[uint16]*MsgInfo)
 	}
 	if size >= math.MaxUint16 || fId >= math.MaxUint16 {
 		log.Fatal("too many protobuf messages maxId:%f (max = %v) ", fId, math.MaxUint16)

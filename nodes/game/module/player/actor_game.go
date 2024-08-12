@@ -73,7 +73,7 @@ func (p *ActorGame) OnStop() {
 
 // cron
 func (p *ActorGame) checkGameList() {
-	data, errCode := rpc.SendData(p.App(), cst.SourcePath, cst.DBActor, cst.NodeTypeCenter, &pb.GetGameListReq{
+	data, errCode := rpc.SendDataToDB(p.App(), &pb.GetGameListReq{
 		Kid: cst.Unlimited,
 	})
 	if errCode == 0 {
@@ -93,7 +93,7 @@ func (p *ActorGame) checkTableList(rid int64) {
 		Rid: rid,
 	}
 
-	data, errCode := rpc.SendData(p.App(), cst.SourcePath, cst.DBActor, cst.NodeTypeCenter, req)
+	data, errCode := rpc.SendDataToDB(p.App(), req)
 	if errCode == 0 {
 		resp, ok := data.(*pb.GetTableListResp)
 		if !ok || resp == nil || resp.Items == nil {
@@ -122,7 +122,7 @@ func (p *ActorGame) checkRoomList() {
 		Uid: cst.Unlimited,
 	}
 
-	data, errCode := rpc.SendData(p.App(), cst.SourcePath, cst.DBActor, cst.NodeTypeCenter, req)
+	data, errCode := rpc.SendDataToDB(p.App(), req)
 	if errCode == 0 {
 		resp, ok := data.(*pb.GetRoomListResp)
 		if ok && resp != nil && resp.Items != nil {

@@ -1,7 +1,6 @@
 package player
 
 import (
-	"github.com/po2656233/goleaf/gate"
 	clog "github.com/po2656233/superplace/logger"
 	. "superman/internal/constant"
 	protoMsg "superman/internal/protocol/gofile"
@@ -33,7 +32,7 @@ func enter(args []interface{}) {
 	var tb *mgr.Table
 	tb = room.GetTable(m.TableID)
 	if tb == nil {
-		data, errCode := rpc.SendData(agent.App(), SourcePath, DBActor, NodeTypeCenter, &protoMsg.GetTableReq{Tid: m.TableID})
+		data, errCode := rpc.SendDataToDB(agent.App(), &protoMsg.GetTableReq{Tid: m.TableID})
 		if errCode == 0 {
 			if tbResp, ok := data.(*protoMsg.GetTableResp); ok {
 				var err error
@@ -111,7 +110,7 @@ func join(args []interface{}) {
 			Rid:        SYSTEMID,
 			Gid:        m.GameID,
 			PlayScore:  Unlimited,
-			Name:       "",
+			Name:       gInfo.Name,
 			Opentime:   time.Now().Unix(),
 			Commission: INVALID, //系统房没有税收
 			MaxRound:   Unlimited,
@@ -201,7 +200,7 @@ func playing(args []interface{}) {
 // 意见反馈
 func handleSuggest(args []interface{}) {
 	_ = args[0].(*protoMsg.SuggestReq)
-	agent := args[1].(gate.Agent)
+	agent := args[1].(mgr.Agent)
 	if userData := agent.UserData(); userData != nil { //[0
 		person := userData.(*mgr.Player)
 		msg := &protoMsg.SuggestResp{
