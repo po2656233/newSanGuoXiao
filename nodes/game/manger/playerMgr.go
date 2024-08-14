@@ -158,7 +158,10 @@ func (itself *Player) Enter(args []interface{}) { //入场
 }
 
 func (itself *Player) Exit() bool { //退出
-	if itself.GameHandle == nil || false == itself.GameHandle.UpdateInfo([]interface{}{protoMsg.PlayerState_PlayerStandUp, itself.UserID}) {
+	if protoMsg.PlayerState_PlayerReady <= itself.State &&
+		itself.State < protoMsg.PlayerState_PlayerTrustee &&
+		itself.GameHandle != nil &&
+		false == itself.GameHandle.UpdateInfo([]interface{}{protoMsg.PlayerState_PlayerStandUp, itself.UserID}) {
 		return false
 	}
 	itself.State = protoMsg.PlayerState_PlayerStandUp

@@ -243,6 +243,7 @@ func (self *BaccaratGame) Start(args []interface{}) bool {
 			}) { // 剩余次数为零,释放资源
 				return false //表示不执行after
 			}
+
 			return true
 		}, func() {
 			// 校准剩余次数
@@ -372,12 +373,38 @@ func (self *BaccaratGame) Over(args []interface{}) bool {
 		if chair.Total != INVALID {
 			checkout.MyAcquire = chair.Gain
 		}
-
 		GetClientMgr().SendTo(chair.UserID, checkout)
 	})
 
 	log.Infof("[%v:%v]   \t结算注单... 各区域情况:%v", self.GameInfo.Name, self.T.Id, allAreaInfo)
 	return true
+}
+
+// UpdateInfo 检测是否可以站起
+func (self *BaccaratGame) UpdateInfo(args []interface{}) bool {
+	flag, ok := args[0].(protoMsg.PlayerState)
+	if !ok {
+		return false
+	}
+	uid, ok1 := args[1].(int64)
+	if !ok1 {
+		return false
+	}
+	bRet := false
+	switch flag {
+	case protoMsg.PlayerState_PlayerStandUp, protoMsg.PlayerState_PlayerGiveUp:
+		self.personBetInfo.Range(func(key, value any) bool {
+			if uid1, ok1 := key.(int64); ok1 && uid == uid1 {
+				bRet = true
+				return false
+			}
+			return true
+		})
+	}
+	if bRet {
+		return true
+	}
+	return self.Game.UpdateInfo(args)
 }
 
 // 发牌

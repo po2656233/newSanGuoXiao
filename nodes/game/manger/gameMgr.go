@@ -300,12 +300,12 @@ func (g *Game) UpdateInfo(args []interface{}) bool {
 	switch flag {
 	case protoMsg.PlayerState_PlayerSitDown:
 		g.AddPlayer(uid)
-	case protoMsg.PlayerState_PlayerStandUp:
+	case protoMsg.PlayerState_PlayerStandUp, protoMsg.PlayerState_PlayerGiveUp:
 		if protoMsg.GameScene_Start <= g.GameInfo.Scene && g.GameInfo.Scene <= protoMsg.GameScene_Over {
 			return false
 		}
-	case protoMsg.PlayerState_PlayerGiveUp:
 		g.RemovePlayer(uid)
+	default:
 
 	}
 	return true
