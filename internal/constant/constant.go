@@ -18,6 +18,7 @@ const (
 	DBActor    = ".db"
 	AccActor   = ".account"
 	GameActor  = ".game"
+	MatchActor = ".match"
 )
 
 const (
@@ -32,16 +33,19 @@ const (
 	NodeTypeGate   = "gate"
 	NodeTypeGame   = "game"
 	NodeTypeLeaf   = "leaf"
+	NodeTypeMatch  = "match"
 )
 const (
-	ActIdGate = "user"
-	ActIdGame = "game"
+	ActIdGate  = "user"
+	ActIdGame  = "game"
+	ActIdMatch = "match"
 )
 
 const (
 	FuncLogin        = "login"
 	FuncEnter        = "enter"
 	FuncRequest      = "request"
+	FuncMatch        = "joinGameReadyQueue"
 	FuncSimpLogin    = "simpleLogin"
 	FuncSessionClose = "sessionClose"
 )
@@ -51,7 +55,7 @@ const (
 	CenterDb = "center_db_id"
 	GameDb   = "game_db_id"
 	TcpAddr  = ":10011"
-	KcpAddr  = ":10021"
+	KcpAddr  = ":10012"
 )
 
 // sdk平台类型
@@ -81,8 +85,9 @@ const (
 
 	Ten       = 10
 	Twenty    = 20
-	Limit     = 99 // 限制
-	Unlimited = -1
+	FullScore = 100 // 满分
+	Limit     = 99  // 限制
+	Unlimited = -1  // 无限制
 
 	MaxLoadNum = 20 //最大录单
 )

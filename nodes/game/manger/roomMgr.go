@@ -6,6 +6,7 @@ import (
 	log "github.com/po2656233/superplace/logger"
 	. "superman/internal/constant"
 	protoMsg "superman/internal/protocol/gofile"
+	"superman/internal/redis_cluster"
 	"superman/internal/utils"
 	"sync"
 	"sync/atomic"
@@ -154,6 +155,17 @@ func (self *Room) AddTable(table *protoMsg.TableInfo, f NewGameFunc) (*Table, er
 	tb.GameHandle, gameName = f(table.Gid, tb) //创建游戏句柄
 	if tb.GameHandle == nil {
 		return nil, fmt.Errorf("房间ID:%d 牌桌ID:%d 游戏ID:%d err:%s!!! ", table.Rid, table.Id, table.Gid, StatusText[Room17])
+	}
+	app := clientManger.GetApp()
+	if err := tb.AddRedisSit(redis_cluster.RedisMatchInfo{
+		Tid:      tb.Id,
+		SitCount: tb.sitCount,
+		MaxSit:   tb.MaxSitter,
+		Sid:      app.NodeId(),
+		Route:    app.NodeType(),
+	}); err != nil {
+		log.Errorf("[%v:%v]房->(%v:%v)桌 游戏創建失败! err:%v", self.Id, self.Name, tb.Id, tb.Name, err)
+		return nil, err
 	}
 	log.Infof("[%v:%v]房->(%v:%v)桌 <%v:%v> 游戏創建成功!", self.Id, self.Name, tb.Id, tb.Name, table.Gid, gameName)
 	self.tables = append(self.tables, tb)

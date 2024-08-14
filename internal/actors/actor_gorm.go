@@ -78,8 +78,10 @@ func (self *ActorDB) changeDB(dbNode string) {
 	// 获取 db_id = "center_db_1" 的配置
 	dbID := self.App().Settings().GetConfig(DbList).GetString(dbNode)
 	if self.db != nil {
-		dbObj, _ := self.db.DB()
-		_ = dbObj.Close()
+		dbObj, err := self.db.DB()
+		CheckError(err)
+		err = dbObj.Close()
+		CheckError(err)
 		self.db = nil
 	}
 	self.db = gormCpt.GetDb(dbID)
@@ -94,8 +96,6 @@ func (self *ActorDB) changeDB(dbNode string) {
 
 // AddUser 完成注册 【新增一个玩家】
 func (self *ActorDB) addUser(user sqlmodel.User) (int64, error) {
-	self.Lock()
-	defer self.Unlock()
 	uid := self.checkUser(user.Account)
 	if 0 < uid {
 		return 0, errors.New("用户已经存在")
@@ -104,6 +104,8 @@ func (self *ActorDB) addUser(user sqlmodel.User) (int64, error) {
 	now := time.Now()
 	user.Signintime = now.Unix()
 	user.CreatedAt = now
+	self.Lock()
+	defer self.Unlock()
 	err := self.db.Table(user.TableName()).Create(&user).Error
 	if !CheckError(err) {
 		return 0, err
@@ -113,13 +115,14 @@ func (self *ActorDB) addUser(user sqlmodel.User) (int64, error) {
 
 // AddRoom 新增房间
 func (self *ActorDB) addRoom(room sqlmodel.Room) (int64, error) {
-	self.Lock()
-	defer self.Unlock()
+
 	rid := self.checkRoom(room.Hostid, room.Name)
 	if 0 < rid {
 		return 0, errors.New("房间已经存在")
 	}
 	room.CreatedAt = time.Now()
+	self.Lock()
+	defer self.Unlock()
 	err := self.db.Table(room.TableName()).Create(&room).Error
 	if !CheckError(err) {
 		return 0, err
@@ -129,8 +132,6 @@ func (self *ActorDB) addRoom(room sqlmodel.Room) (int64, error) {
 
 // AddTable 新增桌牌
 func (self *ActorDB) addTable(table sqlmodel.Table) (id int64, maxSit int32, err error) {
-	self.Lock()
-	defer self.Unlock()
 	count := self.checkTableCount(table.Rid)
 	max := self.checkRoomMaxTable(table.Rid)
 	if max <= count {
@@ -139,6 +140,8 @@ func (self *ActorDB) addTable(table sqlmodel.Table) (id int64, maxSit int32, err
 	maxSit = self.checkGameMaxPlayer(table.Gid)
 	table.MaxSitter = maxSit
 	table.CreatedAt = time.Now()
+	self.Lock()
+	defer self.Unlock()
 	err = self.db.Table(table.TableName()).Create(&table).Error
 	if !CheckError(err) {
 		return 0, maxSit, err
@@ -242,11 +245,11 @@ func (self *ActorDB) addRecord(table *sqlmodel.Record) error {
 
 // DelTable 新增桌牌Decrease
 func (self *ActorDB) eraseRemain(tid int64, amount int32) (int32, error) {
-	self.Lock()
-	defer self.Unlock()
 	tb := sqlmodel.Table{
 		ID: tid,
 	}
+	self.Lock()
+	defer self.Unlock()
 	err := self.db.Model(tb).Select("remain").Where("0 < maxround AND 0 < remain").
 		UpdateColumn("remain", gorm.Expr("remain - ?", amount)).First(&tb).Error
 	return tb.Remain, err
@@ -254,11 +257,11 @@ func (self *ActorDB) eraseRemain(tid int64, amount int32) (int32, error) {
 
 // DelTable 新增桌牌
 func (self *ActorDB) delTable(rid, tid int64) error {
-	self.Lock()
-	defer self.Unlock()
 	tb := sqlmodel.Table{
 		ID: tid,
 	}
+	self.Lock()
+	defer self.Unlock()
 	err := self.db.Model(tb).Delete(tb).Error
 	if !CheckError(err) {
 		return err

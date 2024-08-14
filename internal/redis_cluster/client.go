@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v8"
 	exViper "github.com/po2656233/superplace/extend/viper"
+	cst "superman/internal/constant"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -50,6 +51,15 @@ type Redis struct {
 
 type CnfRedis struct {
 	Redis Redis `json:"redis_cluster"`
+}
+
+// RedisMatchInfo 匹配牌桌信息
+type RedisMatchInfo struct {
+	Tid      int64  `json:"tid"`
+	MaxSit   int32  `json:"max_sit"`
+	SitCount int32  `json:"sit_count"`
+	Sid      string `json:"sid"`
+	Route    string `json:"route"`
 }
 
 var once sync.Once
@@ -106,6 +116,7 @@ func initClients() {
 
 		//传入的参数是新建的redis.Client
 		NewClient: func(opt *redis.Options) *redis.Client {
+			// 创建redsync实例
 			return redis.NewClient(opt)
 		},
 
@@ -116,7 +127,7 @@ func initClients() {
 		//钩子函数
 		//仅当客户端执行命令需要从连接池获取连接时，如果连接池需要新建连接则会调用此钩子函数
 		OnConnect: func(ctx context.Context, conn *redis.Conn) error {
-			fmt.Printf("redis_cluster conn=%v\n", conn)
+			//fmt.Printf("redis_cluster conn=%v\n", conn)
 			return nil
 		},
 
@@ -158,6 +169,37 @@ func (self *RdbClient) Close() {
 	}
 }
 
+func (rdb *RdbClient) Clear() {
+	atomic.SwapUint64(&rdb.seqScore, 0)
+}
+
+// ModifyAndAddToSetWithLua 并发锁执行 redis
+func (self *RdbClient) ModifyAndAddToSetWithLua(ctx context.Context, key string, oldValue, newValue interface{}, score float64) error {
+	acquired, err := self.DB.SetNX(ctx, cst.KeyLock, "1", 0).Result()
+	if err != nil {
+		fmt.Println("Error acquiring lock:", err)
+		return err
+	}
+
+	if acquired {
+		fmt.Println("Lock acquired, executing critical section")
+		// 执行关键代码
+		if err = self.Remove(ctx, key, []interface{}{oldValue}); err == nil {
+			err = self.AddRank(ctx, key, score, newValue)
+		}
+
+		// 释放锁
+		if _, err1 := self.DB.Del(ctx, cst.KeyLock).Result(); err1 != nil {
+			fmt.Println("Error releasing lock:", err1)
+			return err1
+		}
+		fmt.Println("Lock released")
+	} else {
+		fmt.Println("Could not acquire lock")
+	}
+	return err
+}
+
 // AddRank 添加排名子项
 func (self *RdbClient) AddRank(ctx context.Context, key string, score float64, member interface{}) error {
 	_, err := self.DB.ZAdd(ctx, key, &redis.Z{Score: score, Member: member}).Result()
@@ -177,7 +219,7 @@ func (self *RdbClient) IncrBy(ctx context.Context, key string, score float64, me
 }
 
 // Remove 删除元素
-func (self *RdbClient) Remove(ctx context.Context, key string, member []string) error {
+func (self *RdbClient) Remove(ctx context.Context, key string, member []interface{}) error {
 	_, err := self.DB.ZRem(ctx, key, member).Result()
 	return err
 }

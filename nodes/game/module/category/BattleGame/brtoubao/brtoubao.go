@@ -464,10 +464,9 @@ func (self *BrToubaoGame) onOver() {
 	self.T.CalibratingRemain(Default)
 
 	//自动清场
-	if self.IsClear || (SYSTEMID != self.T.Rid && self.T.Remain <= INVALID) {
-		self.Close(func() *Table {
-			return self.T
-		})
+	if self.IsClear || self.Close(func() *Table {
+		return self.T
+	}) {
 		return
 	}
 

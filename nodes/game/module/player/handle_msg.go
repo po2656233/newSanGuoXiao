@@ -60,7 +60,6 @@ func join(args []interface{}) {
 	agent := args[1].(*ActorPlayer)
 	uid := agent.Session.Uid
 	clog.Debugf("[join]params %+v  uid:%+v", m, uid)
-
 	person := mgr.GetPlayerMgr().Get(uid)
 	// 玩家仍在游戏中
 	if person.GameHandle != nil {
@@ -80,20 +79,23 @@ func join(args []interface{}) {
 	// 检测游戏是否可用
 	gInfo := mgr.GetGameInfoMgr().GetGame(m.GameID)
 	if gInfo == nil {
+		clog.Errorf("[join] [gInfo] params %+v  uid:%+v FAIL", m, uid)
 		agent.SendResultPop(FAILED, StatusText[Title001], StatusText[TableInfo03])
 		return
 	}
 	if gInfo.State == protoMsg.GameState_InitTB {
+		clog.Warnf("[join] [State] params %+v  uid:%+v InitTB", m, uid)
 		agent.SendResultPop(FAILED, StatusText[Title001], StatusText[Game16])
 		return
 	}
 	if gInfo.State == protoMsg.GameState_CloseTB {
+		clog.Warnf("[join] [State] params %+v  uid:%+v CloseTB", m, uid)
 		agent.SendResultPop(FAILED, StatusText[Title001], StatusText[Game19])
 		return
 	}
 	// 玩家加入游戏准备列表
 	if ok := room.AddWait(m.GameID, person); !ok {
-		clog.Warnf("[join] [GameHandle] params %+v  uid:%+v FAIL", m, uid)
+		clog.Warnf("[join] [GameHandle] params %+v  uid:%+v exist", m, uid)
 		agent.SendResultPop(FAILED, StatusText[Title001], StatusText[Login09])
 		return
 	}
@@ -101,6 +103,7 @@ func join(args []interface{}) {
 	if ok := mgr.GetRoomMgr().GetRoom(m.RoomID).CheckGameFull(m.GameID); ok {
 		if m.RoomID != SYSTEMID {
 			// 牌桌不足
+			clog.Warnf("[join] [CheckGameFull] params %+v  uid:%+v no enought", m, uid)
 			agent.SendResult(FAILED, StatusText[TableInfo10])
 			return
 		}

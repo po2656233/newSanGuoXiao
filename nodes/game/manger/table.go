@@ -1,9 +1,13 @@
 package manger
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
 	log "github.com/po2656233/superplace/logger"
 	. "superman/internal/constant"
 	protoMsg "superman/internal/protocol/gofile"
+	"superman/internal/redis_cluster"
 	"superman/internal/rpc"
 	"superman/internal/utils"
 	"sync"
@@ -128,6 +132,9 @@ func (tb *Table) AddChair(player *Player) (errCode int) {
 	// 游戏准备 添加刚坐下的玩家
 	tb.GameHandle.UpdateInfo([]interface{}{player.State, player.UserID})
 	if isNew {
+		if err := tb.RedisSitCount(Fault); err != nil {
+			return TableInfo09
+		}
 		// 玩家积分转换
 		if tb.PlayScore == Unlimited {
 			sitter.PlayerInfo.Gold = sitter.PlayerInfo.Coin + 100*sitter.PlayerInfo.YuanBao
@@ -211,7 +218,71 @@ func (tb *Table) RemoveChair(uid int64) {
 		return true
 	})
 	tb.sitters.Delete(uid)
+	tb.RedisSitCount(Default)
 	atomic.SwapInt32(&tb.sitCount, -1)
+}
+
+func (tb *Table) AddRedisSit(info redis_cluster.RedisMatchInfo) error {
+	key := GetMatchKey(tb.Gid, tb.Rid)
+	list, err := redis_cluster.SingleRedis().GetTopCount(context.Background(), key, INVALID)
+	if err != nil {
+		return err
+	}
+	for _, item := range list {
+		val, ok := item.Member.(string)
+		if !ok {
+			continue
+		}
+		info1 := redis_cluster.RedisMatchInfo{}
+		err = json.Unmarshal([]byte(val), &info1)
+		if err != nil {
+			continue
+		}
+		if info1.Tid == info.Tid {
+			return nil
+		}
+	}
+	data, _ := json.Marshal(&info)
+	err = redis_cluster.SingleRedis().AddRank(context.Background(), key, FullScore, data)
+	return err
+}
+
+func (tb *Table) RedisSitCount(mus int) error {
+	key := GetMatchKey(tb.Gid, tb.Rid)
+	list, err := redis_cluster.SingleRedis().GetTopCount(context.Background(), key, INVALID)
+	if err != nil {
+		return err
+	}
+	if 0 == len(list) {
+		return fmt.Errorf("no have list. tid:%v", tb.Id)
+	}
+	info := redis_cluster.RedisMatchInfo{}
+	index := 0
+	score := float64(0)
+	for i, item := range list {
+		val, ok := item.Member.(string)
+		if !ok {
+			continue
+		}
+		err = json.Unmarshal([]byte(val), &info)
+		if err != nil {
+			continue
+		}
+		if info.Tid == tb.Id {
+			score = item.Score
+			index = i
+			break
+		}
+	}
+	if info.Tid != tb.Id {
+		return fmt.Errorf("no have tid:%v", tb.Id)
+	}
+	old := list[index]
+	info.SitCount = tb.SitCount()
+	data, _ := json.Marshal(info)
+	score += float64(mus)
+	err = redis_cluster.SingleRedis().ModifyAndAddToSetWithLua(context.Background(), key, old.Member, data, score)
+	return err
 }
 
 func (tb *Table) ClearChairs() {
@@ -395,10 +466,13 @@ func (tb *Table) GetOrderList() []int64 {
 	}
 	return utils.Unique(list)
 }
+func (tb *Table) CheckFinish() {
+
+}
 
 // CalibratingRemain 校准剩余次数
 func (tb *Table) CalibratingRemain(delCount int32) {
-	if tb.MaxRound == Unlimited {
+	if tb.Remain <= INVALID {
 		return
 	}
 	data, code := rpc.SendDataToDB(GetClientMgr().GetApp(), &protoMsg.DecreaseGameRunReq{

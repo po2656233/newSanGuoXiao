@@ -13,6 +13,7 @@ func CheckError(err error) (isOk bool) {
 	}
 	exUtils.Try(func() {
 		if !isOk {
+			clog.Errorf("err:%v", err)
 			panic(err)
 		}
 	}, func(errString string) {

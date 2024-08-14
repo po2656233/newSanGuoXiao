@@ -1,9 +1,11 @@
 package player
 
 import (
+	superConst "github.com/po2656233/superplace/const"
 	cfacade "github.com/po2656233/superplace/facade"
 	log "github.com/po2656233/superplace/logger"
 	"github.com/po2656233/superplace/net/parser/simple"
+	"strings"
 	cst "superman/internal/constant"
 	event2 "superman/internal/event"
 	pb "superman/internal/protocol/gofile"
@@ -27,7 +29,7 @@ type (
 )
 
 func (p *ActorGame) AliasID() string {
-	return "game"
+	return strings.Trim(cst.GameActor, superConst.DOT)
 }
 func (p *ActorGame) OnInit() {
 	log.Debugf("[ActorGame] path = %s init!", p.PathString())
@@ -46,13 +48,11 @@ func (p *ActorGame) OnInit() {
 	p.Remote().Register(p.CreateRoomResp)
 	p.Remote().Register(p.CreateTableResp)
 	p.Remote().Register(p.DeleteTableResp)
-
 	p.Timer().RemoveAll()
 	p.Timer().AddOnce(time.Second, p.checkGameList)
 	p.Timer().AddOnce(time.Second, p.checkRoomList)
 
 }
-
 func (p *ActorGame) OnFindChild(msg *cfacade.Message) (cfacade.IActor, bool) {
 	// 动态创建 player child actor
 	childID := msg.TargetPath().ChildID

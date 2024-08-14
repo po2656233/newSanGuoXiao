@@ -1,4 +1,4 @@
-//go:build master || leaf || game || gate || web || center
+//go:build master || leaf || game || gate || web || center || match
 
 package main
 

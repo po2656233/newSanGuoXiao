@@ -10,7 +10,7 @@ import (
 // 手机短信验证码
 var (
 	//errValidateReachLimit = errors.New("validate times reach limit")
-	errCodeNotMatch  = errors.New("code not match")
+	errCodeNotMatch  = errors.New("code not queue")
 	errCodeNotExpire = errors.New("code not expire")
 	errCodeNotExist  = errors.New("code not exist")
 )

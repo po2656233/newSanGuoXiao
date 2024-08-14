@@ -387,11 +387,13 @@ func (g *Game) ToNextScene() bool {
 ////////////////////////////////////////////////////////////////////////////////////
 
 // Close 关闭游戏
-func (g *Game) Close(f ClearFunc) {
-	g.ChangeState(protoMsg.GameScene_Closing)
-	//
+func (g *Game) Close(f ClearFunc) bool {
 	tb := f()
 	if tb != nil {
+		if tb.MaxRound == Unlimited || INVALID < tb.Remain {
+			return false
+		}
+		g.ChangeState(protoMsg.GameScene_Closing)
 		GetClientMgr().NotifyOthers(g.PlayerList, &protoMsg.DisbandedTableResp{
 			RoomID:  tb.Rid,
 			TableID: tb.Id,
@@ -399,11 +401,18 @@ func (g *Game) Close(f ClearFunc) {
 		if rm := GetRoomMgr().GetRoom(tb.Rid); rm != nil {
 			rm.DelTable(tb.Id)
 		}
+		if g.Timer != nil {
+			g.Timer.Stop()
+			g.Timer = nil
+		}
+		*g = Game{}
+		g = nil
 		tb.Close()
 		*tb = Table{}
 		tb = nil
+		return true
 	}
-
+	return false
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -238,13 +238,10 @@ func (self *BaccaratGame) Start(args []interface{}) bool {
 		}
 		self.Game.RegisterEvent(protoMsg.GameScene_Over, overResp, openResp.Times.TotalTime, func() bool {
 			self.Over(nil)
-			if self.T.Remain <= INVALID { // 剩余次数为零,释放资源
-				self.Close(func() *Table {
-					return self.T
-				})
-				*self = BaccaratGame{}
-				self = nil
-				return false
+			if self.IsClear || self.Close(func() *Table {
+				return self.T
+			}) { // 剩余次数为零,释放资源
+				return false //表示不执行after
 			}
 			return true
 		}, func() {
