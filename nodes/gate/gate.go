@@ -4,6 +4,7 @@ import (
 	"github.com/po2656233/superplace"
 	sgxGops "github.com/po2656233/superplace/components/gops"
 	cfacade "github.com/po2656233/superplace/facade"
+	clog "github.com/po2656233/superplace/logger"
 	cconnector "github.com/po2656233/superplace/net/connector"
 	"github.com/po2656233/superplace/net/parser/pomelo"
 	"github.com/po2656233/superplace/net/parser/simple"
@@ -78,6 +79,7 @@ func buildSimpleParser(app *superplace.AppBuilder) cfacade.INetParser {
 		childActor := &ActorAgent{}
 		newAgent.AddOnClose(childActor.onSimpleSessionClose)
 		_, _ = agentActor.Child().Create(newAgent.SID(), childActor)
+		clog.Infof("新增客户端 sid:%v uid:%v", newAgent.SID(), newAgent.UID())
 	})
 
 	// 设置大头&小头
@@ -121,6 +123,6 @@ func buildSimpleParser(app *superplace.AppBuilder) cfacade.INetParser {
 		FuncName: FuncMatch,
 	})
 
-	GetMsgFunc("config/leafconf/message_id.json")
+	GetMsgFunc("config/message_id.json")
 	return agentActor
 }

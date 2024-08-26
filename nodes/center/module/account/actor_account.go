@@ -28,32 +28,38 @@ func (p *ActorAccount) OnInit() {
 	p.Remote().Register(p.GetUserID)
 }
 
-// Register 注册开发者帐号
+// Register 注册开发者账号
 func (p *ActorAccount) Register(req *pb.RegisterReq) (*pb.RegisterResp, int32) {
 	accountName := req.Name
 	password := req.Password
 
-	if strings.TrimSpace(accountName) == "" || strings.TrimSpace(password) == "" {
+	if strings.TrimSpace(accountName) == Empty || strings.TrimSpace(password) == Empty {
 		return nil, Register02
 	}
 
-	if len(accountName) < 3 || len(accountName) > 18 {
+	if len(accountName) < NameLenMin || len(accountName) > NameLenMax {
 		return nil, Register02
 	}
 
-	if len(password) < 3 || len(password) > 18 {
+	if len(password) < NameLenMin || len(password) > NameLenMax {
 		return nil, Register02
 	}
 
 	//db2.DevAccountRegister(accountName, password, req.Address)
 	data, errCode := rpc.SendDataToDB(p.App(), req)
+	if data == nil {
+		return nil, Register02
+	}
 	resp, _ := data.(*pb.RegisterResp)
 	return resp, errCode
 }
 
-// Login 根据帐号名获取开发者帐号表
+// Login 根据帐号名获取开发者账号表
 func (p *ActorAccount) Login(req *pb.LoginReq) (*pb.LoginResp, int32) {
 	data, errCode := rpc.SendDataToDB(p.App(), req)
+	if data == nil {
+		return nil, Login02
+	}
 	resp, _ := data.(*pb.LoginResp)
 	return resp, errCode
 

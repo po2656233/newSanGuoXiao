@@ -23,7 +23,6 @@ func Run(profileFilePath, nodeId string) {
 
 	// 配置sgx引擎
 	app := superplace.Configure(profileFilePath, nodeId, false, superplace.Cluster)
-
 	// diagnose
 	app.Register(superGops.New())
 	// 注册调度组件

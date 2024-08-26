@@ -3,7 +3,7 @@ package queue
 import (
 	"context"
 	"encoding/json"
-	cstring "github.com/po2656233/superplace/extend/string"
+	"github.com/po2656233/superplace/extend/string"
 	cfacade "github.com/po2656233/superplace/facade"
 	log "github.com/po2656233/superplace/logger"
 	"github.com/po2656233/superplace/net/parser/simple"
@@ -47,7 +47,7 @@ func (p *ActorQueue) OnStop() {
 	}
 }
 
-func (p *ActorQueue) joinGameReadyQueue(session *cproto.Session, req *protoMsg.JoinGameReadyQueueReq) {
+func (p *ActorQueue) joinGameReadyQueue(session *cproto.Session, req *protoMsg.JoinAllReadyQueueReq) {
 	// 从redis中查找评分最高分的房间作为可选项 一般房间仅差一个人满座的，则评分最高
 	list, err := redis_cluster.SingleRedis().GetTopCountMembers(context.Background(), GetMatchKey(req.GameID, req.RoomID), INVALID)
 	if err != nil {
@@ -79,7 +79,7 @@ func (p *ActorQueue) joinGameReadyQueue(session *cproto.Session, req *protoMsg.J
 	}
 	info := redis_cluster.RedisMatchInfo{}
 	if err = json.Unmarshal([]byte(val), &info); err != nil {
-		log.Errorf("[ActorQueue] 游戏[%v] 房间[%v] err:%v", req.GameID, req.RoomID, info)
+		log.Errorf("[ActorQueue] 游戏[%v] 房间[%v] info:%+v err:%v", req.GameID, req.RoomID, info, err)
 		p.Response(session, &protoMsg.ResultResp{
 			State: FAILED,
 			Hints: StatusText[Game51],
@@ -136,7 +136,7 @@ func (p *ActorQueue) joinGameReadyQueue(session *cproto.Session, req *protoMsg.J
 
 	}
 
-	log.Infof("[ActorQueue] 游戏[%v] 房间[%v] 牌桌信息:%v", req.GameID, req.RoomID, info)
+	log.Infof("[ActorQueue] 游戏[%v] 房间[%v] 牌桌信息:%+v", req.GameID, req.RoomID, info)
 	quest := &protoMsg.Request{
 		//Sid:   session.Sid,
 		//Route: session.ActorPath(),
@@ -146,7 +146,7 @@ func (p *ActorQueue) joinGameReadyQueue(session *cproto.Session, req *protoMsg.J
 	for _, datum := range msgData {
 		quest.Data = append(quest.Data, datum...)
 	}
-	childId := cstring.ToString(session.Uid)
+	childId := exString.ToString(session.Uid)
 	data, _ := proto.Marshal(quest)
 	clusterPacket := cproto.GetClusterPacket()
 	clusterPacket.SourcePath = session.AgentPath

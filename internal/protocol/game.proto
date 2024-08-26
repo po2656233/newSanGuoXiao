@@ -22,6 +22,11 @@ message EnterGameResp {
   int32 chairID = 3;                // 椅子编号
   PlayerSimpleInfo userInfo = 4;    // 玩家信息
 }
+// 加入全服游戏准备队列 也是反馈 JoinGameReadyQueueResp
+message JoinAllReadyQueueReq {
+  int64 roomID = 1;                 // 房间ID 注: =0时,为系统房
+  int64 gameID = 2;                 // 游戏ID
+}
 //加入游戏准备队列
 message JoinGameReadyQueueReq {
   int64 roomID = 1;                 // 房间ID 注: =0时,为系统房

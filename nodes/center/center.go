@@ -1,10 +1,10 @@
 package center
 
 import (
-	"fmt"
 	"github.com/po2656233/superplace"
 	"github.com/po2656233/superplace/components/cron"
 	superGORM "github.com/po2656233/superplace/components/gorm"
+	log "github.com/po2656233/superplace/logger"
 	"superman/internal/actors"
 	"superman/internal/conf"
 	"superman/nodes/center/db"
@@ -16,7 +16,7 @@ func Run(profileFilePath, nodeId string) {
 	defer func() {
 		if r := recover(); r != nil {
 			// 这里处理异常
-			fmt.Println("Recovered in main", r)
+			log.Errorf("Recovered in main:%v", r)
 		}
 	}()
 	app := superplace.Configure(

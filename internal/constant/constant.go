@@ -22,13 +22,6 @@ const (
 )
 
 const (
-	MIDGate  = 1
-	MIDLeaf  = 2
-	MIDGame  = 3
-	MIDPing  = 4
-	MIDMatch = 5 //匹配服
-)
-const (
 	NodeTypeCenter = "center"
 	NodeTypeGate   = "gate"
 	NodeTypeGame   = "game"
@@ -45,7 +38,7 @@ const (
 	FuncLogin        = "login"
 	FuncEnter        = "enter"
 	FuncRequest      = "request"
-	FuncMatch        = "joinGameReadyQueue"
+	FuncMatch        = "joinAllReadyQueue"
 	FuncSimpLogin    = "simpleLogin"
 	FuncSessionClose = "sessionClose"
 )
@@ -56,12 +49,20 @@ const (
 	GameDb   = "game_db_id"
 	TcpAddr  = ":10011"
 	KcpAddr  = ":10012"
+	Empty    = ""
 )
 
 // sdk平台类型
 const (
 	DevMode  int32 = 1 // 开发模式，注册开发帐号登陆(开发时使用)
 	QuickSDK int32 = 2 // quick sdk
+)
+const (
+	MIDGate  = 1
+	MIDLeaf  = 2
+	MIDGame  = 3
+	MIDPing  = 4
+	MIDMatch = 5 //匹配服
 )
 
 // 源码中重要标识
@@ -90,6 +91,10 @@ const (
 	Unlimited = -1  // 无限制
 
 	MaxLoadNum = 20 //最大录单
+)
+const (
+	NameLenMin = 3
+	NameLenMax = 18
 )
 
 // money 0:结算 1:充值 2:平台扣除 3:平台奖励 4:冻结 5:退税 6:提取 7:购买房卡 8:消耗房卡 9:置换房卡

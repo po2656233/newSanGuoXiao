@@ -15,7 +15,7 @@ const replaceWith = '';
 var protoDir = "../internal/protocol"
 //server begin
 var outServerMsg =  "../nodes/game/msg/msg.go";
-var outRouter = "../nodes/leaf/jettengame/gate/router.go";
+// var outRouter = "../nodes/leaf/jettengame/gate/router.go";
 
 var all_protos = {};
 var all_message = {};
@@ -172,7 +172,7 @@ function genServer() {
     }
 
     routerStr += "}\n\n"
-	msgStr += '  \n\tutils.ToJsonFile("./../../config/leafconf/message_id.json", msgMap, "", "\\t") \n'
+	msgStr += '  \n\tutils.ToJsonFile("./../../config/message_id.json", msgMap, "", "\\t") \n'
 	msgStr += "\tmsgMap = nil\n"
 	msgStr += "}\n"
 
@@ -180,7 +180,7 @@ function genServer() {
 	
 	
 	helputil.write2file(outServerMsg, msgStr);
-	helputil.write2file(outRouter, routerStr);
+	// helputil.write2file(outRouter, routerStr);
 }
 
 

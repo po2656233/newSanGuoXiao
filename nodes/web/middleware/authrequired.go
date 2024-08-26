@@ -8,11 +8,20 @@ import (
 	"superman/internal/token"
 )
 
+var skipRoutes = map[string]bool{
+	"/":            true,
+	"/login":       true,
+	"/register":    true,
+	"/list/pid":    true,
+	"/list/server": true,
+}
+
 // AuthRequired gin jwt 认证中间件
 func AuthRequired() superGin.GinHandlerFunc {
 	return func(ctx *superGin.Context) {
 		uri := ctx.Request.RequestURI
-		if uri == "/" || uri == "/register" || uri == "/login" || uri == "/list/pid" || strings.Contains(uri, "/list/server") {
+		_, ok := skipRoutes[uri]
+		if ok || strings.Contains(uri, "/list/server") {
 			return
 		}
 		tokenString := strings.TrimPrefix(ctx.GetHeader("Authorization"), "Bearer ")

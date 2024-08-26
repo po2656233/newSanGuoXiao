@@ -237,6 +237,7 @@
 	"310": "ZhaocaimiaoEraseCell",
 	"311": "ZhaocaimiaoOpenInfo",
 	"312": "ZhaocaimiaoOpenResp",
+	"313": "JoinAllReadyQueueReq",
 	"32": "MasterInfo",
 	"33": "TaskItem",
 	"34": "ClassItem",
