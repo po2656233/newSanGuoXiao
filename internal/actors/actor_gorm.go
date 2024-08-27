@@ -32,6 +32,7 @@ func (self *ActorDB) AliasID() string {
 func (self *ActorDB) OnInit() {
 	self.Remote().Register(self.Register)
 	self.Remote().Register(self.Login)
+	self.Remote().Register(self.Logout)
 
 	self.Remote().Register(self.GetClassList)
 	self.Remote().Register(self.GetRoomList)
@@ -46,6 +47,7 @@ func (self *ActorDB) OnInit() {
 	self.Remote().Register(self.GetUserInfo)
 
 	self.Remote().Register(self.FixNickName)
+
 	self.Remote().Register(self.Recharge)
 	self.Remote().Register(self.AddRecord)
 	self.Remote().Register(self.DecreaseGameRun)
@@ -275,6 +277,19 @@ func (self *ActorDB) updateNickName(uid int64, nickname string) error {
 	defer self.Unlock()
 	user := sqlmodel.User{}
 	return self.db.Table(user.TableName()).Where("id=?", uid).UpdateColumn("name", nickname).Error
+}
+func (self *ActorDB) updateLoginTime(uid int64) error {
+	self.Lock()
+	defer self.Unlock()
+	user := sqlmodel.User{}
+
+	return self.db.Table(user.TableName()).Where("id=?", uid).UpdateColumn("logintime", time.Now().Unix()).Error
+}
+func (self *ActorDB) updateLeaveTime(uid, now int64) error {
+	self.Lock()
+	defer self.Unlock()
+	user := sqlmodel.User{}
+	return self.db.Table(user.TableName()).Where("id=?", uid).UpdateColumn("leavetime", now).Error
 }
 
 ///////////////////////Check//////////////////////////////////////////////

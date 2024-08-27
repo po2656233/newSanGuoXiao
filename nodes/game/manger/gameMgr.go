@@ -17,6 +17,7 @@ type IGameOperate interface {
 	Start(args []interface{}) bool        // 开始
 	Ready(args []interface{}) bool        // 玩家准备
 	Playing(args []interface{}) bool      // 游 戏(下分|下注)
+	Over(args []interface{}) bool         // 结算
 	UpdateInfo(args []interface{}) bool   // 更新信息 如玩家进入、准备或离开等操作
 	SuperControl(args []interface{}) bool // 超级控制
 }
@@ -189,10 +190,16 @@ func (self *Game) ChangeStateAndWork(state protoMsg.GameScene) {
 		log.Warnf("[%v:%v]   \t 场景:%v 未注册!!! 可能导致游戏无法运行. ", self.Name, self.Id, protoMsg.GameScene_name[int32(state)])
 		return
 	}
+	// 如果当前没有玩家,则游戏暂停
+	if state == protoMsg.GameScene_Start && self.GetPlayerCount() == INVALID {
+		log.Warnf("[%v:%v]   \t 场景:开始 游戏中没有玩家, 游戏暂停. ", self.Name, self.Id)
+		return
+	}
 
 	if nowScene.before != nil {
 		nowScene.before()
 	}
+
 	if self.GameInfo.Scene != state {
 		if self.GameInfo.MaxPlayer != Unlimited {
 			log.Infof("[%v:%v]   \t当前场景:%v 当前玩家列表%v", self.Name, self.Id, protoMsg.GameScene_name[int32(state)], self.PlayerList)
@@ -212,6 +219,7 @@ func (self *Game) ChangeStateAndWork(state protoMsg.GameScene) {
 	if !canAfter {
 		return
 	}
+
 	// 继续执行任务
 	if nowScene.timeout > 0 {
 		if self.Timer != nil {
@@ -230,7 +238,6 @@ func (self *Game) ChangeStateAndWork(state protoMsg.GameScene) {
 	if nowScene.sceneInfo != nil && 0 < self.GetPlayerCount() {
 		GetClientMgr().NotifyOthers(self.PlayerList, nowScene.sceneInfo)
 	}
-
 }
 
 ///////////////////////////////游戏操作//////////////////////////////////////////////
@@ -287,6 +294,10 @@ func (g *Game) Playing(args []interface{}) bool {
 	return true
 }
 
+func (g *Game) Over(args []interface{}) bool {
+	return true
+}
+
 // UpdateInfo 更新信息 如玩家进入或离开
 func (g *Game) UpdateInfo(args []interface{}) bool {
 	flag, ok := args[0].(protoMsg.PlayerState)
@@ -336,6 +347,8 @@ func (g *Game) SuperControl(args []interface{}) bool {
 //////////////////////////////////////////////////////////////////////////////////////
 
 func (g *Game) RegisterEvent(scene protoMsg.GameScene, info proto.Message, timeout int32, work func() bool, before, after func()) {
+	g.playlistLK.Lock()
+	defer g.playlistLK.Unlock()
 	if g.Event == nil {
 		g.Event = make(map[protoMsg.GameScene]WorkTask)
 	}
@@ -376,10 +389,10 @@ func (g *Game) ToNextScene() bool {
 	if int32(protoMsg.GameScene_Closing) <= next {
 		return false
 	}
-	// 如果当前没有玩家,游戏回归空闲状态
-	if int32(protoMsg.GameScene_Start) == next && g.GetPlayerCount() == INVALID {
-		next = int32(protoMsg.GameScene_Free)
-	}
+	//// 如果当前没有玩家,游戏回归空闲状态
+	//if int32(protoMsg.GameScene_Start) == next && g.GetPlayerCount() == INVALID {
+	//	next = int32(protoMsg.GameScene_Free)
+	//}
 	g.ChangeStateAndWork(protoMsg.GameScene(next))
 	return true
 }

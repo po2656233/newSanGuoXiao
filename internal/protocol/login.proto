@@ -71,3 +71,11 @@ message ReconnectResp{
   int64 inTableNum = 3;  //所在桌子编号(=0时,没有进桌)
   string token = 4;
 }
+//登出
+message LogoutReq{
+  int64 uid = 1;
+}
+message LogoutResp{
+  int64 uid = 1;
+  int64 timestamp = 2;
+}

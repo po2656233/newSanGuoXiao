@@ -213,8 +213,9 @@ func (self *Room) ProcessWaitingQueue(ctx context.Context) {
 				}
 				if code != SUCCESS {
 					self.waiting <- waiter
+				} else {
+					log.Infof("[ProcessWaitingQueue]玩家:(%d) [gid:%d]配桌成功  [rid:%v][tid:%d] [chair:%d] ", waiter.Uid, waiter.Gid, self.Id, tb.Id, player.InChairId)
 				}
-				log.Infof("[ProcessWaitingQueue]玩家:(%d) [gid:%d]配桌成功  [rid:%v][tid:%d] [chair:%d] ", waiter.Uid, waiter.Gid, self.Id, tb.Id, player.InChairId)
 			}
 		} else {
 			self.waiting <- waiter

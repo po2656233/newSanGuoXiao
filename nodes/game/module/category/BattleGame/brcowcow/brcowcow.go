@@ -262,7 +262,7 @@ func (self *BrcowcowGame) Playing(args []interface{}) bool {
 }
 
 // 结算
-func (self *BrcowcowGame) Over(args []interface{}) {
+func (self *BrcowcowGame) Over(args []interface{}) bool {
 	_ = args
 	allAreaInfo := make([]int64, AREA_MAX)
 	bankerAwardScore := int64(0)
@@ -318,6 +318,11 @@ func (self *BrcowcowGame) Over(args []interface{}) {
 		self.openInfo.AwardArea)
 	self.T.ChairSettle(self.Name, self.Inning, result)
 
+	// 移除已离线玩家
+	noLiveIds := self.T.CheckChairsNoLive()
+	for _, uid := range noLiveIds {
+		self.RemovePlayer(uid)
+	}
 	// 派奖信息
 	checkout.TotalSettlement = allAreaInfo[:]
 	checkout.TotalSettlement = append(checkout.TotalSettlement, bankerAwardScore)
@@ -329,6 +334,7 @@ func (self *BrcowcowGame) Over(args []interface{}) {
 	})
 
 	log.Infof("[%v:%v]   \t结算注单... 各区域情况:%v", self.Name, self.T.Id, allAreaInfo)
+	return true
 }
 
 // 发牌
@@ -610,7 +616,11 @@ func (self *BrcowcowGame) onOver() {
 	// 玩家结算(框架消息)
 	self.Over(nil)
 
-	self.T.CalibratingRemain(Default)
+	// 有人玩就减去一场
+	self.personBetInfo.Range(func(key, value any) bool {
+		self.T.CalibratingRemain(Default)
+		return false
+	})
 
 	//自动清场
 	if self.IsClear || self.Close(func() *Table {

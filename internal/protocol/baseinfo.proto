@@ -88,7 +88,7 @@ enum GameScene {
   Ready = 1;          //准备
   Setting = 2;        //设置时长
   Confirm = 3;        // 确认
-  Start = 4;          //开始---此时,不能随意退桌。除非放弃游戏
+  Start = 4;          //开始---此时,不能随意退桌。除非放弃游戏 或百人类游戏
   Call = 5;           //叫分
   Decide = 6;         //定庄
   SitDirect = 7;      //决定方位
@@ -197,9 +197,11 @@ message PlayerInfo {
   PlayerState state = 11; // 状态
   int64 gold = 12;        //金币 *100
   int64 money = 13;       //余额
-  int64 inRooId = 14;   //所在的房间ID,为重连后,拉取相应数据
-  int64 inTableId = 15; //所在的牌桌ID
-  int32 inChairId = 16; //椅子编号
+  int64 loginTime = 14;    // 登录时间戳
+  int64 leaveTime = 15;    // 离开时间戳(登录成功后，该值为零)
+  int64 inRooId = 16;     // 所在的房间ID,为重连后,拉取相应数据
+  int64 inTableId = 17;   // 所在的牌桌ID
+  int32 inChairId = 18;   // 椅子编号
 }
 // 玩家简明信息
 message PlayerSimpleInfo {

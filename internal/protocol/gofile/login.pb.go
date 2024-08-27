@@ -714,6 +714,109 @@ func (x *ReconnectResp) GetToken() string {
 	return ""
 }
 
+//登出
+type LogoutReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Uid int64 `protobuf:"varint,1,opt,name=uid,proto3" json:"uid,omitempty"`
+}
+
+func (x *LogoutReq) Reset() {
+	*x = LogoutReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_login_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *LogoutReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LogoutReq) ProtoMessage() {}
+
+func (x *LogoutReq) ProtoReflect() protoreflect.Message {
+	mi := &file_login_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LogoutReq.ProtoReflect.Descriptor instead.
+func (*LogoutReq) Descriptor() ([]byte, []int) {
+	return file_login_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *LogoutReq) GetUid() int64 {
+	if x != nil {
+		return x.Uid
+	}
+	return 0
+}
+
+type LogoutResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Uid       int64 `protobuf:"varint,1,opt,name=uid,proto3" json:"uid,omitempty"`
+	Timestamp int64 `protobuf:"varint,2,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+}
+
+func (x *LogoutResp) Reset() {
+	*x = LogoutResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_login_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *LogoutResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LogoutResp) ProtoMessage() {}
+
+func (x *LogoutResp) ProtoReflect() protoreflect.Message {
+	mi := &file_login_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LogoutResp.ProtoReflect.Descriptor instead.
+func (*LogoutResp) Descriptor() ([]byte, []int) {
+	return file_login_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *LogoutResp) GetUid() int64 {
+	if x != nil {
+		return x.Uid
+	}
+	return 0
+}
+
+func (x *LogoutResp) GetTimestamp() int64 {
+	if x != nil {
+		return x.Timestamp
+	}
+	return 0
+}
+
 var File_login_proto protoreflect.FileDescriptor
 
 var file_login_proto_rawDesc = []byte{
@@ -809,7 +912,13 @@ var file_login_proto_rawDesc = []byte{
 	0x54, 0x61, 0x62, 0x6c, 0x65, 0x4e, 0x75, 0x6d, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0a,
 	0x69, 0x6e, 0x54, 0x61, 0x62, 0x6c, 0x65, 0x4e, 0x75, 0x6d, 0x12, 0x14, 0x0a, 0x05, 0x74, 0x6f,
 	0x6b, 0x65, 0x6e, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e,
-	0x42, 0x05, 0x5a, 0x03, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x22, 0x1d, 0x0a, 0x09, 0x4c, 0x6f, 0x67, 0x6f, 0x75, 0x74, 0x52, 0x65, 0x71, 0x12, 0x10, 0x0a,
+	0x03, 0x75, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x03, 0x75, 0x69, 0x64, 0x22,
+	0x3c, 0x0a, 0x0a, 0x4c, 0x6f, 0x67, 0x6f, 0x75, 0x74, 0x52, 0x65, 0x73, 0x70, 0x12, 0x10, 0x0a,
+	0x03, 0x75, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x03, 0x75, 0x69, 0x64, 0x12,
+	0x1c, 0x0a, 0x09, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x03, 0x52, 0x09, 0x74, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x42, 0x05, 0x5a,
+	0x03, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -824,7 +933,7 @@ func file_login_proto_rawDescGZIP() []byte {
 	return file_login_proto_rawDescData
 }
 
-var file_login_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_login_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_login_proto_goTypes = []interface{}{
 	(*RegisterReq)(nil),    // 0: pb.RegisterReq
 	(*RegisterResp)(nil),   // 1: pb.RegisterResp
@@ -835,15 +944,17 @@ var file_login_proto_goTypes = []interface{}{
 	(*AllopatricResp)(nil), // 6: pb.AllopatricResp
 	(*ReconnectReq)(nil),   // 7: pb.ReconnectReq
 	(*ReconnectResp)(nil),  // 8: pb.ReconnectResp
-	nil,                    // 9: pb.LoginRequest.ParamsEntry
-	nil,                    // 10: pb.LoginResponse.ParamsEntry
-	(*MasterInfo)(nil),     // 11: pb.MasterInfo
+	(*LogoutReq)(nil),      // 9: pb.LogoutReq
+	(*LogoutResp)(nil),     // 10: pb.LogoutResp
+	nil,                    // 11: pb.LoginRequest.ParamsEntry
+	nil,                    // 12: pb.LoginResponse.ParamsEntry
+	(*MasterInfo)(nil),     // 13: pb.MasterInfo
 }
 var file_login_proto_depIdxs = []int32{
-	9,  // 0: pb.LoginRequest.params:type_name -> pb.LoginRequest.ParamsEntry
-	10, // 1: pb.LoginResponse.params:type_name -> pb.LoginResponse.ParamsEntry
-	11, // 2: pb.LoginResp.mainInfo:type_name -> pb.MasterInfo
-	11, // 3: pb.ReconnectResp.mainInfo:type_name -> pb.MasterInfo
+	11, // 0: pb.LoginRequest.params:type_name -> pb.LoginRequest.ParamsEntry
+	12, // 1: pb.LoginResponse.params:type_name -> pb.LoginResponse.ParamsEntry
+	13, // 2: pb.LoginResp.mainInfo:type_name -> pb.MasterInfo
+	13, // 3: pb.ReconnectResp.mainInfo:type_name -> pb.MasterInfo
 	4,  // [4:4] is the sub-list for method output_type
 	4,  // [4:4] is the sub-list for method input_type
 	4,  // [4:4] is the sub-list for extension type_name
@@ -966,6 +1077,30 @@ func file_login_proto_init() {
 				return nil
 			}
 		}
+		file_login_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*LogoutReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_login_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*LogoutResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -973,7 +1108,7 @@ func file_login_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_login_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

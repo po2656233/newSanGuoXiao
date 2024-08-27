@@ -291,6 +291,8 @@ func init() {
     RegisterMessage(&protoMsg.AllopatricResp{})
     RegisterMessage(&protoMsg.ReconnectReq{})
     RegisterMessage(&protoMsg.ReconnectResp{})
+    RegisterMessage(&protoMsg.LogoutReq{})
+    RegisterMessage(&protoMsg.LogoutResp{})
 
     //mahjong文件生成的代码
     RegisterMessage(&protoMsg.MahjongKeZi{})

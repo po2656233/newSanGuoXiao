@@ -16,6 +16,7 @@ import (
 	mgr "superman/nodes/game/manger"
 	"superman/nodes/game/module/online"
 	"superman/nodes/game/msg"
+	"time"
 )
 
 type (
@@ -165,9 +166,12 @@ func (p *ActorPlayer) OnStop() {
 	mgr.GetClientMgr().DeleteClient(p.Session.Uid)
 	// 玩家退出 并且从玩家管理中删除信息
 	person := mgr.GetPlayerMgr().Get(p.Session.Uid)
-	if person != nil && person.Exit() {
-		mgr.GetPlayerMgr().Delete(person.UserID)
-		person = nil
+	if person != nil {
+		person.LeaveTime = time.Now().Unix()
+		if person.Exit() {
+			mgr.GetPlayerMgr().Delete(person.UserID)
+			person = nil
+		}
 	}
 }
 

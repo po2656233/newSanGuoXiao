@@ -68,6 +68,7 @@ func ToPlayer(info *protoMsg.UserInfo) *Player {
 			State:     0,
 			Gold:      0,
 			Money:     info.Money,
+			LeaveTime: INVALID,
 			InRooId:   0,
 			InTableId: 0,
 			InChairId: 0,
@@ -158,10 +159,7 @@ func (itself *Player) Enter(args []interface{}) { //入场
 }
 
 func (itself *Player) Exit() bool { //退出
-	if protoMsg.PlayerState_PlayerReady <= itself.State &&
-		itself.State < protoMsg.PlayerState_PlayerTrustee &&
-		itself.GameHandle != nil &&
-		false == itself.GameHandle.UpdateInfo([]interface{}{protoMsg.PlayerState_PlayerStandUp, itself.UserID}) {
+	if itself.GameHandle != nil && !itself.GameHandle.UpdateInfo([]interface{}{protoMsg.PlayerState_PlayerStandUp, itself.UserID}) {
 		return false
 	}
 	itself.State = protoMsg.PlayerState_PlayerStandUp

@@ -1869,9 +1869,11 @@ proto.pb.PlayerInfo.toObject = function(includeInstance, msg) {
     state: jspb.Message.getFieldWithDefault(msg, 11, 0),
     gold: jspb.Message.getFieldWithDefault(msg, 12, 0),
     money: jspb.Message.getFieldWithDefault(msg, 13, 0),
-    inrooid: jspb.Message.getFieldWithDefault(msg, 14, 0),
-    intableid: jspb.Message.getFieldWithDefault(msg, 15, 0),
-    inchairid: jspb.Message.getFieldWithDefault(msg, 16, 0)
+    logintime: jspb.Message.getFieldWithDefault(msg, 14, 0),
+    leavetime: jspb.Message.getFieldWithDefault(msg, 15, 0),
+    inrooid: jspb.Message.getFieldWithDefault(msg, 16, 0),
+    intableid: jspb.Message.getFieldWithDefault(msg, 17, 0),
+    inchairid: jspb.Message.getFieldWithDefault(msg, 18, 0)
   };
 
   if (includeInstance) {
@@ -1962,13 +1964,21 @@ proto.pb.PlayerInfo.deserializeBinaryFromReader = function(msg, reader) {
       break;
     case 14:
       var value = /** @type {number} */ (reader.readInt64());
-      msg.setInrooid(value);
+      msg.setLogintime(value);
       break;
     case 15:
       var value = /** @type {number} */ (reader.readInt64());
-      msg.setIntableid(value);
+      msg.setLeavetime(value);
       break;
     case 16:
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setInrooid(value);
+      break;
+    case 17:
+      var value = /** @type {number} */ (reader.readInt64());
+      msg.setIntableid(value);
+      break;
+    case 18:
       var value = /** @type {number} */ (reader.readInt32());
       msg.setInchairid(value);
       break;
@@ -2092,24 +2102,38 @@ proto.pb.PlayerInfo.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getInrooid();
+  f = message.getLogintime();
   if (f !== 0) {
     writer.writeInt64(
       14,
       f
     );
   }
-  f = message.getIntableid();
+  f = message.getLeavetime();
   if (f !== 0) {
     writer.writeInt64(
       15,
       f
     );
   }
+  f = message.getInrooid();
+  if (f !== 0) {
+    writer.writeInt64(
+      16,
+      f
+    );
+  }
+  f = message.getIntableid();
+  if (f !== 0) {
+    writer.writeInt64(
+      17,
+      f
+    );
+  }
   f = message.getInchairid();
   if (f !== 0) {
     writer.writeInt32(
-      16,
+      18,
       f
     );
   }
@@ -2312,47 +2336,77 @@ proto.pb.PlayerInfo.prototype.setMoney = function(value) {
 
 
 /**
- * optional int64 inRooId = 14;
+ * optional int64 loginTime = 14;
  * @return {number}
  */
-proto.pb.PlayerInfo.prototype.getInrooid = function() {
+proto.pb.PlayerInfo.prototype.getLogintime = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 14, 0));
 };
 
 
 /** @param {number} value */
-proto.pb.PlayerInfo.prototype.setInrooid = function(value) {
+proto.pb.PlayerInfo.prototype.setLogintime = function(value) {
   jspb.Message.setProto3IntField(this, 14, value);
 };
 
 
 /**
- * optional int64 inTableId = 15;
+ * optional int64 leaveTime = 15;
  * @return {number}
  */
-proto.pb.PlayerInfo.prototype.getIntableid = function() {
+proto.pb.PlayerInfo.prototype.getLeavetime = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 15, 0));
 };
 
 
 /** @param {number} value */
-proto.pb.PlayerInfo.prototype.setIntableid = function(value) {
+proto.pb.PlayerInfo.prototype.setLeavetime = function(value) {
   jspb.Message.setProto3IntField(this, 15, value);
 };
 
 
 /**
- * optional int32 inChairId = 16;
+ * optional int64 inRooId = 16;
  * @return {number}
  */
-proto.pb.PlayerInfo.prototype.getInchairid = function() {
+proto.pb.PlayerInfo.prototype.getInrooid = function() {
   return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 16, 0));
 };
 
 
 /** @param {number} value */
-proto.pb.PlayerInfo.prototype.setInchairid = function(value) {
+proto.pb.PlayerInfo.prototype.setInrooid = function(value) {
   jspb.Message.setProto3IntField(this, 16, value);
+};
+
+
+/**
+ * optional int64 inTableId = 17;
+ * @return {number}
+ */
+proto.pb.PlayerInfo.prototype.getIntableid = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 17, 0));
+};
+
+
+/** @param {number} value */
+proto.pb.PlayerInfo.prototype.setIntableid = function(value) {
+  jspb.Message.setProto3IntField(this, 17, value);
+};
+
+
+/**
+ * optional int32 inChairId = 18;
+ * @return {number}
+ */
+proto.pb.PlayerInfo.prototype.getInchairid = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 18, 0));
+};
+
+
+/** @param {number} value */
+proto.pb.PlayerInfo.prototype.setInchairid = function(value) {
+  jspb.Message.setProto3IntField(this, 18, value);
 };
 
 

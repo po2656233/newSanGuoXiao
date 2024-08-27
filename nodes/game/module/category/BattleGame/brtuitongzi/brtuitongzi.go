@@ -251,7 +251,7 @@ func (self *BrTuitongziGame) Playing(args []interface{}) bool {
 }
 
 // Over 结算
-func (self *BrTuitongziGame) Over(args []interface{}) {
+func (self *BrTuitongziGame) Over(args []interface{}) bool {
 	_ = args
 	allAreaInfo := make([]int64, AREA_MAX)
 	self.personBetInfo.Range(func(key, value any) bool {
@@ -283,7 +283,11 @@ func (self *BrTuitongziGame) Over(args []interface{}) {
 	//结算
 	result := fmt.Sprintf("庄[%v] 天[%v] 地[%v] 顺[%v] 中奖区域:%v", self.openInfo.BankerCard, self.openInfo.TianCard, self.openInfo.DiCard, self.openInfo.ShunCard, self.openInfo.AwardArea)
 	self.T.ChairSettle(self.Name, self.Inning, result)
-
+	// 移除已离线玩家
+	noLiveIds := self.T.CheckChairsNoLive()
+	for _, uid := range noLiveIds {
+		self.RemovePlayer(uid)
+	}
 	//派奖
 	checkout := &protoMsg.BrtoubaoCheckoutResp{}
 	checkout.Acquires = allAreaInfo
@@ -295,6 +299,7 @@ func (self *BrTuitongziGame) Over(args []interface{}) {
 		GetClientMgr().SendTo(chair.UserID, checkout)
 	})
 	log.Infof("[%v:%v]   \t结算注单... 各区域情况:%v", self.GameInfo.Name, self.T.Id, allAreaInfo)
+	return true
 }
 
 // DispatchCard 发牌
@@ -472,7 +477,11 @@ func (self *BrTuitongziGame) onOver() {
 	// 玩家结算(框架消息)
 	self.Over(nil)
 
-	self.T.CalibratingRemain(Default)
+	// 有人玩就减去一场
+	self.personBetInfo.Range(func(key, value any) bool {
+		self.T.CalibratingRemain(Default)
+		return false
+	})
 
 	//自动清场
 	if self.IsClear || self.Close(func() *Table {

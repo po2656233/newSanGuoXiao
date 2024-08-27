@@ -403,9 +403,12 @@ func (tb *Table) ChairSettle(name, inning, result string) {
 			Coin:      resp.Gold,
 			Reason:    resp.Order,
 		}
+		chair.Coin = changeGold.Coin
+		chair.Gold = resp.Gold
 		GetClientMgr().SendTo(chair.UserID, changeGold)
 		return true
 	})
+
 }
 
 // SitCount 座位总数
@@ -466,9 +469,6 @@ func (tb *Table) GetOrderList() []int64 {
 	}
 	return utils.Unique(list)
 }
-func (tb *Table) CheckFinish() {
-
-}
 
 // CalibratingRemain 校准剩余次数
 func (tb *Table) CalibratingRemain(delCount int32) {
@@ -484,6 +484,32 @@ func (tb *Table) CalibratingRemain(delCount int32) {
 			tb.Remain = resp.Remain
 		}
 	}
+}
+
+// CheckChairsNoLive 检测桌椅上已经离开的玩家
+func (tb *Table) CheckChairsNoLive() (noLiveIDs []int64) {
+	noLiveIDs = make([]int64, 0)
+	tb.sitters.Range(func(key, value any) bool {
+		if chair, ok := value.(*Chair); ok && INVALID != chair.LeaveTime {
+			noLiveIDs = append(noLiveIDs, chair.UserID)
+			if chair.ID == tb.maxChairID {
+				tb.maxChairID--
+				if tb.maxChairID < 1 {
+					tb.maxChairID = 1
+				}
+			}
+			chair = nil
+		}
+		return true
+	})
+	for _, uid := range noLiveIDs {
+		tb.sitters.Delete(uid)
+	}
+	atomic.SwapInt32(&tb.sitCount, -int32(len(noLiveIDs)))
+	if tb.SitCount() == INVALID {
+		tb.isStart = false
+	}
+	return
 }
 
 /////////////////////////////////////////////////////////////////////////

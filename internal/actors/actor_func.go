@@ -54,6 +54,9 @@ func (self *ActorDB) Login(req *pb.LoginReq) (*pb.LoginResp, error) {
 	if err != nil {
 		return nil, err
 	}
+	if err := self.updateLoginTime(userInfo.ID); err != nil {
+		return nil, err
+	}
 	resp := &pb.LoginResp{}
 	resp.MainInfo = &pb.MasterInfo{
 		UserInfo: &pb.UserInfo{
@@ -83,6 +86,17 @@ func (self *ActorDB) Login(req *pb.LoginReq) (*pb.LoginResp, error) {
 		},
 	}
 	return resp, err
+}
+
+func (self *ActorDB) Logout(req *pb.LogoutReq) (*pb.LogoutResp, error) {
+	now := time.Now().Unix()
+	if err := self.updateLeaveTime(req.Uid, now); err != nil {
+		return nil, err
+	}
+	return &pb.LogoutResp{
+		Uid:       req.Uid,
+		Timestamp: now,
+	}, nil
 }
 
 // GetClassList 取分类列表

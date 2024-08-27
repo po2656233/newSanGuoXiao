@@ -182,7 +182,7 @@ func (self *RdbClient) ModifyAndAddToSetWithLua(ctx context.Context, key string,
 	}
 
 	if acquired {
-		fmt.Println("Lock acquired, executing critical section")
+		//fmt.Println("Lock acquired, executing critical section")
 		// 执行关键代码
 		if err = self.Remove(ctx, key, []interface{}{oldValue}); err == nil {
 			err = self.AddRank(ctx, key, score, newValue)
@@ -193,7 +193,7 @@ func (self *RdbClient) ModifyAndAddToSetWithLua(ctx context.Context, key string,
 			fmt.Println("Error releasing lock:", err1)
 			return err1
 		}
-		fmt.Println("Lock released")
+		//fmt.Println("Lock released")
 	} else {
 		fmt.Println("Could not acquire lock")
 	}

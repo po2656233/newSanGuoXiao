@@ -31,7 +31,7 @@ type (
 func (p *ActorQueue) OnInit() {
 	// 注册 session关闭的remote函数(网关触发连接断开后，会调用RPC发送该消息)
 	p.Remote().Register(p.sessionClose)
-	p.Local().Register(p.joinGameReadyQueue)
+	p.Local().Register(p.joinAllReadyQueue)
 }
 
 // sessionClose 接收角色session关闭处理
@@ -47,7 +47,7 @@ func (p *ActorQueue) OnStop() {
 	}
 }
 
-func (p *ActorQueue) joinGameReadyQueue(session *cproto.Session, req *protoMsg.JoinAllReadyQueueReq) {
+func (p *ActorQueue) joinAllReadyQueue(session *cproto.Session, req *protoMsg.JoinAllReadyQueueReq) {
 	// 从redis中查找评分最高分的房间作为可选项 一般房间仅差一个人满座的，则评分最高
 	list, err := redis_cluster.SingleRedis().GetTopCountMembers(context.Background(), GetMatchKey(req.GameID, req.RoomID), INVALID)
 	if err != nil {

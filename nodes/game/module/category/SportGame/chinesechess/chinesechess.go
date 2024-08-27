@@ -371,12 +371,6 @@ func (self *Chinesechess) Playing(args []interface{}) bool {
 	return true
 }
 
-// Over 结 算
-func (self *Chinesechess) Over(args []interface{}) bool {
-
-	return true
-}
-
 // UpdateInfo 更新玩家信息
 func (self *Chinesechess) UpdateInfo(args []interface{}) bool {
 	flag, ok := args[0].(protoMsg.PlayerState)

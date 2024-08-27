@@ -187,6 +187,7 @@ func (self *BaccaratGame) Start(args []interface{}) bool {
 				//此处会重置以往的库存值
 				self.inventory = self.confInventory
 			}
+
 			return true
 		}, func() {
 			startResp.Inning = self.Inning
@@ -203,10 +204,6 @@ func (self *BaccaratGame) Start(args []interface{}) bool {
 			},
 		}
 		self.Game.RegisterEvent(protoMsg.GameScene_Playing, playResp, playResp.Times.TotalTime, func() bool {
-			if self.T.SitCount() == 0 {
-				self.ChangeStateAndWork(protoMsg.GameScene_Start)
-				return false
-			}
 			return true
 		}, func() {
 			playResp.Times.TimeStamp = self.TimeStamp
@@ -243,11 +240,13 @@ func (self *BaccaratGame) Start(args []interface{}) bool {
 			}) { // 剩余次数为零,释放资源
 				return false //表示不执行after
 			}
-
 			return true
 		}, func() {
-			// 校准剩余次数
-			self.T.CalibratingRemain(Default)
+			// 校准剩余次数 有人玩,才减去
+			self.personBetInfo.Range(func(key, value any) bool {
+				self.T.CalibratingRemain(Default)
+				return false
+			})
 			openResp.Times.TimeStamp = self.TimeStamp
 		}, nil)
 	}
@@ -362,13 +361,19 @@ func (self *BaccaratGame) Over(args []interface{}) bool {
 		return true
 	})
 
+	// 对平局的先结算
+	result := fmt.Sprintf("闲:[%v] 庄:[%v] 中奖区域:%v", GetCardsText(self.cbPlayerCards.Cards), GetCardsText(self.cbBankerCards.Cards), self.openInfo.AwardArea)
+	// 结算
+	self.T.ChairSettle(self.Name, self.Inning, result)
+	// 移除已离线玩家
+	noLiveIds := self.T.CheckChairsNoLive()
+	for _, uid := range noLiveIds {
+		self.RemovePlayer(uid)
+	}
+	// 发送游戏结算数据
 	//派奖
 	checkout := &protoMsg.BaccaratCheckoutResp{}
 	checkout.Acquires = allAreaInfo
-
-	// 对平局的先结算
-	result := fmt.Sprintf("闲:[%v] 庄:[%v] 中奖区域:%v", GetCardsText(self.cbPlayerCards.Cards), GetCardsText(self.cbBankerCards.Cards), self.openInfo.AwardArea)
-	self.T.ChairSettle(self.Name, self.Inning, result)
 	self.T.ChairWork(func(chair *Chair) {
 		if chair.Total != INVALID {
 			checkout.MyAcquire = chair.Gain
@@ -394,16 +399,19 @@ func (self *BaccaratGame) UpdateInfo(args []interface{}) bool {
 	switch flag {
 	case protoMsg.PlayerState_PlayerStandUp, protoMsg.PlayerState_PlayerGiveUp:
 		self.personBetInfo.Range(func(key, value any) bool {
-			if uid1, ok1 := key.(int64); ok1 && uid == uid1 {
+			if uid1, ok2 := key.(int64); ok2 && uid == uid1 {
 				bRet = true
 				return false
 			}
 			return true
 		})
-	}
-	if bRet {
+		if bRet {
+			return false
+		}
+		self.RemovePlayer(uid)
 		return true
 	}
+
 	return self.Game.UpdateInfo(args)
 }
 

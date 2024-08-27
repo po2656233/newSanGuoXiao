@@ -231,7 +231,7 @@ func (self *TigerXdragonGame) Playing(args []interface{}) bool {
 }
 
 // 结算
-func (self *TigerXdragonGame) Over(args []interface{}) {
+func (self *TigerXdragonGame) Over(args []interface{}) bool {
 	_ = args
 	allAreaInfo := make([]int64, AREA_MAX)
 	self.personBetInfo.Range(func(key, value any) bool {
@@ -263,6 +263,13 @@ func (self *TigerXdragonGame) Over(args []interface{}) {
 	// 结算
 	result := fmt.Sprintf("龙:%v  虎:%v 中奖区域:%v", GetCardText(self.openInfo.Cards[0]), GetCardText(self.openInfo.Cards[1]), self.openInfo.AwardArea)
 	self.T.ChairSettle(self.Name, self.Inning, result)
+
+	// 移除已离线玩家
+	noLiveIds := self.T.CheckChairsNoLive()
+	for _, uid := range noLiveIds {
+		self.RemovePlayer(uid)
+	}
+
 	// 派奖信息
 	checkout := &protoMsg.TigerXdragonCheckoutResp{}
 	checkout.Acquires = allAreaInfo
@@ -283,6 +290,7 @@ func (self *TigerXdragonGame) Over(args []interface{}) {
 	//}
 
 	log.Infof("[%v:%v]   \t结算注单... 各区域情况:%v", self.Name, self.T.Id, allAreaInfo)
+	return true
 }
 
 // 发牌
@@ -474,7 +482,11 @@ func (self *TigerXdragonGame) onOver() {
 	// 玩家结算(框架消息)
 	self.Over(nil)
 
-	self.T.CalibratingRemain(Default)
+	// 有人玩就减去一场
+	self.personBetInfo.Range(func(key, value any) bool {
+		self.T.CalibratingRemain(Default)
+		return false
+	})
 
 	//自动清场
 	if self.IsClear || self.Close(func() *Table {

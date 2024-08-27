@@ -10,6 +10,7 @@ import (
 	"strconv"
 	. "superman/internal/constant"
 	protoMsg "superman/internal/protocol/gofile"
+	"superman/internal/rpc"
 	"superman/internal/utils"
 	"sync"
 	"time"
@@ -79,13 +80,17 @@ func (self *ClientManger) Get(userID int64) (Agent, bool) {
 	return nil, false
 }
 
-// 删除客户端
+// DeleteClient 删除客户端
 func (self *ClientManger) DeleteClient(userID int64) {
 	self.Delete(userID)
+	rpc.SendDataToDB(self.GetApp(), &protoMsg.LogoutReq{
+		Uid: userID,
+	})
 }
 
 // /------------------------广播---------------------------------------///
-// 全网广播
+
+// NotifyAll 全网广播
 func (self *ClientManger) NotifyAll(msg proto.Message) {
 	self.Range(func(key, value interface{}) bool {
 		if _, ok := key.(int64); !ok {
