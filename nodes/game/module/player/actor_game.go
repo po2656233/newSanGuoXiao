@@ -32,27 +32,55 @@ func (p *ActorGame) AliasID() string {
 	return strings.Trim(cst.GameActor, superConst.DOT)
 }
 func (p *ActorGame) OnInit() {
-	log.Debugf("[ActorGame] path = %s init!", p.PathString())
-	p.childExitTime = time.Minute * 30
-	p.getGamesTime = time.Second * 5
-	p.getRoomsTime = time.Minute * 1
+	// 加载游戏配置
 	category.InitConfig()
+	// 加载协议文件
+	rpc.LoadMsgInfos()
+	// 客户端管理实例句柄
 	mgr.GetClientMgr().SetApp(p.App())
 
+	// 注册协议
+	p.registerEvent() // 响应事件
+	//p.registerLocalMsg()  // 注册(与客户端通信)的协议
+	p.registerRemoteMsg() // 注意服务间交互的协议
+
+	// 检查游戏基础信息(房间列表、牌桌列表)
+	p.checkBaseInfo()
+
+}
+
+// registerEvent 响应事件
+func (p *ActorGame) registerEvent() {
 	// 注册角色登陆事件
 	p.Event().Register(p.onLoginEvent)
 	p.Event().Register(p.onLogoutEvent)
 	p.Event().Register(p.onPlayerCreateEvent)
-	p.Remote().Register(p.checkChild)
+
+}
+
+// registerRemoteMsg 注意服务间交互的协议
+func (p *ActorGame) registerRemoteMsg() {
+	p.Remote().Register(p.checkChild) // 与子节点交互
 	// 接收来自中心服的数据修改
 	p.Remote().Register(p.CreateRoomResp)
 	p.Remote().Register(p.CreateTableResp)
 	p.Remote().Register(p.DeleteTableResp)
+}
+
+// checkBaseInfo 检查基础信息
+func (p *ActorGame) checkBaseInfo() {
+	log.Debugf("[ActorGame] path = %s init!", p.PathString())
+	p.childExitTime = time.Minute * 30
+	p.getGamesTime = time.Second * 5
+	p.getRoomsTime = time.Minute * 1
+
 	p.Timer().RemoveAll()
 	p.Timer().AddOnce(time.Second, p.checkGameList)
 	p.Timer().AddOnce(time.Second, p.checkRoomList)
+	//p.Call(p.PathString(), "checkChild", nil)
 
 }
+
 func (p *ActorGame) OnFindChild(msg *cfacade.Message) (cfacade.IActor, bool) {
 	// 动态创建 player child actor
 	childID := msg.TargetPath().ChildID
@@ -141,11 +169,7 @@ func (p *ActorGame) checkChild() {
 	// 扫描所有玩家actor
 	p.Child().Each(func(iActor cfacade.IActor) {
 		child, ok := iActor.(*ActorPlayer)
-		if !ok {
-			return
-		}
-
-		if child.isOnline {
+		if !ok || child.isOnline {
 			return
 		}
 

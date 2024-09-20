@@ -251,6 +251,8 @@ func init() {
     RegisterMessage(&protoMsg.BarterCoinResp{})
     RegisterMessage(&protoMsg.BarterYuanBaoReq{})
     RegisterMessage(&protoMsg.BarterYuanBaoResp{})
+    RegisterMessage(&protoMsg.BarterMoneyReq{})
+    RegisterMessage(&protoMsg.BarterMoneyResp{})
     RegisterMessage(&protoMsg.GetGoodsReq{})
     RegisterMessage(&protoMsg.GetGoodsResp{})
     RegisterMessage(&protoMsg.GetAllGoodsReq{})

@@ -124,7 +124,7 @@ func (self *ActorDB) GetRoomList(req *pb.GetRoomListReq) (*pb.GetRoomListResp, e
 			Items: make([]*pb.RoomInfo, 0),
 		},
 	}
-	ret, err := self.checkRooms(req.Uid, req.StartTime, -1, 0)
+	ret, err := self.checkRooms(req.Uid, 0, -1, 0)
 	for _, room := range ret {
 		resp.Items.Items = append(resp.Items.Items, &pb.RoomInfo{
 			Id:         room.ID,

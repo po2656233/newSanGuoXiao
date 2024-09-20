@@ -386,6 +386,10 @@ func (p *Controller) register(c *superGin.Context) {
 	}
 	RenderResult(c, statusCode, StatusText[int(statusCode)])
 }
+func (p *Controller) serverList0(c *superGin.Context) {
+	c.Set("pid", 2126001)
+	p.serverList(c)
+}
 
 // severList 区服列表
 // http://127.0.0.1:8089/server/list/2126001

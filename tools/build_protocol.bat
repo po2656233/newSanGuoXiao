@@ -38,6 +38,7 @@ echo build proto to "go and js" complete!
 
 cd ../../tools
 node onekey.js
+py .\realize_go.py
 rem timeout /t 2
 echo 开始 3s 倒计时...
 choice /c  abcdQ /n /t 3 /d a /m "如需暂停,请按Q键终止,否则退出"

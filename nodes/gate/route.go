@@ -1,11 +1,6 @@
 package gate
 
 import (
-	"bytes"
-	"encoding/binary"
-	"encoding/json"
-	"errors"
-	exReflect "github.com/po2656233/superplace/extend/reflect"
 	cslice "github.com/po2656233/superplace/extend/slice"
 	cstring "github.com/po2656233/superplace/extend/string"
 	cfacade "github.com/po2656233/superplace/facade"
@@ -14,11 +9,9 @@ import (
 	pmessage "github.com/po2656233/superplace/net/parser/pomelo/message"
 	"github.com/po2656233/superplace/net/parser/simple"
 	cproto "github.com/po2656233/superplace/net/proto"
-	"google.golang.org/protobuf/proto"
-	"os"
-	"strconv"
 	. "superman/internal/constant"
 	"superman/internal/protocol/gofile"
+	"superman/internal/rpc"
 )
 
 var (
@@ -36,47 +29,7 @@ var (
 	notLoginRsp = &pb.Int32{
 		Value: Login07,
 	}
-	mapFuncs = make(map[string]string)
-	endian   = binary.BigEndian
 )
-
-func GetMsgFunc(fileName string) map[string]string {
-	data, _ := os.ReadFile(fileName)
-	//创建map，用于接收解码好的数据
-	//创建文件的解码器
-	_ = json.Unmarshal(data, &mapFuncs)
-	//解码文件中的数据，丢入dataMap所在的内存
-	//fmt.Println("解码成功", mapFuncs)
-	return mapFuncs
-}
-
-func GetProtoData(msg proto.Message) ([]byte, error) {
-	strId := ""
-	name := exReflect.GetStructName(msg)
-	for id, protoName := range mapFuncs {
-		if protoName == name {
-			strId = id
-			break
-		}
-	}
-	if strId == "" {
-		return nil, errors.New("no data")
-	}
-
-	id, err := strconv.Atoi(strId)
-	if err != nil {
-		return nil, err
-	}
-	pkg := bytes.NewBuffer([]byte{})
-	err = binary.Write(pkg, endian, uint16(id))
-	if err != nil {
-		return nil, err
-	}
-
-	data, err := proto.Marshal(msg)
-	data = append(pkg.Bytes(), data...)
-	return data, nil
-}
 
 // ///////////////////////////////pomelo////////////////////////////////////////////////////
 // onDataRoute 数据路由规则
@@ -144,8 +97,8 @@ func onSimpleDataRoute(agent *simple.Agent, msg *simple.Message, route *simple.N
 	session.Mid = msg.MID
 
 	if session.Mid == MIDPing {
-		data, _ := GetProtoData(&pb.PongResp{})
-		agent.Response(MIDPing, data)
+		data, _ := rpc.GetProtoData(&pb.PongResp{})
+		agent.SendRaw(data)
 		return
 	}
 	// current node
@@ -179,7 +132,9 @@ func onSimpleDataRoute(agent *simple.Agent, msg *simple.Message, route *simple.N
 	clusterPacket.Session = session   // agent session
 	clusterPacket.ArgBytes = msg.Data // packet -> message -> data
 	if clusterPacket.FuncName == "" {
-		clusterPacket.FuncName = FuncRequest
+		clog.Errorf("[route][gameNodeRoute] There is no function name in the parameter. ")
+		return
+		//clusterPacket.FuncName = FuncRequest
 	}
 	if err := agent.Cluster().PublishLocal(serverId, clusterPacket); err != nil {
 		clog.Errorf("[route][gameNodeRoute] ClusterLocalDataRoute err:%v", err)

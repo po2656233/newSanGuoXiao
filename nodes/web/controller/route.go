@@ -18,6 +18,7 @@ func (p *Controller) Init() {
 		RouterGroup: group.Group("/list"),
 	}
 	list.GET("/pid", p.pidList)            //包列表
+	list.GET("/server", p.serverList0)     //服务器网关地址
 	list.GET("/server/:pid", p.serverList) //服务器网关地址
 	list.GET("/class", p.classList)        //分类列表
 	list.GET("/room", p.roomList)          //房间列表

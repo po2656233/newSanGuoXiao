@@ -402,7 +402,7 @@ const (
 	GameScene_Ready       GameScene = 1  //准备
 	GameScene_Setting     GameScene = 2  //设置时长
 	GameScene_Confirm     GameScene = 3  // 确认
-	GameScene_Start       GameScene = 4  //开始---此时,不能随意退桌。除非放弃游戏
+	GameScene_Start       GameScene = 4  //开始---此时,不能随意退桌。除非放弃游戏 或百人类游戏
 	GameScene_Call        GameScene = 5  //叫分
 	GameScene_Decide      GameScene = 6  //定庄
 	GameScene_SitDirect   GameScene = 7  //决定方位

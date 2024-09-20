@@ -132,8 +132,8 @@
         "user_name": "root",
         "password": "ko8899110",
         "max_idle_connect": 4,
-        "max_open_connect": 8,
-        "log_mode": true
+        "max_open_connect": 16,
+        "log_mode": false
       }
     ],
     "game_db_group": [
@@ -145,7 +145,7 @@
         "user_name": "root",
         "password": "ko8899110",
         "max_idle_connect": 4,
-        "max_open_connect": 8,
+        "max_open_connect": 16,
         "log_mode": true
       }
     ]

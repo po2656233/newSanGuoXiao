@@ -37,4 +37,5 @@ func Run(profileFilePath, nodeId string) {
 		&ops.ActorOps{},
 	)
 	app.Startup()
+	log.Warnf("程序进程终止")
 }

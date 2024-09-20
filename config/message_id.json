@@ -240,6 +240,8 @@
 	"313": "JoinAllReadyQueueReq",
 	"314": "LogoutReq",
 	"315": "LogoutResp",
+	"316": "BarterMoneyReq",
+	"317": "BarterMoneyResp",
 	"32": "MasterInfo",
 	"33": "TaskItem",
 	"34": "ClassItem",

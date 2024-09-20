@@ -37,7 +37,7 @@ func (p *ActorAgent) OnInit() {
 
 	// simple
 	p.Remote().Register(p.setSimpleSession)
-	p.Local().Register(p.simpleLogin)
+	p.Local().Register(p.Login)
 }
 
 ////////////////////////pomelo//////////////////////////////////////
@@ -154,7 +154,8 @@ func (p *ActorAgent) setSimpleSession(req *pb.StringKeyValue) {
 	}
 }
 
-func (p *ActorAgent) simpleLogin(session *cproto.Session, req *pb.LoginRequest) {
+// Login 登录
+func (p *ActorAgent) Login(session *cproto.Session, req *pb.LoginRequest) {
 	agent, found := simple.GetAgent(p.ActorID())
 	if !found {
 		return
@@ -183,10 +184,13 @@ func (p *ActorAgent) simpleLogin(session *cproto.Session, req *pb.LoginRequest) 
 
 	agent.Session().Set(ServerID, cstring.ToString(req.ServerId))
 	agent.Session().Set(OpenID, cstring.ToString(uid))
-	agent.Response(session.Mid, &pb.LoginResponse{
+	res := &pb.LoginResponse{
 		Uid:    uid,
 		OpenId: cstring.ToString(uid),
-	})
+	}
+	data, err := rpc.GetProtoData(res)
+	agent.SendRaw(data)
+	clog.Infof("Login mid:%v  err:%v", data[:4], err)
 }
 
 func (p *ActorAgent) checkSimpleSession(uid cfacade.UID) {

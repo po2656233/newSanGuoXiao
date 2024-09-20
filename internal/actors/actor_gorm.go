@@ -74,7 +74,7 @@ func (self *ActorDB) changeDB(dbNode string) {
 	// 获取gorm组件
 	gormCpt := self.App().Find(name).(*superGorm.Component)
 	if gormCpt == nil {
-		clog.DPanicf("[component = %s] not found.", name)
+		clog.Panic("[component = %s] not found.", name)
 		return
 	}
 	// 获取 db_id = "center_db_1" 的配置

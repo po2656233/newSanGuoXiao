@@ -1,57 +1,5 @@
 package constant
 
-const (
-	Username = "username"
-	Password = "password"
-
-	ProcessId = "pid" //包id 用于控制客户端
-	ServerId  = "sid"
-	RoomId    = "rid"
-	TableId   = "tid"
-	GameId    = "gid"
-	UserId    = "uid"
-	openId    = "openid" //开发者ID
-)
-const (
-	SourcePath = ".system"
-	OpsActor   = ".ops"
-	DBActor    = ".db"
-	AccActor   = ".account"
-	GameActor  = ".game"
-	MatchActor = ".match"
-)
-
-const (
-	NodeTypeCenter = "center"
-	NodeTypeGate   = "gate"
-	NodeTypeGame   = "game"
-	NodeTypeLeaf   = "leaf"
-	NodeTypeMatch  = "match"
-)
-const (
-	ActIdGate  = "user"
-	ActIdGame  = "game"
-	ActIdMatch = "match"
-)
-
-const (
-	FuncLogin        = "login"
-	FuncEnter        = "enter"
-	FuncRequest      = "request"
-	FuncMatch        = "joinAllReadyQueue"
-	FuncSimpLogin    = "simpleLogin"
-	FuncSessionClose = "sessionClose"
-)
-
-const (
-	DbList   = "db_id_list"
-	CenterDb = "center_db_id"
-	GameDb   = "game_db_id"
-	TcpAddr  = ":10011"
-	KcpAddr  = ":10012"
-	Empty    = ""
-)
-
 // sdk平台类型
 const (
 	DevMode  int32 = 1 // 开发模式，注册开发帐号登陆(开发时使用)
@@ -61,8 +9,17 @@ const (
 	MIDGate  = 1
 	MIDLeaf  = 2
 	MIDGame  = 3
-	MIDPing  = 4
+	MIDPing  = 234
 	MIDMatch = 5 //匹配服
+)
+const (
+	DbList   = "db_id_list"
+	CenterDb = "center_db_id"
+	GameDb   = "game_db_id"
+	TcpAddr  = ":10011"
+	KcpAddr  = ":10012"
+	Empty    = ""
+	MSGFile  = "config/message_id.json"
 )
 
 // 源码中重要标识
@@ -133,4 +90,47 @@ const (
 	EB
 	ZB
 	YB
+)
+
+const (
+	Username = "username"
+	Password = "password"
+
+	ProcessId = "pid" //包id 用于控制客户端
+	ServerId  = "sid"
+	RoomId    = "rid"
+	TableId   = "tid"
+	GameId    = "gid"
+	UserId    = "uid"
+	openId    = "openid" //开发者ID
+)
+const (
+	SourcePath = ".system"
+	OpsActor   = ".ops"
+	DBActor    = ".db"
+	AccActor   = ".account"
+	GameActor  = ".game"
+	MatchActor = ".match"
+)
+
+const (
+	NodeTypeCenter = "center"
+	NodeTypeGate   = "gate"
+	NodeTypeGame   = "game"
+	NodeTypeLeaf   = "leaf"
+	NodeTypeMatch  = "match"
+)
+const (
+	ActIdGate  = "user"
+	ActIdGame  = "game"
+	ActIdMatch = "match"
+)
+
+const (
+	FuncLogin        = "login"
+	FuncEnter        = "enter"
+	FuncRequest      = "request"
+	FuncMatch        = "joinAllReadyQueue"
+	FuncSimpLogin    = "simpleLogin"
+	FuncSessionClose = "sessionClose"
 )

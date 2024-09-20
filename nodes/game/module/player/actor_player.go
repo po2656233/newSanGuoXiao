@@ -5,17 +5,15 @@ import (
 	"github.com/po2656233/superplace/net/parser/simple"
 	cproto "github.com/po2656233/superplace/net/proto"
 	"golang.org/x/net/websocket"
+	"google.golang.org/protobuf/proto"
 	"net"
 	"net/url"
-	"reflect"
 	. "superman/internal/constant"
 	event2 "superman/internal/event"
 	protoMsg "superman/internal/protocol/gofile"
 	"superman/internal/rpc"
-	"superman/internal/utils"
 	mgr "superman/nodes/game/manger"
 	"superman/nodes/game/module/online"
-	"superman/nodes/game/msg"
 	"time"
 )
 
@@ -36,52 +34,10 @@ type (
 //		return "game"
 //	}
 
-// 绑定协议与其处理函数
-func init() {
-	//玩家行为
-	handlerMsg(&protoMsg.EnterGameReq{}, enter)
-	handlerMsg(&protoMsg.JoinGameReadyQueueReq{}, join)
-	handlerMsg(&protoMsg.ExitGameReq{}, exit)
-	handlerMsg(&protoMsg.ChineseChessReadyReq{}, ready)
-	handlerMsg(&protoMsg.ChineseChessSetTimeReq{}, setTime)
-	//handlerMsg(&protoMsg.DisbandedGameReq{}, disbandedGame)
-	//handlerMsg(&protoMsg.TrusteeReq{}, trustee)
-	//handlerMsg(&protoMsg.ChangeTableReq{}, changeTable)
-	//handlerMsg(&protoMsg.GetInningsInfoReq{}, getInnings)
-	//handlerMsg(&protoMsg.GameRecord{}, getGameRecords)
-	//handlerMsg(&protoMsg.GetRecordReq{}, getRecords)
-	//handlerMsg(&protoMsg.GetBackPasswordReq{}, getBackPassword)
-	//
-	////系统
-	//handlerMsg(&protoMsg.UpdateGoldReq{}, updateGold)
-	//handlerMsg(&protoMsg.SuggestReq{}, handleSuggest)           //意见反馈
-	//handlerMsg(&protoMsg.NotifyNoticeReq{}, handleNotifyNotice) //意见反馈
-	////slotGame
-	//// zhaocaimiao
-	//handlerMsg(&protoMsg.ZhaocaimiaoBetReq{}, playing)
-
-	//more people Game
-	handlerMsg(&protoMsg.BaccaratBetReq{}, playing)
-	handlerMsg(&protoMsg.BrcowcowBetReq{}, playing)
-	handlerMsg(&protoMsg.TigerXdragonBetReq{}, playing)
-	handlerMsg(&protoMsg.BrtoubaoBetReq{}, playing)
-	handlerMsg(&protoMsg.BrTuitongziBetReq{}, playing)
-
-	go func() {
-		for {
-			msg.ServerChanRPC.Exec(<-msg.ServerChanRPC.ChanCall)
-		}
-	}()
-}
-
-// 注册传输消息
-func handlerMsg(m interface{}, h interface{}) {
-	msg.ServerChanRPC.Register(reflect.TypeOf(m), h)
-}
 func (p *ActorPlayer) OnInit() {
 	// 注册 session关闭的remote函数(网关触发连接断开后，会调用RPC发送该消息)
 	p.Remote().Register(p.sessionClose)
-	p.Local().Register(p.request)
+	p.registerLocalMsg()
 }
 
 // sessionClose 接收角色session关闭处理
@@ -93,48 +49,6 @@ func (p *ActorPlayer) sessionClose() {
 	logoutEvent := event2.NewPlayerLogout(p.ActorID(), p.playerId)
 	p.PostEvent(&logoutEvent)
 
-}
-func (p *ActorPlayer) request(session *cproto.Session, req *protoMsg.Request) {
-	// 派发给各个模块
-	msgData, err := msg.ProcessorProto.Unmarshal(req.Data)
-	if err != nil {
-		clog.Debugf("unmarshal message error: %v", err)
-		p.SendResult(FAILED, StatusText[NetworkErr09])
-		return
-	}
-	uid := session.GetUid()
-	p.Session = session
-	p.playerId = uid
-	person := mgr.GetPlayerMgr().Get(uid)
-	if person == nil {
-		// 获取玩家信息
-		data, errCode := rpc.SendDataToDB(p.App(), &protoMsg.GetUserInfoReq{Uid: uid})
-		if errCode == 0 && data != nil {
-			resp, ok := data.(*protoMsg.GetUserInfoResp)
-			if ok && resp.Info != nil {
-				person = mgr.ToPlayer(resp.Info)
-				online.BindPlayer(uid, person.UserID, p.PathString())
-				mgr.GetPlayerMgr().Append(person)
-			}
-		}
-	}
-	if person == nil {
-		userData := p.UserData()
-		if userData != nil {
-			person = userData.(*mgr.Player)
-			mgr.GetPlayerMgr().Append(person)
-		}
-	} else {
-		p.SetUserData(person)
-		mgr.GetClientMgr().Append(person.UserID, p)
-	}
-	if !checkArgs([]interface{}{msgData, p}) {
-		return
-	}
-	err = msg.ProcessorProto.Route(msgData, p)
-	utils.CheckError(err)
-
-	//p.Call(session.AgentPath, "Response", &protoMsg.Response{})
 }
 
 func (p *ActorPlayer) Send(funName string, resp interface{}) {
@@ -155,6 +69,8 @@ func (p *ActorPlayer) SendResultPop(state int32, title, hints string) {
 		Hints: hints,
 	})
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////
 
 func (p *ActorPlayer) OnStop() {
 	clog.Infof("OnStop onlineCount = %d", online.Count())
@@ -178,14 +94,11 @@ func (p *ActorPlayer) OnStop() {
 //////////////////////////////实现Agent/////////////////////////////////////////////////////////
 
 func (p *ActorPlayer) WriteMsg(v interface{}) {
-	msgData, err := msg.ProcessorProto.Marshal(v)
+	data, err := rpc.GetProtoData(v.(proto.Message))
 	if err != nil {
-		clog.Debug("unmarshal message error: %v", err)
+		clog.Errorf("game send msg err:%v", err)
 		return
 	}
-	data := make([]byte, 0)
-	data = append(data, msgData[0]...)
-	data = append(data, msgData[1]...)
 	p.Response(p.Session, data)
 }
 func (p *ActorPlayer) LocalAddr() net.Addr {
