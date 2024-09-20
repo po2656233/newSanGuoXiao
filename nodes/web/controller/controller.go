@@ -360,6 +360,29 @@ func (p *Controller) login(c *superGin.Context) {
 func (p *Controller) register(c *superGin.Context) {
 	accountName := c.PostString(Username, "")
 	password := c.PostString(Password, "")
+	pid := c.PostInt32(ProcessId, 0)
+	plist := data2.SdkConfig.GetPidList()
+	if pid == 0 {
+		size := len(plist)
+		if 0 < size {
+			pid = plist[0]
+			//index := rand.Int() % len(plist)
+			//pid = plist[index]
+		}
+	} else {
+		isOk := false
+		for _, item := range plist {
+			if item == pid {
+				isOk = true
+				break
+			}
+		}
+		if !isOk {
+			RenderResult(c, http.StatusOK, "无效的PID")
+			return
+		}
+	}
+
 	data, statusCode := rpc.SendDataToAcc(p.App, &pb.RegisterReq{
 		Name:     accountName,
 		Password: password,
@@ -368,14 +391,11 @@ func (p *Controller) register(c *superGin.Context) {
 	if statusCode == code.OK {
 		resp, ok := data.(*pb.RegisterResp)
 		if ok {
-			plist := data2.SdkConfig.GetPidList()
-			pid := int32(0)
-			size := len(plist)
-			if 0 < size {
-				pid = plist[0]
-				//index := rand.Int() % len(plist)
-				//pid = plist[index]
+			if resp.OpenId == "-1" {
+				RenderResult(c, http.StatusOK, "该用户已被注册")
+				return
 			}
+
 			config := data2.SdkConfig.Get(pid)
 			resp.SdkId = config.SdkId
 			resp.Pid = pid

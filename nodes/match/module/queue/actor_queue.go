@@ -13,8 +13,9 @@ import (
 	. "superman/internal/constant"
 	protoMsg "superman/internal/protocol/gofile"
 	"superman/internal/redis_cluster"
+	"superman/internal/rpc"
 	"superman/nodes/game/module/online"
-	"superman/nodes/game/msg"
+	//"superman/nodes/game/msg"
 )
 
 type (
@@ -142,10 +143,8 @@ func (p *ActorQueue) joinAllReadyQueue(session *cproto.Session, req *protoMsg.Jo
 		//Route: session.ActorPath(),
 		Data: make([]byte, 0),
 	}
-	msgData, _ := msg.ProcessorProto.Marshal(req)
-	for _, datum := range msgData {
-		quest.Data = append(quest.Data, datum...)
-	}
+	msgData, _ := rpc.GetProtoData(req)
+	quest.Data = append(quest.Data, msgData...)
 	childId := exString.ToString(session.Uid)
 	data, _ := proto.Marshal(quest)
 	clusterPacket := cproto.GetClusterPacket()

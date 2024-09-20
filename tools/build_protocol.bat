@@ -1,8 +1,8 @@
 @echo off
 chcp 65001 >nul
 @echo "-----------fix package name(本地化)------------------"
-
-py  .\amend.py
+@echo "-----------校正 proto文件------------------"
+py  .\rectify.py
 timeout 1
 echo build go protocol file...
 cd ../internal
@@ -37,7 +37,8 @@ echo build proto to "go and js" complete!
 @echo off
 
 cd ../../tools
-node onekey.js
+rem node onekey.js
+@echo "-----------实例化 各个REQ消息体 的处理函数------------------"
 py .\realize_go.py
 rem timeout /t 2
 echo 开始 3s 倒计时...

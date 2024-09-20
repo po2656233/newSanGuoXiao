@@ -13,13 +13,14 @@ const (
 	MIDMatch = 5 //匹配服
 )
 const (
-	DbList   = "db_id_list"
-	CenterDb = "center_db_id"
-	GameDb   = "game_db_id"
-	TcpAddr  = ":10011"
-	KcpAddr  = ":10012"
-	Empty    = ""
-	MSGFile  = "config/message_id.json"
+	DbList    = "db_id_list"
+	CenterDb  = "center_db_id"
+	GameDb    = "game_db_id"
+	TcpAddr   = ":10011"
+	KcpAddr   = ":10012"
+	Empty     = ""
+	MSGFile   = "config/common/message_id.json"
+	RedisConf = "config/common/redis.toml"
 )
 
 // 源码中重要标识

@@ -67,7 +67,7 @@ var redisObj *RdbClient
 
 func SingleRedis() *RdbClient {
 	once.Do(func() {
-		vp := exViper.NewViper("internal/redis_cluster/redis.toml")
+		vp := exViper.NewViper(cst.RedisConf)
 		cfr := CnfRedis{}
 		err := vp.Unmarshal(&cfr)
 		if err != nil {

@@ -7,7 +7,7 @@
 package pb
 
 import (
-	
+	proto "github.com/golang/protobuf/proto"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -23,7 +23,7 @@ const (
 
 // This is a compile-time assertion that a sufficiently up-to-date version
 // of the legacy proto package is being used.
-
+const _ = proto.ProtoPackageIsVersion4
 
 //该协议文件不提供 req 和 resp 注:如需使用,请在子游戏协议中嵌套相关协议.
 //////////////////////////////enum////////////////////////////////////////////////////

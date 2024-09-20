@@ -92,18 +92,6 @@
         },
         "enable": true
       }
-    ],
-    "leaf": [
-      {
-        "node_id": "30001",
-        "__settings__": {
-          "db_id_list" : {
-            "game_db_id": "leaf_db_1"
-          },
-          "ref_logger": "leaf_log"
-        },
-        "enable": true
-      }
     ]
   },
   "data_config": {
@@ -117,7 +105,7 @@
     "redis": {
       "prefix_key": "data_config",
       "subscribe_key": "data_config_change",
-      "address": "127.0.0.1:6379",
+      "address": "121.37.211.227:6379",
       "password": "",
       "db": 7
     }
@@ -128,9 +116,9 @@
         "enable": true,
         "db_id": "center_db_1",
         "db_name": "minigame",
-        "host": "127.0.0.1:3306",
+        "host": "121.37.211.227:3306",
         "user_name": "root",
-        "password": "ko8899110",
+        "password": "741963ko",
         "max_idle_connect": 4,
         "max_open_connect": 16,
         "log_mode": false
@@ -141,9 +129,9 @@
         "enable": true,
         "db_id": "game_db_1",
         "db_name": "sanguoxiao",
-        "host": "127.0.0.1:3306",
+        "host": "121.37.211.227:3306",
         "user_name": "root",
-        "password": "ko8899110",
+        "password": "741963ko",
         "max_idle_connect": 4,
         "max_open_connect": 16,
         "log_mode": true
