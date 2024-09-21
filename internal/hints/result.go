@@ -3,6 +3,7 @@ package hints
 import (
 	"github.com/po2656233/superplace/components/gin"
 	sgxCode "github.com/po2656233/superplace/const/code"
+	. "superman/internal/constant"
 )
 
 type Result struct {
@@ -16,6 +17,9 @@ func NewDataResult(code int32) *Result {
 		Code:    code,
 		Message: sgxCode.GetMessage(code),
 		Data:    []string{},
+	}
+	if result.Message == Empty && Title001 <= result.Code {
+		result.Message = StatusText[int(result.Code)]
 	}
 	return result
 }

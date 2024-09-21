@@ -4,6 +4,7 @@ import re
 # 定义目录和文件路径
 PROTO_DIR = r'..\internal\protocol'  # 修改为您的 proto 文件目录
 GO_FILE = r'..\nodes\game\module\player\handle_msg.go'  # 请根据实际路径修改
+GOFILE_DIRECTORY = r'..\internal\protocol\gofile'  # 设置要遍历的目录
 
 def extract_req_messages(proto_dir):
     """
@@ -65,17 +66,17 @@ def generate_handler_functions(messages):
         if comment:
             comment_lines = '// ' + comment.replace('\n', '\n// ')
             functions.append(f'''
-{comment_lines}
-func (p *ActorPlayer) {method}(session *cproto.Session, m *protoMsg.{msg}) {{
-\t// TODO: 实现 {method} 处理逻辑
-}}
-''')
+    {comment_lines}
+    func (p *ActorPlayer) {method}(session *cproto.Session, m *protoMsg.{msg}) {{
+    \t// TODO: 实现 {method} 处理逻辑
+    }}
+    ''')
         else:
             functions.append(f'''
-func (p *ActorPlayer) {method}(session *cproto.Session, m *protoMsg.{msg}) {{
-\t// TODO: 实现 {method} 处理逻辑
-}}
-''')
+    func (p *ActorPlayer) {method}(session *cproto.Session, m *protoMsg.{msg}) {{
+    \t// TODO: 实现 {method} 处理逻辑
+    }}
+    ''')
     return functions
 
 def update_go_file(go_file, registration_lines, handler_functions):
@@ -153,21 +154,73 @@ def update_go_file(go_file, registration_lines, handler_functions):
     except Exception as e:
         print(f'发生错误: {e}')
 
+def comment_lines_in_file(file_path, target_strings):
+    """
+    注释文件中包含目标字符串的行。
+    """
+    with open(file_path, 'r', encoding='utf-8') as file:
+        lines = file.readlines()
+
+    modified = False
+    new_lines = []
+    for line in lines:
+        stripped_line = line.strip()
+        if any(target in stripped_line for target in target_strings):
+            if not stripped_line.startswith("//"):
+                new_lines.append("// " + line)
+                modified = True
+            else:
+                new_lines.append(line)
+        else:
+            new_lines.append(line)
+
+    if modified:
+        with open(file_path, 'w', encoding='utf-8') as file:
+            file.writelines(new_lines)
+        print(f"已修改文件: {file_path}")
+    else:
+        print(f"未找到需要修改的行: {file_path}")
+
+def traverse_and_modify(directory, target_strings, file_extension=".go"):
+    """
+    遍历目录下所有指定扩展名的文件，并注释目标字符串所在的行。
+    """
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if file.endswith(file_extension):
+                file_path = os.path.join(root, file)
+                comment_lines_in_file(file_path, target_strings)
+
+def comment_proto_files():
+    """
+    注释gofile目录下所有.go文件中包含指定proto语句的行。
+    """
+    # 设置要注释掉的目标字符串
+    targets = [
+        'proto "github.com/golang/protobuf/proto"',
+        'const _ = proto.ProtoPackageIsVersion4'
+    ]
+
+    traverse_and_modify(GOFILE_DIRECTORY, targets)
+
 def main():
+    # 提取并处理消息注册和处理函数
     messages = extract_req_messages(PROTO_DIR)
     unique_messages = list(set(messages))  # 去重
     if not unique_messages:
         print('未找到以 Req 结尾的有效 message。')
-        return
+    else:
+        # 生成注册代码
+        registration_lines = generate_registration_lines(unique_messages)
 
-    # 生成注册代码
-    registration_lines = generate_registration_lines(unique_messages)
+        # 生成处理函数代码
+        handler_functions = generate_handler_functions(unique_messages)
 
-    # 生成处理函数代码
-    handler_functions = generate_handler_functions(unique_messages)
-
-    # 更新 Go 文件
-    update_go_file(GO_FILE, registration_lines, handler_functions)
+        # 更新 Go 文件
+        update_go_file(GO_FILE, registration_lines, handler_functions)
+    
+    # 注释gofile目录下的指定proto语句
+    comment_proto_files()
 
 if __name__ == "__main__":
     main()

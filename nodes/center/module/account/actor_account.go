@@ -34,15 +34,15 @@ func (p *ActorAccount) Register(req *pb.RegisterReq) (*pb.RegisterResp, int32) {
 	password := req.Password
 
 	if strings.TrimSpace(accountName) == Empty || strings.TrimSpace(password) == Empty {
-		return nil, Register02
+		return nil, Register09
 	}
 
 	if len(accountName) < NameLenMin || len(accountName) > NameLenMax {
-		return nil, Register02
+		return nil, Register07
 	}
 
 	if len(password) < NameLenMin || len(password) > NameLenMax {
-		return nil, Register02
+		return nil, Register08
 	}
 
 	//db2.DevAccountRegister(accountName, password, req.Address)

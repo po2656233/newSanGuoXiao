@@ -49,14 +49,14 @@ func (p *Controller) roomList(c *superGin.Context) {
 	claims, ok := c.Get("claims")
 	if !ok || claims == nil {
 		sgxLogger.Warnf("roomCreate get claims fail. current params=%v", c.GetParams())
-		RenderResult(c, Login15, StatusText[Login15])
+		RenderResult(c, Login15)
 		return
 	}
 	uid := int64(0)
 	clms, ok := claims.(*jwt.RegisteredClaims)
 	if !ok {
 		sgxLogger.Warnf("roomCreate claims fail. current params=%v", c.GetParams())
-		RenderResult(c, Service003, StatusText[Service003])
+		RenderResult(c, Service003)
 		return
 	}
 	uid, _ = strconv.ParseInt(clms.ID, 10, 64)
@@ -76,7 +76,7 @@ func (p *Controller) tableList(c *superGin.Context) {
 	rid := c.GetInt64("rid", 0)
 	if rid < 1 {
 		sgxLogger.Warnf("rid < 1 params=%v", c.GetParams())
-		RenderResult(c, Service003, StatusText[Service003])
+		RenderResult(c, Service003)
 		return
 	}
 	data, errCode := rpc.SendDataToDB(p.App, &pb.GetTableListReq{
@@ -95,7 +95,7 @@ func (p *Controller) gameList(c *superGin.Context) {
 	kid := c.GetInt64("kid", -1)
 	if kid == 0 {
 		sgxLogger.Warnf("rid < 1 params=%v", c.GetParams())
-		RenderResult(c, Service003, StatusText[Service003])
+		RenderResult(c, Service003)
 		return
 	}
 	data, errCode := rpc.SendDataToDB(p.App, &pb.GetGameListReq{
@@ -116,7 +116,7 @@ func (p *Controller) roomCreate(c *superGin.Context) {
 	claims, ok := c.Get("claims")
 	if !ok || claims == nil {
 		sgxLogger.Warnf("roomCreate get claims fail. current params=%v", c.GetParams())
-		RenderResult(c, Login15, StatusText[Login15])
+		RenderResult(c, Login15)
 		return
 	}
 	uid := int64(0)
@@ -130,7 +130,7 @@ func (p *Controller) roomCreate(c *superGin.Context) {
 		req.Name = name
 	} else {
 		sgxLogger.Warnf("roomCreate get hostid fail. current params=%v", c.GetParams())
-		RenderResult(c, Service004, StatusText[Service004])
+		RenderResult(c, Service004)
 		return
 	}
 	if roomKey, ok := c.GetPostForm("roomkey"); ok {
@@ -169,7 +169,7 @@ func (p *Controller) roomCreate(c *superGin.Context) {
 	}
 	if resp, ok := data.(*pb.CreateRoomResp); ok {
 		if resp.Info == nil || resp.Info.Id == 0 {
-			RenderResult(c, http.StatusNotAcceptable, "房间创建失败")
+			RenderResult(c, Room18)
 			return
 		}
 	}
@@ -181,7 +181,7 @@ func (p *Controller) tableCreate(c *superGin.Context) {
 	claims, ok := c.Get("claims")
 	if !ok || claims == nil {
 		sgxLogger.Warnf("roomCreate get claims fail. current params=%v", c.GetParams())
-		RenderResult(c, Login15, StatusText[Login15])
+		RenderResult(c, Login15)
 		return
 	}
 	//uid := int64(0)
@@ -197,7 +197,7 @@ func (p *Controller) tableCreate(c *superGin.Context) {
 	strMaxRound, ok7 := c.GetPostForm("maxround")
 	if !ok1 || !ok2 || !ok3 || !ok4 || !ok6 || !ok7 {
 		sgxLogger.Warnf("roomCreate get hostid fail. current params=%v", c.GetParams())
-		RenderResult(c, Service004, StatusText[Service004])
+		RenderResult(c, Service004)
 		return
 	}
 	rid, _ := strconv.ParseInt(strRid, 10, 64)
@@ -223,7 +223,7 @@ func (p *Controller) tableCreate(c *superGin.Context) {
 	}
 	if resp, ok := data.(*pb.CreateTableResp); ok {
 		if resp.Table == nil || resp.Table.Id == 0 {
-			RenderResult(c, http.StatusNotAcceptable, "牌桌创建失败")
+			RenderResult(c, TableInfo14)
 			return
 		}
 	}
@@ -235,7 +235,7 @@ func (p *Controller) tableDelete(c *superGin.Context) {
 	claims, ok := c.Get("claims")
 	if !ok || claims == nil {
 		sgxLogger.Warnf("roomCreate get claims fail. current params=%v", c.GetParams())
-		RenderResult(c, Login15, StatusText[Login15])
+		RenderResult(c, Login15)
 		return
 	}
 	uid := int64(0)
@@ -245,7 +245,7 @@ func (p *Controller) tableDelete(c *superGin.Context) {
 	strTid, ok1 := c.GetPostForm("tid")
 	if !ok1 {
 		sgxLogger.Warnf("roomCreate get hostid fail. current params=%v", c.GetParams())
-		RenderResult(c, Service004, StatusText[Service004])
+		RenderResult(c, Service004)
 		return
 	}
 	// 先检测游戏服相应游戏是否处于关闭状态，如果没有关闭则请求关闭
@@ -262,7 +262,7 @@ func (p *Controller) tableDelete(c *superGin.Context) {
 	}
 	if resp, ok := data.(*pb.DeleteTableResp); ok {
 		if resp.Tid == 0 || resp.Rid == 0 {
-			RenderResult(c, http.StatusNotAcceptable, "牌桌删除失败")
+			RenderResult(c, TableInfo13)
 			return
 		}
 	}
@@ -283,13 +283,13 @@ func (p *Controller) login(c *superGin.Context) {
 	config := data2.SdkConfig.Get(pid)
 	if config == nil {
 		sgxLogger.Warnf("if platformConfig == nil {. params=%s", c.GetParams())
-		RenderResult(c, Login02, StatusText[Login02])
+		RenderResult(c, Login02)
 		return
 	}
 	sdkInvoke, err := sdk.GetInvoke(config.SdkId)
 	if err != nil {
 		sgxLogger.Warnf("[pid = %d] get invoke error. params=%s", pid, c.GetParams())
-		RenderResult(c, Service001, StatusText[Service001])
+		RenderResult(c, Service001)
 		return
 	}
 	params := c.GetParams(true)
@@ -302,20 +302,20 @@ func (p *Controller) login(c *superGin.Context) {
 				sgxLogger.Warnf("code = %d, error = %s", statusCode, error[0])
 			}
 
-			RenderResult(c, statusCode, StatusText[int(statusCode)])
+			RenderResult(c, statusCode)
 			return
 		}
 
 		if result == nil {
 			sgxLogger.Warnf("callback result map is nil. params= %s", c.GetParams())
-			RenderResult(c, Login02, StatusText[Login02])
+			RenderResult(c, Login02)
 			return
 		}
 		strUid, _ := result.GetString("open_id")
 		uid, err := strconv.ParseInt(strUid, 10, 64)
 		if err != nil || uid == 0 {
 			sgxLogger.Warnf("callback result map not found `open_id`. result = %s", result)
-			RenderResult(c, Login02, StatusText[Login02])
+			RenderResult(c, Login02)
 			return
 		}
 
@@ -346,7 +346,7 @@ func (p *Controller) login(c *superGin.Context) {
 		//openid, found := result.GetString("open_id")
 		//if found == false {
 		//	sgxLogger.Warnf("callback result map not found `open_id`. result = %s", result)
-		//	RenderResult(c, Login02, StatusText[Login02])
+		//	RenderResult(c, Login02)
 		//	return
 		//}
 		//
@@ -378,7 +378,7 @@ func (p *Controller) register(c *superGin.Context) {
 			}
 		}
 		if !isOk {
-			RenderResult(c, http.StatusOK, "无效的PID")
+			RenderResult(c, Service002)
 			return
 		}
 	}
@@ -392,7 +392,7 @@ func (p *Controller) register(c *superGin.Context) {
 		resp, ok := data.(*pb.RegisterResp)
 		if ok {
 			if resp.OpenId == "-1" {
-				RenderResult(c, http.StatusOK, "该用户已被注册")
+				RenderResult(c, Register05)
 				return
 			}
 
@@ -404,7 +404,7 @@ func (p *Controller) register(c *superGin.Context) {
 		RenderResult(c, http.StatusOK, resp)
 		return
 	}
-	RenderResult(c, statusCode, StatusText[int(statusCode)])
+	RenderResult(c, statusCode)
 }
 func (p *Controller) serverList0(c *superGin.Context) {
 	c.Set("pid", 2126001)
@@ -418,13 +418,13 @@ func (p *Controller) serverList(c *superGin.Context) {
 
 	if pid < 1 {
 		sgxLogger.Warnf("if pid < 1 {. params=%v", c.GetParams())
-		RenderResult(c, Service002, StatusText[Service002])
+		RenderResult(c, Service002)
 		return
 	}
 
 	areaGroup, found := data2.AreaGroupConfig.Get(pid)
 	if found == false {
-		RenderResult(c, Service002, StatusText[Service002])
+		RenderResult(c, Service002)
 		return
 	}
 
@@ -464,14 +464,14 @@ func (p *Controller) recharge(c *superGin.Context) {
 	claims, ok := c.Get("claims")
 	if !ok || claims == nil {
 		sgxLogger.Warnf("roomCreate get claims fail. current params=%v", c.GetParams())
-		RenderResult(c, Login15, StatusText[Login15])
+		RenderResult(c, Login15)
 		return
 	}
 	byUid := int64(0)
 	if clms, ok := claims.(*jwt.RegisteredClaims); ok {
 		byUid, _ = strconv.ParseInt(clms.ID, 10, 64)
 	} else {
-		RenderResult(c, Login11, StatusText[Login11])
+		RenderResult(c, Login11)
 		return
 	}
 	req := &pb.RechargeReq{
@@ -479,24 +479,24 @@ func (p *Controller) recharge(c *superGin.Context) {
 	}
 	strUID, ok := c.GetPostForm("uid")
 	if !ok {
-		RenderResult(c, Service004, StatusText[Service004])
+		RenderResult(c, Service004)
 		return
 	}
 	uid, err := strconv.ParseInt(strUID, 10, 64)
 	if err != nil {
-		RenderResult(c, Service004, StatusText[Service004])
+		RenderResult(c, Service004)
 		return
 	}
 	req.UserID = uid
 
 	strPayment, ok := c.GetPostForm("payment")
 	if !ok {
-		RenderResult(c, Service004, StatusText[Service004])
+		RenderResult(c, Service004)
 		return
 	}
 	payment, err := strconv.ParseInt(strPayment, 10, 64)
 	if err != nil || payment < 0 {
-		RenderResult(c, Service004, StatusText[Service004])
+		RenderResult(c, Service004)
 		return
 	}
 	req.Payment = payment

@@ -24,7 +24,11 @@ var StatusText = map[int]string{
 	Register02: "注册失败",
 	Register03: "注册出错",
 	Register04: "注册",
-	Register05: "已经存在该账号",
+	Register05: "该用户名已被注册",
+	Register06: "用户名长度超出",
+	Register07: "用户名长度不对",
+	Register08: "密码长度不对",
+	Register09: "不能包含空格符",
 
 	Login01: "ꕥ登录成功ꕥ",
 	Login02: "登录失败!",
@@ -72,8 +76,10 @@ var StatusText = map[int]string{
 	TableInfo10: "牌桌不足,需房主补充牌桌",
 	TableInfo11: "座椅上的数据出错",
 	TableInfo12: "金币不足,配桌失败",
+	TableInfo13: "牌桌删除失败",
+	TableInfo14: "牌桌创建失败",
 
-	Setting01: "名字不能为空!",
+	Setting01: "配置信息错误!",
 	Setting02: "座位数过少!",
 	Setting03: "游戏类型不正确!",
 	Setting04: "游戏种类不正确!",
@@ -110,6 +116,7 @@ var StatusText = map[int]string{
 	Room15: "牌桌数已达到最大限制",
 	Room16: "房间不存在",
 	Room17: "添加牌桌失败:游戏未开放或已关闭",
+	Room18: "房间创建失败",
 
 	User01: "玩家",
 	User02: "无效请求",
@@ -267,6 +274,10 @@ const (
 	Register03
 	Register04
 	Register05
+	Register06
+	Register07
+	Register08
+	Register09
 )
 
 // 登录
@@ -358,6 +369,8 @@ const (
 	TableInfo10
 	TableInfo11
 	TableInfo12
+	TableInfo13
+	TableInfo14
 )
 
 const (
@@ -379,6 +392,7 @@ const (
 	Room15
 	Room16
 	Room17
+	Room18
 )
 
 const (
