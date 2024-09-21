@@ -155,7 +155,7 @@ func (p *ActorAgent) setSimpleSession(req *pb.StringKeyValue) {
 }
 
 // Login 登录
-func (p *ActorAgent) Login(session *cproto.Session, req *pb.LoginRequest) {
+func (p *ActorAgent) Login(_ *cproto.Session, req *pb.LoginRequest) {
 	agent, found := simple.GetAgent(p.ActorID())
 	if !found {
 		return
@@ -163,11 +163,9 @@ func (p *ActorAgent) Login(session *cproto.Session, req *pb.LoginRequest) {
 
 	// 验证token
 	uid, _ := token.GetIDForToken(req.Token)
-	if uid == 0 {
-		agent.Response(session.Mid, &pb.ResultResp{
-			State: Login07,
-			Hints: StatusText[Login07],
-		})
+	if uid == Fault {
+		mid, data, _ := rpc.ParseResultPop(Login07)
+		agent.Response(mid, data)
 		return
 	}
 
@@ -175,10 +173,8 @@ func (p *ActorAgent) Login(session *cproto.Session, req *pb.LoginRequest) {
 
 	if err := agent.Bind(uid); err != nil {
 		clog.Warn(err)
-		agent.Response(session.Mid, &pb.ResultResp{
-			State: Flag0003,
-			Hints: StatusText[Flag0003],
-		})
+		mid, data, _ := rpc.ParseResultPop(Flag0003)
+		agent.Response(mid, data)
 		return
 	}
 
@@ -188,18 +184,16 @@ func (p *ActorAgent) Login(session *cproto.Session, req *pb.LoginRequest) {
 		Uid:    uid,
 		OpenId: cstring.ToString(uid),
 	}
-	data, err := rpc.GetProtoData(res)
-	agent.SendRaw(data)
-	clog.Infof("Login mid:%v  err:%v", data[:4], err)
+	mid, data, err := rpc.ParseProto(res)
+	agent.Response(mid, data)
+	clog.Infof("Login mid:%v  err:%v", mid, err)
 }
 
 func (p *ActorAgent) checkSimpleSession(uid cfacade.UID) {
 	if agent, found := simple.GetAgentWithUID(uid); found {
-		session := agent.Session()
-		agent.Response(session.Mid, &pb.ResultResp{
-			State: Login12,
-			Hints: StatusText[Login12],
-		})
+		mid, data, _ := rpc.ParseResult(Login12)
+		agent.Response(mid, data)
+		return
 	}
 
 	rsp := &cproto.PomeloKick{

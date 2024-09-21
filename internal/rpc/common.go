@@ -1,10 +1,7 @@
 package rpc
 
 import (
-	"bytes"
 	"encoding/binary"
-	"encoding/json"
-	"fmt"
 	"github.com/po2656233/superplace/const/code"
 	exReflect "github.com/po2656233/superplace/extend/reflect"
 	"github.com/po2656233/superplace/facade"
@@ -12,9 +9,6 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
-	"os"
-	"reflect"
-	"strconv"
 	"strings"
 	. "superman/internal/constant"
 	pb "superman/internal/protocol/gofile"
@@ -57,52 +51,6 @@ func (ms *MessageSender) SendData(req proto.Message) interface{} {
 		clog.Warnf("[SendData] source:%s actor:%v node:%s req:%+v errCode:%v", ms.source, ms.actorID, ms.nodeType, req, errCode)
 	}
 	return resp
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// LoadMsgInfos 获取消息映射文件message_id.json
-func LoadMsgInfos() map[string]string {
-	data, _ := os.ReadFile(MSGFile)
-	//创建map，用于接收解码好的数据
-	//创建文件的解码器
-	_ = json.Unmarshal(data, &MapIdMsg)
-	//解码文件中的数据，丢入dataMap所在的内存
-	//fmt.Println("解码成功", mapFuncs)
-	return MapIdMsg
-}
-
-// GetProtoData 获取协议结构数据 msgID + data.len + data
-func GetProtoData(msg proto.Message) ([]byte, error) {
-	strId := ""
-	name := reflect.Indirect(reflect.ValueOf(msg)).Type().Name()
-	for id, protoName := range MapIdMsg {
-		if protoName == name {
-			strId = id
-			break
-		}
-	}
-	if strId == "" {
-		return nil, fmt.Errorf("no data")
-	}
-
-	id, err := strconv.Atoi(strId)
-	if err != nil {
-		return nil, err
-	}
-	pkg := bytes.NewBuffer([]byte{})
-	err = binary.Write(pkg, Endian, uint32(id))
-	if err != nil {
-		return nil, err
-	}
-
-	data, err := proto.Marshal(msg)
-	err = binary.Write(pkg, Endian, uint32(len(data)))
-	if err != nil {
-		return nil, err
-	}
-	data = append(pkg.Bytes(), data...)
-	return data, nil
 }
 
 // Ping 实现了Ping功能
