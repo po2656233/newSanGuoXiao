@@ -5,6 +5,8 @@ import (
 	"github.com/po2656233/superplace"
 	"github.com/po2656233/superplace/components/cron"
 	"github.com/po2656233/superplace/components/gin"
+	"github.com/po2656233/superplace/extend/file"
+	clog "github.com/po2656233/superplace/logger"
 	"superman/internal/component/check_center"
 	"superman/internal/conf"
 	"superman/nodes/web/controller"
@@ -46,15 +48,15 @@ func httpServerComponent(addr string) *superGin.Component {
 	httpServer.Use(superGin.RecoveryWithZap(true))
 
 	// 映射h5客户端静态文件到static目录，例如：http://127.0.0.1:8089/static/protocol.js
-	//httpServer.Static("/static", "./static/")
+	httpServer.Static("/static", "./static/")
 
 	// 加载./view目录的html模板文件(详情查看gin文档)
-	//viewFiles := sgxFile.WalkFiles("./view/", ".html")
-	//if len(viewFiles) < 1 {
-	//	clog.Errorf("view files not found.")
-	//} else {
-	//	httpServer.LoadHTMLFiles(viewFiles...)
-	//}
+	viewFiles := exFile.WalkFiles("./view/", ".html")
+	if len(viewFiles) < 1 {
+		clog.Errorf("view files not found.")
+	} else {
+		httpServer.LoadHTMLFiles(viewFiles...)
+	}
 
 	//注册 controller
 	httpServer.Register(new(controller.Controller))

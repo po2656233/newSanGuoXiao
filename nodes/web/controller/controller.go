@@ -361,6 +361,15 @@ func (p *Controller) register(c *superGin.Context) {
 	accountName := c.PostString(Username, "")
 	password := c.PostString(Password, "")
 	pid := c.PostInt32(ProcessId, 0)
+	if accountName == Empty {
+		RenderResult(c, Register10)
+		return
+	}
+	if password == Empty {
+		RenderResult(c, Register11)
+		return
+	}
+
 	plist := data2.SdkConfig.GetPidList()
 	if pid == 0 {
 		size := len(plist)
@@ -404,6 +413,7 @@ func (p *Controller) register(c *superGin.Context) {
 		RenderResult(c, http.StatusOK, resp)
 		return
 	}
+	sgxLogger.Warnf("register fail. params= %s", c.GetParams())
 	RenderResult(c, statusCode)
 }
 func (p *Controller) serverList0(c *superGin.Context) {

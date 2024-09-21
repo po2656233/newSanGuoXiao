@@ -29,6 +29,8 @@ var StatusText = map[int]string{
 	Register07: "用户名长度不对",
 	Register08: "密码长度不对",
 	Register09: "不能包含空格符",
+	Register10: "用户名不能为空",
+	Register11: "密码不能为空",
 
 	Login01: "ꕥ登录成功ꕥ",
 	Login02: "登录失败!",
@@ -278,6 +280,8 @@ const (
 	Register07
 	Register08
 	Register09
+	Register10
+	Register11
 )
 
 // 登录
