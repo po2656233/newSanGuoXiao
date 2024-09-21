@@ -33,6 +33,8 @@ func RenderResult(c *superGin.Context, statusCode int32, data ...interface{}) {
 	result := NewDataResult(statusCode)
 	if len(data) > 0 {
 		result.Data = data[0]
+	} else {
+		result.Data = nil
 	}
 	c.JSON200(result)
 }
