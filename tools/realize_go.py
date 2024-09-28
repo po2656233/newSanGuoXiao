@@ -1,19 +1,16 @@
 import os
 import re
+import json
 
-# 定义目录和文件路径
-PROTO_DIR = r'..\internal\protocol'  # 修改为您的 proto 文件目录
-GOFILE_DIRECTORY = r'..\internal\protocol\gofile'  # 设置要遍历的目录
+# 读取配置文件
+with open('config.json', 'r', encoding='utf-8') as config_file:
+    config = json.load(config_file)
 
-# 定义要过滤的 proto 文件列表
-FILTERED_FILES = ['login.proto', 'base_type.proto', 'baseinfo.proto']
-
-# 定义节点和 handle_msg.go 文件路径的映射关系
-NODE_TO_GO_FILE = {
-    'game': r'..\nodes\game\module\player\handle_msg.go',
-    'user': r'..\nodes\user\module\player\handle_msg.go',
-    # 添加更多节点和文件路径的映射
-}
+# 从配置文件中获取配置信息
+PROTO_DIR = config['proto_dir']
+GOFILE_DIRECTORY = config['gofile_directory']
+FILTERED_FILES = config['filtered_files']
+NODE_TO_GO_FILE = config['node_to_go_file']
 
 def extract_req_messages(proto_dir):
     """

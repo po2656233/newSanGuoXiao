@@ -4,6 +4,24 @@
 
 ## 文件说明
 
+### `config.json`
+
+该文件用于存储配置信息，包括 `.proto` 文件目录、要遍历的目录、要过滤的 `.proto` 文件列表以及节点和 `handle_msg.go` 文件路径的映射关系。
+
+#### 示例
+
+```json
+{
+    "proto_dir": "../internal/protocol",
+    "gofile_directory": "../internal/protocol/gofile",
+    "filtered_files": ["login.proto", "base_type.proto", "baseinfo.proto"],
+    "node_to_go_file": {
+        "game": "../nodes/game/module/player/handle_msg.go",
+        "user": "../nodes/user/module/player/handle_msg.go"
+    }
+}
+```
+
 ### `realize_go.py`
 
 该脚本用于提取 `.proto` 文件中以 `Req` 结尾的消息，并生成相应的注册代码和处理函数，写入对应的 `handle_msg.go` 文件中。
@@ -18,10 +36,8 @@
 
 #### 使用方法
 
-1. 修改 `PROTO_DIR` 和 `GOFILE_DIRECTORY` 变量，设置您的 `.proto` 文件目录和要遍历的目录。
-2. 在 `FILTERED_FILES` 列表中添加要过滤的 `.proto` 文件名。
-3. 在 `NODE_TO_GO_FILE` 字典中添加节点和 `handle_msg.go` 文件路径的映射关系。
-4. 运行脚本：`python realize_go.py`
+1. 修改 `config.json` 文件，设置您的 `.proto` 文件目录、要遍历的目录、要过滤的 `.proto` 文件列表以及节点和 `handle_msg.go` 文件路径的映射关系。
+2. 运行脚本：`python realize_go.py`
 
 ### `rectify.py`
 

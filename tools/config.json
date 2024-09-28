@@ -1,0 +1,9 @@
+{
+    "proto_dir": "../internal/protocol",
+    "gofile_directory": "../internal/protocol/gofile",
+    "filtered_files": ["login.proto", "base_type.proto", "baseinfo.proto"],
+    "node_to_go_file": {
+        "game": "../nodes/game/module/player/handle_msg.go",
+        "social": "../nodes/chat/module/player/handle_msg.go"
+    }
+}

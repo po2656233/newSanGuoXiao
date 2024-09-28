@@ -15,8 +15,7 @@ import (
 
 // 注册接口
 func (p *ActorPlayer) registerLocalMsg() {
-
-	p.Local().Register(p.CheckKnapsack)
+p.Local().Register(p.CheckKnapsack)
 	p.Local().Register(p.ZhaocaimiaoBet)
 	p.Local().Register(p.HowPlay)
 	p.Local().Register(p.BaccaratHost)
@@ -100,6 +99,8 @@ func (p *ActorPlayer) registerLocalMsg() {
 	p.Local().Register(p.ExitGame)
 	p.Local().Register(p.Email)
 	p.Local().Register(p.GetUserInfo)
+	p.Local().Register(p.MokOpenReward)
+	p.Local().Register(p.ModList)
 }
 func (p *ActorPlayer) getPerson(session *cproto.Session) *mgr.Player {
 	p.Session = session
@@ -821,3 +822,16 @@ func (p *ActorPlayer) BrcowcowBet(session *cproto.Session, m *protoMsg.BrcowcowB
 func (p *ActorPlayer) GetGoods(session *cproto.Session, m *protoMsg.GetGoodsReq) {
 	// TODO: 实现 GetGoods 处理逻辑
 }
+
+
+    // 模块开放奖励
+    func (p *ActorPlayer) MokOpenReward(session *cproto.Session, m *protoMsg.MokOpenRewardReq) {
+    	// TODO: 实现 MokOpenReward 处理逻辑
+    }
+    
+
+    // 模块列表
+    func (p *ActorPlayer) ModList(session *cproto.Session, m *protoMsg.ModListReq) {
+    	// TODO: 实现 ModList 处理逻辑
+    }
+    

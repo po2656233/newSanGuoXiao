@@ -26,10 +26,11 @@ if not exist "jsfile" (
 
 rem echo %CD%
 
-for /f "delims=" %%i in ('dir /A:-D /B ') do (
-echo %%i -- GoFile jsFile
-protoc -I./ --go_out=./gofile/ --go_opt=paths=source_relative %%i
-protoc --js_out=import_style=commonjs,binary:./jsfile/ %%i
+for /f "delims=" %%i in ('dir /A:-D /B *.proto') do (
+    rem 检查当前文件是否在过滤列表中
+    echo %%i -- GoFile jsFile
+    protoc -I./ --go_out=./gofile/ --go_opt=paths=source_relative %%i
+    protoc --js_out=import_style=commonjs,binary:./jsfile/ %%i
 )
 
 echo build proto to "go and js" complete!
