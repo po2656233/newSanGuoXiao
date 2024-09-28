@@ -120,18 +120,18 @@ const (
 	NodeTypeGame   = "game"
 	NodeTypeLeaf   = "leaf"
 	NodeTypeMatch  = "match"
+	NodeTypeChat   = "chat" // 聊天服
 )
 const (
 	ActIdGate  = "user"
 	ActIdGame  = "game"
 	ActIdMatch = "match"
+	ActIdChat  = "chat"
 )
 
 const (
 	FuncLogin        = "login"
 	FuncEnter        = "enter"
 	FuncRequest      = "request"
-	FuncMatch        = "joinAllReadyQueue"
-	FuncSimpLogin    = "simpleLogin"
 	FuncSessionClose = "sessionClose"
 )

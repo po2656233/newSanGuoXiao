@@ -6,6 +6,9 @@ PROTO_DIR = r'..\internal\protocol'  # 修改为您的 proto 文件目录
 GO_FILE = r'..\nodes\game\module\player\handle_msg.go'  # 请根据实际路径修改
 GOFILE_DIRECTORY = r'..\internal\protocol\gofile'  # 设置要遍历的目录
 
+# 定义要过滤的 proto 文件列表
+FILTERED_FILES = ['login.proto', '.proto']
+
 def extract_req_messages(proto_dir):
     """
     提取所有未被注释且以 Req 结尾的 message 及其注释。
@@ -17,6 +20,10 @@ def extract_req_messages(proto_dir):
     for root, _, files in os.walk(proto_dir):
         for file in files:
             if file.endswith('.proto'):
+                # 检查文件是否在过滤列表中
+                if file in FILTERED_FILES:
+                    continue  # 跳过被过滤的文件
+
                 path = os.path.join(root, file)
                 try:
                     with open(path, 'r', encoding='utf-8') as f:
