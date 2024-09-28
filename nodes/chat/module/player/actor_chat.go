@@ -1,37 +1,32 @@
 package player
 
 import (
+	"strings"
+	cst "superman/internal/constant"
+	"superman/internal/rpc"
+	"time"
+
 	superConst "github.com/po2656233/superplace/const"
 	cfacade "github.com/po2656233/superplace/facade"
 	log "github.com/po2656233/superplace/logger"
 	"github.com/po2656233/superplace/net/parser/simple"
-	"strings"
-	cst "superman/internal/constant"
-	"superman/internal/rpc"
-	mgr "superman/nodes/game/manger"
-	"superman/nodes/game/module/category"
-	"time"
 )
 
 type (
-	// ActorGame 每位登录的玩家对应一个子actor
-	ActorGame struct {
+	// ActorChat 每位登录的玩家对应一个子actor
+	ActorChat struct {
 		//pomelo.ActorBase
 		simple.ActorBase
 		childExitTime time.Duration
 	}
 )
 
-func (p *ActorGame) AliasID() string {
+func (p *ActorChat) AliasID() string {
 	return strings.Trim(cst.GameActor, superConst.DOT)
 }
-func (p *ActorGame) OnInit() {
-	// 加载游戏配置
-	category.InitConfig()
+func (p *ActorChat) OnInit() {
 	// 加载协议文件
 	rpc.LoadMsgInfos()
-	// 客户端管理实例句柄
-	mgr.GetClientMgr().SetApp(p.App())
 
 	// 注册协议
 	//p.registerLocalMsg()  // 注册(与客户端通信)的协议
@@ -43,21 +38,21 @@ func (p *ActorGame) OnInit() {
 }
 
 // registerRemoteMsg 注意服务间交互的协议
-func (p *ActorGame) registerRemoteMsg() {
+func (p *ActorChat) registerRemoteMsg() {
 	p.Remote().Register(p.checkChild) // 与子节点交互
 }
 
 // checkBaseInfo 检查基础信息
-func (p *ActorGame) checkBaseInfo() {
-	log.Debugf("[ActorGame] path = %s init!", p.PathString())
+func (p *ActorChat) checkBaseInfo() {
+	log.Debugf("[ActorChat] path = %s init!", p.PathString())
 	p.childExitTime = time.Minute * 30
 
 	p.Timer().RemoveAll()
-	//p.Call(p.PathString(), "checkChild", nil)
+	p.Call(p.PathString(), "checkChild", nil)
 
 }
 
-func (p *ActorGame) OnFindChild(msg *cfacade.Message) (cfacade.IActor, bool) {
+func (p *ActorChat) OnFindChild(msg *cfacade.Message) (cfacade.IActor, bool) {
 	// 动态创建 player child actor
 	childID := msg.TargetPath().ChildID
 	childActor, err := p.Child().Create(childID, &ActorPlayer{
@@ -71,11 +66,11 @@ func (p *ActorGame) OnFindChild(msg *cfacade.Message) (cfacade.IActor, bool) {
 	return childActor, true
 }
 
-func (p *ActorGame) OnStop() {
-	log.Debugf("[ActorGame] path = %s exit!", p.PathString())
+func (p *ActorChat) OnStop() {
+	log.Debugf("[ActorChat] path = %s exit!", p.PathString())
 }
 
-func (p *ActorGame) checkChild() {
+func (p *ActorChat) checkChild() {
 	// 扫描所有玩家actor
 	p.Child().Each(func(iActor cfacade.IActor) {
 		child, ok := iActor.(*ActorPlayer)

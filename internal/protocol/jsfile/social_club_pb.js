@@ -11,8 +11,8 @@ var jspb = require('google-protobuf');
 var goog = jspb;
 var global = Function('return this')();
 
-var comm_pb = require('./comm_pb.js');
-goog.object.extend(proto, comm_pb);
+var baseinfo_pb = require('./baseinfo_pb.js');
+goog.object.extend(proto, baseinfo_pb);
 goog.exportSymbol('proto.pb.ClubApplyDealReq', null, global);
 goog.exportSymbol('proto.pb.ClubApplyDealResp', null, global);
 goog.exportSymbol('proto.pb.ClubApplyListReq', null, global);
@@ -2064,7 +2064,7 @@ proto.pb.ClubApplyResp.toObject = function(includeInstance, msg) {
   var obj = {
     clubid: jspb.Message.getFieldWithDefault(msg, 1, 0),
     clubname: jspb.Message.getFieldWithDefault(msg, 2, ""),
-    applyman: (f = msg.getApplyman()) && comm_pb.UserInfo.toObject(includeInstance, f)
+    applyman: (f = msg.getApplyman()) && baseinfo_pb.UserInfo.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -2110,8 +2110,8 @@ proto.pb.ClubApplyResp.deserializeBinaryFromReader = function(msg, reader) {
       msg.setClubname(value);
       break;
     case 3:
-      var value = new comm_pb.UserInfo;
-      reader.readMessage(value,comm_pb.UserInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.UserInfo;
+      reader.readMessage(value,baseinfo_pb.UserInfo.deserializeBinaryFromReader);
       msg.setApplyman(value);
       break;
     default:
@@ -2162,7 +2162,7 @@ proto.pb.ClubApplyResp.serializeBinaryToWriter = function(message, writer) {
     writer.writeMessage(
       3,
       f,
-      comm_pb.UserInfo.serializeBinaryToWriter
+      baseinfo_pb.UserInfo.serializeBinaryToWriter
     );
   }
 };
@@ -2204,7 +2204,7 @@ proto.pb.ClubApplyResp.prototype.setClubname = function(value) {
  */
 proto.pb.ClubApplyResp.prototype.getApplyman = function() {
   return /** @type{?proto.pb.UserInfo} */ (
-    jspb.Message.getWrapperField(this, comm_pb.UserInfo, 3));
+    jspb.Message.getWrapperField(this, baseinfo_pb.UserInfo, 3));
 };
 
 
@@ -2753,7 +2753,7 @@ proto.pb.ClubApplyListResp.toObject = function(includeInstance, msg) {
   var obj = {
     clubid: jspb.Message.getFieldWithDefault(msg, 1, 0),
     mansList: jspb.Message.toObjectList(msg.getMansList(),
-    comm_pb.UserInfo.toObject, includeInstance)
+    baseinfo_pb.UserInfo.toObject, includeInstance)
   };
 
   if (includeInstance) {
@@ -2795,8 +2795,8 @@ proto.pb.ClubApplyListResp.deserializeBinaryFromReader = function(msg, reader) {
       msg.setClubid(value);
       break;
     case 2:
-      var value = new comm_pb.UserInfo;
-      reader.readMessage(value,comm_pb.UserInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.UserInfo;
+      reader.readMessage(value,baseinfo_pb.UserInfo.deserializeBinaryFromReader);
       msg.addMans(value);
       break;
     default:
@@ -2840,7 +2840,7 @@ proto.pb.ClubApplyListResp.serializeBinaryToWriter = function(message, writer) {
     writer.writeRepeatedMessage(
       2,
       f,
-      comm_pb.UserInfo.serializeBinaryToWriter
+      baseinfo_pb.UserInfo.serializeBinaryToWriter
     );
   }
 };
@@ -2867,7 +2867,7 @@ proto.pb.ClubApplyListResp.prototype.setClubid = function(value) {
  */
 proto.pb.ClubApplyListResp.prototype.getMansList = function() {
   return /** @type{!Array<!proto.pb.UserInfo>} */ (
-    jspb.Message.getRepeatedWrapperField(this, comm_pb.UserInfo, 2));
+    jspb.Message.getRepeatedWrapperField(this, baseinfo_pb.UserInfo, 2));
 };
 
 
@@ -4474,8 +4474,8 @@ proto.pb.ClubInviteInfo.prototype.toObject = function(opt_includeInstance) {
 proto.pb.ClubInviteInfo.toObject = function(includeInstance, msg) {
   var obj = {
     clubid: jspb.Message.getFieldWithDefault(msg, 1, 0),
-    targetdata: (f = msg.getTargetdata()) && comm_pb.UserInfo.toObject(includeInstance, f),
-    senderdata: (f = msg.getSenderdata()) && comm_pb.UserInfo.toObject(includeInstance, f)
+    targetdata: (f = msg.getTargetdata()) && baseinfo_pb.UserInfo.toObject(includeInstance, f),
+    senderdata: (f = msg.getSenderdata()) && baseinfo_pb.UserInfo.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -4517,13 +4517,13 @@ proto.pb.ClubInviteInfo.deserializeBinaryFromReader = function(msg, reader) {
       msg.setClubid(value);
       break;
     case 2:
-      var value = new comm_pb.UserInfo;
-      reader.readMessage(value,comm_pb.UserInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.UserInfo;
+      reader.readMessage(value,baseinfo_pb.UserInfo.deserializeBinaryFromReader);
       msg.setTargetdata(value);
       break;
     case 3:
-      var value = new comm_pb.UserInfo;
-      reader.readMessage(value,comm_pb.UserInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.UserInfo;
+      reader.readMessage(value,baseinfo_pb.UserInfo.deserializeBinaryFromReader);
       msg.setSenderdata(value);
       break;
     default:
@@ -4567,7 +4567,7 @@ proto.pb.ClubInviteInfo.serializeBinaryToWriter = function(message, writer) {
     writer.writeMessage(
       2,
       f,
-      comm_pb.UserInfo.serializeBinaryToWriter
+      baseinfo_pb.UserInfo.serializeBinaryToWriter
     );
   }
   f = message.getSenderdata();
@@ -4575,7 +4575,7 @@ proto.pb.ClubInviteInfo.serializeBinaryToWriter = function(message, writer) {
     writer.writeMessage(
       3,
       f,
-      comm_pb.UserInfo.serializeBinaryToWriter
+      baseinfo_pb.UserInfo.serializeBinaryToWriter
     );
   }
 };
@@ -4602,7 +4602,7 @@ proto.pb.ClubInviteInfo.prototype.setClubid = function(value) {
  */
 proto.pb.ClubInviteInfo.prototype.getTargetdata = function() {
   return /** @type{?proto.pb.UserInfo} */ (
-    jspb.Message.getWrapperField(this, comm_pb.UserInfo, 2));
+    jspb.Message.getWrapperField(this, baseinfo_pb.UserInfo, 2));
 };
 
 
@@ -4635,7 +4635,7 @@ proto.pb.ClubInviteInfo.prototype.hasTargetdata = function() {
  */
 proto.pb.ClubInviteInfo.prototype.getSenderdata = function() {
   return /** @type{?proto.pb.UserInfo} */ (
-    jspb.Message.getWrapperField(this, comm_pb.UserInfo, 3));
+    jspb.Message.getWrapperField(this, baseinfo_pb.UserInfo, 3));
 };
 
 

@@ -13,9 +13,11 @@ import (
 	"strings"
 )
 
-const sqlModelDir = "internal/sql_model/"
+const dbName = "social"
 
-const modelPkgPath = "sql_model"
+// 以下尽量不改动
+const sqlModelDir = "internal/sql_model/" + dbName
+const modelPkgPath = dbName
 
 // 请清空 [sqlmodel/model]目录下的文件,再执行
 func main() {
@@ -23,7 +25,6 @@ func main() {
 	password := "ko8899110"
 	address := "127.0.0.1"
 	port := "3306"
-	dbName := "minigame"
 	dataSourceName := user + ":" + password + "@tcp(" + address + ":" + port + ")/" + dbName + "?charset=utf8"
 	//注意 注意 此处为移除gorm的日志自定义了相关结构。正式使用时 请放开
 	db, err1 := gorm.Open(gmysql.Open(dataSourceName), &gorm.Config{

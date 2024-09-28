@@ -1,7 +1,7 @@
 syntax = "proto3";
 option go_package = "/pb";
 package pb;
-import "comm.proto";
+import "baseinfo.proto";
 // 好友在线情况
 message FriendOnlineReq {
 }

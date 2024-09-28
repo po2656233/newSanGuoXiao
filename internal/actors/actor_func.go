@@ -8,7 +8,7 @@ import (
 	"strconv"
 	pb "superman/internal/protocol/gofile"
 	"superman/internal/rpc"
-	sqlmodel "superman/internal/sql_model"
+	sqlmodel "superman/internal/sql_model/minigame"
 	. "superman/internal/utils"
 	"time"
 )

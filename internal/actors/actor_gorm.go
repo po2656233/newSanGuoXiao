@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm"
 	"strings"
 	. "superman/internal/constant"
-	sqlmodel "superman/internal/sql_model"
+	sqlmodel "superman/internal/sql_model/minigame"
 	. "superman/internal/utils"
 	"sync"
 	"time"

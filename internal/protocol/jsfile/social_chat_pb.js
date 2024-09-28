@@ -11,8 +11,8 @@ var jspb = require('google-protobuf');
 var goog = jspb;
 var global = Function('return this')();
 
-var comm_pb = require('./comm_pb.js');
-goog.object.extend(proto, comm_pb);
+var baseinfo_pb = require('./baseinfo_pb.js');
+goog.object.extend(proto, baseinfo_pb);
 goog.exportSymbol('proto.pb.ChatHisReq', null, global);
 goog.exportSymbol('proto.pb.ChatHisResp', null, global);
 goog.exportSymbol('proto.pb.ChatSgxInviteReq', null, global);
@@ -851,7 +851,7 @@ proto.pb.ChatSgxInviteResp.toObject = function(includeInstance, msg) {
     targetuid: jspb.Message.getFieldWithDefault(msg, 2, 0),
     gameeid: jspb.Message.getFieldWithDefault(msg, 3, 0),
     cont: jspb.Message.getFieldWithDefault(msg, 4, ""),
-    senderdata: (f = msg.getSenderdata()) && comm_pb.UserBaseInfo.toObject(includeInstance, f)
+    senderdata: (f = msg.getSenderdata()) && baseinfo_pb.UserBaseInfo.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -905,8 +905,8 @@ proto.pb.ChatSgxInviteResp.deserializeBinaryFromReader = function(msg, reader) {
       msg.setCont(value);
       break;
     case 5:
-      var value = new comm_pb.UserBaseInfo;
-      reader.readMessage(value,comm_pb.UserBaseInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.UserBaseInfo;
+      reader.readMessage(value,baseinfo_pb.UserBaseInfo.deserializeBinaryFromReader);
       msg.setSenderdata(value);
       break;
     default:
@@ -971,7 +971,7 @@ proto.pb.ChatSgxInviteResp.serializeBinaryToWriter = function(message, writer) {
     writer.writeMessage(
       5,
       f,
-      comm_pb.UserBaseInfo.serializeBinaryToWriter
+      baseinfo_pb.UserBaseInfo.serializeBinaryToWriter
     );
   }
 };
@@ -1043,7 +1043,7 @@ proto.pb.ChatSgxInviteResp.prototype.setCont = function(value) {
  */
 proto.pb.ChatSgxInviteResp.prototype.getSenderdata = function() {
   return /** @type{?proto.pb.UserBaseInfo} */ (
-    jspb.Message.getWrapperField(this, comm_pb.UserBaseInfo, 5));
+    jspb.Message.getWrapperField(this, baseinfo_pb.UserBaseInfo, 5));
 };
 
 

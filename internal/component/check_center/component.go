@@ -1,15 +1,16 @@
 package checkCenter
 
 import (
-	sgxFacade "github.com/po2656233/superplace/facade"
-	sgxLogger "github.com/po2656233/superplace/logger"
 	"superman/internal/rpc"
 	"time"
+
+	facade "github.com/po2656233/superplace/facade"
+	clog "github.com/po2656233/superplace/logger"
 )
 
 // Component 启动时,检查center节点是否存活
 type Component struct {
-	sgxFacade.Component
+	facade.Component
 }
 
 func New() *Component {
@@ -26,6 +27,6 @@ func (c *Component) OnAfterInit() {
 			break
 		}
 		time.Sleep(2 * time.Second)
-		sgxLogger.Warn("center node connect fail. retrying in 2 seconds.")
+		clog.Warn("center node connect fail. retrying in 2 seconds.")
 	}
 }

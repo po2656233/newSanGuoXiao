@@ -11,8 +11,8 @@ var jspb = require('google-protobuf');
 var goog = jspb;
 var global = Function('return this')();
 
-var comm_pb = require('./comm_pb.js');
-goog.object.extend(proto, comm_pb);
+var baseinfo_pb = require('./baseinfo_pb.js');
+goog.object.extend(proto, baseinfo_pb);
 goog.exportSymbol('proto.pb.FriendApplyBatchDealReq', null, global);
 goog.exportSymbol('proto.pb.FriendApplyBatchDealResp', null, global);
 goog.exportSymbol('proto.pb.FriendApplyBatchReq', null, global);
@@ -750,7 +750,7 @@ proto.pb.FriendListResp.prototype.toObject = function(opt_includeInstance) {
 proto.pb.FriendListResp.toObject = function(includeInstance, msg) {
   var obj = {
     dataarrList: jspb.Message.toObjectList(msg.getDataarrList(),
-    comm_pb.UserInfo.toObject, includeInstance)
+    baseinfo_pb.UserInfo.toObject, includeInstance)
   };
 
   if (includeInstance) {
@@ -788,8 +788,8 @@ proto.pb.FriendListResp.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new comm_pb.UserInfo;
-      reader.readMessage(value,comm_pb.UserInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.UserInfo;
+      reader.readMessage(value,baseinfo_pb.UserInfo.deserializeBinaryFromReader);
       msg.addDataarr(value);
       break;
     default:
@@ -826,7 +826,7 @@ proto.pb.FriendListResp.serializeBinaryToWriter = function(message, writer) {
     writer.writeRepeatedMessage(
       1,
       f,
-      comm_pb.UserInfo.serializeBinaryToWriter
+      baseinfo_pb.UserInfo.serializeBinaryToWriter
     );
   }
 };
@@ -838,7 +838,7 @@ proto.pb.FriendListResp.serializeBinaryToWriter = function(message, writer) {
  */
 proto.pb.FriendListResp.prototype.getDataarrList = function() {
   return /** @type{!Array<!proto.pb.UserInfo>} */ (
-    jspb.Message.getRepeatedWrapperField(this, comm_pb.UserInfo, 1));
+    jspb.Message.getRepeatedWrapperField(this, baseinfo_pb.UserInfo, 1));
 };
 
 
@@ -1925,7 +1925,7 @@ proto.pb.FriendApplyListResp.prototype.toObject = function(opt_includeInstance) 
 proto.pb.FriendApplyListResp.toObject = function(includeInstance, msg) {
   var obj = {
     dataarrList: jspb.Message.toObjectList(msg.getDataarrList(),
-    comm_pb.UserInfo.toObject, includeInstance)
+    baseinfo_pb.UserInfo.toObject, includeInstance)
   };
 
   if (includeInstance) {
@@ -1963,8 +1963,8 @@ proto.pb.FriendApplyListResp.deserializeBinaryFromReader = function(msg, reader)
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = new comm_pb.UserInfo;
-      reader.readMessage(value,comm_pb.UserInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.UserInfo;
+      reader.readMessage(value,baseinfo_pb.UserInfo.deserializeBinaryFromReader);
       msg.addDataarr(value);
       break;
     default:
@@ -2001,7 +2001,7 @@ proto.pb.FriendApplyListResp.serializeBinaryToWriter = function(message, writer)
     writer.writeRepeatedMessage(
       1,
       f,
-      comm_pb.UserInfo.serializeBinaryToWriter
+      baseinfo_pb.UserInfo.serializeBinaryToWriter
     );
   }
 };
@@ -2013,7 +2013,7 @@ proto.pb.FriendApplyListResp.serializeBinaryToWriter = function(message, writer)
  */
 proto.pb.FriendApplyListResp.prototype.getDataarrList = function() {
   return /** @type{!Array<!proto.pb.UserInfo>} */ (
-    jspb.Message.getRepeatedWrapperField(this, comm_pb.UserInfo, 1));
+    jspb.Message.getRepeatedWrapperField(this, baseinfo_pb.UserInfo, 1));
 };
 
 
@@ -2226,7 +2226,7 @@ proto.pb.FriendApplyDealResp.toObject = function(includeInstance, msg) {
     senderuid: jspb.Message.getFieldWithDefault(msg, 1, 0),
     targetuid: jspb.Message.getFieldWithDefault(msg, 2, 0),
     isagree: jspb.Message.getFieldWithDefault(msg, 3, 0),
-    frienddata: (f = msg.getFrienddata()) && comm_pb.UserInfo.toObject(includeInstance, f)
+    frienddata: (f = msg.getFrienddata()) && baseinfo_pb.UserInfo.toObject(includeInstance, f)
   };
 
   if (includeInstance) {
@@ -2276,8 +2276,8 @@ proto.pb.FriendApplyDealResp.deserializeBinaryFromReader = function(msg, reader)
       msg.setIsagree(value);
       break;
     case 4:
-      var value = new comm_pb.UserInfo;
-      reader.readMessage(value,comm_pb.UserInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.UserInfo;
+      reader.readMessage(value,baseinfo_pb.UserInfo.deserializeBinaryFromReader);
       msg.setFrienddata(value);
       break;
     default:
@@ -2335,7 +2335,7 @@ proto.pb.FriendApplyDealResp.serializeBinaryToWriter = function(message, writer)
     writer.writeMessage(
       4,
       f,
-      comm_pb.UserInfo.serializeBinaryToWriter
+      baseinfo_pb.UserInfo.serializeBinaryToWriter
     );
   }
 };
@@ -2392,7 +2392,7 @@ proto.pb.FriendApplyDealResp.prototype.setIsagree = function(value) {
  */
 proto.pb.FriendApplyDealResp.prototype.getFrienddata = function() {
   return /** @type{?proto.pb.UserInfo} */ (
-    jspb.Message.getWrapperField(this, comm_pb.UserInfo, 4));
+    jspb.Message.getWrapperField(this, baseinfo_pb.UserInfo, 4));
 };
 
 
@@ -2636,7 +2636,7 @@ proto.pb.FriendApplyBatchDealResp.toObject = function(includeInstance, msg) {
     senderuidarrList: jspb.Message.getRepeatedField(msg, 2),
     isagree: jspb.Message.getFieldWithDefault(msg, 3, 0),
     friendarrList: jspb.Message.toObjectList(msg.getFriendarrList(),
-    comm_pb.UserInfo.toObject, includeInstance)
+    baseinfo_pb.UserInfo.toObject, includeInstance)
   };
 
   if (includeInstance) {
@@ -2686,8 +2686,8 @@ proto.pb.FriendApplyBatchDealResp.deserializeBinaryFromReader = function(msg, re
       msg.setIsagree(value);
       break;
     case 4:
-      var value = new comm_pb.UserInfo;
-      reader.readMessage(value,comm_pb.UserInfo.deserializeBinaryFromReader);
+      var value = new baseinfo_pb.UserInfo;
+      reader.readMessage(value,baseinfo_pb.UserInfo.deserializeBinaryFromReader);
       msg.addFriendarr(value);
       break;
     default:
@@ -2745,7 +2745,7 @@ proto.pb.FriendApplyBatchDealResp.serializeBinaryToWriter = function(message, wr
     writer.writeRepeatedMessage(
       4,
       f,
-      comm_pb.UserInfo.serializeBinaryToWriter
+      baseinfo_pb.UserInfo.serializeBinaryToWriter
     );
   }
 };
@@ -2819,7 +2819,7 @@ proto.pb.FriendApplyBatchDealResp.prototype.setIsagree = function(value) {
  */
 proto.pb.FriendApplyBatchDealResp.prototype.getFriendarrList = function() {
   return /** @type{!Array<!proto.pb.UserInfo>} */ (
-    jspb.Message.getRepeatedWrapperField(this, comm_pb.UserInfo, 4));
+    jspb.Message.getRepeatedWrapperField(this, baseinfo_pb.UserInfo, 4));
 };
 
 

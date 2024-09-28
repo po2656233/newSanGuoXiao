@@ -5,6 +5,7 @@ import (
 	"github.com/po2656233/superplace/net/parser/simple"
 	cproto "github.com/po2656233/superplace/net/proto"
 	event2 "superman/internal/event"
+	"superman/nodes/chat/db"
 	mgr "superman/nodes/game/manger"
 	"superman/nodes/game/module/online"
 	"time"
@@ -15,11 +16,12 @@ type (
 	ActorPlayer struct {
 		//pomelo.ActorBase
 		simple.ActorBase
-		isOnline bool // 玩家是否在线
-		playerId int64
-		uid      int64
-		Session  *cproto.Session
-		userData interface{}
+		isOnline    bool // 玩家是否在线
+		playerId    int64
+		uid         int64
+		Session     *cproto.Session
+		userData    interface{}
+		dbComponent *db.Component
 	}
 )
 
@@ -31,6 +33,7 @@ func (p *ActorPlayer) OnInit() {
 	// 注册 session关闭的remote函数(网关触发连接断开后，会调用RPC发送该消息)
 	p.Remote().Register(p.sessionClose)
 	p.registerLocalMsg()
+	p.dbComponent = p.App().Find("db_chat_component").(*db.Component)
 }
 
 // sessionClose 接收角色session关闭处理
