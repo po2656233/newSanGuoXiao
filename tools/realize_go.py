@@ -3,18 +3,24 @@ import re
 
 # 定义目录和文件路径
 PROTO_DIR = r'..\internal\protocol'  # 修改为您的 proto 文件目录
-GO_FILE = r'..\nodes\game\module\player\handle_msg.go'  # 请根据实际路径修改
 GOFILE_DIRECTORY = r'..\internal\protocol\gofile'  # 设置要遍历的目录
 
 # 定义要过滤的 proto 文件列表
-FILTERED_FILES = ['login.proto', '.proto']
+FILTERED_FILES = ['login.proto', 'base_type.proto', 'baseinfo.proto']
+
+# 定义节点和 handle_msg.go 文件路径的映射关系
+NODE_TO_GO_FILE = {
+    'game': r'..\nodes\game\module\player\handle_msg.go',
+    'user': r'..\nodes\user\module\player\handle_msg.go',
+    # 添加更多节点和文件路径的映射
+}
 
 def extract_req_messages(proto_dir):
     """
     提取所有未被注释且以 Req 结尾的 message 及其注释。
-    返回一个列表，每个元素为元组 (message_name, comment)
+    返回一个字典，键为节点名，值为消息列表，每个消息为元组 (message_name, comment)
     """
-    req_messages = []
+    req_messages = {}
     message_pattern = re.compile(r'^\s*message\s+(\w+Req)\s*\{')
 
     for root, _, files in os.walk(proto_dir):
@@ -23,6 +29,11 @@ def extract_req_messages(proto_dir):
                 # 检查文件是否在过滤列表中
                 if file in FILTERED_FILES:
                     continue  # 跳过被过滤的文件
+
+                # 获取节点名
+                node_name = file.split('_')[0] if '_' in file else 'default'
+                if node_name not in req_messages:
+                    req_messages[node_name] = []
 
                 path = os.path.join(root, file)
                 try:
@@ -48,7 +59,7 @@ def extract_req_messages(proto_dir):
                                     else:
                                         break
                                 full_comment = '\n'.join(comments) if comments else ''
-                                req_messages.append((msg_name, full_comment))
+                                req_messages[node_name].append((msg_name, full_comment))
                 except Exception as e:
                     print(f'无法读取文件 {path}: {e}')
     return req_messages
@@ -212,19 +223,24 @@ def comment_proto_files():
 
 def main():
     # 提取并处理消息注册和处理函数
-    messages = extract_req_messages(PROTO_DIR)
-    unique_messages = list(set(messages))  # 去重
-    if not unique_messages:
-        print('未找到以 Req 结尾的有效 message。')
-    else:
+    messages_by_node = extract_req_messages(PROTO_DIR)
+    for node, messages in messages_by_node.items():
+        unique_messages = list(set(messages))  # 去重
+        if not unique_messages:
+            print(f'未找到以 Req 结尾的有效 message 在节点: {node}')
+            continue
+
         # 生成注册代码
         registration_lines = generate_registration_lines(unique_messages)
 
         # 生成处理函数代码
         handler_functions = generate_handler_functions(unique_messages)
 
+        # 获取对应的 Go 文件路径
+        go_file = NODE_TO_GO_FILE.get(node, list(NODE_TO_GO_FILE.values())[0])
+
         # 更新 Go 文件
-        update_go_file(GO_FILE, registration_lines, handler_functions)
+        update_go_file(go_file, registration_lines, handler_functions)
     
     # 注释gofile目录下的指定proto语句
     comment_proto_files()
