@@ -6,7 +6,10 @@ import (
 	clog "github.com/po2656233/superplace/logger"
 	"gorm.io/gorm"
 	"strconv"
-	pb "superman/internal/protocol/gofile"
+	commMsg "superman/internal/protocol/go_file/common"
+	gameMsg "superman/internal/protocol/go_file/game"
+
+	gateMsg "superman/internal/protocol/go_file/gate"
 	"superman/internal/rpc"
 	sqlmodel "superman/internal/sql_model/minigame"
 	. "superman/internal/utils"
@@ -14,7 +17,7 @@ import (
 )
 
 // Register /////////////////////////////////////////////////////////
-func (self *ActorDB) Register(req *pb.RegisterReq) (*pb.RegisterResp, error) {
+func (self *ActorDB) Register(req *gateMsg.RegisterReq) (*gateMsg.RegisterResp, error) {
 	m := req
 	identity := uuid.New().String()
 	user := sqlmodel.User{
@@ -41,14 +44,14 @@ func (self *ActorDB) Register(req *pb.RegisterReq) (*pb.RegisterResp, error) {
 		uid = -1
 		clog.Errorf("[actor_gorm] Register uid:%v err:%v", uid, err)
 	}
-	resp := &pb.RegisterResp{
+	resp := &gateMsg.RegisterResp{
 		OpenId: fmt.Sprintf("%d", uid),
 	}
 
 	return resp, err
 }
 
-func (self *ActorDB) Login(req *pb.LoginReq) (*pb.LoginResp, error) {
+func (self *ActorDB) Login(req *gateMsg.LoginReq) (*gateMsg.LoginResp, error) {
 	psw := Md5Sum(req.Password + strconv.FormatInt(int64(len(req.Password)), 10))
 	userInfo, err := self.checkUserInfo(req.Account, psw)
 	if err != nil {
@@ -57,58 +60,58 @@ func (self *ActorDB) Login(req *pb.LoginReq) (*pb.LoginResp, error) {
 	if err := self.updateLoginTime(userInfo.ID); err != nil {
 		return nil, err
 	}
-	resp := &pb.LoginResp{}
-	resp.MainInfo = &pb.MasterInfo{
-		UserInfo: &pb.UserInfo{
-			UserID:       userInfo.ID,
-			Name:         userInfo.Name,
-			Account:      userInfo.Account,
-			Password:     userInfo.Password,
-			Money:        userInfo.Money,
-			Coin:         userInfo.Coin,
-			YuanBao:      userInfo.Yuanbao,
-			FaceID:       userInfo.Face,
-			Gender:       userInfo.Gender,
-			Age:          userInfo.Age,
-			Vip:          userInfo.Vip,
-			Level:        userInfo.Level,
-			PassPortID:   userInfo.Passport,
-			Address:      userInfo.Address,
-			AgentID:      userInfo.Agentid,
-			ServerAddr:   userInfo.Serveraddr,
-			MachineCode:  userInfo.Machinecode,
-			RealName:     userInfo.Realname,
-			PhoneNum:     userInfo.Phone,
-			Email:        userInfo.Email,
-			ReferralCode: userInfo.Referralcode,
-			IDentity:     userInfo.Identity,
-			ClientAddr:   userInfo.Clientaddr,
+	resp := &gateMsg.LoginResp{}
+	resp.MainInfo = &commMsg.MasterInfo{
+		UserInfo: &commMsg.UserInfo{
+			UserID:  userInfo.ID,
+			Name:    userInfo.Name,
+			Account: userInfo.Account,
+			//Password:     userInfo.Password,
+			Money:   userInfo.Money,
+			Coin:    userInfo.Coin,
+			YuanBao: userInfo.Yuanbao,
+			FaceID:  userInfo.Face,
+			Gender:  userInfo.Gender,
+			Age:     userInfo.Age,
+			Vip:     userInfo.Vip,
+			Level:   userInfo.Level,
+			//PassPortID:   userInfo.Passport,
+			//Address:      userInfo.Address,
+			//AgentID:      userInfo.Agentid,
+			//ServerAddr:   userInfo.Serveraddr,
+			//MachineCode:  userInfo.Machinecode,
+			//RealName:     userInfo.Realname,
+			//PhoneNum:     userInfo.Phone,
+			//Email:        userInfo.Email,
+			//ReferralCode: userInfo.Referralcode,
+			//IDentity:     userInfo.Identity,
+			//ClientAddr:   userInfo.Clientaddr,
 		},
 	}
 	return resp, err
 }
 
-func (self *ActorDB) Logout(req *pb.LogoutReq) (*pb.LogoutResp, error) {
+func (self *ActorDB) Logout(req *gateMsg.LogoutReq) (*gateMsg.LogoutResp, error) {
 	now := time.Now().Unix()
 	if err := self.updateLeaveTime(req.Uid, now); err != nil {
 		return nil, err
 	}
-	return &pb.LogoutResp{
+	return &gateMsg.LogoutResp{
 		Uid:       req.Uid,
 		Timestamp: now,
 	}, nil
 }
 
 // GetClassList 取分类列表
-func (self *ActorDB) GetClassList() (*pb.GetClassListResp, error) {
-	resp := &pb.GetClassListResp{
-		Items: &pb.ClassList{
-			Classify: make([]*pb.ClassItem, 0),
+func (self *ActorDB) GetClassList() (*gateMsg.GetClassListResp, error) {
+	resp := &gateMsg.GetClassListResp{
+		Items: &commMsg.ClassList{
+			Classify: make([]*commMsg.ClassItem, 0),
 		},
 	}
 	ret, err := self.checkClassify()
 	for _, kind := range ret {
-		resp.Items.Classify = append(resp.Items.Classify, &pb.ClassItem{
+		resp.Items.Classify = append(resp.Items.Classify, &commMsg.ClassItem{
 			Id:     kind.ID,
 			Name:   kind.Name,
 			EnName: kind.EnName,
@@ -118,18 +121,18 @@ func (self *ActorDB) GetClassList() (*pb.GetClassListResp, error) {
 }
 
 // GetRoomList 取分类列表
-func (self *ActorDB) GetRoomList(req *pb.GetRoomListReq) (*pb.GetRoomListResp, error) {
-	resp := &pb.GetRoomListResp{
-		Items: &pb.RoomList{
-			Items: make([]*pb.RoomInfo, 0),
+func (self *ActorDB) GetRoomList(req *gateMsg.GetRoomListReq) (*gateMsg.GetRoomListResp, error) {
+	resp := &gateMsg.GetRoomListResp{
+		Items: &commMsg.RoomList{
+			Items: make([]*commMsg.RoomInfo, 0),
 		},
 	}
 	ret, err := self.checkRooms(req.Uid, 0, -1, 0)
 	for _, room := range ret {
-		resp.Items.Items = append(resp.Items.Items, &pb.RoomInfo{
+		resp.Items.Items = append(resp.Items.Items, &commMsg.RoomInfo{
 			Id:         room.ID,
 			HostId:     room.Hostid,
-			Level:      pb.RoomLevel(room.Level),
+			Level:      commMsg.RoomLevel(room.Level),
 			Name:       room.Name,
 			RoomKey:    room.Roomkey,
 			EnterScore: room.Enterscore,
@@ -142,15 +145,15 @@ func (self *ActorDB) GetRoomList(req *pb.GetRoomListReq) (*pb.GetRoomListResp, e
 }
 
 // GetTableList 取分类列表
-func (self *ActorDB) GetTableList(req *pb.GetTableListReq) (*pb.GetTableListResp, error) {
-	resp := &pb.GetTableListResp{
-		Items: &pb.TableList{
-			Items: make([]*pb.TableInfo, 0),
+func (self *ActorDB) GetTableList(req *gateMsg.GetTableListReq) (*gateMsg.GetTableListResp, error) {
+	resp := &gateMsg.GetTableListResp{
+		Items: &commMsg.TableList{
+			Items: make([]*commMsg.TableInfo, 0),
 		},
 	}
 	ret, err := self.checkTables(req.Rid, -1, 0)
 	for _, table := range ret {
-		resp.Items.Items = append(resp.Items.Items, &pb.TableInfo{
+		resp.Items.Items = append(resp.Items.Items, &commMsg.TableInfo{
 			Id:         table.ID,
 			Rid:        table.Rid,
 			Name:       table.Name,
@@ -167,20 +170,20 @@ func (self *ActorDB) GetTableList(req *pb.GetTableListReq) (*pb.GetTableListResp
 }
 
 // GetGameList 取分类列表
-func (self *ActorDB) GetGameList(req *pb.GetGameListReq) (*pb.GetGameListResp, error) {
-	resp := &pb.GetGameListResp{
-		Items: &pb.GameList{
-			Items: make([]*pb.GameInfo, 0),
+func (self *ActorDB) GetGameList(req *gateMsg.GetGameListReq) (*gateMsg.GetGameListResp, error) {
+	resp := &gateMsg.GetGameListResp{
+		Items: &commMsg.GameList{
+			Items: make([]*commMsg.GameInfo, 0),
 		},
 	}
 	ret, err := self.checkGames(req.Kid, -1, 0)
 	for _, game := range ret {
-		resp.Items.Items = append(resp.Items.Items, &pb.GameInfo{
+		resp.Items.Items = append(resp.Items.Items, &commMsg.GameInfo{
 			Id:        game.ID,
 			Name:      game.Name,
 			Kid:       game.Kid,
 			Lessscore: game.Lessscore,
-			State:     pb.GameState(game.State),
+			State:     commMsg.GameState(game.State),
 			MaxPlayer: game.MaxPlayer,
 			HowToPlay: game.HowToPlay,
 		})
@@ -190,27 +193,27 @@ func (self *ActorDB) GetGameList(req *pb.GetGameListReq) (*pb.GetGameListResp, e
 
 ///////////////////////create////////////////////////////////////
 
-func (self *ActorDB) CreateRoom(req *pb.CreateRoomReq) (*pb.CreateRoomResp, error) {
-	resp := &pb.CreateRoomResp{}
+func (self *ActorDB) CreateRoom(req *gateMsg.CreateRoomReq) (*gateMsg.CreateRoomResp, error) {
+	resp := &gateMsg.CreateRoomResp{}
 	maxCount := int32(0)
 	maxTable := int32(0)
 	switch req.Level {
-	case pb.RoomLevel_GeneralRoom:
+	case commMsg.RoomLevel_GeneralRoom:
 		maxCount = 20
 		maxTable = 5
-	case pb.RoomLevel_MiddleRoom:
+	case commMsg.RoomLevel_MiddleRoom:
 		maxCount = 50
 		maxTable = 10
-	case pb.RoomLevel_HighRoom:
+	case commMsg.RoomLevel_HighRoom:
 		maxCount = 200
 		maxTable = 20
-	case pb.RoomLevel_TopRoom:
+	case commMsg.RoomLevel_TopRoom:
 		maxCount = 1000
 		maxTable = 50
-	case pb.RoomLevel_SuperRoom:
+	case commMsg.RoomLevel_SuperRoom:
 		maxCount = 10000
 		maxTable = 100
-	case pb.RoomLevel_SystemRoom:
+	case commMsg.RoomLevel_SystemRoom:
 		maxCount = -1
 		maxTable = -1
 
@@ -235,7 +238,7 @@ func (self *ActorDB) CreateRoom(req *pb.CreateRoomReq) (*pb.CreateRoomResp, erro
 	if 0 == roomId || err != nil {
 		return nil, err
 	}
-	resp.Info = &pb.RoomInfo{
+	resp.Info = &commMsg.RoomInfo{
 		Id:         roomId,
 		HostId:     req.HostId,
 		Level:      req.Level,
@@ -250,8 +253,8 @@ func (self *ActorDB) CreateRoom(req *pb.CreateRoomReq) (*pb.CreateRoomResp, erro
 	return resp, nil
 }
 
-func (self *ActorDB) CreateTable(req *pb.CreateTableReq) (*pb.CreateTableResp, error) {
-	resp := &pb.CreateTableResp{}
+func (self *ActorDB) CreateTable(req *gateMsg.CreateTableReq) (*gateMsg.CreateTableResp, error) {
+	resp := &gateMsg.CreateTableResp{}
 	if req.Name == "" {
 		// 则获取游戏名称
 		req.Name, _ = self.checkGameName(req.Gid)
@@ -269,7 +272,7 @@ func (self *ActorDB) CreateTable(req *pb.CreateTableReq) (*pb.CreateTableResp, e
 	if err != nil {
 		return resp, err
 	}
-	resp.Table = &pb.TableInfo{
+	resp.Table = &commMsg.TableInfo{
 		Id:         tid,
 		Rid:        req.Rid,
 		Gid:        req.Gid,
@@ -285,8 +288,8 @@ func (self *ActorDB) CreateTable(req *pb.CreateTableReq) (*pb.CreateTableResp, e
 	return resp, err
 }
 
-func (self *ActorDB) DeleteTable(req *pb.DeleteTableReq) (*pb.DeleteTableResp, error) {
-	resp := &pb.DeleteTableResp{}
+func (self *ActorDB) DeleteTable(req *gateMsg.DeleteTableReq) (*gateMsg.DeleteTableResp, error) {
+	resp := &gateMsg.DeleteTableResp{}
 	rid := self.checkTableRid(req.Tid)
 	if rid == 0 {
 		return resp, fmt.Errorf("tid:%d no have rid", req.Tid)
@@ -305,13 +308,13 @@ func (self *ActorDB) DeleteTable(req *pb.DeleteTableReq) (*pb.DeleteTableResp, e
 
 // /////////////////////////////////////////////////////////////////////////////////////
 
-func (self *ActorDB) GetTable(req *pb.GetTableReq) (*pb.GetTableResp, error) {
-	resp := &pb.GetTableResp{}
+func (self *ActorDB) GetTable(req *gateMsg.GetTableReq) (*gateMsg.GetTableResp, error) {
+	resp := &gateMsg.GetTableResp{}
 	info, err := self.checkTable(req.Tid)
 	if err != nil {
 		return nil, err
 	}
-	resp.Info = &pb.TableInfo{
+	resp.Info = &commMsg.TableInfo{
 		Id:         info.ID,
 		Name:       info.Name,
 		Rid:        info.Rid,
@@ -325,31 +328,31 @@ func (self *ActorDB) GetTable(req *pb.GetTableReq) (*pb.GetTableResp, error) {
 	}
 	return resp, err
 }
-func (self *ActorDB) GetUserInfo(req *pb.GetUserInfoReq) (*pb.GetUserInfoResp, error) {
-	resp := &pb.GetUserInfoResp{}
+func (self *ActorDB) GetUserInfo(req *gateMsg.GetUserInfoReq) (*gateMsg.GetUserInfoResp, error) {
+	resp := &gateMsg.GetUserInfoResp{}
 	info, err := self.checkUserSimpInfo(req.Uid)
 	if err != nil {
 		return resp, err
 	}
-	resp.Info = &pb.UserInfo{
-		UserID:  info.ID,
-		Name:    info.Name,
-		Account: info.Account,
-		FaceID:  info.Face,
-		Gender:  info.Gender,
-		Age:     info.Age,
-		Empiric: info.Empiric,
-		Vip:     info.Vip,
-		Level:   info.Level,
-		YuanBao: info.Yuanbao,
-		Coin:    info.Coin,
-		Money:   info.Money,
+	resp.Info = &commMsg.UserInfo{
+		UserID:   info.ID,
+		Name:     info.Name,
+		Account:  info.Account,
+		FaceID:   info.Face,
+		Gender:   info.Gender,
+		Age:      info.Age,
+		Empirice: info.Empiric,
+		Vip:      info.Vip,
+		Level:    info.Level,
+		YuanBao:  info.Yuanbao,
+		Coin:     info.Coin,
+		Money:    info.Money,
 	}
 	return resp, nil
 }
 
-func (self *ActorDB) FixNickName(req *pb.FixNickNameReq) (*pb.FixNickNameResp, error) {
-	resp := &pb.FixNickNameResp{}
+func (self *ActorDB) FixNickName(req *gateMsg.FixNickNameReq) (*gateMsg.FixNickNameResp, error) {
+	resp := &gateMsg.FixNickNameResp{}
 	err := self.updateNickName(req.Uid, req.Name)
 	if err != nil {
 		return resp, err
@@ -359,7 +362,7 @@ func (self *ActorDB) FixNickName(req *pb.FixNickNameReq) (*pb.FixNickNameResp, e
 	return resp, nil
 }
 
-func (self *ActorDB) Recharge(req *pb.RechargeReq) (*pb.RechargeResp, error) {
+func (self *ActorDB) Recharge(req *gateMsg.RechargeReq) (*gateMsg.RechargeResp, error) {
 	info := &sqlmodel.Recharge{
 		UID:       req.UserID,
 		Byid:      req.ByiD,
@@ -381,7 +384,7 @@ func (self *ActorDB) Recharge(req *pb.RechargeReq) (*pb.RechargeResp, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &pb.RechargeResp{
+	return &gateMsg.RechargeResp{
 		UserID:    info.UID,
 		ByiD:      info.Byid,
 		PreMoney:  info.Premoney,
@@ -397,8 +400,8 @@ func (self *ActorDB) Recharge(req *pb.RechargeReq) (*pb.RechargeResp, error) {
 	}, nil
 }
 
-func (self *ActorDB) AddRecord(req *pb.AddRecordReq) (*pb.AddRecordResp, error) {
-	resp := &pb.AddRecordResp{}
+func (self *ActorDB) AddRecord(req *gameMsg.AddRecordReq) (*gameMsg.AddRecordResp, error) {
+	resp := &gameMsg.AddRecordResp{}
 	record := &sqlmodel.Record{
 		UID:       req.Uid,
 		Tid:       req.Tid,
@@ -421,8 +424,8 @@ func (self *ActorDB) AddRecord(req *pb.AddRecordReq) (*pb.AddRecordResp, error) 
 	resp.Gold = record.Gold
 	return resp, nil
 }
-func (self *ActorDB) DecreaseGameRun(req *pb.DecreaseGameRunReq) (*pb.DecreaseGameRunResp, error) {
-	resp := &pb.DecreaseGameRunResp{}
+func (self *ActorDB) DecreaseGameRun(req *gameMsg.DecreaseGameRunReq) (*gameMsg.DecreaseGameRunResp, error) {
+	resp := &gameMsg.DecreaseGameRunResp{}
 	remain, err := self.eraseRemain(req.Tid, req.Amount)
 	resp.Tid = req.Tid
 	resp.Remain = remain

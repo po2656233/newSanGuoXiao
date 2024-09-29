@@ -1,319 +1,1222 @@
 {
-	"1": "BaccaratSceneResp",
-	"10": "BaccaratBetReq",
-	"100": "ChineseChessResult",
-	"101": "ChineseChessSceneResp",
-	"102": "ChineseChessStateReadyResp",
-	"103": "ChineseChessStateSetResp",
-	"104": "ChineseChessStateConfirmResp",
-	"105": "ChineseChessStateStartResp",
-	"106": "ChineseChessStatePlayingResp",
-	"107": "ChineseChessStateOpenResp",
-	"108": "ChineseChessStateOverResp",
-	"109": "ChineseChessJiangJuResp",
-	"11": "BaccaratBetResp",
-	"110": "ChineseChessJueShaResp",
-	"111": "ChineseChessReadyReq",
-	"112": "ChineseChessReadyResp",
-	"113": "ChineseChessSetTimeReq",
-	"114": "ChineseChessSetTimeResp",
-	"115": "ChineseChessAgreeTimeReq",
-	"116": "ChineseChessAgreeTimeResp",
-	"117": "ChineseChessMoveReq",
-	"118": "ChineseChessMoveResp",
-	"119": "EnterGameReq",
-	"12": "BaccaratOpenResp",
-	"120": "EnterGameResp",
-	"121": "JoinGameReadyQueueReq",
-	"122": "JoinGameReadyQueueResp",
-	"123": "WaitGameStartResp",
-	"124": "ExitGameReq",
-	"125": "ExitGameResp",
-	"126": "DisbandedTableReq",
-	"127": "DisbandedTableResp",
-	"128": "DisbandedGameReq",
-	"129": "DisbandedGameResp",
-	"13": "BaccaratCheckoutResp",
-	"130": "ChangeTableReq",
-	"131": "ChangeTableResp",
-	"132": "GetBackPasswordReq",
-	"133": "GetBackPasswordResp",
-	"134": "RankingListReq",
-	"135": "RankingListResp",
-	"136": "TrusteeReq",
-	"137": "TrusteeResp",
-	"138": "RollDiceReq",
-	"139": "RollDiceResp",
-	"14": "UserInfo",
-	"140": "GameOverReq",
-	"141": "GameOverResp",
-	"142": "UpdateGoldReq",
-	"143": "UpdateGoldResp",
-	"144": "AddRecordReq",
-	"145": "AddRecordResp",
-	"146": "DecreaseGameRunReq",
-	"147": "DecreaseGameRunResp",
-	"148": "GetRecordResp",
-	"149": "GetInningsInfoReq",
-	"15": "UserSimpleInfo",
-	"150": "GetInningsInfoResp",
-	"151": "GetClassListReq",
-	"152": "GetClassListResp",
-	"153": "GetRoomListReq",
-	"154": "GetRoomListResp",
-	"155": "GetTableListReq",
-	"156": "GetTableListResp",
-	"157": "GetTableReq",
-	"158": "GetTableResp",
-	"159": "GetGameListReq",
-	"16": "PlayerInfo",
-	"160": "GetGameListResp",
-	"161": "GetTaskListReq",
-	"162": "GetTaskListResp",
-	"163": "GetUserInfoReq",
-	"164": "GetUserInfoResp",
-	"165": "ChooseClassReq",
-	"166": "ChooseClassResp",
-	"167": "ChooseRoomReq",
-	"168": "ChooseRoomResp",
-	"169": "ChooseTableReq",
-	"17": "PlayerSimpleInfo",
-	"170": "ChooseTableResp",
-	"171": "CreateRoomReq",
-	"172": "CreateRoomResp",
-	"173": "CreateTableReq",
-	"174": "CreateTableResp",
-	"175": "DeleteTableReq",
-	"176": "DeleteTableResp",
-	"177": "FixNickNameReq",
-	"178": "FixNickNameResp",
-	"179": "CheckInReq",
-	"18": "HeroInfo",
-	"180": "CheckInResp",
-	"181": "GetCheckInReq",
-	"182": "GetCheckInResp",
-	"183": "DrawHeroReq",
-	"184": "DrawHeroResp",
-	"185": "GetMyHeroReq",
-	"186": "GetMyHeroResp",
-	"187": "ChooseHeroReq",
-	"188": "ChooseHeroResp",
-	"189": "DownHeroReq",
-	"19": "WeaponInfo",
-	"190": "DownHeroReqResp",
-	"191": "GetAllHeroReq",
-	"192": "GetAllHeroResp",
-	"193": "CheckHeroReq",
-	"194": "CheckHeroResp",
-	"195": "HowPlayReq",
-	"196": "HowPlayResp",
-	"197": "RechargeReq",
-	"198": "RechargeResp",
-	"199": "GetRechargesReq",
-	"2": "BaccaratStateStartResp",
-	"20": "GoodsInfo",
-	"200": "GetRechargesResp",
-	"201": "UpdateMoneyReq",
-	"202": "UpdateMoneyResp",
-	"203": "BarterCoinReq",
-	"204": "BarterCoinResp",
-	"205": "BarterYuanBaoReq",
-	"206": "BarterYuanBaoResp",
-	"207": "GetGoodsReq",
-	"208": "GetGoodsResp",
-	"209": "GetAllGoodsReq",
-	"21": "KnapsackInfo",
-	"210": "GetAllGoodsResp",
-	"211": "BuyGoodsReq",
-	"212": "BuyGoodsResp",
-	"213": "CheckKnapsackReq",
-	"214": "CheckKnapsackResp",
-	"215": "BarterReq",
-	"216": "BarterResp",
-	"217": "ToShoppingResp",
-	"218": "EmailReq",
-	"219": "EmailResp",
-	"22": "EmailInfo",
-	"220": "ClaimReq",
-	"221": "ClaimResp",
-	"222": "SuggestReq",
-	"223": "SuggestResp",
-	"224": "EmailReadReq",
-	"225": "EmailReadResp",
-	"226": "EmailDelReq",
-	"227": "EmailDelResp",
-	"228": "NotifyBeOutResp",
-	"229": "NotifyBalanceChangeResp",
-	"23": "RoomInfo",
-	"230": "NotifyNoticeReq",
-	"231": "NotifyNoticeResp",
-	"232": "ResultResp",
-	"233": "ResultPopResp",
-	"234": "PingReq",
-	"235": "PongResp",
-	"236": "RegisterReq",
-	"237": "RegisterResp",
-	"238": "LoginRequest",
-	"239": "LoginResponse",
-	"24": "TableInfo",
-	"240": "LoginReq",
-	"241": "LoginResp",
-	"242": "AllopatricResp",
-	"243": "ReconnectReq",
-	"244": "ReconnectResp",
-	"245": "MahjongKeZi",
-	"246": "MahjongHint",
-	"247": "MahjongPlayer",
-	"248": "EnterGameMJResp",
-	"249": "MahjongSceneResp",
-	"25": "TimeInfo",
-	"250": "MahjongStateFreeResp",
-	"251": "MahjongStateDirectResp",
-	"252": "MahjongStateDecideResp",
-	"253": "MahjongStateRollDiceResp",
-	"254": "MahjongStateStartResp",
-	"255": "MahjongStatePlayingResp",
-	"256": "MahjongStateWaitOperateResp",
-	"257": "MahjongStateOpenResp",
-	"258": "MahjongStateOverResp",
-	"259": "MahjongReadyReq",
-	"26": "InningInfo",
-	"260": "MahjongReadyResp",
-	"261": "MahjongRollReq",
-	"262": "MahjongRollResp",
-	"263": "MahjongOutCardReq",
-	"264": "MahjongOutCardResp",
-	"265": "MahjongOperateReq",
-	"266": "MahjongOperateResp",
-	"267": "MahjongDealResp",
-	"268": "MahjongHintResp",
-	"269": "GetUserIDReq",
-	"27": "CardInfo",
-	"270": "GetUserIDResp",
-	"271": "Request",
-	"272": "Response",
-	"273": "ErrorResponse",
-	"274": "SgxGrid",
-	"275": "SgxBoardInfo",
-	"276": "SanguoxiaoPlayer",
-	"277": "SanguoxiaoAttack",
-	"278": "SanguoxiaoResult",
-	"279": "ChallengeReq",
-	"28": "AreaInfo",
-	"280": "ChallengeResp",
-	"281": "SanguoxiaoSceneResp",
-	"282": "SanguoxiaoStatePlayingResp",
-	"283": "SanguoxiaoStateEraseResp",
-	"284": "SanguoxiaoStateOverResp",
-	"285": "SanguoxiaoSwapReq",
-	"286": "SanguoxiaoSwapResp",
-	"287": "SanguoxiaoTriggerResp",
-	"288": "TetrisShape",
-	"289": "TetrisBlock",
-	"29": "GameInfo",
-	"290": "TigerXdragonSceneResp",
-	"291": "TigerXdragonStateStartResp",
-	"292": "TigerXdragonStatePlayingResp",
-	"293": "TigerXdragonStateOpenResp",
-	"294": "TigerXdragonStateOverResp",
-	"295": "TigerXdragonBetReq",
-	"296": "TigerXdragonBetResp",
-	"297": "TigerXdragonOpenResp",
-	"298": "TigerXdragonCheckoutResp",
-	"299": "TigerXdragonHostReq",
-	"3": "BaccaratStatePlayingResp",
-	"30": "GameRecord",
-	"300": "TigerXdragonHostResp",
-	"301": "TigerXdragonSuperHostReq",
-	"302": "TigerXdragonSuperHostResp",
-	"303": "ZhaocaimiaoSceneResp",
-	"304": "ZhaocaimiaoStateStartResp",
-	"305": "ZhaocaimiaoStatePlayingResp",
-	"306": "ZhaocaimiaoStateOpenResp",
-	"307": "ZhaocaimiaoBetReq",
-	"308": "ZhaocaimiaoBetResp",
-	"309": "ZhaocaimiaoCell",
-	"31": "GameRecordList",
-	"310": "ZhaocaimiaoEraseCell",
-	"311": "ZhaocaimiaoOpenInfo",
-	"312": "ZhaocaimiaoOpenResp",
-	"313": "JoinAllReadyQueueReq",
-	"314": "LogoutReq",
-	"315": "LogoutResp",
-	"316": "BarterMoneyReq",
-	"317": "BarterMoneyResp",
-	"32": "MasterInfo",
-	"33": "TaskItem",
-	"34": "ClassItem",
-	"35": "TaskList",
-	"36": "ClassList",
-	"37": "PlayerList",
-	"38": "GoodsList",
-	"39": "RoomList",
-	"4": "BaccaratStateOpenResp",
-	"40": "TableList",
-	"41": "GameList",
-	"42": "InningList",
-	"43": "None",
-	"44": "Bool",
-	"45": "Int32",
-	"46": "Int64",
-	"47": "Double",
-	"48": "String",
-	"49": "Int64Int32",
-	"5": "BaccaratStateOverResp",
-	"50": "Int64Int64",
-	"51": "Int32Int32",
-	"52": "Int32Int64",
-	"53": "Int32List",
-	"54": "Int64List",
-	"55": "Int32Map",
-	"56": "Int32Int64Map",
-	"57": "StringKeyValue",
-	"58": "BrcowcowSceneResp",
-	"59": "BrcowcowStateFreeResp",
-	"6": "BaccaratHostReq",
-	"60": "BrcowcowStateStartResp",
-	"61": "BrcowcowStatePlayingResp",
-	"62": "BrcowcowStateOpenResp",
-	"63": "BrcowcowStateOverResp",
-	"64": "BrcowcowBetReq",
-	"65": "BrcowcowBetResp",
-	"66": "BrcowcowOpenResp",
-	"67": "BrcowcowOverResp",
-	"68": "BrcowcowHostReq",
-	"69": "BrcowcowHostResp",
-	"7": "BaccaratHostResp",
-	"70": "BrcowcowHostListReq",
-	"71": "BrcowcowHostListResp",
-	"72": "BrtoubaoSceneResp",
-	"73": "BrtoubaoStateStartResp",
-	"74": "BrtoubaoStatePlayingResp",
-	"75": "BrtoubaoStateOpenResp",
-	"76": "BrtoubaoStateOverResp",
-	"77": "BrtoubaoBetReq",
-	"78": "BrtoubaoBetResp",
-	"79": "BrtoubaoOpenResp",
-	"8": "BaccaratSuperHostReq",
-	"80": "BrtoubaoCheckoutResp",
-	"81": "BrtoubaoHostReq",
-	"82": "BrtoubaoHostResp",
-	"83": "BrtoubaoSuperHostReq",
-	"84": "BrtoubaoSuperHostResp",
-	"85": "BrTuitongziSceneResp",
-	"86": "BrTuitongziStateStartResp",
-	"87": "BrTuitongziStatePlayingResp",
-	"88": "BrTuitongziStateOpenResp",
-	"89": "BrTuitongziStateOverResp",
-	"9": "BaccaratSuperHostResp",
-	"90": "BrTuitongziBetReq",
-	"91": "BrTuitongziBetResp",
-	"92": "BrTuitongziOpenResp",
-	"93": "BrTuitongziCheckoutResp",
-	"94": "BrTuitongziHostReq",
-	"95": "BrTuitongziHostResp",
-	"96": "BrTuitongziSuperHostReq",
-	"97": "BrTuitongziSuperHostResp",
-	"98": "XQGrid",
-	"99": "XQBoardInfo"
+    "100044": {
+        "name": "GetUserIDReq",
+        "node": "common"
+    },
+    "100045": {
+        "name": "GetUserIDResp",
+        "node": "common"
+    },
+    "100046": {
+        "name": "Request",
+        "node": "common"
+    },
+    "100047": {
+        "name": "Response",
+        "node": "common"
+    },
+    "100048": {
+        "name": "ErrorResponse",
+        "node": "common"
+    },
+    "200000": {
+        "name": "GetClassListReq",
+        "node": "gate"
+    },
+    "200001": {
+        "name": "GetClassListResp",
+        "node": "gate"
+    },
+    "200002": {
+        "name": "GetRoomListReq",
+        "node": "gate"
+    },
+    "200003": {
+        "name": "GetRoomListResp",
+        "node": "gate"
+    },
+    "200004": {
+        "name": "GetTableListReq",
+        "node": "gate"
+    },
+    "200005": {
+        "name": "GetTableListResp",
+        "node": "gate"
+    },
+    "200006": {
+        "name": "GetTableReq",
+        "node": "gate"
+    },
+    "200007": {
+        "name": "GetTableResp",
+        "node": "gate"
+    },
+    "200008": {
+        "name": "GetGameListReq",
+        "node": "gate"
+    },
+    "200009": {
+        "name": "GetGameListResp",
+        "node": "gate"
+    },
+    "200010": {
+        "name": "GetTaskListReq",
+        "node": "gate"
+    },
+    "200011": {
+        "name": "GetTaskListResp",
+        "node": "gate"
+    },
+    "200012": {
+        "name": "GetUserInfoReq",
+        "node": "gate"
+    },
+    "200013": {
+        "name": "GetUserInfoResp",
+        "node": "gate"
+    },
+    "200014": {
+        "name": "ChooseClassReq",
+        "node": "gate"
+    },
+    "200015": {
+        "name": "ChooseClassResp",
+        "node": "gate"
+    },
+    "200016": {
+        "name": "ChooseRoomReq",
+        "node": "gate"
+    },
+    "200017": {
+        "name": "ChooseRoomResp",
+        "node": "gate"
+    },
+    "200018": {
+        "name": "ChooseTableReq",
+        "node": "gate"
+    },
+    "200019": {
+        "name": "ChooseTableResp",
+        "node": "gate"
+    },
+    "200020": {
+        "name": "CreateRoomReq",
+        "node": "gate"
+    },
+    "200021": {
+        "name": "CreateRoomResp",
+        "node": "gate"
+    },
+    "200022": {
+        "name": "CreateTableReq",
+        "node": "gate"
+    },
+    "200023": {
+        "name": "CreateTableResp",
+        "node": "gate"
+    },
+    "200024": {
+        "name": "DeleteTableReq",
+        "node": "gate"
+    },
+    "200025": {
+        "name": "DeleteTableResp",
+        "node": "gate"
+    },
+    "200026": {
+        "name": "FixNickNameReq",
+        "node": "gate"
+    },
+    "200027": {
+        "name": "FixNickNameResp",
+        "node": "gate"
+    },
+    "200028": {
+        "name": "CheckInReq",
+        "node": "gate"
+    },
+    "200029": {
+        "name": "CheckInResp",
+        "node": "gate"
+    },
+    "200030": {
+        "name": "GetCheckInReq",
+        "node": "gate"
+    },
+    "200031": {
+        "name": "GetCheckInResp",
+        "node": "gate"
+    },
+    "200032": {
+        "name": "DrawHeroReq",
+        "node": "gate"
+    },
+    "200033": {
+        "name": "DrawHeroResp",
+        "node": "gate"
+    },
+    "200034": {
+        "name": "GetMyHeroReq",
+        "node": "gate"
+    },
+    "200035": {
+        "name": "GetMyHeroResp",
+        "node": "gate"
+    },
+    "200036": {
+        "name": "ChooseHeroReq",
+        "node": "gate"
+    },
+    "200037": {
+        "name": "ChooseHeroResp",
+        "node": "gate"
+    },
+    "200038": {
+        "name": "DownHeroReq",
+        "node": "gate"
+    },
+    "200039": {
+        "name": "DownHeroReqResp",
+        "node": "gate"
+    },
+    "200040": {
+        "name": "GetAllHeroReq",
+        "node": "gate"
+    },
+    "200041": {
+        "name": "GetAllHeroResp",
+        "node": "gate"
+    },
+    "200042": {
+        "name": "CheckHeroReq",
+        "node": "gate"
+    },
+    "200043": {
+        "name": "CheckHeroResp",
+        "node": "gate"
+    },
+    "200044": {
+        "name": "HowPlayReq",
+        "node": "gate"
+    },
+    "200045": {
+        "name": "HowPlayResp",
+        "node": "gate"
+    },
+    "200046": {
+        "name": "RechargeReq",
+        "node": "gate"
+    },
+    "200047": {
+        "name": "RechargeResp",
+        "node": "gate"
+    },
+    "200048": {
+        "name": "GetRechargesReq",
+        "node": "gate"
+    },
+    "200049": {
+        "name": "GetRechargesResp",
+        "node": "gate"
+    },
+    "200050": {
+        "name": "UpdateMoneyReq",
+        "node": "gate"
+    },
+    "200051": {
+        "name": "UpdateMoneyResp",
+        "node": "gate"
+    },
+    "200052": {
+        "name": "BarterCoinReq",
+        "node": "gate"
+    },
+    "200053": {
+        "name": "BarterCoinResp",
+        "node": "gate"
+    },
+    "200054": {
+        "name": "BarterYuanBaoReq",
+        "node": "gate"
+    },
+    "200055": {
+        "name": "BarterYuanBaoResp",
+        "node": "gate"
+    },
+    "200056": {
+        "name": "BarterMoneyReq",
+        "node": "gate"
+    },
+    "200057": {
+        "name": "BarterMoneyResp",
+        "node": "gate"
+    },
+    "200058": {
+        "name": "GetGoodsReq",
+        "node": "gate"
+    },
+    "200059": {
+        "name": "GetGoodsResp",
+        "node": "gate"
+    },
+    "200060": {
+        "name": "GetAllGoodsReq",
+        "node": "gate"
+    },
+    "200061": {
+        "name": "GetAllGoodsResp",
+        "node": "gate"
+    },
+    "200062": {
+        "name": "BuyGoodsReq",
+        "node": "gate"
+    },
+    "200063": {
+        "name": "BuyGoodsResp",
+        "node": "gate"
+    },
+    "200064": {
+        "name": "CheckKnapsackReq",
+        "node": "gate"
+    },
+    "200065": {
+        "name": "CheckKnapsackResp",
+        "node": "gate"
+    },
+    "200066": {
+        "name": "BarterReq",
+        "node": "gate"
+    },
+    "200067": {
+        "name": "BarterResp",
+        "node": "gate"
+    },
+    "200068": {
+        "name": "ToShoppingResp",
+        "node": "gate"
+    },
+    "200069": {
+        "name": "EmailReq",
+        "node": "gate"
+    },
+    "200070": {
+        "name": "EmailResp",
+        "node": "gate"
+    },
+    "200071": {
+        "name": "ClaimReq",
+        "node": "gate"
+    },
+    "200072": {
+        "name": "ClaimResp",
+        "node": "gate"
+    },
+    "200073": {
+        "name": "SuggestReq",
+        "node": "gate"
+    },
+    "200074": {
+        "name": "SuggestResp",
+        "node": "gate"
+    },
+    "200075": {
+        "name": "EmailReadReq",
+        "node": "gate"
+    },
+    "200076": {
+        "name": "EmailReadResp",
+        "node": "gate"
+    },
+    "200077": {
+        "name": "EmailDelReq",
+        "node": "gate"
+    },
+    "200078": {
+        "name": "EmailDelResp",
+        "node": "gate"
+    },
+    "200079": {
+        "name": "NotifyBeOutResp",
+        "node": "gate"
+    },
+    "200080": {
+        "name": "NotifyBalanceChangeResp",
+        "node": "gate"
+    },
+    "200081": {
+        "name": "NotifyNoticeReq",
+        "node": "gate"
+    },
+    "200082": {
+        "name": "NotifyNoticeResp",
+        "node": "gate"
+    },
+    "200083": {
+        "name": "ResultResp",
+        "node": "gate"
+    },
+    "200084": {
+        "name": "ResultPopResp",
+        "node": "gate"
+    },
+    "200085": {
+        "name": "PingReq",
+        "node": "gate"
+    },
+    "200086": {
+        "name": "PongResp",
+        "node": "gate"
+    },
+    "200087": {
+        "name": "RegisterReq",
+        "node": "gate"
+    },
+    "200088": {
+        "name": "RegisterResp",
+        "node": "gate"
+    },
+    "200089": {
+        "name": "LoginRequest",
+        "node": "gate"
+    },
+    "200090": {
+        "name": "LoginResponse",
+        "node": "gate"
+    },
+    "200091": {
+        "name": "LoginReq",
+        "node": "gate"
+    },
+    "200092": {
+        "name": "LoginResp",
+        "node": "gate"
+    },
+    "200093": {
+        "name": "AllopatricResp",
+        "node": "gate"
+    },
+    "200094": {
+        "name": "ReconnectReq",
+        "node": "gate"
+    },
+    "200095": {
+        "name": "ReconnectResp",
+        "node": "gate"
+    },
+    "200096": {
+        "name": "LogoutReq",
+        "node": "gate"
+    },
+    "200097": {
+        "name": "LogoutResp",
+        "node": "gate"
+    },
+    "300000": {
+        "name": "ChatTextReq",
+        "node": "chat"
+    },
+    "300001": {
+        "name": "ChatTextResp",
+        "node": "chat"
+    },
+    "300002": {
+        "name": "ChatSgxInviteReq",
+        "node": "chat"
+    },
+    "300003": {
+        "name": "ChatSgxInviteResp",
+        "node": "chat"
+    },
+    "300004": {
+        "name": "ChatHisReq",
+        "node": "chat"
+    },
+    "300005": {
+        "name": "ChatHisResp",
+        "node": "chat"
+    },
+    "300008": {
+        "name": "ClubNewReq",
+        "node": "chat"
+    },
+    "300009": {
+        "name": "ClubNewResp",
+        "node": "chat"
+    },
+    "300010": {
+        "name": "ClubDissolveReq",
+        "node": "chat"
+    },
+    "300011": {
+        "name": "ClubDissolveResp",
+        "node": "chat"
+    },
+    "300012": {
+        "name": "ClubApplyReq",
+        "node": "chat"
+    },
+    "300013": {
+        "name": "ClubApplyResp",
+        "node": "chat"
+    },
+    "300014": {
+        "name": "ClubApplyDealReq",
+        "node": "chat"
+    },
+    "300015": {
+        "name": "ClubApplyDealResp",
+        "node": "chat"
+    },
+    "300016": {
+        "name": "ClubApplyListReq",
+        "node": "chat"
+    },
+    "300017": {
+        "name": "ClubApplyListResp",
+        "node": "chat"
+    },
+    "300018": {
+        "name": "ClubListReq",
+        "node": "chat"
+    },
+    "300019": {
+        "name": "ClubListResp",
+        "node": "chat"
+    },
+    "300020": {
+        "name": "ClubMembersReq",
+        "node": "chat"
+    },
+    "300021": {
+        "name": "ClubMembersResp",
+        "node": "chat"
+    },
+    "300022": {
+        "name": "ClubMineReq",
+        "node": "chat"
+    },
+    "300023": {
+        "name": "ClubMineResp",
+        "node": "chat"
+    },
+    "300024": {
+        "name": "ClubJobReq",
+        "node": "chat"
+    },
+    "300025": {
+        "name": "ClubJobResp",
+        "node": "chat"
+    },
+    "300026": {
+        "name": "ClubGiveReq",
+        "node": "chat"
+    },
+    "300027": {
+        "name": "ClubGiveResp",
+        "node": "chat"
+    },
+    "300029": {
+        "name": "ClubInviteReq",
+        "node": "chat"
+    },
+    "300030": {
+        "name": "ClubInviteResp",
+        "node": "chat"
+    },
+    "300031": {
+        "name": "ClubInviteListReq",
+        "node": "chat"
+    },
+    "300032": {
+        "name": "ClubInviteListResp",
+        "node": "chat"
+    },
+    "300033": {
+        "name": "ClubInviteDealReq",
+        "node": "chat"
+    },
+    "300034": {
+        "name": "ClubInviteDealResp",
+        "node": "chat"
+    },
+    "300035": {
+        "name": "FriendOnlineReq",
+        "node": "chat"
+    },
+    "300036": {
+        "name": "FriendOnlineResp",
+        "node": "chat"
+    },
+    "300037": {
+        "name": "FriendListReq",
+        "node": "chat"
+    },
+    "300038": {
+        "name": "FriendListResp",
+        "node": "chat"
+    },
+    "300039": {
+        "name": "FriendDelReq",
+        "node": "chat"
+    },
+    "300040": {
+        "name": "FriendDelResp",
+        "node": "chat"
+    },
+    "300041": {
+        "name": "FriendApplyReq",
+        "node": "chat"
+    },
+    "300042": {
+        "name": "FriendApplyResp",
+        "node": "chat"
+    },
+    "300043": {
+        "name": "FriendApplyBatchReq",
+        "node": "chat"
+    },
+    "300044": {
+        "name": "FriendApplyBatchResp",
+        "node": "chat"
+    },
+    "300045": {
+        "name": "FriendApplyListReq",
+        "node": "chat"
+    },
+    "300046": {
+        "name": "FriendApplyListResp",
+        "node": "chat"
+    },
+    "300047": {
+        "name": "FriendApplyDealReq",
+        "node": "chat"
+    },
+    "300048": {
+        "name": "FriendApplyDealResp",
+        "node": "chat"
+    },
+    "300049": {
+        "name": "FriendApplyBatchDealReq",
+        "node": "chat"
+    },
+    "300050": {
+        "name": "FriendApplyBatchDealResp",
+        "node": "chat"
+    },
+    "400000": {
+        "name": "BaccaratSceneResp",
+        "node": "game"
+    },
+    "400001": {
+        "name": "BaccaratStateStartResp",
+        "node": "game"
+    },
+    "400002": {
+        "name": "BaccaratStatePlayingResp",
+        "node": "game"
+    },
+    "400003": {
+        "name": "BaccaratStateOpenResp",
+        "node": "game"
+    },
+    "400004": {
+        "name": "BaccaratStateOverResp",
+        "node": "game"
+    },
+    "400005": {
+        "name": "BaccaratHostReq",
+        "node": "game"
+    },
+    "400006": {
+        "name": "BaccaratHostResp",
+        "node": "game"
+    },
+    "400007": {
+        "name": "BaccaratSuperHostReq",
+        "node": "game"
+    },
+    "400008": {
+        "name": "BaccaratSuperHostResp",
+        "node": "game"
+    },
+    "400009": {
+        "name": "BaccaratBetReq",
+        "node": "game"
+    },
+    "400010": {
+        "name": "BaccaratBetResp",
+        "node": "game"
+    },
+    "400011": {
+        "name": "BaccaratOpenResp",
+        "node": "game"
+    },
+    "400012": {
+        "name": "BaccaratCheckoutResp",
+        "node": "game"
+    },
+    "400013": {
+        "name": "BrcowcowSceneResp",
+        "node": "game"
+    },
+    "400014": {
+        "name": "BrcowcowStateFreeResp",
+        "node": "game"
+    },
+    "400015": {
+        "name": "BrcowcowStateStartResp",
+        "node": "game"
+    },
+    "400016": {
+        "name": "BrcowcowStatePlayingResp",
+        "node": "game"
+    },
+    "400017": {
+        "name": "BrcowcowStateOpenResp",
+        "node": "game"
+    },
+    "400018": {
+        "name": "BrcowcowStateOverResp",
+        "node": "game"
+    },
+    "400019": {
+        "name": "BrcowcowBetReq",
+        "node": "game"
+    },
+    "400020": {
+        "name": "BrcowcowBetResp",
+        "node": "game"
+    },
+    "400021": {
+        "name": "BrcowcowOpenResp",
+        "node": "game"
+    },
+    "400022": {
+        "name": "BrcowcowOverResp",
+        "node": "game"
+    },
+    "400023": {
+        "name": "BrcowcowHostReq",
+        "node": "game"
+    },
+    "400024": {
+        "name": "BrcowcowHostResp",
+        "node": "game"
+    },
+    "400025": {
+        "name": "BrcowcowHostListReq",
+        "node": "game"
+    },
+    "400026": {
+        "name": "BrcowcowHostListResp",
+        "node": "game"
+    },
+    "400027": {
+        "name": "BrtoubaoSceneResp",
+        "node": "game"
+    },
+    "400028": {
+        "name": "BrtoubaoStateStartResp",
+        "node": "game"
+    },
+    "400029": {
+        "name": "BrtoubaoStatePlayingResp",
+        "node": "game"
+    },
+    "400030": {
+        "name": "BrtoubaoStateOpenResp",
+        "node": "game"
+    },
+    "400031": {
+        "name": "BrtoubaoStateOverResp",
+        "node": "game"
+    },
+    "400032": {
+        "name": "BrtoubaoBetReq",
+        "node": "game"
+    },
+    "400033": {
+        "name": "BrtoubaoBetResp",
+        "node": "game"
+    },
+    "400034": {
+        "name": "BrtoubaoOpenResp",
+        "node": "game"
+    },
+    "400035": {
+        "name": "BrtoubaoCheckoutResp",
+        "node": "game"
+    },
+    "400036": {
+        "name": "BrtoubaoHostReq",
+        "node": "game"
+    },
+    "400037": {
+        "name": "BrtoubaoHostResp",
+        "node": "game"
+    },
+    "400038": {
+        "name": "BrtoubaoSuperHostReq",
+        "node": "game"
+    },
+    "400039": {
+        "name": "BrtoubaoSuperHostResp",
+        "node": "game"
+    },
+    "400040": {
+        "name": "BrTuitongziSceneResp",
+        "node": "game"
+    },
+    "400041": {
+        "name": "BrTuitongziStateStartResp",
+        "node": "game"
+    },
+    "400042": {
+        "name": "BrTuitongziStatePlayingResp",
+        "node": "game"
+    },
+    "400043": {
+        "name": "BrTuitongziStateOpenResp",
+        "node": "game"
+    },
+    "400044": {
+        "name": "BrTuitongziStateOverResp",
+        "node": "game"
+    },
+    "400045": {
+        "name": "BrTuitongziBetReq",
+        "node": "game"
+    },
+    "400046": {
+        "name": "BrTuitongziBetResp",
+        "node": "game"
+    },
+    "400047": {
+        "name": "BrTuitongziOpenResp",
+        "node": "game"
+    },
+    "400048": {
+        "name": "BrTuitongziCheckoutResp",
+        "node": "game"
+    },
+    "400049": {
+        "name": "BrTuitongziHostReq",
+        "node": "game"
+    },
+    "400050": {
+        "name": "BrTuitongziHostResp",
+        "node": "game"
+    },
+    "400051": {
+        "name": "BrTuitongziSuperHostReq",
+        "node": "game"
+    },
+    "400052": {
+        "name": "BrTuitongziSuperHostResp",
+        "node": "game"
+    },
+    "400056": {
+        "name": "ChineseChessSceneResp",
+        "node": "game"
+    },
+    "400057": {
+        "name": "ChineseChessStateReadyResp",
+        "node": "game"
+    },
+    "400058": {
+        "name": "ChineseChessStateSetResp",
+        "node": "game"
+    },
+    "400059": {
+        "name": "ChineseChessStateConfirmResp",
+        "node": "game"
+    },
+    "400060": {
+        "name": "ChineseChessStateStartResp",
+        "node": "game"
+    },
+    "400061": {
+        "name": "ChineseChessStatePlayingResp",
+        "node": "game"
+    },
+    "400062": {
+        "name": "ChineseChessStateOpenResp",
+        "node": "game"
+    },
+    "400063": {
+        "name": "ChineseChessStateOverResp",
+        "node": "game"
+    },
+    "400064": {
+        "name": "ChineseChessJiangJuResp",
+        "node": "game"
+    },
+    "400065": {
+        "name": "ChineseChessJueShaResp",
+        "node": "game"
+    },
+    "400066": {
+        "name": "ChineseChessReadyReq",
+        "node": "game"
+    },
+    "400067": {
+        "name": "ChineseChessReadyResp",
+        "node": "game"
+    },
+    "400068": {
+        "name": "ChineseChessSetTimeReq",
+        "node": "game"
+    },
+    "400069": {
+        "name": "ChineseChessSetTimeResp",
+        "node": "game"
+    },
+    "400070": {
+        "name": "ChineseChessAgreeTimeReq",
+        "node": "game"
+    },
+    "400071": {
+        "name": "ChineseChessAgreeTimeResp",
+        "node": "game"
+    },
+    "400072": {
+        "name": "ChineseChessMoveReq",
+        "node": "game"
+    },
+    "400073": {
+        "name": "ChineseChessMoveResp",
+        "node": "game"
+    },
+    "400074": {
+        "name": "EnterGameReq",
+        "node": "game"
+    },
+    "400075": {
+        "name": "EnterGameResp",
+        "node": "game"
+    },
+    "400076": {
+        "name": "JoinAllReadyQueueReq",
+        "node": "game"
+    },
+    "400077": {
+        "name": "JoinGameReadyQueueReq",
+        "node": "game"
+    },
+    "400078": {
+        "name": "JoinGameReadyQueueResp",
+        "node": "game"
+    },
+    "400079": {
+        "name": "WaitGameStartResp",
+        "node": "game"
+    },
+    "400080": {
+        "name": "ExitGameReq",
+        "node": "game"
+    },
+    "400081": {
+        "name": "ExitGameResp",
+        "node": "game"
+    },
+    "400082": {
+        "name": "DisbandedTableReq",
+        "node": "game"
+    },
+    "400083": {
+        "name": "DisbandedTableResp",
+        "node": "game"
+    },
+    "400084": {
+        "name": "DisbandedGameReq",
+        "node": "game"
+    },
+    "400085": {
+        "name": "DisbandedGameResp",
+        "node": "game"
+    },
+    "400086": {
+        "name": "ChangeTableReq",
+        "node": "game"
+    },
+    "400087": {
+        "name": "ChangeTableResp",
+        "node": "game"
+    },
+    "400088": {
+        "name": "GetBackPasswordReq",
+        "node": "game"
+    },
+    "400089": {
+        "name": "GetBackPasswordResp",
+        "node": "game"
+    },
+    "400090": {
+        "name": "RankingListReq",
+        "node": "game"
+    },
+    "400091": {
+        "name": "RankingListResp",
+        "node": "game"
+    },
+    "400092": {
+        "name": "TrusteeReq",
+        "node": "game"
+    },
+    "400093": {
+        "name": "TrusteeResp",
+        "node": "game"
+    },
+    "400094": {
+        "name": "RollDiceReq",
+        "node": "game"
+    },
+    "400095": {
+        "name": "RollDiceResp",
+        "node": "game"
+    },
+    "400096": {
+        "name": "GameOverReq",
+        "node": "game"
+    },
+    "400097": {
+        "name": "GameOverResp",
+        "node": "game"
+    },
+    "400098": {
+        "name": "UpdateGoldReq",
+        "node": "game"
+    },
+    "400099": {
+        "name": "UpdateGoldResp",
+        "node": "game"
+    },
+    "400100": {
+        "name": "AddRecordReq",
+        "node": "game"
+    },
+    "400101": {
+        "name": "AddRecordResp",
+        "node": "game"
+    },
+    "400102": {
+        "name": "DecreaseGameRunReq",
+        "node": "game"
+    },
+    "400103": {
+        "name": "DecreaseGameRunResp",
+        "node": "game"
+    },
+    "400104": {
+        "name": "GetRecordResp",
+        "node": "game"
+    },
+    "400105": {
+        "name": "GetInningsInfoReq",
+        "node": "game"
+    },
+    "400106": {
+        "name": "GetInningsInfoResp",
+        "node": "game"
+    },
+    "400110": {
+        "name": "EnterGameMJResp",
+        "node": "game"
+    },
+    "400111": {
+        "name": "MahjongSceneResp",
+        "node": "game"
+    },
+    "400112": {
+        "name": "MahjongStateFreeResp",
+        "node": "game"
+    },
+    "400113": {
+        "name": "MahjongStateDirectResp",
+        "node": "game"
+    },
+    "400114": {
+        "name": "MahjongStateDecideResp",
+        "node": "game"
+    },
+    "400115": {
+        "name": "MahjongStateRollDiceResp",
+        "node": "game"
+    },
+    "400116": {
+        "name": "MahjongStateStartResp",
+        "node": "game"
+    },
+    "400117": {
+        "name": "MahjongStatePlayingResp",
+        "node": "game"
+    },
+    "400118": {
+        "name": "MahjongStateWaitOperateResp",
+        "node": "game"
+    },
+    "400119": {
+        "name": "MahjongStateOpenResp",
+        "node": "game"
+    },
+    "400120": {
+        "name": "MahjongStateOverResp",
+        "node": "game"
+    },
+    "400121": {
+        "name": "MahjongReadyReq",
+        "node": "game"
+    },
+    "400122": {
+        "name": "MahjongReadyResp",
+        "node": "game"
+    },
+    "400123": {
+        "name": "MahjongRollReq",
+        "node": "game"
+    },
+    "400124": {
+        "name": "MahjongRollResp",
+        "node": "game"
+    },
+    "400125": {
+        "name": "MahjongOutCardReq",
+        "node": "game"
+    },
+    "400126": {
+        "name": "MahjongOutCardResp",
+        "node": "game"
+    },
+    "400127": {
+        "name": "MahjongOperateReq",
+        "node": "game"
+    },
+    "400128": {
+        "name": "MahjongOperateResp",
+        "node": "game"
+    },
+    "400129": {
+        "name": "MahjongDealResp",
+        "node": "game"
+    },
+    "400130": {
+        "name": "MahjongHintResp",
+        "node": "game"
+    },
+    "400136": {
+        "name": "ChallengeReq",
+        "node": "game"
+    },
+    "400137": {
+        "name": "ChallengeResp",
+        "node": "game"
+    },
+    "400138": {
+        "name": "SanguoxiaoSceneResp",
+        "node": "game"
+    },
+    "400139": {
+        "name": "SanguoxiaoStatePlayingResp",
+        "node": "game"
+    },
+    "400140": {
+        "name": "SanguoxiaoStateEraseResp",
+        "node": "game"
+    },
+    "400141": {
+        "name": "SanguoxiaoStateOverResp",
+        "node": "game"
+    },
+    "400142": {
+        "name": "SanguoxiaoSwapReq",
+        "node": "game"
+    },
+    "400143": {
+        "name": "SanguoxiaoSwapResp",
+        "node": "game"
+    },
+    "400144": {
+        "name": "SanguoxiaoTriggerResp",
+        "node": "game"
+    },
+    "400147": {
+        "name": "TigerXdragonSceneResp",
+        "node": "game"
+    },
+    "400148": {
+        "name": "TigerXdragonStateStartResp",
+        "node": "game"
+    },
+    "400149": {
+        "name": "TigerXdragonStatePlayingResp",
+        "node": "game"
+    },
+    "400150": {
+        "name": "TigerXdragonStateOpenResp",
+        "node": "game"
+    },
+    "400151": {
+        "name": "TigerXdragonStateOverResp",
+        "node": "game"
+    },
+    "400152": {
+        "name": "TigerXdragonBetReq",
+        "node": "game"
+    },
+    "400153": {
+        "name": "TigerXdragonBetResp",
+        "node": "game"
+    },
+    "400154": {
+        "name": "TigerXdragonOpenResp",
+        "node": "game"
+    },
+    "400155": {
+        "name": "TigerXdragonCheckoutResp",
+        "node": "game"
+    },
+    "400156": {
+        "name": "TigerXdragonHostReq",
+        "node": "game"
+    },
+    "400157": {
+        "name": "TigerXdragonHostResp",
+        "node": "game"
+    },
+    "400158": {
+        "name": "TigerXdragonSuperHostReq",
+        "node": "game"
+    },
+    "400159": {
+        "name": "TigerXdragonSuperHostResp",
+        "node": "game"
+    },
+    "400160": {
+        "name": "ZhaocaimiaoSceneResp",
+        "node": "game"
+    },
+    "400161": {
+        "name": "ZhaocaimiaoStateStartResp",
+        "node": "game"
+    },
+    "400162": {
+        "name": "ZhaocaimiaoStatePlayingResp",
+        "node": "game"
+    },
+    "400163": {
+        "name": "ZhaocaimiaoStateOpenResp",
+        "node": "game"
+    },
+    "400164": {
+        "name": "ZhaocaimiaoBetReq",
+        "node": "game"
+    },
+    "400165": {
+        "name": "ZhaocaimiaoBetResp",
+        "node": "game"
+    },
+    "400169": {
+        "name": "ZhaocaimiaoOpenResp",
+        "node": "game"
+    }
 }

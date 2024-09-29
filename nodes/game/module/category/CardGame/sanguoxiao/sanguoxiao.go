@@ -2,7 +2,8 @@ package sanguoxiao
 
 import (
 	log "github.com/po2656233/superplace/logger"
-	protoMsg "superman/internal/protocol/gofile"
+	commMsg "superman/internal/protocol/go_file/common"
+	gameMsg "superman/internal/protocol/go_file/game"
 	"superman/internal/utils"
 	mgr "superman/nodes/game/manger"
 	. "superman/nodes/game/module/category"
@@ -16,13 +17,13 @@ const (
 )
 
 // PieceDamage 伤害列表
-var PieceDamage = map[protoMsg.SgxPiece]int64{
-	protoMsg.SgxPiece_Jin:  10,
-	protoMsg.SgxPiece_Mu:   10,
-	protoMsg.SgxPiece_Shui: 10,
-	protoMsg.SgxPiece_Huo:  10,
-	protoMsg.SgxPiece_Tu:   10,
-	protoMsg.SgxPiece_Yao:  100,
+var PieceDamage = map[gameMsg.SgxPiece]int64{
+	gameMsg.SgxPiece_Jin:  10,
+	gameMsg.SgxPiece_Mu:   10,
+	gameMsg.SgxPiece_Shui: 10,
+	gameMsg.SgxPiece_Huo:  10,
+	gameMsg.SgxPiece_Tu:   10,
+	gameMsg.SgxPiece_Yao:  100,
 }
 
 // SanguoxiaoGame 继承于GameItem
@@ -31,14 +32,14 @@ type SanguoxiaoGame struct {
 	row        int32
 	col        int32
 	curUID     int64
-	status     protoMsg.GameScene
+	status     commMsg.GameScene
 	curTimer   *time.Timer
-	board      *protoMsg.SgxBoardInfo // 其实质是二维数组
-	arrayBoard [][]protoMsg.SgxPiece  // 和board等同,游戏主要操作该棋盘
-	result     *protoMsg.SanguoxiaoResult
+	board      *gameMsg.SgxBoardInfo // 其实质是二维数组
+	arrayBoard [][]gameMsg.SgxPiece  // 和board等同,游戏主要操作该棋盘
+	result     *gameMsg.SanguoxiaoResult
 
-	redPlay  *protoMsg.SanguoxiaoPlayer // 红方玩家
-	bluePlay *protoMsg.SanguoxiaoPlayer // 蓝方玩家
+	redPlay  *gameMsg.SanguoxiaoPlayer // 红方玩家
+	bluePlay *gameMsg.SanguoxiaoPlayer // 蓝方玩家
 	playList []int64
 }
 
@@ -68,7 +69,7 @@ func (self *SanguoxiaoGame) Scene(args []interface{}) bool {
 	person := userData.(*mgr.Player)
 	now := time.Now().Unix()
 	mgr.GetClientMgr().SendTo(person.UserID,
-		&protoMsg.SanguoxiaoSceneResp{
+		&gameMsg.SanguoxiaoSceneResp{
 			TimeStamp: time.Now().Unix(),
 			//Inning:    self.InningInfo.Number,
 			Board:    self.board,
@@ -76,12 +77,12 @@ func (self *SanguoxiaoGame) Scene(args []interface{}) bool {
 			BlueCamp: self.bluePlay,
 		})
 	switch self.status {
-	case protoMsg.GameScene_Start:
-	case protoMsg.GameScene_Playing: // 移位
+	case commMsg.GameScene_Start:
+	case commMsg.GameScene_Playing: // 移位
 		{
-			msg := &protoMsg.SanguoxiaoStatePlayingResp{
+			msg := &gameMsg.SanguoxiaoStatePlayingResp{
 				UserID: self.curUID,
-				Times: &protoMsg.TimeInfo{
+				Times: &commMsg.TimeInfo{
 					TimeStamp: now,
 					//WaitTime:  self.Duration.PlayTime,
 					OutTime: int32(now - self.TimeStamp),
@@ -90,11 +91,11 @@ func (self *SanguoxiaoGame) Scene(args []interface{}) bool {
 			}
 			mgr.GetClientMgr().SendTo(person.UserID, msg)
 		}
-	case protoMsg.GameScene_Opening: // 消除
+	case commMsg.GameScene_Opening: // 消除
 		{
-			msg := &protoMsg.SanguoxiaoStateEraseResp{
+			msg := &gameMsg.SanguoxiaoStateEraseResp{
 				NowBoard: self.board,
-				Times: &protoMsg.TimeInfo{
+				Times: &commMsg.TimeInfo{
 					TimeStamp: now,
 					//WaitTime:  self.Config.SanGuoXiao.Duration.OpenTime,
 					OutTime: int32(now - self.TimeStamp),
@@ -103,11 +104,11 @@ func (self *SanguoxiaoGame) Scene(args []interface{}) bool {
 			}
 			mgr.GetClientMgr().SendTo(person.UserID, msg)
 		}
-	case protoMsg.GameScene_Over: // 结算
+	case commMsg.GameScene_Over: // 结算
 		{
-			msg := &protoMsg.SanguoxiaoStateOverResp{
+			msg := &gameMsg.SanguoxiaoStateOverResp{
 				Result: self.result,
-				Times: &protoMsg.TimeInfo{
+				Times: &commMsg.TimeInfo{
 					TimeStamp: now,
 					//WaitTime:  self.Config.SanGuoXiao.Duration.OverTime,
 					OutTime: int32(now - self.TimeStamp),
@@ -137,13 +138,13 @@ func (self *SanguoxiaoGame) Playing(args []interface{}) bool {
 	if !self.Game.Playing(args) {
 		return false
 	}
-	m := args[0].(*protoMsg.SanguoxiaoSwapReq)
+	m := args[0].(*gameMsg.SanguoxiaoSwapReq)
 	agent := args[1].(mgr.Agent)
 	userData := agent.UserData()
 	person := userData.(*mgr.Player)
-	cells := make([]*protoMsg.SgxGrid, len(self.board.Cells))
+	cells := make([]*gameMsg.SgxGrid, len(self.board.Cells))
 	for _, item := range self.board.Cells {
-		cells = append(cells, &protoMsg.SgxGrid{
+		cells = append(cells, &gameMsg.SgxGrid{
 			Row:  item.Row,
 			Col:  item.Col,
 			Core: item.Core,
@@ -157,14 +158,14 @@ func (self *SanguoxiaoGame) Playing(args []interface{}) bool {
 	}
 
 	// 通知玩家 当前操作
-	mgr.GetClientMgr().NotifyOthers(self.playList, &protoMsg.SanguoxiaoSwapResp{
+	mgr.GetClientMgr().NotifyOthers(self.playList, &gameMsg.SanguoxiaoSwapResp{
 		Uid:    person.UserID,
 		Origin: m.Origin,
 		Target: m.Target,
 	})
 
 	// 轮值至下个玩家
-	self.status = protoMsg.GameScene_Opening
+	self.status = commMsg.GameScene_Opening
 	self.OnOpen()
 	return true
 }
@@ -181,15 +182,15 @@ func (self *SanguoxiaoGame) Over(args []interface{}) bool {
 	}
 
 	// 奖励  todo 待商榷
-	award := make([]*protoMsg.GoodsInfo, 0)
-	award = append(award, &protoMsg.GoodsInfo{
+	award := make([]*commMsg.GoodsInfo, 0)
+	award = append(award, &commMsg.GoodsInfo{
 		Id:   1,
 		Sold: 1,
 	})
-	self.result = &protoMsg.SanguoxiaoResult{
+	self.result = &gameMsg.SanguoxiaoResult{
 		WinID:  winId,
 		LoseID: loseId,
-		Awards: &protoMsg.GoodsList{
+		Awards: &commMsg.GoodsList{
 			Items: award,
 		},
 	}
@@ -215,7 +216,7 @@ func (self *SanguoxiaoGame) OnNext() {
 	if self.curTimer != nil {
 		self.curTimer.Stop()
 	}
-	if self.status != protoMsg.GameScene_Playing {
+	if self.status != commMsg.GameScene_Playing {
 		log.Error("[Sanguoxiao][OnNext] 场景信息不匹配 %v ", self.status)
 		return
 	}
@@ -228,8 +229,8 @@ func (self *SanguoxiaoGame) OnNext() {
 	}
 
 	mgr.GetClientMgr().NotifyOthers(self.playList,
-		&protoMsg.SanguoxiaoStatePlayingResp{
-			Times: &protoMsg.TimeInfo{
+		&gameMsg.SanguoxiaoStatePlayingResp{
+			Times: &commMsg.TimeInfo{
 				TimeStamp: self.TimeStamp,
 				WaitTime:  wait,
 				OutTime:   0,
@@ -245,7 +246,7 @@ func (self *SanguoxiaoGame) OnOpen() {
 	if self.curTimer != nil {
 		self.curTimer.Stop()
 	}
-	if self.status != protoMsg.GameScene_Opening {
+	if self.status != commMsg.GameScene_Opening {
 		log.Error("[Sanguoxiao][OnNext] 场景信息不匹配 %v ", self.status)
 		return
 	}
@@ -253,19 +254,19 @@ func (self *SanguoxiaoGame) OnOpen() {
 	// 消除
 	if !self.eraseGrid() {
 		// 无法消除,则轮置下位
-		self.toState(protoMsg.GameScene_Playing, self.OnNext)
+		self.toState(commMsg.GameScene_Playing, self.OnNext)
 		return
 	}
 
 	// 检测双方血量
 	if self.redPlay.Health <= 0 || self.bluePlay.Health <= 0 {
-		self.toState(protoMsg.GameScene_Over, self.OnOver)
+		self.toState(commMsg.GameScene_Over, self.OnOver)
 		return
 	}
 	self.TimeStamp = time.Now().Unix()
 	mgr.GetClientMgr().NotifyOthers(self.playList,
-		&protoMsg.SanguoxiaoStateEraseResp{
-			Times: &protoMsg.TimeInfo{
+		&gameMsg.SanguoxiaoStateEraseResp{
+			Times: &commMsg.TimeInfo{
 				TimeStamp: self.TimeStamp,
 				//WaitTime:  self.Config.SanGuoXiao.Duration.OpenTime,
 				OutTime: 0,
@@ -281,7 +282,7 @@ func (self *SanguoxiaoGame) OnOver() {
 	if self.curTimer != nil {
 		self.curTimer.Stop()
 	}
-	if self.status != protoMsg.GameScene_Over {
+	if self.status != commMsg.GameScene_Over {
 		log.Error("[Sanguoxiao][OnNext] 场景信息不匹配 %v ", self.status)
 		return
 	}
@@ -290,9 +291,9 @@ func (self *SanguoxiaoGame) OnOver() {
 	self.Over(nil)
 
 	self.TimeStamp = time.Now().Unix()
-	msg := &protoMsg.SanguoxiaoStateOverResp{
+	msg := &gameMsg.SanguoxiaoStateOverResp{
 		Result: self.result,
-		Times: &protoMsg.TimeInfo{
+		Times: &commMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			//WaitTime:  self.Config.SanGuoXiao.Duration.OverTime,
 			OutTime: 0,
@@ -306,7 +307,7 @@ func (self *SanguoxiaoGame) OnOver() {
 }
 
 // /////////////////////////////////////////////////////////////////////
-func (self *SanguoxiaoGame) toState(scene protoMsg.GameScene, f func()) {
+func (self *SanguoxiaoGame) toState(scene commMsg.GameScene, f func()) {
 	self.status = scene
 	f()
 }
@@ -315,21 +316,21 @@ func (self *SanguoxiaoGame) toState(scene protoMsg.GameScene, f func()) {
 
 // initBord 初始化方格
 func (self *SanguoxiaoGame) initBord(row, col int32) {
-	self.board = &protoMsg.SgxBoardInfo{}
-	self.arrayBoard = make([][]protoMsg.SgxPiece, row) // [rowNum][colNum]protoMsg.SgxPiece{}
+	self.board = &gameMsg.SgxBoardInfo{}
+	self.arrayBoard = make([][]gameMsg.SgxPiece, row) // [rowNum][colNum]gameMsg.SgxPiece{}
 	for i := 0; i < int(row); i++ {
-		self.arrayBoard[i] = make([]protoMsg.SgxPiece, col)
+		self.arrayBoard[i] = make([]gameMsg.SgxPiece, col)
 	}
 	// 避免连续三个相同
 	for i := int32(0); i < row; i++ {
 		for j := int32(0); j < col; j++ {
-			item := &protoMsg.SgxGrid{
+			item := &gameMsg.SgxGrid{
 				Row:  i,
 				Col:  j,
-				Core: protoMsg.SgxPiece(utils.GenRandNum32(int32(protoMsg.SgxPiece_Jin), int32(protoMsg.SgxPiece_Yao))),
+				Core: gameMsg.SgxPiece(utils.GenRandNum32(int32(gameMsg.SgxPiece_Jin), int32(gameMsg.SgxPiece_Yao))),
 			}
 			if self.canErase(item) {
-				for index := protoMsg.SgxPiece_Jin; index <= protoMsg.SgxPiece_Yao; index++ {
+				for index := gameMsg.SgxPiece_Jin; index <= gameMsg.SgxPiece_Yao; index++ {
 					if item.Core == index {
 						continue
 					}
@@ -347,7 +348,7 @@ func (self *SanguoxiaoGame) initBord(row, col int32) {
 }
 
 // 获取格子
-func (self *SanguoxiaoGame) getGrid(row, col int32) *protoMsg.SgxGrid {
+func (self *SanguoxiaoGame) getGrid(row, col int32) *gameMsg.SgxGrid {
 	for _, cell := range self.board.Cells {
 		if cell.Row == row && cell.Col == col {
 			return cell
@@ -357,14 +358,14 @@ func (self *SanguoxiaoGame) getGrid(row, col int32) *protoMsg.SgxGrid {
 }
 
 // 设置格子
-func (self *SanguoxiaoGame) setGrid(row, col int32, core protoMsg.SgxPiece) {
+func (self *SanguoxiaoGame) setGrid(row, col int32, core gameMsg.SgxPiece) {
 	if cell := self.getGrid(row, col); cell != nil {
 		cell.Core = core
 	}
 }
 
 // swapGrid 方格属性交换
-func (self *SanguoxiaoGame) swapGrid(origin, target *protoMsg.SgxGrid) bool {
+func (self *SanguoxiaoGame) swapGrid(origin, target *gameMsg.SgxGrid) bool {
 	divR := origin.Row - target.Row
 	divC := origin.Col - target.Col
 	// 必须是相连的方格
@@ -374,7 +375,7 @@ func (self *SanguoxiaoGame) swapGrid(origin, target *protoMsg.SgxGrid) bool {
 	if (1 < divR || divR < -1) && divC != 0 {
 		return false
 	}
-	tempCell := &protoMsg.SgxGrid{
+	tempCell := &gameMsg.SgxGrid{
 		Row:  origin.Row,
 		Col:  origin.Col,
 		Core: target.Core,
@@ -411,19 +412,19 @@ func (self *SanguoxiaoGame) swapGrid(origin, target *protoMsg.SgxGrid) bool {
 // /////////////////////////////////////////////////////////////////////////////////////////
 // eraseGrid 消除方格 获得的战力 主要逻辑
 func (self *SanguoxiaoGame) eraseGrid() bool {
-	msg := &protoMsg.SanguoxiaoTriggerResp{
+	msg := &gameMsg.SanguoxiaoTriggerResp{
 		Uid: self.curUID,
-		PerBoard: &protoMsg.SgxBoardInfo{
-			Cells: make([]*protoMsg.SgxGrid, 0),
+		PerBoard: &gameMsg.SgxBoardInfo{
+			Cells: make([]*gameMsg.SgxGrid, 0),
 		},
-		Erase:   make([]*protoMsg.SgxGrid, 0),
-		Attacks: make([]*protoMsg.SanguoxiaoAttack, 0),
+		Erase:   make([]*gameMsg.SgxGrid, 0),
+		Attacks: make([]*gameMsg.SanguoxiaoAttack, 0),
 	}
 
 	/////////////////////////游戏核心玩法////////////////////////////////
 	// 消除 逐个消除
 	for _, cell := range self.board.Cells {
-		temp := &protoMsg.SgxGrid{
+		temp := &gameMsg.SgxGrid{
 			Row:  cell.Row,
 			Col:  cell.Col,
 			Core: cell.Core,
@@ -437,9 +438,9 @@ func (self *SanguoxiaoGame) eraseGrid() bool {
 	// 根据消除的元素数量统计攻击伤害
 	for _, grid := range msg.Erase {
 		if cell := self.getGrid(grid.Row, grid.Col); cell != nil {
-			cell.Core = protoMsg.SgxPiece_NoSGXPiece
+			cell.Core = gameMsg.SgxPiece_NoSGXPiece
 		}
-		self.arrayBoard[grid.Row][grid.Col] = protoMsg.SgxPiece_NoSGXPiece
+		self.arrayBoard[grid.Row][grid.Col] = gameMsg.SgxPiece_NoSGXPiece
 	}
 
 	// 掉落
@@ -486,14 +487,14 @@ func (self *SanguoxiaoGame) fallDown() {
 	//for c := int32(0); c < self.col; c++ {
 	//	for r := int32(0); r < self.row; r++ {
 	//		// 找到空位
-	//		if self.arrayBoard[r][c] == protoMsg.SgxPiece_NoPiece {
+	//		if self.arrayBoard[r][c] == gameMsg.SgxPiece_NoPiece {
 	//			for nr := r + 1; nr < self.row; nr++ {
 	//				// 找到可以用的方块
-	//				if self.arrayBoard[nr][c] != protoMsg.SgxPiece_NoPiece {
+	//				if self.arrayBoard[nr][c] != gameMsg.SgxPiece_NoPiece {
 	//					// 转移数据
 	//					self.setGrid(r, c, self.arrayBoard[nr][c])
 	//					self.arrayBoard[r][c] = self.arrayBoard[nr][c]
-	//					self.arrayBoard[nr][c] = protoMsg.SgxPiece_NoPiece
+	//					self.arrayBoard[nr][c] = gameMsg.SgxPiece_NoPiece
 	//					// [c,r]下落 nr-r 格
 	//					break
 	//				}
@@ -507,8 +508,8 @@ func (self *SanguoxiaoGame) fallDown() {
 func (self *SanguoxiaoGame) fillEmpty() {
 	//for r := int32(0); r < self.row; r++ {
 	//	for c := int32(0); c < self.col; c++ {
-	//		if self.arrayBoard[r][c] == protoMsg.SgxPiece_NoPiece {
-	//			self.arrayBoard[r][c] = protoMsg.SgxPiece(GenRandNum32(int32(protoMsg.SgxPiece_Jin), int32(protoMsg.SgxPiece_Yao)))
+	//		if self.arrayBoard[r][c] == gameMsg.SgxPiece_NoPiece {
+	//			self.arrayBoard[r][c] = gameMsg.SgxPiece(GenRandNum32(int32(gameMsg.SgxPiece_Jin), int32(gameMsg.SgxPiece_Yao)))
 	//			self.setGrid(r, c, self.arrayBoard[r][c])
 	//		}
 	//	}
@@ -516,17 +517,17 @@ func (self *SanguoxiaoGame) fillEmpty() {
 }
 
 // 获取伤害或治疗
-func (self *SanguoxiaoGame) getAttacks(cells []*protoMsg.SgxGrid, heros []*protoMsg.HeroInfo) ([]*protoMsg.SanguoxiaoAttack, int64, int64) {
-	attackList := make([]*protoMsg.SanguoxiaoAttack, 0)
+func (self *SanguoxiaoGame) getAttacks(cells []*gameMsg.SgxGrid, heros []*commMsg.HeroInfo) ([]*gameMsg.SanguoxiaoAttack, int64, int64) {
+	attackList := make([]*gameMsg.SanguoxiaoAttack, 0)
 	therapyTotal := int64(0)
 	damageTotal := int64(0)
 	for _, hero := range heros {
 		for _, cell := range cells {
 			if int32(hero.Faction) == int32(cell.Core) {
-				attack := &protoMsg.SanguoxiaoAttack{
+				attack := &gameMsg.SanguoxiaoAttack{
 					HeroId: hero.Id,
 				}
-				if cell.Core == protoMsg.SgxPiece_Yao {
+				if cell.Core == gameMsg.SgxPiece_Yao {
 					therapyTotal += PieceDamage[cell.Core]
 					attack.Therapy += PieceDamage[cell.Core]
 				} else {
@@ -544,39 +545,39 @@ func (self *SanguoxiaoGame) getAttacks(cells []*protoMsg.SgxGrid, heros []*proto
 
 // //////////////////////////////////////////////////////////////////////////
 // 判断格子前后的是否可消除
-func (self *SanguoxiaoGame) canErase(grid *protoMsg.SgxGrid) bool {
-	if grid.Core == protoMsg.SgxPiece_NoSGXPiece || 0 == len(self.arrayBoard) {
+func (self *SanguoxiaoGame) canErase(grid *gameMsg.SgxGrid) bool {
+	if grid.Core == gameMsg.SgxPiece_NoSGXPiece || 0 == len(self.arrayBoard) {
 		return false
 	}
-	gridUp1 := &protoMsg.SgxGrid{
+	gridUp1 := &gameMsg.SgxGrid{
 		Row: grid.Row - 1,
 		Col: grid.Col,
 	}
-	gridUp2 := &protoMsg.SgxGrid{
+	gridUp2 := &gameMsg.SgxGrid{
 		Row: grid.Row - 2,
 		Col: grid.Col,
 	}
-	gridDw1 := &protoMsg.SgxGrid{
+	gridDw1 := &gameMsg.SgxGrid{
 		Row: grid.Row + 1,
 		Col: grid.Col,
 	}
-	gridDw2 := &protoMsg.SgxGrid{
+	gridDw2 := &gameMsg.SgxGrid{
 		Row: grid.Row + 2,
 		Col: grid.Col,
 	}
-	gridLf1 := &protoMsg.SgxGrid{
+	gridLf1 := &gameMsg.SgxGrid{
 		Row: grid.Row,
 		Col: grid.Col - 1,
 	}
-	gridLf2 := &protoMsg.SgxGrid{
+	gridLf2 := &gameMsg.SgxGrid{
 		Row: grid.Row,
 		Col: grid.Col - 2,
 	}
-	gridRt1 := &protoMsg.SgxGrid{
+	gridRt1 := &gameMsg.SgxGrid{
 		Row: grid.Row,
 		Col: grid.Col + 1,
 	}
-	gridRt2 := &protoMsg.SgxGrid{
+	gridRt2 := &gameMsg.SgxGrid{
 		Row: grid.Row,
 		Col: grid.Col + 2,
 	}

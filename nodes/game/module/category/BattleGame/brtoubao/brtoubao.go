@@ -4,7 +4,8 @@ import (
 	"fmt"
 	log "github.com/po2656233/superplace/logger"
 	. "superman/internal/constant"
-	protoMsg "superman/internal/protocol/gofile"
+	protoMsg "superman/internal/protocol/go_file/common"
+	gameMsg "superman/internal/protocol/go_file/game"
 	. "superman/internal/utils"
 	. "superman/nodes/game/manger"
 	. "superman/nodes/game/module/category"
@@ -18,9 +19,9 @@ import (
 type BrToubaoGame struct {
 	*Game
 	T             *Table
-	personBetInfo *sync.Map                  //map[int64][]*protoMsg.BrtoubaoBetResp //下注信息
-	openAreas     [][]byte                   //开奖纪录
-	openInfo      *protoMsg.BrtoubaoOpenResp //开奖结果
+	personBetInfo *sync.Map                 //map[int64][]*protoMsg.BrtoubaoBetResp //下注信息
+	openAreas     [][]byte                  //开奖纪录
+	openInfo      *gameMsg.BrtoubaoOpenResp //开奖结果
 
 	hostList    []int64 //申请列表(默认11个)
 	bankerID    int64   //庄家ID
@@ -52,7 +53,7 @@ func (self *BrToubaoGame) Init() {
 	self.keepTwice = 0        // 连续抢庄次数
 	self.hostList = []int64{} // 申请列表(默认11个)
 
-	self.openInfo = &protoMsg.BrtoubaoOpenResp{} // 结算结果
+	self.openInfo = &gameMsg.BrtoubaoOpenResp{} // 结算结果
 
 	self.personBetInfo = new(sync.Map)      //make(map[int64][]*protoMsg.BrtoubaoBetResp) // 玩家下注信息
 	self.openAreas = make([][]byte, 10, 20) // 开奖纪录
@@ -77,7 +78,7 @@ func (self *BrToubaoGame) Scene(args []interface{}) bool {
 	person := args[0].(*Player)
 
 	//场景信息
-	StateInfo := &protoMsg.BrtoubaoSceneResp{
+	StateInfo := &gameMsg.BrtoubaoSceneResp{
 		AllPlayers: &protoMsg.PlayerList{
 			Items: make([]*protoMsg.PlayerInfo, 0),
 		},
@@ -97,7 +98,7 @@ func (self *BrToubaoGame) Scene(args []interface{}) bool {
 		if !ok {
 			return true
 		}
-		bets, ok1 := value.([]*protoMsg.BrtoubaoBetResp)
+		bets, ok1 := value.([]*gameMsg.BrtoubaoBetResp)
 		if !ok1 {
 			return true
 		}
@@ -123,27 +124,27 @@ func (self *BrToubaoGame) Scene(args []interface{}) bool {
 	case protoMsg.GameScene_Start: //准备
 		timeInfo.TotalTime = YamlObj.Brtoubao.Duration.Start
 		timeInfo.WaitTime = timeInfo.TotalTime - timeInfo.OutTime
-		GlobalSender.SendTo(uid, &protoMsg.BrtoubaoStateStartResp{
+		GlobalSender.SendTo(uid, &gameMsg.BrtoubaoStateStartResp{
 			Times:  timeInfo,
 			Inning: self.Inning,
 		})
 	case protoMsg.GameScene_Playing: //下注
 		timeInfo.TotalTime = YamlObj.Brtoubao.Duration.Play
 		timeInfo.WaitTime = timeInfo.TotalTime - timeInfo.OutTime
-		GlobalSender.SendTo(uid, &protoMsg.BrtoubaoStatePlayingResp{
+		GlobalSender.SendTo(uid, &gameMsg.BrtoubaoStatePlayingResp{
 			Times: timeInfo,
 		})
 	case protoMsg.GameScene_Opening: //开奖
 		timeInfo.TotalTime = YamlObj.Brtoubao.Duration.Open
 		timeInfo.WaitTime = timeInfo.TotalTime - timeInfo.OutTime
-		GlobalSender.SendTo(uid, &protoMsg.BrtoubaoStateOpenResp{
+		GlobalSender.SendTo(uid, &gameMsg.BrtoubaoStateOpenResp{
 			Times:    timeInfo,
 			OpenInfo: self.openInfo,
 		})
 	case protoMsg.GameScene_Over: //结算
 		timeInfo.TotalTime = YamlObj.Brtoubao.Duration.Over
 		timeInfo.WaitTime = timeInfo.TotalTime - timeInfo.OutTime
-		GlobalSender.SendTo(uid, &protoMsg.BrtoubaoStateOverResp{
+		GlobalSender.SendTo(uid, &gameMsg.BrtoubaoStateOverResp{
 			Times: timeInfo,
 		})
 	}
@@ -168,7 +169,7 @@ func (self *BrToubaoGame) Playing(args []interface{}) bool {
 	}
 	//【传输对象】
 	agent := args[1].(Agent)
-	m := args[0].(*protoMsg.BrtoubaoBetReq)
+	m := args[0].(*gameMsg.BrtoubaoBetReq)
 	if m.BetScore <= 0 {
 		log.Infof("[%v:%v][%v] Playing:->%v ", self.GameInfo.Name, self.T.Id, StatusText[Game07], m)
 		GlobalSender.SendResult(agent, FAILED, StatusText[Game07])
@@ -218,7 +219,7 @@ func (self *BrToubaoGame) Playing(args []interface{}) bool {
 
 	//下注成功
 	//下注数目累加
-	msg := &protoMsg.BrtoubaoBetResp{}
+	msg := &gameMsg.BrtoubaoBetResp{}
 	msg.UserID = sitter.UserID
 	msg.BetArea = m.BetArea
 	msg.BetScore = m.BetScore
@@ -227,7 +228,7 @@ func (self *BrToubaoGame) Playing(args []interface{}) bool {
 	sitter.Total += m.BetScore
 	if value, ok := self.personBetInfo.Load(sitter.UserID); ok {
 		ok = false
-		areaBetInfos, ok1 := value.([]*protoMsg.BrtoubaoBetResp)
+		areaBetInfos, ok1 := value.([]*gameMsg.BrtoubaoBetResp)
 		for index, betItem := range areaBetInfos {
 			if betItem.BetArea == m.BetArea {
 				areaBetInfos[index].BetScore = betItem.BetScore + m.BetScore
@@ -237,13 +238,13 @@ func (self *BrToubaoGame) Playing(args []interface{}) bool {
 			}
 		}
 		if !ok || !ok1 {
-			areaBetInfos = CopyInsert(areaBetInfos, len(areaBetInfos), msg).([]*protoMsg.BrtoubaoBetResp)
+			areaBetInfos = CopyInsert(areaBetInfos, len(areaBetInfos), msg).([]*gameMsg.BrtoubaoBetResp)
 		}
 		self.personBetInfo.Store(sitter.UserID, areaBetInfos)
 	} else {
 		log.Infof("[%v:%v]\t玩家:%v 下注:%v", self.GameInfo.Name, self.T.Id, sitter.UserID, m)
-		areaBetInfos := make([]*protoMsg.BrtoubaoBetResp, 0)
-		areaBetInfos = CopyInsert(areaBetInfos, len(areaBetInfos), msg).([]*protoMsg.BrtoubaoBetResp)
+		areaBetInfos := make([]*gameMsg.BrtoubaoBetResp, 0)
+		areaBetInfos = CopyInsert(areaBetInfos, len(areaBetInfos), msg).([]*gameMsg.BrtoubaoBetResp)
 		self.personBetInfo.Store(sitter.UserID, areaBetInfos)
 	}
 	person.State = protoMsg.PlayerState_PlayerPlaying
@@ -260,7 +261,7 @@ func (self *BrToubaoGame) Over(args []interface{}) bool {
 	allAreaInfo := make([]int64, AREA_MAX)
 	self.personBetInfo.Range(func(key, value any) bool {
 		uid, ok := key.(int64)
-		betInfos, ok1 := value.([]*protoMsg.BrtoubaoBetResp)
+		betInfos, ok1 := value.([]*gameMsg.BrtoubaoBetResp)
 		if !ok || !ok1 {
 			return true
 		}
@@ -293,7 +294,7 @@ func (self *BrToubaoGame) Over(args []interface{}) bool {
 		self.RemovePlayer(uid)
 	}
 	//派奖
-	checkout := &protoMsg.BrtoubaoCheckoutResp{}
+	checkout := &gameMsg.BrtoubaoCheckoutResp{}
 	checkout.Acquires = allAreaInfo
 	// 统一结算
 	self.T.ChairWork(func(chair *Chair) {
@@ -410,7 +411,7 @@ func (self *BrToubaoGame) onStart() {
 	// 开始状态
 	//m := self.permitHost() //反馈定庄信息
 	//GlobalSender.NotifyOthers(self.PlayerList, MainGameState, protoMsg.GameScene_Start, m)
-	GlobalSender.NotifyOthers(self.PlayerList, &protoMsg.BrtoubaoStateStartResp{
+	GlobalSender.NotifyOthers(self.PlayerList, &gameMsg.BrtoubaoStateStartResp{
 		Times: &protoMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			OutTime:   INVALID,
@@ -427,7 +428,7 @@ func (self *BrToubaoGame) onPlay() {
 	time.AfterFunc(time.Duration(YamlObj.Brtoubao.Duration.Play)*time.Second, self.onOpen)
 
 	// 下注状态
-	GlobalSender.NotifyOthers(self.PlayerList, &protoMsg.BrtoubaoStatePlayingResp{
+	GlobalSender.NotifyOthers(self.PlayerList, &gameMsg.BrtoubaoStatePlayingResp{
 		Times: &protoMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			OutTime:   INVALID,
@@ -442,7 +443,7 @@ func (self *BrToubaoGame) onOpen() {
 	// 开始状态
 	//m := self.permitHost() //反馈定庄信息
 	//GlobalSender.NotifyOthers(self.PlayerList, MainGameState, protoMsg.GameScene_Start, m)
-	GlobalSender.NotifyOthers(self.PlayerList, &protoMsg.BrtoubaoStateOpenResp{
+	GlobalSender.NotifyOthers(self.PlayerList, &gameMsg.BrtoubaoStateOpenResp{
 		Times: &protoMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			OutTime:   INVALID,
@@ -481,7 +482,7 @@ func (self *BrToubaoGame) onOver() {
 
 	// 开奖状态
 	time.AfterFunc(time.Duration(YamlObj.Brtoubao.Duration.Over)*time.Second, self.onStart)
-	GlobalSender.NotifyOthers(self.PlayerList, &protoMsg.BrtoubaoStateOverResp{
+	GlobalSender.NotifyOthers(self.PlayerList, &gameMsg.BrtoubaoStateOverResp{
 		Times: &protoMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			OutTime:   INVALID,
@@ -503,7 +504,7 @@ func (self *BrToubaoGame) host(args []interface{}) {
 		return
 	}
 
-	host := args[2].(*protoMsg.BrtoubaoHostReq)
+	host := args[2].(*gameMsg.BrtoubaoHostReq)
 	userID := userData.(*Player).UserID
 
 	size := len(self.hostList)
@@ -541,7 +542,7 @@ func (self *BrToubaoGame) host(args []interface{}) {
 	}
 
 	log.Infof("[%v:%v]有人来抢庄啦:%d 列表人数%d", self.GameInfo.Name, self.T.Id, userID, len(self.hostList))
-	GlobalSender.NotifyOthers(self.PlayerList, &protoMsg.BrtoubaoHostResp{
+	GlobalSender.NotifyOthers(self.PlayerList, &gameMsg.BrtoubaoHostResp{
 		UserID: userID,
 		IsWant: host.IsWant,
 	})
@@ -552,7 +553,7 @@ func (self *BrToubaoGame) superHost(args []interface{}) {
 	//【消息】
 	_ = args[2]
 	agent := args[1].(Agent)
-	host := args[2].(*protoMsg.BrtoubaoSuperHostReq)
+	host := args[2].(*gameMsg.BrtoubaoSuperHostReq)
 
 	userData := agent.UserData()
 	if nil == userData {
@@ -575,7 +576,7 @@ func (self *BrToubaoGame) superHost(args []interface{}) {
 	}
 
 	// 通知
-	GlobalSender.NotifyOthers(self.PlayerList, &protoMsg.BrtoubaoSuperHostResp{
+	GlobalSender.NotifyOthers(self.PlayerList, &gameMsg.BrtoubaoSuperHostResp{
 		UserID: self.bankerID,
 		IsWant: host.IsWant,
 	})
@@ -583,7 +584,7 @@ func (self *BrToubaoGame) superHost(args []interface{}) {
 }
 
 // 定庄(说明: 随时可申请上庄,申请列表一共11位。如果有超级抢庄,则插入列表首位。)
-func (self *BrToubaoGame) permitHost() *protoMsg.BrtoubaoHostResp {
+func (self *BrToubaoGame) permitHost() *gameMsg.BrtoubaoHostResp {
 	//校验是否满足庄家条件 [5000 < 金额] 不可连续坐庄15次
 	tempList := self.hostList
 	log.Infof("[%v:%v]定庄.... 列表数据:%v", self.GameInfo.Name, self.T.Id, self.hostList)
@@ -627,7 +628,7 @@ func (self *BrToubaoGame) permitHost() *protoMsg.BrtoubaoHostResp {
 	}
 	//完成定庄后,初始化超级抢庄ID
 	self.superHostID = 0
-	msg := &protoMsg.BrtoubaoHostResp{
+	msg := &gameMsg.BrtoubaoHostResp{
 		UserID: self.bankerID,
 		IsWant: true,
 	}
@@ -653,7 +654,7 @@ func (self *BrToubaoGame) simulatedResult() (int64, bool) {
 	}
 	var personAwardScore int64 = self.inventory
 	self.personBetInfo.Range(func(key, value any) bool {
-		betInfos, ok1 := value.([]*protoMsg.BrtoubaoBetResp)
+		betInfos, ok1 := value.([]*gameMsg.BrtoubaoBetResp)
 		if !ok1 {
 			return true
 		}

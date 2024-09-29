@@ -5,7 +5,7 @@ import (
 	cactor "github.com/po2656233/superplace/net/actor"
 	"strings"
 	. "superman/internal/constant"
-	"superman/internal/protocol/gofile"
+	"superman/internal/protocol/go_file/common"
 )
 
 var (

@@ -1,6 +1,18 @@
 # coding=utf-8
 import os
 import re
+import json
+import subprocess
+
+# 读取配置文件
+with open('config.json', 'r', encoding='utf-8') as config_file:
+    config = json.load(config_file)
+
+PROTO_DIR = config['proto_dir']
+PROTO_DIRS = [os.path.join(PROTO_DIR, d) for d in config['proto_dirs']]
+GOFILE_DIRECTORIES = [os.path.join(PROTO_DIR, d) for d in config['gofile_directory']]
+JSFILE_DIRECTORIES = [os.path.join(PROTO_DIR, d) for d in config['jsfile_directory']]
+FILTERED_FILES = config['filtered_files']
 
 number = 0
 # 基础类型列表
@@ -131,35 +143,63 @@ def transform_proto(proto_content):
     return modify_fields(content)
 
 
+def generate_proto_files(proto_dirs, gofile_directories, jsfile_directories):
+    for proto_dir, gofile_dir, jsfile_dir in zip(proto_dirs, gofile_directories, jsfile_directories):
+        for root, _, files in os.walk(proto_dir):
+            for file in files:
+                if file.endswith('.proto') and file not in FILTERED_FILES:
+                    proto_file = os.path.join(root, file)
+                    print(f'处理文件: {proto_file}')
+                    subprocess.run(['protoc', '-I', PROTO_DIR, f'--go_out={gofile_dir}', '--go_opt=paths=source_relative', proto_file])
+                    subprocess.run(['protoc', '-I', PROTO_DIR, f'--js_out=import_style=commonjs,binary:{jsfile_dir}', proto_file])
+
+
 def main():
-    fileDir = "../internal/protocol"
-    fileList = listFiles(fileDir)
-    # 关键字1,2(修改引号间的内容)
-    w1 = '{'
-    w2 = '}'
+    for gofile_dir in GOFILE_DIRECTORIES:
+        if not os.path.exists(gofile_dir):
+            os.makedirs(gofile_dir)
+            print(f'创建目录: {gofile_dir}')
+        else:
+            print(f'目录已存在: {gofile_dir}')
 
-    for fileObj in fileList:
-        # 调整协议编码
-        f = open(fileObj, 'r+', encoding='utf-8')
-        buff = f.read()
-        buff = transform_proto(buff)
-        pat = re.compile(w1 + '(.*?)' + w2, re.S)
-        pat.findall(buff)
-        newNUMS = re.sub(pat, deal, buff)
+    for jsfile_dir in JSFILE_DIRECTORIES:
+        if not os.path.exists(jsfile_dir):
+            os.makedirs(jsfile_dir)
+            print(f'创建目录: {jsfile_dir}')
+        else:
+            print(f'目录已存在: {jsfile_dir}')
 
-        # 包名本地化
-        f.seek(0)
-        f.truncate()
-        all_the_lines = newNUMS.split('\n')
-        for line in all_the_lines:
-            if len(line) > 0:  # 当改行为空，表明已经读取到文件末尾，退出循环
-                content = line.split(' ')  # 因为每行有三个TAB符号分开的数字，将它们分开
-                if len(content) > 0 and content[0] == 'package':
-                    f.write("package pb;\n")
-                else:
-                    line = line.replace(' iD =',' id =')
-                    f.write(line + '\n')
-        f.close()
+    for proto_dir in PROTO_DIRS:
+        fileList = listFiles(proto_dir)
+        # 关键字1,2(修改引号间的内容)
+        w1 = '{'
+        w2 = '}'
+
+        for fileObj in fileList:
+            # 调整协议编码
+            f = open(fileObj, 'r+', encoding='utf-8')
+            buff = f.read()
+            buff = transform_proto(buff)
+            pat = re.compile(w1 + '(.*?)' + w2, re.S)
+            pat.findall(buff)
+            newNUMS = re.sub(pat, deal, buff)
+
+            # 包名本地化
+            f.seek(0)
+            f.truncate()
+            all_the_lines = newNUMS.split('\n')
+            for line in all_the_lines:
+                if len(line) > 0:  # 当改行为空，表明已经读取到文件末尾，退出循环
+                    content = line.split(' ')  # 因为每行有三个TAB符号分开的数字，将它们分开
+                    if len(content) > 0 and content[0] == 'package':
+                        f.write("package pb;\n")
+                    else:
+                        line = line.replace(' iD =',' id =')
+                        f.write(line + '\n')
+            f.close()
+
+    # 生成 .go 和 .js 文件
+    generate_proto_files(PROTO_DIRS, GOFILE_DIRECTORIES, JSFILE_DIRECTORIES)
 
 
 if __name__ == '__main__':

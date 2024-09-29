@@ -1,0 +1,88 @@
+syntax = "proto3";
+option go_package = "/game";
+package pb;
+import "common/baseinfo.proto";
+// kindID 2005
+//36个筒子加4个白板 白板算半点
+//白板 = 10 
+// 1~9筒 = 1~9
+//场景
+message BrTuitongziSceneResp{
+  int64 timeStamp = 1;            //时间戳
+  string inning = 2;              //牌局号
+  repeated int32 chips = 3;       //筹 码
+  repeated bytes awardAreas = 4;  //开奖记录(路单)
+  repeated int64 areaBets = 5;    //各下注区当前总下注额
+  repeated int64 myBets = 6;      //个人在各下注区的总下注额
+  PlayerList allPlayers = 7;  //玩家列表
+  int32  remainCount = 8;		  //剩余张数
+  int32 startArea = 9;
+}
+//状态
+// 服务端推送
+//(开始 - 定庄)
+message BrTuitongziStateStartResp {
+  TimeInfo times = 1;
+  int32 startArea = 2;//开始发牌区域
+  bytes  dice = 3;//两个骰子点数(决定起始发牌区域)
+  string inning = 4;               // 牌局号
+}
+//(下注)
+message BrTuitongziStatePlayingResp {
+  TimeInfo times = 1;
+}
+//(开奖)
+message BrTuitongziStateOpenResp {
+  TimeInfo times = 1;
+  BrTuitongziOpenResp openInfo = 2;
+}
+//(结束)
+message BrTuitongziStateOverResp {
+  TimeInfo times = 1;
+}
+//游戏消息
+//下注
+message BrTuitongziBetReq{
+  int32 betArea = 1;        //下注区域
+  int64 betScore = 2;        //下注金额
+}
+message BrTuitongziBetResp{
+  int64 userID = 1;
+  int32 betArea = 2;        //下注区域
+  int64 betScore = 3;        //下注金额
+}
+//开奖
+message BrTuitongziOpenResp{
+  bytes awardArea = 1;    //各区域胜负：1胜，0负, 2平
+  CardInfo bankerCard = 2;    //天
+  CardInfo shunCard = 3;    //顺
+  CardInfo tianCard = 4;    //天
+  CardInfo diCard = 5;    //地
+}
+//结算
+message BrTuitongziCheckoutResp{
+  int64 myAcquire = 1;        //获得金币(结算)
+  repeated int64 acquires = 2;//各个区域输赢情况
+}
+/////////////预留协议///////////////////////////
+//抢庄
+message BrTuitongziHostReq {
+  bool isWant = 1;//true上庄 false取消上庄
+}
+message BrTuitongziHostResp {
+  int64 userID = 1;
+  bool isWant = 2;//true上庄 false取消上庄
+}
+//超级抢庄
+message BrTuitongziSuperHostReq {
+  bool isWant = 1;//true上庄 false取消
+}
+message BrTuitongziSuperHostResp {
+  int64 userID = 1;
+  bool isWant = 2;//true上庄 false取消
+}
+// 从零开始，后面累加1 共4区域
+//    Area_Shun             //顺
+//    Area_Tian            	//天
+//    Area_Di          		//地
+//    Area_Zhuang          	//庄(该区域不可下注)

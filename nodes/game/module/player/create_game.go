@@ -3,7 +3,7 @@ package player
 import (
 	log "github.com/po2656233/superplace/logger"
 	cst "superman/internal/constant"
-	protoMsg "superman/internal/protocol/gofile"
+	protoMsg "superman/internal/protocol/go_file/common"
 	. "superman/nodes/game/manger"
 	"superman/nodes/game/module/category/BattleGame/brbaccarat"
 	"superman/nodes/game/module/category/BattleGame/brcowcow"

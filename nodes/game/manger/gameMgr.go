@@ -5,7 +5,8 @@ import (
 	"google.golang.org/protobuf/proto"
 	"strings"
 	. "superman/internal/constant"
-	protoMsg "superman/internal/protocol/gofile"
+	protoMsg "superman/internal/protocol/go_file/common"
+	gameMsg "superman/internal/protocol/go_file/game"
 	"superman/internal/utils"
 	"sync"
 	"time"
@@ -253,7 +254,7 @@ func (g *Game) Scene(args []interface{}) bool {
 	now := time.Now().Unix()
 	wait := g.openTime - now
 	if 0 < wait {
-		GetClientMgr().SendTo(person.UserID, &protoMsg.WaitGameStartResp{
+		GetClientMgr().SendTo(person.UserID, &gameMsg.WaitGameStartResp{
 			GameID:      g.Id,
 			WaitTimeOut: wait,
 		})
@@ -407,7 +408,7 @@ func (g *Game) Close(f ClearFunc) bool {
 			return false
 		}
 		g.ChangeState(protoMsg.GameScene_Closing)
-		GetClientMgr().NotifyOthers(g.PlayerList, &protoMsg.DisbandedTableResp{
+		GetClientMgr().NotifyOthers(g.PlayerList, &gameMsg.DisbandedTableResp{
 			RoomID:  tb.Rid,
 			TableID: tb.Id,
 		})

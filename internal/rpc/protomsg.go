@@ -10,7 +10,7 @@ import (
 	"reflect"
 	"strconv"
 	. "superman/internal/constant"
-	pb "superman/internal/protocol/gofile"
+	gateMsg "superman/internal/protocol/go_file/gate"
 )
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -61,7 +61,7 @@ func GetProtoData(msg proto.Message) ([]byte, error) {
 
 // GetProtoResult 获取协议结构数据 msgID + data.len + data
 func GetProtoResult(code int) ([]byte, error) {
-	return GetProtoData(&pb.ResultResp{
+	return GetProtoData(&gateMsg.ResultResp{
 		State: int32(code),
 		Hints: StatusText[code],
 	})
@@ -69,7 +69,7 @@ func GetProtoResult(code int) ([]byte, error) {
 
 // GetProtoResultPop 获取协议结构数据 msgID + data.len + data
 func GetProtoResultPop(code int) ([]byte, error) {
-	return GetProtoData(&pb.ResultPopResp{
+	return GetProtoData(&gateMsg.ResultPopResp{
 		Title: StatusText[Title001],
 		Flag:  int32(code),
 		Hints: StatusText[code],
@@ -78,7 +78,7 @@ func GetProtoResultPop(code int) ([]byte, error) {
 
 // GetProtoResultPopWarn 获取协议结构数据 msgID + data.len + data
 func GetProtoResultPopWarn(code int) ([]byte, error) {
-	return GetProtoData(&pb.ResultPopResp{
+	return GetProtoData(&gateMsg.ResultPopResp{
 		Title: StatusText[Title002],
 		Flag:  int32(code),
 		Hints: StatusText[code],
@@ -87,7 +87,7 @@ func GetProtoResultPopWarn(code int) ([]byte, error) {
 
 // GetProtoResultPopFatal 获取协议结构数据 msgID + data.len + data
 func GetProtoResultPopFatal(code int) ([]byte, error) {
-	return GetProtoData(&pb.ResultPopResp{
+	return GetProtoData(&gateMsg.ResultPopResp{
 		Title: StatusText[Title005],
 		Flag:  int32(code),
 		Hints: StatusText[code],
@@ -116,14 +116,14 @@ func ParseProto(msg proto.Message) (uint32, []byte, error) {
 }
 
 func ParseResult(code int) (uint32, []byte, error) {
-	return ParseProto(&pb.ResultResp{
+	return ParseProto(&gateMsg.ResultResp{
 		State: int32(code),
 		Hints: StatusText[code],
 	})
 }
 
 func ParseResultPop(code int) (uint32, []byte, error) {
-	return ParseProto(&pb.ResultPopResp{
+	return ParseProto(&gateMsg.ResultPopResp{
 		Flag:  int32(code),
 		Title: StatusText[Title001],
 		Hints: StatusText[code],
@@ -131,14 +131,14 @@ func ParseResultPop(code int) (uint32, []byte, error) {
 }
 
 func ParseResultPopWarn(code int) (uint32, []byte, error) {
-	return ParseProto(&pb.ResultPopResp{
+	return ParseProto(&gateMsg.ResultPopResp{
 		Flag:  int32(code),
 		Title: StatusText[Title002],
 		Hints: StatusText[code],
 	})
 }
 func ParseResultPopFatal(code int) (uint32, []byte, error) {
-	return ParseProto(&pb.ResultPopResp{
+	return ParseProto(&gateMsg.ResultPopResp{
 		Flag:  int32(code),
 		Title: StatusText[Title005],
 		Hints: StatusText[code],

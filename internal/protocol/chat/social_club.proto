@@ -1,0 +1,146 @@
+syntax = "proto3";
+option go_package = "/chat";
+package pb;
+import "common/baseinfo.proto";
+//群定义
+message ClubInfo {
+	int64 id = 1;			// 群ID
+	int64 master = 2;		// 群主
+	int64 builder = 3;		// 创建者
+	int64 createdAt = 4;	// 创建时间
+	int32 icon = 5;			// 群Logo
+	int32 mode = 6;			// 群模式
+	int64 score = 7;		// 群总积分(群主或副群主用于分配给群员)
+	string name = 8;		// 群名
+	string notice = 9;		// 群公告
+}
+//群成员定义
+message ClubMemberInfo {
+	int64 id = 1;				//成员ID
+	int64 uid = 2;				//用户ID
+	int32 job = 3;				//职位
+	int32 liveness = 4;			//活跃度
+	int32 totalLiveness = 5;	//历史总活跃度
+	int64 score = 6;			//积分
+	int64 refereeUid = 7;		//推荐人
+	int64 clubId = 8;			//群ID
+}
+// 建群
+message ClubNewReq {
+	int32 icon = 1;  //群Logo
+	string name = 2;  //群名
+	string notice = 3;  //群公告
+}
+message ClubNewResp {
+	ClubInfo data = 1;
+}
+// 解散群
+message ClubDissolveReq {
+	int64 clubId = 1;	//群ID
+}
+message ClubDissolveResp {
+	int64 clubId = 1;	//群ID
+}
+// 申请入群
+message ClubApplyReq {
+	int64 clubId = 1; 		//想进的群ID
+	string clubName = 2; 	//想进的群名
+}
+message ClubApplyResp {
+	int64 clubId = 1;		//想进的群ID
+	string clubName = 2;	//想进的群名
+	UserInfo applyMan = 3;	//申请人
+}
+// 处理入群申请
+message ClubApplyDealReq {
+	int64 clubId = 1;	//群ID
+	int64 uid = 2;		//申请人Uid
+	int32 isAgree = 3;	//是否同意 1是 0否
+}
+message ClubApplyDealResp {
+	int64 clubId = 1;	//群ID
+	int64 uid = 2;		//申请人Uid
+	int32 isAgree = 3;	//是否同意 1是 0否
+}
+// 申请列表
+message ClubApplyListReq {
+	int64 clubId = 1;
+}
+message ClubApplyListResp {
+	int64 clubId = 1;
+	repeated UserInfo mans = 2;	//申请者序列
+}
+// 群列表
+message ClubListReq {
+}
+message ClubListResp {
+	repeated ClubInfo dataArr = 1;
+}
+// 群成员列表
+message ClubMembersReq {
+	int64 clubId = 1;
+}
+message ClubMembersResp {
+	int64 clubId = 1;
+	repeated ClubMemberInfo dataArr = 2;
+}
+// 我的群
+message ClubMineReq {
+}
+message ClubMineResp {
+	repeated ClubInfo dataArr = 1;
+}
+// 切换群成员职务
+message ClubJobReq {
+	int64 clubId = 1;
+	int64 uid    = 2;
+	int32 job    = 3;
+}
+message ClubJobResp {
+	int64 clubId = 1;
+	int64 uid    = 2;
+	int32 job    = 3;
+}
+//为成员分配积分
+message ClubGiveReq {
+	int64 clubId = 1;		//目标所在群
+	int64 targetUid	= 2; 	//目标Uid
+	int64 count	= 3;		//赠送数额
+	int32 currency = 4;		//赠送币种
+}
+message ClubGiveResp {
+	ClubGiveReq reqData = 1;
+	int64 senderUid = 2; //赠送者Uid
+}
+// 邀请信息
+message ClubInviteInfo {
+	int64 clubId = 1;			//群ID
+	UserInfo targetData = 2;	//邀请对象的用户信息
+	UserInfo senderData = 3;	//邀请发起者的用户信息
+}
+// 邀请入群
+message ClubInviteReq {
+	int64 clubId = 1;		//群ID
+	int64 targetUid	= 2; 	//邀请对象Uid
+	string targetName = 3;	//邀请对象账号/昵称
+}
+message ClubInviteResp {
+	ClubInviteInfo data = 1;
+}
+//邀请信息查询
+message ClubInviteListReq {
+	int32 inviteType = 1;	// 0 我发出的+我收到的， 1 我发出的， 2 我收到的
+}
+message ClubInviteListResp {
+	int32 inviteType = 1;	// 0 我发出的+我收到的， 1 我发出的， 2 我收到的
+	repeated ClubInviteInfo dataArr = 2;
+}
+//同意/拒绝邀请
+message ClubInviteDealReq {
+	int64 clubId = 1;		//群ID
+	int32 isAgree = 2;		//是否同意 1是 0否
+}
+message ClubInviteDealResp {
+	int64 clubId = 1;		//群ID
+	int32 isAgree = 2;		//是否同意 1是 0否
+}

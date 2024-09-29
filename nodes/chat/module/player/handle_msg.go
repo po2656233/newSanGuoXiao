@@ -1,7 +1,7 @@
 package player
 
 import (
-	pb "superman/internal/protocol/gofile"
+	pb "superman/internal/protocol/go_file/common"
 	"superman/nodes/chat/db"
 	"time"
 

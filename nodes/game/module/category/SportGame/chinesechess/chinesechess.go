@@ -3,7 +3,8 @@ package chinesechess
 import (
 	log "github.com/po2656233/superplace/logger"
 	. "superman/internal/constant"
-	protoMsg "superman/internal/protocol/gofile"
+	protoMsg "superman/internal/protocol/go_file/common"
+	gameMsg "superman/internal/protocol/go_file/game"
 	. "superman/nodes/game/manger"
 	. "superman/nodes/game/module/category"
 	"time"
@@ -12,7 +13,7 @@ import (
 type Chinesechess struct {
 	*Game
 	T         *Table
-	board     *protoMsg.XQBoardInfo
+	board     *gameMsg.XQBoardInfo
 	redCamp   *protoMsg.PlayerSimpleInfo
 	blackCamp *protoMsg.PlayerSimpleInfo
 	curUid    int64
@@ -25,8 +26,8 @@ func New(game *Game, table *Table) *Chinesechess {
 	p := &Chinesechess{
 		Game: game,
 		T:    table,
-		board: &protoMsg.XQBoardInfo{
-			Cells: make([]*protoMsg.XQGrid, 0),
+		board: &gameMsg.XQBoardInfo{
+			Cells: make([]*gameMsg.XQGrid, 0),
 		},
 	}
 	p.Init()
@@ -50,7 +51,7 @@ func (self *Chinesechess) Scene(args []interface{}) bool {
 	}
 	person := args[0].(*Player)
 	uid := person.UserID
-	GetClientMgr().SendTo(uid, &protoMsg.ChineseChessSceneResp{
+	GetClientMgr().SendTo(uid, &gameMsg.ChineseChessSceneResp{
 		TimeStamp: time.Now().Unix(),
 		Inning:    self.Inning,
 		Board:     self.board,
@@ -73,34 +74,34 @@ func (self *Chinesechess) Scene(args []interface{}) bool {
 	switch self.GameInfo.Scene {
 	case protoMsg.GameScene_Free: //
 	case protoMsg.GameScene_Setting: //
-		GetClientMgr().SendTo(uid, &protoMsg.ChineseChessStateSetResp{
+		GetClientMgr().SendTo(uid, &gameMsg.ChineseChessStateSetResp{
 			Times: getTimeInfo(YamlObj.Chinesechess.Duration.Settime),
 			Uid:   self.curUid,
 		})
 	case protoMsg.GameScene_WaitOperate: //
-		GetClientMgr().SendTo(uid, &protoMsg.ChineseChessStateConfirmResp{
+		GetClientMgr().SendTo(uid, &gameMsg.ChineseChessStateConfirmResp{
 			Times: getTimeInfo(YamlObj.Chinesechess.Duration.Confirm),
 			Uid:   self.curUid,
 		})
 	case protoMsg.GameScene_Start: // 开始
-		GetClientMgr().SendTo(uid, &protoMsg.ChineseChessStateStartResp{
+		GetClientMgr().SendTo(uid, &gameMsg.ChineseChessStateStartResp{
 			Times: getTimeInfo(YamlObj.Chinesechess.Duration.Start),
 			Uid:   self.curUid,
 		})
 	case protoMsg.GameScene_Playing: // 下棋
-		GetClientMgr().SendTo(uid, &protoMsg.ChineseChessStatePlayingResp{
+		GetClientMgr().SendTo(uid, &gameMsg.ChineseChessStatePlayingResp{
 			Times: getTimeInfo(YamlObj.Chinesechess.Duration.Play),
 			Uid:   self.curUid,
 		})
 	case protoMsg.GameScene_Opening: // 开奖
-		GetClientMgr().SendTo(uid, &protoMsg.ChineseChessStateOpenResp{
+		GetClientMgr().SendTo(uid, &gameMsg.ChineseChessStateOpenResp{
 			Times:  getTimeInfo(YamlObj.Chinesechess.Duration.Open),
 			WinUid: self.winUid,
 		})
 	case protoMsg.GameScene_Over: // 结算
-		GetClientMgr().SendTo(uid, &protoMsg.ChineseChessStateOverResp{
+		GetClientMgr().SendTo(uid, &gameMsg.ChineseChessStateOverResp{
 			Times: getTimeInfo(YamlObj.Chinesechess.Duration.Over),
-			Result: &protoMsg.ChineseChessResult{
+			Result: &gameMsg.ChineseChessResult{
 				RedCamp:   self.redCamp,
 				BlackCamp: self.blackCamp,
 			},
@@ -117,7 +118,7 @@ func (self *Chinesechess) Start(args []interface{}) bool {
 		return false
 	}
 	// 准备事件
-	readyResp := &protoMsg.ChineseChessStateSetResp{
+	readyResp := &gameMsg.ChineseChessStateSetResp{
 		Times: &protoMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			OutTime:   0,
@@ -137,7 +138,7 @@ func (self *Chinesechess) Start(args []interface{}) bool {
 	}, nil, nil)
 
 	// 设置时长事件
-	setResp := &protoMsg.ChineseChessStateSetResp{
+	setResp := &gameMsg.ChineseChessStateSetResp{
 		Times: &protoMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			OutTime:   0,
@@ -157,7 +158,7 @@ func (self *Chinesechess) Start(args []interface{}) bool {
 	}, nil, nil)
 
 	// 确认时长事件
-	confirmResp := &protoMsg.ChineseChessStateConfirmResp{
+	confirmResp := &gameMsg.ChineseChessStateConfirmResp{
 		Times: &protoMsg.TimeInfo{
 			OutTime:   0,
 			WaitTime:  YamlObj.Chinesechess.Duration.Confirm,
@@ -173,7 +174,7 @@ func (self *Chinesechess) Start(args []interface{}) bool {
 	}, nil)
 
 	// 游戏开始事件
-	startResp := &protoMsg.ChineseChessStateStartResp{
+	startResp := &gameMsg.ChineseChessStateStartResp{
 		Times: &protoMsg.TimeInfo{
 			OutTime:   0,
 			WaitTime:  YamlObj.Chinesechess.Duration.Start,
@@ -194,7 +195,7 @@ func (self *Chinesechess) Start(args []interface{}) bool {
 	}, nil, nil)
 
 	// 游戏操作事件
-	playResp := &protoMsg.ChineseChessStatePlayingResp{
+	playResp := &gameMsg.ChineseChessStatePlayingResp{
 		Times: &protoMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			OutTime:   0,
@@ -222,7 +223,7 @@ func (self *Chinesechess) Start(args []interface{}) bool {
 	}, nil)
 
 	// 游戏开奖场景
-	openResp := &protoMsg.ChineseChessStateOpenResp{
+	openResp := &gameMsg.ChineseChessStateOpenResp{
 		Times: &protoMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			OutTime:   0,
@@ -247,14 +248,14 @@ func (self *Chinesechess) Start(args []interface{}) bool {
 	}, nil, nil)
 
 	// 游戏结算事件
-	overResp := &protoMsg.ChineseChessStateOverResp{
+	overResp := &gameMsg.ChineseChessStateOverResp{
 		Times: &protoMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			OutTime:   0,
 			WaitTime:  YamlObj.Chinesechess.Duration.Over,
 			TotalTime: YamlObj.Chinesechess.Duration.Over,
 		},
-		Result: &protoMsg.ChineseChessResult{
+		Result: &gameMsg.ChineseChessResult{
 			RedCamp:   self.redCamp,
 			BlackCamp: self.blackCamp,
 		},
@@ -307,7 +308,7 @@ func (self *Chinesechess) Playing(args []interface{}) bool {
 	//
 	_ = args[1]
 	//【消息】
-	m := args[0].(*protoMsg.ChineseChessMoveReq)
+	m := args[0].(*gameMsg.ChineseChessMoveReq)
 	agent := args[1].(Agent)
 	if self.GameInfo.Scene != protoMsg.GameScene_Playing {
 		GetClientMgr().SendResult(agent, FAILED, StatusText[Game04])
@@ -336,10 +337,10 @@ func (self *Chinesechess) Playing(args []interface{}) bool {
 	case moveFail:
 	case moveBeJiangJu:
 	case moveJiangJu:
-		GetClientMgr().NotifyOthers(self.PlayerList, &protoMsg.ChineseChessJiangJuResp{BeJiangUid: otherUid})
+		GetClientMgr().NotifyOthers(self.PlayerList, &gameMsg.ChineseChessJiangJuResp{BeJiangUid: otherUid})
 	case moveJueSha:
 		can = true
-		GetClientMgr().NotifyOthers(self.PlayerList, &protoMsg.ChineseChessJueShaResp{BeJueShaUid: otherUid})
+		GetClientMgr().NotifyOthers(self.PlayerList, &gameMsg.ChineseChessJueShaResp{BeJueShaUid: otherUid})
 		self.winUid = self.curUid
 	default:
 	}
@@ -347,7 +348,7 @@ func (self *Chinesechess) Playing(args []interface{}) bool {
 		GetClientMgr().SendResult(agent, FAILED, StatusText[Game63])
 		return false
 	}
-	msg := &protoMsg.ChineseChessMoveResp{
+	msg := &gameMsg.ChineseChessMoveResp{
 		Uid:    person.UserID,
 		Origin: m.Origin,
 		Target: m.Target,
@@ -355,7 +356,7 @@ func (self *Chinesechess) Playing(args []interface{}) bool {
 	count := 0
 	for _, cell := range self.board.Cells {
 		if cell.Row == m.Origin.Row && cell.Col == m.Origin.Col {
-			cell.Core = protoMsg.XQPiece_NoXQPiece
+			cell.Core = gameMsg.XQPiece_NoXQPiece
 			count++
 		} else if cell.Row == m.Target.Row && cell.Col == m.Target.Col {
 			cell.Core = m.Target.Core
@@ -398,7 +399,7 @@ func (self *Chinesechess) UpdateInfo(args []interface{}) bool {
 func (self *Chinesechess) ReadyOP(args []interface{}) {
 	_ = args[1]
 	//【消息】
-	m := args[0].(*protoMsg.ChineseChessReadyReq)
+	m := args[0].(*gameMsg.ChineseChessReadyReq)
 	agent := args[1].(Agent)
 	if protoMsg.GameScene_Start <= self.GameInfo.Scene {
 		GetClientMgr().SendResult(agent, FAILED, StatusText[Game04])
@@ -406,7 +407,7 @@ func (self *Chinesechess) ReadyOP(args []interface{}) {
 	}
 
 	person := agent.UserData().(*Player)
-	msg := &protoMsg.ChineseChessReadyResp{
+	msg := &gameMsg.ChineseChessReadyResp{
 		Uid:     person.UserID,
 		IsReady: m.IsReady,
 	}
@@ -420,7 +421,7 @@ func (self *Chinesechess) ReadyOP(args []interface{}) {
 func (self *Chinesechess) SetTimeOP(args []interface{}) {
 	_ = args[1]
 	//【消息】
-	m := args[0].(*protoMsg.ChineseChessSetTimeReq)
+	m := args[0].(*gameMsg.ChineseChessSetTimeReq)
 	agent := args[1].(Agent)
 	if self.GameInfo.Scene != protoMsg.GameScene_Setting {
 		GetClientMgr().SendResult(agent, FAILED, StatusText[Game04])
@@ -442,7 +443,7 @@ func (self *Chinesechess) SetTimeOP(args []interface{}) {
 	}
 
 	self.timeout = m.Timeout
-	msg := &protoMsg.ChineseChessSetTimeResp{
+	msg := &gameMsg.ChineseChessSetTimeResp{
 		Uid:     person.UserID,
 		Timeout: m.Timeout,
 	}
@@ -454,14 +455,14 @@ func (self *Chinesechess) SetTimeOP(args []interface{}) {
 func (self *Chinesechess) ConfirmOP(args []interface{}) {
 	_ = args[1]
 	//【消息】
-	m := args[0].(*protoMsg.ChineseChessAgreeTimeReq)
+	m := args[0].(*gameMsg.ChineseChessAgreeTimeReq)
 	agent := args[1].(Agent)
 	if self.GameInfo.Scene != protoMsg.GameScene_WaitOperate {
 		GetClientMgr().SendResult(agent, FAILED, StatusText[Game04])
 		return
 	}
 	person := agent.UserData().(*Player)
-	msg := &protoMsg.ChineseChessAgreeTimeResp{
+	msg := &gameMsg.ChineseChessAgreeTimeResp{
 		Uid:     person.UserID,
 		IsAgree: m.IsAgree,
 	}
@@ -479,181 +480,181 @@ func (self *Chinesechess) ConfirmOP(args []interface{}) {
 // ///////////////////////[初始化]///////////////////////////////////
 // 初始化棋盘
 func (self *Chinesechess) initBord() {
-	self.board = &protoMsg.XQBoardInfo{
-		Cells: make([]*protoMsg.XQGrid, 0),
+	self.board = &gameMsg.XQBoardInfo{
+		Cells: make([]*gameMsg.XQGrid, 0),
 	}
 	// 第一排
 	row := 0
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(0),
-		Core: protoMsg.XQPiece_RedJu,
+		Core: gameMsg.XQPiece_RedJu,
 	})
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(1),
-		Core: protoMsg.XQPiece_RedMa,
+		Core: gameMsg.XQPiece_RedMa,
 	})
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(2),
-		Core: protoMsg.XQPiece_RedXiang,
+		Core: gameMsg.XQPiece_RedXiang,
 	})
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(3),
-		Core: protoMsg.XQPiece_RedShi,
+		Core: gameMsg.XQPiece_RedShi,
 	})
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(4),
-		Core: protoMsg.XQPiece_RedShuai,
+		Core: gameMsg.XQPiece_RedShuai,
 	})
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(5),
-		Core: protoMsg.XQPiece_RedShi,
+		Core: gameMsg.XQPiece_RedShi,
 	})
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(6),
-		Core: protoMsg.XQPiece_RedXiang,
+		Core: gameMsg.XQPiece_RedXiang,
 	})
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(7),
-		Core: protoMsg.XQPiece_RedMa,
+		Core: gameMsg.XQPiece_RedMa,
 	})
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(8),
-		Core: protoMsg.XQPiece_RedJu,
+		Core: gameMsg.XQPiece_RedJu,
 	})
 	// 红炮
 	row = 2
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(1),
-		Core: protoMsg.XQPiece_RedPao,
+		Core: gameMsg.XQPiece_RedPao,
 	})
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(7),
-		Core: protoMsg.XQPiece_RedPao,
+		Core: gameMsg.XQPiece_RedPao,
 	})
 	// 红兵
 	row = 3
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(0),
-		Core: protoMsg.XQPiece_RedBing,
+		Core: gameMsg.XQPiece_RedBing,
 	})
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(2),
-		Core: protoMsg.XQPiece_RedBing,
+		Core: gameMsg.XQPiece_RedBing,
 	})
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(4),
-		Core: protoMsg.XQPiece_RedBing,
+		Core: gameMsg.XQPiece_RedBing,
 	})
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(6),
-		Core: protoMsg.XQPiece_RedBing,
+		Core: gameMsg.XQPiece_RedBing,
 	})
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(8),
-		Core: protoMsg.XQPiece_RedBing,
+		Core: gameMsg.XQPiece_RedBing,
 	})
 
 	// 黑卒
 	row = 6
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(0),
-		Core: protoMsg.XQPiece_BlackZu,
+		Core: gameMsg.XQPiece_BlackZu,
 	})
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(2),
-		Core: protoMsg.XQPiece_BlackZu,
+		Core: gameMsg.XQPiece_BlackZu,
 	})
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(4),
-		Core: protoMsg.XQPiece_BlackZu,
+		Core: gameMsg.XQPiece_BlackZu,
 	})
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(6),
-		Core: protoMsg.XQPiece_BlackZu,
+		Core: gameMsg.XQPiece_BlackZu,
 	})
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(8),
-		Core: protoMsg.XQPiece_BlackZu,
+		Core: gameMsg.XQPiece_BlackZu,
 	})
 	// 黑炮
 	row = 7
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(1),
-		Core: protoMsg.XQPiece_BlackPao,
+		Core: gameMsg.XQPiece_BlackPao,
 	})
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(7),
-		Core: protoMsg.XQPiece_BlackPao,
+		Core: gameMsg.XQPiece_BlackPao,
 	})
 
 	// 最后一排
 	row = 9
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(0),
-		Core: protoMsg.XQPiece_BlackJu,
+		Core: gameMsg.XQPiece_BlackJu,
 	})
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(1),
-		Core: protoMsg.XQPiece_BlackMa,
+		Core: gameMsg.XQPiece_BlackMa,
 	})
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(2),
-		Core: protoMsg.XQPiece_BlackXiang,
+		Core: gameMsg.XQPiece_BlackXiang,
 	})
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(3),
-		Core: protoMsg.XQPiece_BlackShi,
+		Core: gameMsg.XQPiece_BlackShi,
 	})
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(4),
-		Core: protoMsg.XQPiece_BlackJiang,
+		Core: gameMsg.XQPiece_BlackJiang,
 	})
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(5),
-		Core: protoMsg.XQPiece_BlackShi,
+		Core: gameMsg.XQPiece_BlackShi,
 	})
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(6),
-		Core: protoMsg.XQPiece_BlackXiang,
+		Core: gameMsg.XQPiece_BlackXiang,
 	})
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(7),
-		Core: protoMsg.XQPiece_BlackMa,
+		Core: gameMsg.XQPiece_BlackMa,
 	})
-	self.board.Cells = append(self.board.Cells, &protoMsg.XQGrid{
+	self.board.Cells = append(self.board.Cells, &gameMsg.XQGrid{
 		Row:  int32(row),
 		Col:  int32(8),
-		Core: protoMsg.XQPiece_BlackJu,
+		Core: gameMsg.XQPiece_BlackJu,
 	})
 }

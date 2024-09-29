@@ -4,7 +4,9 @@ import (
 	"fmt"
 	log "github.com/po2656233/superplace/logger"
 	. "superman/internal/constant"
-	protoMsg "superman/internal/protocol/gofile"
+	protoMsg "superman/internal/protocol/go_file/common"
+	//gateMsg "superman/internal/protocol/go_file/gate"
+	gameMsg "superman/internal/protocol/go_file/game"
 	"superman/internal/utils"
 	. "superman/nodes/game/manger"
 	. "superman/nodes/game/module/category"
@@ -23,9 +25,9 @@ type BaccaratGame struct {
 	cbBankerCards *protoMsg.CardInfo //庄家扑克
 	cbCardCount   []byte             //首次拿牌数
 
-	personBetInfo *sync.Map                  // map[int64][]*protoMsg.BaccaratBetResp //下注信息
-	openAreas     [][]byte                   //开奖纪录
-	openInfo      *protoMsg.BaccaratOpenResp //开奖结果
+	personBetInfo *sync.Map                 // map[int64][]*protoMsg.BaccaratBetResp //下注信息
+	openAreas     [][]byte                  //开奖纪录
+	openInfo      *gameMsg.BaccaratOpenResp //开奖结果
 
 	hostList    []int64 //申请列表(默认11个)
 	bankerID    int64   //庄家ID
@@ -57,8 +59,8 @@ func (self *BaccaratGame) Init() {
 	self.keepTwice = 0        // 连续抢庄次数
 	self.hostList = []int64{} // 申请列表(默认11个)
 
-	self.cbCardCount = []byte{2, 2}              // 首次拿牌张数
-	self.openInfo = &protoMsg.BaccaratOpenResp{} // 结算结果
+	self.cbCardCount = []byte{2, 2}             // 首次拿牌张数
+	self.openInfo = &gameMsg.BaccaratOpenResp{} // 结算结果
 
 	self.personBetInfo = new(sync.Map)      // make(map[int64][]*protoMsg.BaccaratBetResp) // 玩家下注信息
 	self.openAreas = make([][]byte, 10, 20) // 开奖纪录
@@ -92,7 +94,7 @@ func (self *BaccaratGame) Scene(args []interface{}) bool {
 	person := args[0].(*Player)
 
 	//场景信息
-	StateInfo := &protoMsg.BaccaratSceneResp{
+	StateInfo := &gameMsg.BaccaratSceneResp{
 		AllPlayers: &protoMsg.PlayerList{
 			Items: make([]*protoMsg.PlayerInfo, 0),
 		},
@@ -112,7 +114,7 @@ func (self *BaccaratGame) Scene(args []interface{}) bool {
 		if !ok {
 			return true
 		}
-		bets, ok1 := value.([]*protoMsg.BaccaratBetResp)
+		bets, ok1 := value.([]*gameMsg.BaccaratBetResp)
 		if !ok1 {
 			return true
 		}
@@ -137,27 +139,27 @@ func (self *BaccaratGame) Scene(args []interface{}) bool {
 	case protoMsg.GameScene_Start: //准备
 		timeInfo.TotalTime = YamlObj.Baccarat.Duration.Start
 		timeInfo.WaitTime = timeInfo.TotalTime - timeInfo.OutTime
-		GlobalSender.SendTo(person.UserID, &protoMsg.BaccaratStateStartResp{
+		GlobalSender.SendTo(person.UserID, &gameMsg.BaccaratStateStartResp{
 			Times:  timeInfo,
 			Inning: self.Inning,
 		})
 	case protoMsg.GameScene_Playing: //下注
 		timeInfo.TotalTime = YamlObj.Baccarat.Duration.Play
 		timeInfo.WaitTime = timeInfo.TotalTime - timeInfo.OutTime
-		GlobalSender.SendTo(person.UserID, &protoMsg.BaccaratStatePlayingResp{
+		GlobalSender.SendTo(person.UserID, &gameMsg.BaccaratStatePlayingResp{
 			Times: timeInfo,
 		})
 	case protoMsg.GameScene_Opening: //开奖
 		timeInfo.TotalTime = YamlObj.Baccarat.Duration.Open
 		timeInfo.WaitTime = timeInfo.TotalTime - timeInfo.OutTime
-		GlobalSender.SendTo(person.UserID, &protoMsg.BaccaratStateOpenResp{
+		GlobalSender.SendTo(person.UserID, &gameMsg.BaccaratStateOpenResp{
 			Times:    timeInfo,
 			OpenInfo: self.openInfo,
 		})
 	case protoMsg.GameScene_Over: //结算
 		timeInfo.TotalTime = YamlObj.Baccarat.Duration.Over
 		timeInfo.WaitTime = timeInfo.TotalTime - timeInfo.OutTime
-		GlobalSender.SendTo(person.UserID, &protoMsg.BaccaratStateOverResp{
+		GlobalSender.SendTo(person.UserID, &gameMsg.BaccaratStateOverResp{
 			Times: timeInfo,
 		})
 	}
@@ -173,7 +175,7 @@ func (self *BaccaratGame) Start(args []interface{}) bool {
 		self.IsStart = true
 		// 游戏开始事件
 		// 开始状态
-		startResp := &protoMsg.BaccaratStateStartResp{
+		startResp := &gameMsg.BaccaratStateStartResp{
 			Times: &protoMsg.TimeInfo{
 				OutTime:   0,
 				WaitTime:  YamlObj.Baccarat.Duration.Start,
@@ -196,7 +198,7 @@ func (self *BaccaratGame) Start(args []interface{}) bool {
 		}, nil)
 
 		// 游戏中
-		playResp := &protoMsg.BaccaratStatePlayingResp{
+		playResp := &gameMsg.BaccaratStatePlayingResp{
 			Times: &protoMsg.TimeInfo{
 				OutTime:   0,
 				WaitTime:  YamlObj.Baccarat.Duration.Play,
@@ -210,7 +212,7 @@ func (self *BaccaratGame) Start(args []interface{}) bool {
 		}, nil)
 
 		// 开牌
-		openResp := &protoMsg.BaccaratStateOpenResp{
+		openResp := &gameMsg.BaccaratStateOpenResp{
 			Times: &protoMsg.TimeInfo{
 				OutTime:   0,
 				WaitTime:  YamlObj.Baccarat.Duration.Open,
@@ -226,7 +228,7 @@ func (self *BaccaratGame) Start(args []interface{}) bool {
 		}, nil)
 
 		// 结算
-		overResp := &protoMsg.BaccaratStateOpenResp{
+		overResp := &gameMsg.BaccaratStateOpenResp{
 			Times: &protoMsg.TimeInfo{
 				OutTime:   0,
 				WaitTime:  YamlObj.Baccarat.Duration.Over,
@@ -262,7 +264,7 @@ func (self *BaccaratGame) Playing(args []interface{}) bool {
 	}
 	_ = args[1]
 	//【消息】
-	m := args[0].(*protoMsg.BaccaratBetReq)
+	m := args[0].(*gameMsg.BaccaratBetReq)
 	//【传输对象】
 	agent := args[1].(Agent)
 
@@ -300,7 +302,7 @@ func (self *BaccaratGame) Playing(args []interface{}) bool {
 	// log.Debugf("[%v:%v] 玩家:%v Playing:->%v ", self.GameInfo.Name, self.T.Id, sitter.UserID, m)
 
 	//下注成功
-	msg := &protoMsg.BaccaratBetResp{}
+	msg := &gameMsg.BaccaratBetResp{}
 	msg.UserID = sitter.UserID
 	msg.BetArea = m.BetArea
 	msg.BetScore = m.BetScore
@@ -308,7 +310,7 @@ func (self *BaccaratGame) Playing(args []interface{}) bool {
 	sitter.Total += m.BetScore
 	if value, ok := self.personBetInfo.Load(msg.UserID); ok {
 		ok = false
-		areaBetInfos, ok1 := value.([]*protoMsg.BaccaratBetResp)
+		areaBetInfos, ok1 := value.([]*gameMsg.BaccaratBetResp)
 		for index, betItem := range areaBetInfos {
 			if betItem.BetArea == m.BetArea {
 				areaBetInfos[index].BetScore = betItem.BetScore + m.BetScore
@@ -318,13 +320,13 @@ func (self *BaccaratGame) Playing(args []interface{}) bool {
 			}
 		}
 		if !ok || !ok1 {
-			areaBetInfos = utils.CopyInsert(areaBetInfos, len(areaBetInfos), msg).([]*protoMsg.BaccaratBetResp)
+			areaBetInfos = utils.CopyInsert(areaBetInfos, len(areaBetInfos), msg).([]*gameMsg.BaccaratBetResp)
 		}
 		self.personBetInfo.Store(uid, areaBetInfos)
 	} else {
 		log.Debugf("[%v:%v]\t玩家:%v 下注:%+v", self.GameInfo.Name, self.T.Id, uid, m)
-		areaBetInfos := make([]*protoMsg.BaccaratBetResp, 0)
-		areaBetInfos = utils.CopyInsert(areaBetInfos, len(areaBetInfos), msg).([]*protoMsg.BaccaratBetResp)
+		areaBetInfos := make([]*gameMsg.BaccaratBetResp, 0)
+		areaBetInfos = utils.CopyInsert(areaBetInfos, len(areaBetInfos), msg).([]*gameMsg.BaccaratBetResp)
 		self.personBetInfo.Store(uid, areaBetInfos)
 	}
 	person.State = protoMsg.PlayerState_PlayerPlaying
@@ -340,7 +342,7 @@ func (self *BaccaratGame) Over(args []interface{}) bool {
 	allAreaInfo := make([]int64, AREA_MAX)
 	self.personBetInfo.Range(func(key, value any) bool {
 		uid, ok := key.(int64)
-		betInfos, ok1 := value.([]*protoMsg.BaccaratBetResp)
+		betInfos, ok1 := value.([]*gameMsg.BaccaratBetResp)
 		if !ok || !ok1 {
 			return true
 		}
@@ -372,7 +374,7 @@ func (self *BaccaratGame) Over(args []interface{}) bool {
 	}
 	// 发送游戏结算数据
 	//派奖
-	checkout := &protoMsg.BaccaratCheckoutResp{}
+	checkout := &gameMsg.BaccaratCheckoutResp{}
 	checkout.Acquires = allAreaInfo
 	self.T.ChairWork(func(chair *Chair) {
 		if chair.Total != INVALID {
@@ -608,7 +610,7 @@ func (self *BaccaratGame) host(args []interface{}) {
 		return
 	}
 
-	host := args[2].(*protoMsg.BaccaratHostReq)
+	host := args[2].(*gameMsg.BaccaratHostReq)
 	userID := userData.(*Player).UserID
 
 	size := len(self.hostList)
@@ -647,7 +649,7 @@ func (self *BaccaratGame) host(args []interface{}) {
 	}
 
 	log.Debugf("[%v:%v]\t有人来抢庄啦:%d 列表人数%d", self.GameInfo.Name, self.T.Id, userID, len(self.hostList))
-	GlobalSender.NotifyOthers(self.PlayerList, &protoMsg.BaccaratHostResp{
+	GlobalSender.NotifyOthers(self.PlayerList, &gameMsg.BaccaratHostResp{
 		UserID: userID,
 		IsWant: host.IsWant,
 	})
@@ -658,7 +660,7 @@ func (self *BaccaratGame) superHost(args []interface{}) {
 	//【消息】
 	_ = args[2]
 	agent := args[1].(Agent)
-	host := args[2].(*protoMsg.BaccaratSuperHostReq)
+	host := args[2].(*gameMsg.BaccaratSuperHostReq)
 
 	userData := agent.UserData()
 	if nil == userData {
@@ -681,7 +683,7 @@ func (self *BaccaratGame) superHost(args []interface{}) {
 	}
 
 	// 通知
-	GlobalSender.NotifyOthers(self.PlayerList, &protoMsg.BaccaratSuperHostResp{
+	GlobalSender.NotifyOthers(self.PlayerList, &gameMsg.BaccaratSuperHostResp{
 		UserID: self.bankerID,
 		IsWant: host.IsWant,
 	})
@@ -689,7 +691,7 @@ func (self *BaccaratGame) superHost(args []interface{}) {
 }
 
 // 定庄(说明: 随时可申请上庄,申请列表一共11位。如果有超级抢庄,则插入列表首位。)
-func (self *BaccaratGame) permitHost() *protoMsg.BaccaratHostResp {
+func (self *BaccaratGame) permitHost() *gameMsg.BaccaratHostResp {
 	//校验是否满足庄家条件 [5000 < 金额] 不可连续坐庄15次
 	tempList := self.hostList
 	log.Debugf("[%v:%v]\t定庄.... 列表数据:%v", self.GameInfo.Name, self.T.Id, self.hostList)
@@ -732,7 +734,7 @@ func (self *BaccaratGame) permitHost() *protoMsg.BaccaratHostResp {
 	}
 	//完成定庄后,初始化超级抢庄ID
 	self.superHostID = 0
-	msg := &protoMsg.BaccaratHostResp{
+	msg := &gameMsg.BaccaratHostResp{
 		UserID: self.bankerID,
 		IsWant: true,
 	}
@@ -744,8 +746,8 @@ func (self *BaccaratGame) permitHost() *protoMsg.BaccaratHostResp {
 
 // reset 重新初始化[返回结果提供给外部清场用]
 func (self *BaccaratGame) reset() {
-	self.cbCardCount = []byte{2, 2}              // 首次拿牌张数
-	self.openInfo = &protoMsg.BaccaratOpenResp{} // 结算结果
+	self.cbCardCount = []byte{2, 2}             // 首次拿牌张数
+	self.openInfo = &gameMsg.BaccaratOpenResp{} // 结算结果
 
 	// 闲家手牌
 	self.cbPlayerCards = &protoMsg.CardInfo{
@@ -775,7 +777,7 @@ func (self *BaccaratGame) simulatedResult() (int64, bool) {
 		if !ok {
 			return true
 		}
-		betInfos, ok1 := value.([]*protoMsg.BaccaratBetResp)
+		betInfos, ok1 := value.([]*gameMsg.BaccaratBetResp)
 		if !ok1 {
 			return true
 		}

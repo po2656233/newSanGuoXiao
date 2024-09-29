@@ -5,7 +5,7 @@ import (
 	log "github.com/po2656233/superplace/logger"
 	"runtime"
 	"strings"
-	protoMsg "superman/internal/protocol/gofile"
+	protoMsg "superman/internal/protocol/go_file/common"
 	mgr "superman/nodes/game/manger"
 	"time"
 )

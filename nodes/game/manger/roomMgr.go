@@ -5,7 +5,7 @@ import (
 	"fmt"
 	log "github.com/po2656233/superplace/logger"
 	. "superman/internal/constant"
-	protoMsg "superman/internal/protocol/gofile"
+	protoMsg "superman/internal/protocol/go_file/common"
 	"superman/internal/redis_cluster"
 	"superman/internal/utils"
 	"sync"

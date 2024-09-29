@@ -8,58 +8,60 @@ with open('config.json', 'r', encoding='utf-8') as config_file:
 
 # 从配置文件中获取配置信息
 PROTO_DIR = config['proto_dir']
-GOFILE_DIRECTORY = config['gofile_directory']
+PROTO_DIRS = [os.path.join(PROTO_DIR, d) for d in config['proto_dirs']]
+GOFILE_DIRECTORIES = [os.path.join(PROTO_DIR, d) for d in config['gofile_directory']]
 FILTERED_FILES = config['filtered_files']
 NODE_TO_GO_FILE = config['node_to_go_file']
+MESSAGE_ID_OUTPUT = config['message_id_output']
 
-def extract_req_messages(proto_dir):
+def extract_messages(proto_dirs):
     """
-    提取所有未被注释且以 Req 结尾的 message 及其注释。
+    提取所有未被注释的 message 及其注释。
     返回一个字典，键为节点名，值为消息列表，每个消息为元组 (message_name, comment)
     """
-    req_messages = {}
-    message_pattern = re.compile(r'^\s*message\s+(\w+Req)\s*\{')
+    messages = {}
+    message_pattern = re.compile(r'^\s*message\s+(\w+)\s*\{')
 
-    for root, _, files in os.walk(proto_dir):
-        for file in files:
-            if file.endswith('.proto'):
-                # 检查文件是否在过滤列表中
-                if file in FILTERED_FILES:
-                    continue  # 跳过被过滤的文件
+    for proto_dir in proto_dirs:
+        node_name = os.path.basename(proto_dir)
+        if node_name not in messages:
+            messages[node_name] = []
 
-                # 获取节点名
-                node_name = file.split('_')[0] if '_' in file else 'default'
-                if node_name not in req_messages:
-                    req_messages[node_name] = []
+        for root, _, files in os.walk(proto_dir):
+            for file in files:
+                if file.endswith('.proto'):
+                    # 检查文件是否在过滤列表中
+                    if file in FILTERED_FILES:
+                        continue  # 跳过被过滤的文件
 
-                path = os.path.join(root, file)
-                try:
-                    with open(path, 'r', encoding='utf-8') as f:
-                        lines = f.readlines()
-                        for i, line in enumerate(lines):
-                            msg_match = message_pattern.match(line)
-                            if msg_match:
-                                msg_name = msg_match.group(1)
-                                
-                                # 检查当前行是否被单行注释 '//' 注释掉
-                                if re.match(r'^\s*//', line):
-                                    continue  # 跳过被注释的 message
+                    path = os.path.join(root, file)
+                    try:
+                        with open(path, 'r', encoding='utf-8') as f:
+                            lines = f.readlines()
+                            for i, line in enumerate(lines):
+                                msg_match = message_pattern.match(line)
+                                if msg_match:
+                                    msg_name = msg_match.group(1)
+                                    
+                                    # 检查当前行是否被单行注释 '//' 注释掉
+                                    if re.match(r'^\s*//', line):
+                                        continue  # 跳过被注释的 message
 
-                                # 收集上方的连续单行注释
-                                comments = []
-                                j = i - 1
-                                while j >= 0:
-                                    comment_match = re.match(r'^\s*//\s?(.*)', lines[j])
-                                    if comment_match:
-                                        comments.insert(0, comment_match.group(1).strip())
-                                        j -= 1
-                                    else:
-                                        break
-                                full_comment = '\n'.join(comments) if comments else ''
-                                req_messages[node_name].append((msg_name, full_comment))
-                except Exception as e:
-                    print(f'无法读取文件 {path}: {e}')
-    return req_messages
+                                    # 收集上方的连续单行注释
+                                    comments = []
+                                    j = i - 1
+                                    while j >= 0:
+                                        comment_match = re.match(r'^\s*//\s?(.*)', lines[j])
+                                        if comment_match:
+                                            comments.insert(0, comment_match.group(1).strip())
+                                            j -= 1
+                                        else:
+                                            break
+                                    full_comment = '\n'.join(comments) if comments else ''
+                                    messages[node_name].append((msg_name, full_comment))
+                    except Exception as e:
+                        print(f'无法读取文件 {path}: {e}')
+    return messages
 
 def generate_registration_lines(messages):
     """
@@ -67,8 +69,9 @@ def generate_registration_lines(messages):
     """
     lines = []
     for msg, _ in messages:
-        method = msg[:-3]  # 去除 'Req' 后缀
-        lines.append(f'\tp.Local().Register(p.{method})')
+        if msg.endswith('Req') or msg.endswith('Request'):
+            method = msg[:-3]  # 去除 'Req' 或 'Request' 后缀
+            lines.append(f'\tp.Local().Register(p.{method})')
     return lines
 
 def generate_handler_functions(messages):
@@ -77,17 +80,18 @@ def generate_handler_functions(messages):
     """
     functions = []
     for msg, comment in messages:
-        method = msg[:-3]  # 去除 'Req' 后缀
-        if comment:
-            comment_lines = '// ' + comment.replace('\n', '\n// ')
-            functions.append(f'''
+        if msg.endswith('Req') or msg.endswith('Request'):
+            method = msg[:-3]  # 去除 'Req' 或 'Request' 后缀
+            if comment:
+                comment_lines = '// ' + comment.replace('\n', '\n// ')
+                functions.append(f'''
     {comment_lines}
     func (p *ActorPlayer) {method}(session *cproto.Session, m *protoMsg.{msg}) {{
     \t// TODO: 实现 {method} 处理逻辑
     }}
     ''')
-        else:
-            functions.append(f'''
+            else:
+                functions.append(f'''
     func (p *ActorPlayer) {method}(session *cproto.Session, m *protoMsg.{msg}) {{
     \t// TODO: 实现 {method} 处理逻辑
     }}
@@ -216,15 +220,52 @@ def comment_proto_files():
         'const _ = proto.ProtoPackageIsVersion4'
     ]
 
-    traverse_and_modify(GOFILE_DIRECTORY, targets)
+    for gofile_dir in GOFILE_DIRECTORIES:
+        traverse_and_modify(gofile_dir, targets)
+
+def update_message_id_file(messages_by_node):
+    """
+    更新 message_id.json 文件，记录所有以 Req、Resp、Request 和 Response 结尾的消息体及其所属节点。
+    """
+    message_id_data = {}
+    base_id = 100000
+
+    for node, messages in messages_by_node.items():
+        node_id = base_id * (list(messages_by_node.keys()).index(node) + 1)
+        for i, (msg, _) in enumerate(messages):
+            if msg.endswith('Req') or msg.endswith('Resp') or msg.endswith('Request') or msg.endswith('Response'):
+                message_id_data[node_id + i] = {
+                    "name": msg,
+                    "node": node
+                }
+
+    with open(MESSAGE_ID_OUTPUT, 'w', encoding='utf-8') as f:
+        json.dump(message_id_data, f, indent=4, ensure_ascii=False)
+    print(f'已更新 {MESSAGE_ID_OUTPUT} 文件。')
+
+def replace_import_path_in_go_files(gofile_directories):
+    """
+    替换生成的 .go 文件中的 import 路径
+    """
+    for gofile_dir in gofile_directories:
+        for root, _, files in os.walk(gofile_dir):
+            for file in files:
+                if file.endswith('.go'):
+                    file_path = os.path.join(root, file)
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    content = content.replace('pb "/pb"', 'pb "superman/internal/protocol/go_file/common"')
+                    with open(file_path, 'w', encoding='utf-8') as f:
+                        f.write(content)
+                    print(f'已更新 import 路径: {file_path}')
 
 def main():
     # 提取并处理消息注册和处理函数
-    messages_by_node = extract_req_messages(PROTO_DIR)
+    messages_by_node = extract_messages(PROTO_DIRS)
     for node, messages in messages_by_node.items():
         unique_messages = list(set(messages))  # 去重
         if not unique_messages:
-            print(f'未找到以 Req 结尾的有效 message 在节点: {node}')
+            print(f'未找到有效 message 在节点: {node}')
             continue
 
         # 生成注册代码
@@ -234,13 +275,19 @@ def main():
         handler_functions = generate_handler_functions(unique_messages)
 
         # 获取对应的 Go 文件路径
-        go_file = NODE_TO_GO_FILE.get(node, list(NODE_TO_GO_FILE.values())[0])
-
-        # 更新 Go 文件
-        update_go_file(go_file, registration_lines, handler_functions)
+        go_file = NODE_TO_GO_FILE.get(node)
+        if go_file:
+            # 更新 Go 文件
+            update_go_file(go_file, registration_lines, handler_functions)
     
     # 注释gofile目录下的指定proto语句
     comment_proto_files()
+
+    # 更新 message_id.json 文件
+    update_message_id_file(messages_by_node)
+
+    # 替换生成的 .go 文件中的 import 路径
+    replace_import_path_in_go_files(GOFILE_DIRECTORIES)
 
 if __name__ == "__main__":
     main()

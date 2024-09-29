@@ -6,7 +6,10 @@ import (
 	"fmt"
 	log "github.com/po2656233/superplace/logger"
 	. "superman/internal/constant"
-	protoMsg "superman/internal/protocol/gofile"
+	commMsg "superman/internal/protocol/go_file/common"
+	gameMsg "superman/internal/protocol/go_file/game"
+	gateMsg "superman/internal/protocol/go_file/gate"
+
 	"superman/internal/redis_cluster"
 	"superman/internal/rpc"
 	"superman/internal/utils"
@@ -29,7 +32,7 @@ import (
 
 // Table 桌牌
 type Table struct {
-	*protoMsg.TableInfo
+	*commMsg.TableInfo
 	GameHandle IGameOperate
 	sitters    sync.Map // 座位上的玩家(根据玩家状态区分，旁观者和正在完的玩家)
 	maxChairID int32    // 便于新增椅子号
@@ -86,11 +89,11 @@ func (tb *Table) AddChair(player *Player) (errCode int) {
 	}
 
 	playerList := make([]int64, 0)
-	player.PlayerInfo.State = protoMsg.PlayerState_PlayerSitDown
-	resp := &protoMsg.JoinGameReadyQueueResp{
+	player.PlayerInfo.State = commMsg.PlayerState_PlayerSitDown
+	resp := &gameMsg.JoinGameReadyQueueResp{
 		RoomID:     tb.Rid,
 		TableID:    tb.Id,
-		PlayerList: make([]*protoMsg.PlayerSimpleInfo, 0),
+		PlayerList: make([]*commMsg.PlayerSimpleInfo, 0),
 	}
 	// 检测是否存在了
 	sit, ok := tb.sitters.Load(player.UserID)
@@ -126,7 +129,7 @@ func (tb *Table) AddChair(player *Player) (errCode int) {
 	GetClientMgr().SendTo(player.UserID, resp)
 
 	// 发给其他玩家，当前刚坐下的玩家
-	resp.PlayerList = []*protoMsg.PlayerSimpleInfo{sitter.ToSimpleInfo()}
+	resp.PlayerList = []*commMsg.PlayerSimpleInfo{sitter.ToSimpleInfo()}
 	GetClientMgr().NotifyButOne(playerList, player.UserID, resp)
 
 	// 游戏准备 添加刚坐下的玩家
@@ -185,8 +188,8 @@ func (tb *Table) GetChair(uid int64) *Chair {
 	return nil
 }
 
-func (tb *Table) GetChairInfos() []*protoMsg.PlayerInfo {
-	list := make([]*protoMsg.PlayerInfo, 0)
+func (tb *Table) GetChairInfos() []*commMsg.PlayerInfo {
+	list := make([]*commMsg.PlayerInfo, 0)
 	tb.sitters.Range(func(key, value any) bool {
 		chair, ok1 := value.(*Chair)
 		if !ok1 {
@@ -292,7 +295,7 @@ func (tb *Table) ClearChairs() {
 			person.InChairId = INVALID
 			person.InTableId = INVALID
 			person.GameHandle = nil
-			person.State = protoMsg.PlayerState_PlayerStandUp
+			person.State = commMsg.PlayerState_PlayerStandUp
 			value = nil
 		}
 		return true
@@ -369,7 +372,7 @@ func (tb *Table) ChairSettle(name, inning, result string) {
 		if !ok {
 			return true
 		}
-		chair.PlayerInfo.State = protoMsg.PlayerState_PlayerStandUp
+		chair.PlayerInfo.State = commMsg.PlayerState_PlayerStandUp
 		if chair.Total == INVALID || chair.Gain == INVALID {
 			return true
 		}
@@ -378,7 +381,7 @@ func (tb *Table) ChairSettle(name, inning, result string) {
 			chair.Gain = int64(1000-tb.Commission) * chair.Gain / 1000
 		}
 		//通知金币变化
-		data, code := rpc.SendDataToDB(GetClientMgr().GetApp(), &protoMsg.AddRecordReq{
+		data, code := rpc.SendDataToDB(GetClientMgr().GetApp(), &gameMsg.AddRecordReq{
 			Uid:     chair.UserID,
 			Tid:     tb.Id,
 			Payment: chair.Gain,
@@ -391,12 +394,12 @@ func (tb *Table) ChairSettle(name, inning, result string) {
 			log.Warnf("[%v:%v] inning:[%v] AddRecordReq is failed. code:%v", name, tb.Id, inning, code)
 			return true
 		}
-		resp, ok := data.(*protoMsg.AddRecordResp)
+		resp, ok := data.(*gameMsg.AddRecordResp)
 		if !ok {
 			log.Warnf("[%v:%v] inning:[%v] AddRecordReq is failed. to AddRecordResp", name, tb.Id, inning)
 			return true
 		}
-		changeGold := &protoMsg.NotifyBalanceChangeResp{
+		changeGold := &gateMsg.NotifyBalanceChangeResp{
 			UserID:    chair.UserID,
 			Code:      CodeSettle,
 			AlterCoin: chair.Gain,
@@ -434,7 +437,7 @@ func (tb *Table) GetLookList() []int64 {
 	list := make([]int64, 0)
 	tb.sitters.Range(func(key, value any) bool {
 		if chair, ok := value.(*Chair); ok {
-			if chair.PlayerInfo.State == protoMsg.PlayerState_PlayerLookOn {
+			if chair.PlayerInfo.State == commMsg.PlayerState_PlayerLookOn {
 				list = append(list, chair.PlayerInfo.UserID)
 			}
 		}
@@ -475,12 +478,12 @@ func (tb *Table) CalibratingRemain(delCount int32) {
 	if tb.Remain <= INVALID {
 		return
 	}
-	data, code := rpc.SendDataToDB(GetClientMgr().GetApp(), &protoMsg.DecreaseGameRunReq{
+	data, code := rpc.SendDataToDB(GetClientMgr().GetApp(), &gameMsg.DecreaseGameRunReq{
 		Amount: delCount,
 		Tid:    tb.Id,
 	})
 	if code == SUCCESS {
-		if resp, ok := data.(*protoMsg.DecreaseGameRunResp); ok {
+		if resp, ok := data.(*gameMsg.DecreaseGameRunResp); ok {
 			tb.Remain = resp.Remain
 		}
 	}

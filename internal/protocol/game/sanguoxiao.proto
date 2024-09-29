@@ -1,0 +1,114 @@
+syntax = "proto3";
+option go_package = "/game";
+package pb;
+import "common/baseinfo.proto";
+//次序说明(流程):
+//1、个人信息登录
+//2、招募武将
+//3、选择武将
+//4、匹配挑战对手
+//5、生命值小的一方优先消除,相同则随机一方开始
+//6、开始消除属性触发技能
+//7、15秒轮流消除
+//8、一方总生命值归零则游戏结束
+//9、游戏结束,分配奖励
+//10、退出游戏
+//游戏类型
+enum SgxHeroType {
+  HeroNull = 0;
+  JIN = 1;        //金
+  MU = 2;         //木
+  SHUI = 3;       //水
+  HUO = 4;        //火
+  TU = 5;         //土
+}
+enum SgxPiece {
+  NoSGXPiece = 0;
+  Jin = 1;   // 金
+  Mu = 2;    // 木
+  Shui = 3;  // 水
+  Huo = 4;   // 火
+  Tu = 5;    // 土
+  Yao = 6;   // 药
+}
+// 格子
+message SgxGrid {
+  int32 row = 1;    // 所在排
+  int32 col = 2;    // 所在列
+  SgxPiece core = 3;   // 实际子项
+}
+// 棋盘
+message SgxBoardInfo {
+  repeated SgxGrid  cells = 1; // 所有格子
+}
+// 三国消玩家信息
+message SanguoxiaoPlayer {
+  PlayerInfo  info = 1;                  // 个人信息
+  repeated HeroInfo arenaTeam = 2;         // 出场武将
+  int64 health = 3;    // 生命值
+}
+// 攻击
+message SanguoxiaoAttack {
+  int64  heroId = 1;         // 武将ID
+  int64  damage = 2;         // 攻击造成的伤害值
+  int64  therapy = 3;        // 治疗
+}
+// 游戏结果
+message SanguoxiaoResult {
+  int64 winID = 1;
+  int64 loseID = 2;
+  GoodsList awards = 3; // 奖品 对应商品(GoodsInfo)ID
+}
+////////////////////////////////////////////////////
+// [挑战]
+message ChallengeReq {
+}
+message ChallengeResp {
+  int64 firstID = 1;              // 首发者ID
+  SanguoxiaoPlayer redCamp = 2;    // 红方信息
+  SanguoxiaoPlayer blueCamp = 3;     // 蓝方信息
+}
+/////////////////////////////////////////////////////
+//场景
+message SanguoxiaoSceneResp{
+  int64 timeStamp = 1;              // 时间戳
+  string inning = 2;                // 牌局号
+  SgxBoardInfo board = 3;              // 方格盘信息
+  SanguoxiaoPlayer redCamp = 4;      // 红方
+  SanguoxiaoPlayer blueCamp = 5;       // 蓝方
+}
+// 状态-玩家操作
+message SanguoxiaoStatePlayingResp {
+  TimeInfo times = 1;
+  int64 userID = 2;         // 当前操作方
+}
+// 状态-方格消除
+message SanguoxiaoStateEraseResp {
+  TimeInfo times = 1;
+  SgxBoardInfo nowBoard = 2;   // 当前盘子信息
+}
+// 状态-游戏结算
+message SanguoxiaoStateOverResp {
+  TimeInfo times = 1;
+  SanguoxiaoResult result = 2;
+}
+// 交换
+message SanguoxiaoSwapReq{
+  SgxGrid origin = 1;        //原先的格子
+  SgxGrid target = 2;        //移至的目标格子
+}
+message SanguoxiaoSwapResp{
+  SgxGrid origin = 1;        //原先的格子
+  SgxGrid target = 2;        //移至的目标格子
+  int64 uid = 3;
+}
+// 触发消除
+message SanguoxiaoTriggerResp{
+  int64 uid = 1;
+  int64 redCampHealth = 2;  // 消除后自己的血量 即UserID的血量
+  int64 blueCampHealth = 3;   // 敌方血量
+  SgxBoardInfo perBoard = 4;   // 消除前
+  SgxBoardInfo nowBoard = 5;   // 消除后
+  repeated SgxGrid erase = 6;  // 被消除的格子
+  repeated SanguoxiaoAttack attacks = 7;//武将发起的伤害
+}

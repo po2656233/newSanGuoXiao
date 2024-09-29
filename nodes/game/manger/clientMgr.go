@@ -9,7 +9,7 @@ import (
 	"net"
 	"strconv"
 	. "superman/internal/constant"
-	protoMsg "superman/internal/protocol/gofile"
+	gateMsg "superman/internal/protocol/go_file/gate"
 	"superman/internal/rpc"
 	"superman/internal/utils"
 	"sync"
@@ -26,7 +26,7 @@ type Agent interface {
 	SetUserData(data interface{})
 }
 
-// userID agent
+// ClientManger agent
 type ClientManger struct {
 	sync.Map
 }
@@ -83,7 +83,7 @@ func (self *ClientManger) Get(userID int64) (Agent, bool) {
 // DeleteClient 删除客户端
 func (self *ClientManger) DeleteClient(userID int64) {
 	self.Delete(userID)
-	rpc.SendDataToDB(self.GetApp(), &protoMsg.LogoutReq{
+	rpc.SendDataToDB(self.GetApp(), &gateMsg.LogoutReq{
 		Uid: userID,
 	})
 }
@@ -129,7 +129,7 @@ func (self *ClientManger) SendData(agent Agent, msg proto.Message) {
 		//}
 		agent.WriteMsg(msg)
 	} else {
-		agent.WriteMsg(&protoMsg.ResultResp{
+		agent.WriteMsg(&gateMsg.ResultResp{
 			State: FAILED,
 			Hints: string("无效请求,请重新登录!"),
 		})
@@ -137,13 +137,13 @@ func (self *ClientManger) SendData(agent Agent, msg proto.Message) {
 
 }
 func (self *ClientManger) SendResult(agent Agent, state int32, hints string) {
-	self.SendData(agent, &protoMsg.ResultResp{
+	self.SendData(agent, &gateMsg.ResultResp{
 		State: state,
 		Hints: hints,
 	})
 }
 func (self *ClientManger) SendResultX(uid int64, state int32, hints string) {
-	self.SendTo(uid, &protoMsg.ResultResp{
+	self.SendTo(uid, &gateMsg.ResultResp{
 		State: state,
 		Hints: hints,
 	})
@@ -151,7 +151,7 @@ func (self *ClientManger) SendResultX(uid int64, state int32, hints string) {
 
 // 彈窗提示
 func (self *ClientManger) SendPopResult(agent Agent, state int32, title, hints string) {
-	self.SendData(agent, &protoMsg.ResultPopResp{
+	self.SendData(agent, &gateMsg.ResultPopResp{
 		Flag:  state,
 		Title: title,
 		Hints: hints,
@@ -160,7 +160,7 @@ func (self *ClientManger) SendPopResult(agent Agent, state int32, title, hints s
 
 // 彈窗提示
 func (self *ClientManger) SendPopResultX(uid int64, state int32, title, hints string) {
-	self.SendTo(uid, &protoMsg.ResultPopResp{
+	self.SendTo(uid, &gateMsg.ResultPopResp{
 		Flag:  state,
 		Title: title,
 		Hints: hints,
@@ -168,13 +168,13 @@ func (self *ClientManger) SendPopResultX(uid int64, state int32, title, hints st
 }
 
 func (self *ClientManger) SendError(agent Agent) {
-	agent.WriteMsg(&protoMsg.ResultResp{
+	agent.WriteMsg(&gateMsg.ResultResp{
 		State: FAILED,
 		Hints: StatusText[Login06],
 	})
 }
 func (self *ClientManger) SendErrorX(uid int64) {
-	self.SendTo(uid, &protoMsg.ResultResp{
+	self.SendTo(uid, &gateMsg.ResultResp{
 		State: FAILED,
 		Hints: StatusText[Login06],
 	})

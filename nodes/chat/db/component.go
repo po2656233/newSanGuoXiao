@@ -5,7 +5,7 @@ import (
 	"github.com/po2656233/superplace/facade"
 	log "github.com/po2656233/superplace/logger"
 	"gorm.io/gorm"
-	protoMsg "superman/internal/protocol/gofile"
+	protoMsg "superman/internal/protocol/go_file/common"
 )
 
 type Component struct {

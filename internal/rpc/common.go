@@ -11,7 +11,7 @@ import (
 	"google.golang.org/protobuf/reflect/protoregistry"
 	"strings"
 	. "superman/internal/constant"
-	pb "superman/internal/protocol/gofile"
+	gateMsg "superman/internal/protocol/go_file/gate"
 )
 
 const (
@@ -55,7 +55,7 @@ func (ms *MessageSender) SendData(req proto.Message) interface{} {
 
 // Ping 实现了Ping功能
 func Ping(app facade.IApplication) bool {
-	_, errCode := SendDataToOps(app, &pb.PingReq{})
+	_, errCode := SendDataToOps(app, &gateMsg.PingReq{})
 	return errCode == code.OK
 }
 

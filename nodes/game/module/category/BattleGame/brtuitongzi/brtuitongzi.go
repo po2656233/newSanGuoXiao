@@ -5,7 +5,8 @@ import (
 	"github.com/po2656233/goleaf/gate"
 	log "github.com/po2656233/superplace/logger"
 	. "superman/internal/constant"
-	protoMsg "superman/internal/protocol/gofile"
+	commMsg "superman/internal/protocol/go_file/common"
+	protoMsg "superman/internal/protocol/go_file/game"
 	. "superman/internal/utils"
 	. "superman/nodes/game/manger"
 	. "superman/nodes/game/module/category"
@@ -61,19 +62,19 @@ func (self *BrTuitongziGame) Init() {
 	self.openAreas = make([][]byte, 10, 20)         // 开奖纪录
 	self.cards = make([]byte, 0)
 	// 天-手牌
-	self.openInfo.BankerCard = &protoMsg.CardInfo{
+	self.openInfo.BankerCard = &commMsg.CardInfo{
 		Cards: make([]byte, CardAmount),
 	}
 	// 天-手牌
-	self.openInfo.TianCard = &protoMsg.CardInfo{
+	self.openInfo.TianCard = &commMsg.CardInfo{
 		Cards: make([]byte, CardAmount),
 	}
 	// 地-手牌
-	self.openInfo.DiCard = &protoMsg.CardInfo{
+	self.openInfo.DiCard = &commMsg.CardInfo{
 		Cards: make([]byte, CardAmount),
 	}
 	// 顺-手牌
-	self.openInfo.ShunCard = &protoMsg.CardInfo{
+	self.openInfo.ShunCard = &commMsg.CardInfo{
 		Cards: make([]byte, CardAmount),
 	}
 
@@ -89,8 +90,8 @@ func (self *BrTuitongziGame) Scene(args []interface{}) bool {
 	person := args[0].(*Player)
 	//场景信息
 	StateInfo := &protoMsg.BrTuitongziSceneResp{
-		AllPlayers: &protoMsg.PlayerList{
-			Items: make([]*protoMsg.PlayerInfo, 0),
+		AllPlayers: &commMsg.PlayerList{
+			Items: make([]*commMsg.PlayerInfo, 0),
 		},
 		Inning:     self.Inning,
 		TimeStamp:  self.TimeStamp,
@@ -125,12 +126,12 @@ func (self *BrTuitongziGame) Scene(args []interface{}) bool {
 	GlobalSender.SendTo(uid, StateInfo)
 
 	//通知游戏状态
-	timeInfo := &protoMsg.TimeInfo{
+	timeInfo := &commMsg.TimeInfo{
 		TimeStamp: self.TimeStamp,
 		OutTime:   int32(time.Now().Unix() - self.TimeStamp),
 	}
 	switch self.GameInfo.Scene {
-	case protoMsg.GameScene_Start: //准备
+	case commMsg.GameScene_Start: //准备
 		timeInfo.TotalTime = YamlObj.Brtuitongzi.Duration.Start
 		timeInfo.WaitTime = timeInfo.TotalTime - timeInfo.OutTime
 		GlobalSender.SendTo(uid, &protoMsg.BrTuitongziStateStartResp{
@@ -138,20 +139,20 @@ func (self *BrTuitongziGame) Scene(args []interface{}) bool {
 			StartArea: self.startArea,
 			Inning:    self.Inning,
 		})
-	case protoMsg.GameScene_Playing: //下注
+	case commMsg.GameScene_Playing: //下注
 		timeInfo.TotalTime = YamlObj.Brtuitongzi.Duration.Play
 		timeInfo.WaitTime = timeInfo.TotalTime - timeInfo.OutTime
 		GlobalSender.SendTo(uid, &protoMsg.BrTuitongziStatePlayingResp{
 			Times: timeInfo,
 		})
-	case protoMsg.GameScene_Opening: //开奖
+	case commMsg.GameScene_Opening: //开奖
 		timeInfo.TotalTime = YamlObj.Brtuitongzi.Duration.Open
 		timeInfo.WaitTime = timeInfo.TotalTime - timeInfo.OutTime
 		GlobalSender.SendTo(uid, &protoMsg.BrTuitongziStateOpenResp{
 			Times:    timeInfo,
 			OpenInfo: self.openInfo,
 		})
-	case protoMsg.GameScene_Over: //结算
+	case commMsg.GameScene_Over: //结算
 		timeInfo.TotalTime = YamlObj.Brtuitongzi.Duration.Over
 		timeInfo.WaitTime = timeInfo.TotalTime - timeInfo.OutTime
 		GlobalSender.SendTo(uid, &protoMsg.BrTuitongziStateOverResp{
@@ -242,7 +243,7 @@ func (self *BrTuitongziGame) Playing(args []interface{}) bool {
 		areaBetInfos = CopyInsert(areaBetInfos, len(areaBetInfos), msg).([]*protoMsg.BrTuitongziBetResp)
 		self.personBetInfo.Store(sitter.UserID, areaBetInfos)
 	}
-	person.State = protoMsg.PlayerState_PlayerPlaying
+	person.State = commMsg.PlayerState_PlayerPlaying
 
 	self.bankerScore += msg.BetScore
 	//通知其他玩家
@@ -408,14 +409,14 @@ func (self *BrTuitongziGame) onStart() {
 		self.inventory = self.confInventory
 	}
 
-	self.ChangeState(protoMsg.GameScene_Start)
+	self.ChangeState(commMsg.GameScene_Start)
 	time.AfterFunc(time.Duration(YamlObj.Brtuitongzi.Duration.Start)*time.Second, self.onPlay)
 
 	// 开始状态
 	//m := self.permitHost() //反馈定庄信息
 	//GlobalSender.NotifyOthers(self.PlayerList, MainGameState, protoMsg.GameScene_Start, m)
 	msg := &protoMsg.BrTuitongziStateStartResp{
-		Times: &protoMsg.TimeInfo{
+		Times: &commMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			OutTime:   0,
 			WaitTime:  YamlObj.Brtuitongzi.Duration.Start,
@@ -432,12 +433,12 @@ func (self *BrTuitongziGame) onStart() {
 
 // [下注减法]
 func (self *BrTuitongziGame) onPlay() {
-	self.ChangeState(protoMsg.GameScene_Playing)
+	self.ChangeState(commMsg.GameScene_Playing)
 	time.AfterFunc(time.Duration(YamlObj.Brtuitongzi.Duration.Play)*time.Second, self.onOpen)
 
 	// 下注状态
 	GlobalSender.NotifyOthers(self.PlayerList, &protoMsg.BrTuitongziStatePlayingResp{
-		Times: &protoMsg.TimeInfo{
+		Times: &commMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			OutTime:   0,
 			WaitTime:  YamlObj.Brtuitongzi.Duration.Play,
@@ -447,7 +448,7 @@ func (self *BrTuitongziGame) onPlay() {
 }
 
 func (self *BrTuitongziGame) onOpen() {
-	self.ChangeState(protoMsg.GameScene_Opening)
+	self.ChangeState(commMsg.GameScene_Opening)
 
 	// 开始状态
 	//m := self.permitHost() //反馈定庄信息
@@ -457,7 +458,7 @@ func (self *BrTuitongziGame) onOpen() {
 	self.DispatchCard()
 
 	GlobalSender.NotifyOthers(self.PlayerList, &protoMsg.BrTuitongziStateOpenResp{
-		Times: &protoMsg.TimeInfo{
+		Times: &commMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			OutTime:   0,
 			WaitTime:  YamlObj.Brtuitongzi.Duration.Open,
@@ -472,7 +473,7 @@ func (self *BrTuitongziGame) onOpen() {
 
 // [结算加法]
 func (self *BrTuitongziGame) onOver() {
-	self.ChangeState(protoMsg.GameScene_Over)
+	self.ChangeState(commMsg.GameScene_Over)
 
 	// 玩家结算(框架消息)
 	self.Over(nil)
@@ -493,7 +494,7 @@ func (self *BrTuitongziGame) onOver() {
 	// 开奖状态
 	time.AfterFunc(time.Duration(YamlObj.Brtuitongzi.Duration.Over)*time.Second, self.onStart)
 	GlobalSender.NotifyOthers(self.PlayerList, &protoMsg.BrTuitongziStateOverResp{
-		Times: &protoMsg.TimeInfo{
+		Times: &commMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			OutTime:   0,
 			WaitTime:  YamlObj.Brtuitongzi.Duration.Over,

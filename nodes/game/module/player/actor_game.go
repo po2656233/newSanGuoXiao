@@ -8,7 +8,7 @@ import (
 	"strings"
 	cst "superman/internal/constant"
 	event2 "superman/internal/event"
-	pb "superman/internal/protocol/gofile"
+	gateProto "superman/internal/protocol/go_file/gate"
 	"superman/internal/rpc"
 	mgr "superman/nodes/game/manger"
 	"superman/nodes/game/module/category"
@@ -101,11 +101,11 @@ func (p *ActorGame) OnStop() {
 
 // cron
 func (p *ActorGame) checkGameList() {
-	data, errCode := rpc.SendDataToDB(p.App(), &pb.GetGameListReq{
+	data, errCode := rpc.SendDataToDB(p.App(), &gateProto.GetGameListReq{
 		Kid: cst.Unlimited,
 	})
 	if errCode == 0 {
-		resp, ok := data.(*pb.GetGameListResp)
+		resp, ok := data.(*gateProto.GetGameListResp)
 		if ok && resp != nil && resp.Items != nil {
 			p.Timer().Remove(p.checkGamesTimeId)
 			mgr.GetGameInfoMgr().AddGames(resp.Items.Items)
@@ -117,13 +117,13 @@ func (p *ActorGame) checkGameList() {
 
 // cron
 func (p *ActorGame) checkTableList(rid int64) {
-	req := &pb.GetTableListReq{
+	req := &gateProto.GetTableListReq{
 		Rid: rid,
 	}
 
 	data, errCode := rpc.SendDataToDB(p.App(), req)
 	if errCode == 0 {
-		resp, ok := data.(*pb.GetTableListResp)
+		resp, ok := data.(*gateProto.GetTableListResp)
 		if !ok || resp == nil || resp.Items == nil {
 			return
 		}
@@ -146,13 +146,13 @@ func (p *ActorGame) checkTableList(rid int64) {
 
 // cron
 func (p *ActorGame) checkRoomList() {
-	req := &pb.GetRoomListReq{
+	req := &gateProto.GetRoomListReq{
 		Uid: cst.Unlimited,
 	}
 
 	data, errCode := rpc.SendDataToDB(p.App(), req)
 	if errCode == 0 {
-		resp, ok := data.(*pb.GetRoomListResp)
+		resp, ok := data.(*gateProto.GetRoomListResp)
 		if ok && resp != nil && resp.Items != nil {
 			for _, item := range resp.Items.Items {
 				rm := mgr.GetRoomMgr().AddRoom(item)
@@ -183,12 +183,12 @@ func (p *ActorGame) checkChild() {
 
 /////////////////////////////////////////////////////////////////
 
-func (p *ActorGame) CreateRoomResp(resp *pb.CreateRoomResp) {
+func (p *ActorGame) CreateRoomResp(resp *gateProto.CreateRoomResp) {
 	if _, ok := mgr.GetRoomMgr().Create(resp.Info); !ok {
 		log.Errorf("[ActorGame][CreateRoomResp] [Create] no good!")
 	}
 }
-func (p *ActorGame) CreateTableResp(resp *pb.CreateTableResp) {
+func (p *ActorGame) CreateTableResp(resp *gateProto.CreateTableResp) {
 	if resp.Table == nil {
 		log.Errorf("[ActorGame][CreateTableResp] no resp!")
 		return
@@ -199,7 +199,7 @@ func (p *ActorGame) CreateTableResp(resp *pb.CreateTableResp) {
 		}
 	}
 }
-func (p *ActorGame) DeleteTableResp(resp *pb.DeleteTableResp) {
+func (p *ActorGame) DeleteTableResp(resp *gateProto.DeleteTableResp) {
 	if rm := mgr.GetRoomMgr().GetRoom(resp.Rid); rm != nil {
 		rm.DelTable(resp.Tid)
 	}

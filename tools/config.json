@@ -1,9 +1,12 @@
 {
     "proto_dir": "../internal/protocol",
-    "gofile_directory": "../internal/protocol/gofile",
-    "filtered_files": ["login.proto", "base_type.proto", "baseinfo.proto"],
+    "proto_dirs": ["common", "gate", "chat", "game"],
+    "gofile_directory": ["go_file/", "go_file/", "go_file/", "go_file/"],
+    "jsfile_directory": ["js_file/", "js_file/", "js_file/", "js_file/"],
+    "filtered_files": [""],
     "node_to_go_file": {
         "game": "../nodes/game/module/player/handle_msg.go",
-        "social": "../nodes/chat/module/player/handle_msg.go"
-    }
+        "chat": "../nodes/chat/module/player/handle_msg.go"
+    },
+    "message_id_output": "../config/common/message_id.json"
 }

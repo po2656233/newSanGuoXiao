@@ -11,7 +11,9 @@ import (
 	"google.golang.org/protobuf/proto"
 	"math/rand"
 	. "superman/internal/constant"
-	protoMsg "superman/internal/protocol/gofile"
+	protoMsg "superman/internal/protocol/go_file/common"
+	gameMsg "superman/internal/protocol/go_file/game"
+	gateMsg "superman/internal/protocol/go_file/gate"
 	"superman/internal/redis_cluster"
 	"superman/internal/rpc"
 	"superman/nodes/game/module/online"
@@ -48,12 +50,12 @@ func (p *ActorQueue) OnStop() {
 	}
 }
 
-func (p *ActorQueue) joinAllReadyQueue(session *cproto.Session, req *protoMsg.JoinAllReadyQueueReq) {
+func (p *ActorQueue) joinAllReadyQueue(session *cproto.Session, req *gameMsg.JoinAllReadyQueueReq) {
 	// 从redis中查找评分最高分的房间作为可选项 一般房间仅差一个人满座的，则评分最高
 	list, err := redis_cluster.SingleRedis().GetTopCountMembers(context.Background(), GetMatchKey(req.GameID, req.RoomID), INVALID)
 	if err != nil {
 		log.Errorf("[ActorQueue] 游戏[%v] 房间[%v] 加入牌桌失败! err:%v", req.GameID, req.RoomID, err)
-		p.Response(session, &protoMsg.ResultResp{
+		p.Response(session, &gateMsg.ResultResp{
 			State: FAILED,
 			Hints: StatusText[Game51],
 		})
@@ -62,7 +64,7 @@ func (p *ActorQueue) joinAllReadyQueue(session *cproto.Session, req *protoMsg.Jo
 	size := len(list)
 	if 0 == size {
 		log.Errorf("[ActorQueue] 游戏[%v] 房间[%v] 加入牌桌失败! no enough", req.GameID, req.RoomID)
-		p.Response(session, &protoMsg.ResultResp{
+		p.Response(session, &gateMsg.ResultResp{
 			State: FAILED,
 			Hints: StatusText[Game51],
 		})
@@ -72,7 +74,7 @@ func (p *ActorQueue) joinAllReadyQueue(session *cproto.Session, req *protoMsg.Jo
 	val, ok := list[0].(string)
 	if !ok {
 		log.Errorf("[ActorQueue] 游戏[%v] 房间[%v] 加入牌桌失败! no value", req.GameID, req.RoomID)
-		p.Response(session, &protoMsg.ResultResp{
+		p.Response(session, &gateMsg.ResultResp{
 			State: FAILED,
 			Hints: StatusText[Game51],
 		})
@@ -81,7 +83,7 @@ func (p *ActorQueue) joinAllReadyQueue(session *cproto.Session, req *protoMsg.Jo
 	info := redis_cluster.RedisMatchInfo{}
 	if err = json.Unmarshal([]byte(val), &info); err != nil {
 		log.Errorf("[ActorQueue] 游戏[%v] 房间[%v] info:%+v err:%v", req.GameID, req.RoomID, info, err)
-		p.Response(session, &protoMsg.ResultResp{
+		p.Response(session, &gateMsg.ResultResp{
 			State: FAILED,
 			Hints: StatusText[Game51],
 		})
@@ -95,7 +97,7 @@ func (p *ActorQueue) joinAllReadyQueue(session *cproto.Session, req *protoMsg.Jo
 			val, ok = list[index].(string)
 			if !ok {
 				log.Errorf("[ActorQueue] 游戏[%v] 房间[%v] 加入牌桌失败! no value", req.GameID, req.RoomID)
-				p.Response(session, &protoMsg.ResultResp{
+				p.Response(session, &gateMsg.ResultResp{
 					State: FAILED,
 					Hints: StatusText[Game51],
 				})
@@ -104,7 +106,7 @@ func (p *ActorQueue) joinAllReadyQueue(session *cproto.Session, req *protoMsg.Jo
 			err = json.Unmarshal([]byte(val), &info)
 			if err != nil {
 				log.Errorf("[ActorQueue] 游戏[%v] 房间[%v] err:%v", req.GameID, req.RoomID, err)
-				p.Response(session, &protoMsg.ResultResp{
+				p.Response(session, &gateMsg.ResultResp{
 					State: FAILED,
 					Hints: StatusText[Game51],
 				})

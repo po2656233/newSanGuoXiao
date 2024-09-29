@@ -8,7 +8,7 @@ import (
 	sgxError "github.com/po2656233/superplace/logger/error"
 	"superman/internal/conf"
 	. "superman/internal/constant"
-	pb "superman/internal/protocol/gofile"
+	pb "superman/internal/protocol/go_file/gate"
 	"superman/internal/rpc"
 )
 

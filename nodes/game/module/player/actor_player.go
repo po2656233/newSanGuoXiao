@@ -10,7 +10,7 @@ import (
 	"net/url"
 	. "superman/internal/constant"
 	event2 "superman/internal/event"
-	protoMsg "superman/internal/protocol/gofile"
+	gateMsg "superman/internal/protocol/go_file/gate"
 	"superman/internal/rpc"
 	mgr "superman/nodes/game/manger"
 	"superman/nodes/game/module/online"
@@ -56,14 +56,14 @@ func (p *ActorPlayer) Send(funName string, resp interface{}) {
 }
 
 func (p *ActorPlayer) SendResult(state int32, hints string) {
-	p.WriteMsg(&protoMsg.ResultResp{
+	p.WriteMsg(&gateMsg.ResultResp{
 		State: state,
 		Hints: hints,
 	})
 }
 
 func (p *ActorPlayer) SendResultPop(state int32, title, hints string) {
-	p.WriteMsg(&protoMsg.ResultPopResp{
+	p.WriteMsg(&gateMsg.ResultPopResp{
 		Flag:  state,
 		Title: title,
 		Hints: hints,

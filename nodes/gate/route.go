@@ -10,7 +10,8 @@ import (
 	"github.com/po2656233/superplace/net/parser/simple"
 	cproto "github.com/po2656233/superplace/net/proto"
 	. "superman/internal/constant"
-	"superman/internal/protocol/gofile"
+	"superman/internal/protocol/go_file/common"
+	gateMsg "superman/internal/protocol/go_file/gate"
 	"superman/internal/rpc"
 )
 
@@ -97,7 +98,7 @@ func onSimpleDataRoute(agent *simple.Agent, msg *simple.Message, route *simple.N
 	session.Mid = msg.MID
 
 	if session.Mid == MIDPing {
-		data, _ := rpc.GetProtoData(&pb.PongResp{})
+		data, _ := rpc.GetProtoData(&gateMsg.PongResp{})
 		agent.SendRaw(data)
 		return
 	}

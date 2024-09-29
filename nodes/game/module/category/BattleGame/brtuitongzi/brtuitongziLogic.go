@@ -1,7 +1,7 @@
 package brtuitongzi
 
 import (
-	protoMsg "superman/internal/protocol/gofile"
+	protoMsg "superman/internal/protocol/go_file/common"
 	. "superman/nodes/game/module/category" // 注意这里不能这样导入 "../../category" 因为本地导入是根据gopath路径设定的
 )
 

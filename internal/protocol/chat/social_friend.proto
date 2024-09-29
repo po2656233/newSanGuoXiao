@@ -1,0 +1,69 @@
+syntax = "proto3";
+option go_package = "/chat";
+package pb;
+import "common/baseinfo.proto";
+// 好友在线情况
+message FriendOnlineReq {
+}
+message FriendOnlineResp {
+	repeated int64 uidList = 1;
+}
+// 好友列表
+message FriendListReq {
+}
+message FriendListResp {
+	repeated UserInfo dataArr = 1;
+}
+// 删除好友
+message FriendDelReq {
+	int64 friendUid = 1;
+}
+message FriendDelResp {
+	int64 friendUid = 1;
+}
+// 申请加好友 SenderUid申请加TargetUid为好友
+message FriendApplyReq {
+	int64 senderUid = 1;  //发送者
+	int64 targetUid = 2;  //接收者
+	string cont = 3; //邀请语
+}
+message FriendApplyResp {
+	FriendApplyReq applyData = 1;
+}
+//批量加好友
+message FriendApplyBatchReq {
+	int64 senderUid = 1;
+	repeated int64 targetUidArr = 2;
+	string cont = 3;
+}
+message FriendApplyBatchResp {
+	FriendApplyBatchReq applyData = 1;
+}
+// 好友申请列表
+message FriendApplyListReq {
+}
+message FriendApplyListResp {
+	repeated UserInfo dataArr = 1;
+}
+// 处理好友申请
+message FriendApplyDealReq {
+	int64 senderUid = 1; //发送者
+	int32 isAgree   = 2; //1同意 0拒绝
+}
+message FriendApplyDealResp {
+	int64 senderUid  = 1;     //发送者
+	int64 targetUid  = 2;     //接收者
+	int32 isAgree    = 3;     //1同意 0拒绝
+	UserInfo friendData = 4;  //好友数据
+}
+// 批量处理好友申请
+message FriendApplyBatchDealReq {
+	repeated int64 senderUidArr = 1; //发送者
+	int32 isAgree = 2;   //1同意 0拒绝
+}
+message FriendApplyBatchDealResp {
+	int64 targetUid = 1;				//接收者
+	repeated int64 senderUidArr = 2;	//发送者
+	int32 isAgree = 3;					//1同意 0拒绝
+	repeated UserInfo friendArr = 4;	//好友数据
+}

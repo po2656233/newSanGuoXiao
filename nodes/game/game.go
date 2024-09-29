@@ -6,14 +6,14 @@ import (
 	"github.com/po2656233/superplace/components/gops"
 	"github.com/po2656233/superplace/extend/snowflake"
 	cstring "github.com/po2656233/superplace/extend/string"
-	sgxUtils "github.com/po2656233/superplace/extend/utils"
+	utils "github.com/po2656233/superplace/extend/utils"
 	"superman/internal/component/check_center"
 	"superman/internal/conf"
 	"superman/nodes/game/module/player"
 )
 
 func Run(profileFilePath, nodeId string) {
-	if sgxUtils.IsNumeric(nodeId) == false {
+	if utils.IsNumeric(nodeId) == false {
 		panic("node parameter must is number.")
 	}
 

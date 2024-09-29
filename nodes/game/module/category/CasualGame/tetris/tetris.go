@@ -1,7 +1,7 @@
 package tetris
 
 import (
-	protoMsg "superman/internal/protocol/gofile"
+	protoMsg "superman/internal/protocol/go_file/common"
 	mgr "superman/nodes/game/manger"
 	. "superman/nodes/game/module/category"
 )

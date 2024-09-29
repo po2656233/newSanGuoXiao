@@ -5,7 +5,8 @@ import (
 	log "github.com/po2656233/superplace/logger"
 	"strconv"
 	. "superman/internal/constant"
-	protoMsg "superman/internal/protocol/gofile"
+	protoMsg "superman/internal/protocol/go_file/common"
+	gameMsg "superman/internal/protocol/go_file/game"
 	"superman/internal/utils"
 	. "superman/nodes/game/manger"
 	. "superman/nodes/game/module/category"
@@ -23,9 +24,9 @@ type BrcowcowGame struct {
 	logic       *StuCowCow
 	roundNumber string
 
-	personBetInfo *sync.Map                  //map[int64][]*protoMsg.BrcowcowBetResp //下注信息
-	openAreas     [][]byte                   //开奖纪录
-	openInfo      *protoMsg.BrcowcowOpenResp //开奖结果
+	personBetInfo *sync.Map                 //map[int64][]*protoMsg.BrcowcowBetResp //下注信息
+	openAreas     [][]byte                  //开奖纪录
+	openInfo      *gameMsg.BrcowcowOpenResp //开奖结果
 	odds          []float64
 
 	hostList    []int64 //申请列表(默认11个)
@@ -47,7 +48,7 @@ func New(game *Game, tb *Table) *BrcowcowGame {
 
 	p.bankerScore = 0
 	p.logic = &StuCowCow{}
-	p.openInfo = &protoMsg.BrcowcowOpenResp{} // 结算结果
+	p.openInfo = &gameMsg.BrcowcowOpenResp{} // 结算结果
 	p.Init()
 	return p
 }
@@ -95,7 +96,7 @@ func (self *BrcowcowGame) Scene(args []interface{}) bool {
 	}
 	person := args[0].(*Player)
 	//场景信息
-	StateInfo := &protoMsg.BrcowcowSceneResp{
+	StateInfo := &gameMsg.BrcowcowSceneResp{
 		AllPlayers: &protoMsg.PlayerList{
 			Items: make([]*protoMsg.PlayerInfo, 0),
 		},
@@ -115,7 +116,7 @@ func (self *BrcowcowGame) Scene(args []interface{}) bool {
 		if !ok {
 			return true
 		}
-		bets, ok1 := value.([]*protoMsg.BrcowcowBetResp)
+		bets, ok1 := value.([]*gameMsg.BrcowcowBetResp)
 		if !ok1 {
 			return true
 		}
@@ -141,33 +142,33 @@ func (self *BrcowcowGame) Scene(args []interface{}) bool {
 	case protoMsg.GameScene_Free:
 		timeInfo.TotalTime = YamlObj.BrCowcow.Duration.Free
 		timeInfo.WaitTime = timeInfo.TotalTime - timeInfo.OutTime
-		GlobalSender.SendTo(uid, &protoMsg.BrcowcowStateFreeResp{
+		GlobalSender.SendTo(uid, &gameMsg.BrcowcowStateFreeResp{
 			Times: timeInfo,
 		})
 	case protoMsg.GameScene_Start: //抢庄
 		timeInfo.TotalTime = YamlObj.BrCowcow.Duration.Start
 		timeInfo.WaitTime = timeInfo.TotalTime - timeInfo.OutTime
-		GlobalSender.SendTo(uid, &protoMsg.BrcowcowStateStartResp{
+		GlobalSender.SendTo(uid, &gameMsg.BrcowcowStateStartResp{
 			Times:  timeInfo,
 			HostID: self.bankerID,
 		})
 	case protoMsg.GameScene_Playing: //下注
 		timeInfo.TotalTime = YamlObj.BrCowcow.Duration.Play
 		timeInfo.WaitTime = timeInfo.TotalTime - timeInfo.OutTime
-		GlobalSender.SendTo(uid, &protoMsg.BrcowcowStatePlayingResp{
+		GlobalSender.SendTo(uid, &gameMsg.BrcowcowStatePlayingResp{
 			Times: timeInfo,
 		})
 	case protoMsg.GameScene_Opening: //开奖
 		timeInfo.TotalTime = YamlObj.BrCowcow.Duration.Open
 		timeInfo.WaitTime = timeInfo.TotalTime - timeInfo.OutTime
-		GlobalSender.SendTo(uid, &protoMsg.BrcowcowStateOpenResp{
+		GlobalSender.SendTo(uid, &gameMsg.BrcowcowStateOpenResp{
 			Times:    timeInfo,
 			OpenInfo: self.openInfo,
 		})
 	case protoMsg.GameScene_Over: //结算
 		timeInfo.TotalTime = YamlObj.BrCowcow.Duration.Over
 		timeInfo.WaitTime = timeInfo.TotalTime - timeInfo.OutTime
-		GlobalSender.SendTo(uid, &protoMsg.BrcowcowStateOverResp{
+		GlobalSender.SendTo(uid, &gameMsg.BrcowcowStateOverResp{
 			Times: timeInfo,
 		})
 	}
@@ -189,7 +190,7 @@ func (self *BrcowcowGame) Start(args []interface{}) bool {
 func (self *BrcowcowGame) Playing(args []interface{}) bool {
 	_ = args[1]
 	//【消息】
-	m := args[0].(*protoMsg.BrcowcowBetReq)
+	m := args[0].(*gameMsg.BrcowcowBetReq)
 	//【传输对象】
 	agent := args[1].(Agent)
 
@@ -226,7 +227,7 @@ func (self *BrcowcowGame) Playing(args []interface{}) bool {
 
 	//下注成功
 	//下注数目累加
-	msg := &protoMsg.BrcowcowBetResp{}
+	msg := &gameMsg.BrcowcowBetResp{}
 	msg.UserID = sitter.UserID
 	msg.BetArea = m.BetArea
 	msg.BetScore = m.BetScore
@@ -234,7 +235,7 @@ func (self *BrcowcowGame) Playing(args []interface{}) bool {
 	sitter.Total += m.BetScore
 	if value, ok := self.personBetInfo.Load(sitter.UserID); ok {
 		ok = false
-		areaBetInfos, ok1 := value.([]*protoMsg.BrcowcowBetResp)
+		areaBetInfos, ok1 := value.([]*gameMsg.BrcowcowBetResp)
 		for index, betItem := range areaBetInfos {
 			if betItem.BetArea == m.BetArea {
 				areaBetInfos[index].BetScore = betItem.BetScore + m.BetScore
@@ -244,13 +245,13 @@ func (self *BrcowcowGame) Playing(args []interface{}) bool {
 			}
 		}
 		if !ok || !ok1 {
-			areaBetInfos = utils.CopyInsert(areaBetInfos, len(areaBetInfos), msg).([]*protoMsg.BrcowcowBetResp)
+			areaBetInfos = utils.CopyInsert(areaBetInfos, len(areaBetInfos), msg).([]*gameMsg.BrcowcowBetResp)
 		}
 		self.personBetInfo.Store(sitter.UserID, areaBetInfos)
 	} else {
 		log.Infof("[%v:%v]\t玩家:%v 下注:%+v", self.Name, self.T.Id, sitter.UserID, m)
-		areaBetInfos := make([]*protoMsg.BrcowcowBetResp, 0)
-		areaBetInfos = utils.CopyInsert(areaBetInfos, len(areaBetInfos), msg).([]*protoMsg.BrcowcowBetResp)
+		areaBetInfos := make([]*gameMsg.BrcowcowBetResp, 0)
+		areaBetInfos = utils.CopyInsert(areaBetInfos, len(areaBetInfos), msg).([]*gameMsg.BrcowcowBetResp)
 		self.personBetInfo.Store(sitter.UserID, areaBetInfos)
 	}
 	person.State = protoMsg.PlayerState_PlayerPlaying
@@ -272,7 +273,7 @@ func (self *BrcowcowGame) Over(args []interface{}) bool {
 			return true
 		}
 
-		betInfos, ok1 := value.([]*protoMsg.BrcowcowBetResp)
+		betInfos, ok1 := value.([]*gameMsg.BrcowcowBetResp)
 		if !ok1 {
 			return true
 		}
@@ -297,7 +298,7 @@ func (self *BrcowcowGame) Over(args []interface{}) bool {
 	})
 
 	//派奖
-	checkout := &protoMsg.BrcowcowOverResp{}
+	checkout := &gameMsg.BrcowcowOverResp{}
 
 	if self.bankerID != INVALID {
 		//查看是否够赔
@@ -560,7 +561,7 @@ func (self *BrcowcowGame) onDecide() {
 	// 开始状态
 	//m := self.permitHost() //反馈定庄信息
 	//GlobalSender.NotifyOthers(self.PlayerList, MainGameState, protoMsg.GameScene_Start, m)
-	GlobalSender.NotifyOthers(self.PlayerList, &protoMsg.BrcowcowStateStartResp{
+	GlobalSender.NotifyOthers(self.PlayerList, &gameMsg.BrcowcowStateStartResp{
 		Times: &protoMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			OutTime:   0,
@@ -579,7 +580,7 @@ func (self *BrcowcowGame) onPlay() {
 	time.AfterFunc(time.Duration(YamlObj.BrCowcow.Duration.Play)*time.Second, self.onOpen)
 
 	// 下注状态
-	GlobalSender.NotifyOthers(self.PlayerList, &protoMsg.BrcowcowStatePlayingResp{
+	GlobalSender.NotifyOthers(self.PlayerList, &gameMsg.BrcowcowStatePlayingResp{
 		Times: &protoMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			OutTime:   0,
@@ -595,7 +596,7 @@ func (self *BrcowcowGame) onOpen() {
 	// 开始状态
 	//m := self.permitHost() //反馈定庄信息
 	//GlobalSender.NotifyOthers(self.PlayerList, MainGameState, protoMsg.GameScene_Start, m)
-	GlobalSender.NotifyOthers(self.PlayerList, &protoMsg.BrcowcowStateOpenResp{
+	GlobalSender.NotifyOthers(self.PlayerList, &gameMsg.BrcowcowStateOpenResp{
 		Times: &protoMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			OutTime:   0,
@@ -631,7 +632,7 @@ func (self *BrcowcowGame) onOver() {
 
 	// 开奖状态
 	time.AfterFunc(time.Duration(YamlObj.BrCowcow.Duration.Over)*time.Second, self.onDecide)
-	GlobalSender.NotifyOthers(self.PlayerList, &protoMsg.BrcowcowStateOverResp{
+	GlobalSender.NotifyOthers(self.PlayerList, &gameMsg.BrcowcowStateOverResp{
 		Times: &protoMsg.TimeInfo{
 			TimeStamp: self.TimeStamp,
 			OutTime:   0,
@@ -653,7 +654,7 @@ func (self *BrcowcowGame) host(args []interface{}) {
 		return
 	}
 
-	host := a[0].(*protoMsg.BrcowcowHostReq)
+	host := a[0].(*gameMsg.BrcowcowHostReq)
 	person := userData.(*Player)
 	userID := person.UserID
 
@@ -716,7 +717,7 @@ func (self *BrcowcowGame) host(args []interface{}) {
 	}
 
 	log.Infof("[%v:%v]有人来抢庄啦:%d 列表人数%d", self.Name, self.T.Id, userID, len(self.hostList))
-	GlobalSender.NotifyOthers(self.PlayerList, &protoMsg.BrcowcowHostResp{
+	GlobalSender.NotifyOthers(self.PlayerList, &gameMsg.BrcowcowHostResp{
 		UserID: userID,
 		IsWant: host.IsWant,
 	})
@@ -728,7 +729,7 @@ func (self *BrcowcowGame) hostlist(args []interface{}) {
 	_ = args
 	//a := args[0].([]interface{})
 	person := GlobalPlayerMgr.Get(self.bankerID)
-	msg := &protoMsg.BrcowcowHostListResp{}
+	msg := &gameMsg.BrcowcowHostListResp{}
 	if person != nil {
 		msg.CurHost = person.PlayerInfo
 		msg.Waitlist = self.hostList
@@ -778,7 +779,7 @@ func (self *BrcowcowGame) superHost(args []interface{}) {
 }
 
 // 定庄(说明: 随时可申请上庄,申请列表一共11位。如果有超级抢庄,则插入列表首位。)
-func (self *BrcowcowGame) permitHost() *protoMsg.BrcowcowHostResp {
+func (self *BrcowcowGame) permitHost() *gameMsg.BrcowcowHostResp {
 	//校验是否满足庄家条件 [5000 < 金额] 不可连续坐庄15次
 	tempList := self.hostList
 	log.Infof("[%v:%v]定庄.... 列表数据:%v", self.Name, self.T.Id, self.hostList)
@@ -829,7 +830,7 @@ func (self *BrcowcowGame) permitHost() *protoMsg.BrcowcowHostResp {
 	}
 	//完成定庄后,初始化超级抢庄ID
 	self.superHostID = 0
-	msg := &protoMsg.BrcowcowHostResp{
+	msg := &gameMsg.BrcowcowHostResp{
 		UserID: self.bankerID,
 		IsWant: true,
 	}
@@ -861,7 +862,7 @@ func (self *BrcowcowGame) simulatedResult() (int64, bool) {
 	}
 	var personAwardScore int64 = self.inventory
 	self.personBetInfo.Range(func(key, value any) bool {
-		betInfos, ok := value.([]*protoMsg.BrcowcowBetResp)
+		betInfos, ok := value.([]*gameMsg.BrcowcowBetResp)
 		if !ok {
 			return true
 		}

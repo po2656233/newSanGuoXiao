@@ -3,7 +3,7 @@ package manger
 import (
 	log "github.com/po2656233/superplace/logger"
 	. "superman/internal/constant"
-	protoMsg "superman/internal/protocol/gofile"
+	protoMsg "superman/internal/protocol/go_file/common"
 	"sync"
 )
 
@@ -76,7 +76,7 @@ func ToPlayer(info *protoMsg.UserInfo) *Player {
 	}
 }
 
-func SimpleToPlayer(info *protoMsg.UserSimpleInfo) *Player {
+func SimpleToPlayer(info *protoMsg.UserInfo) *Player {
 	return &Player{
 		PlayerInfo: &protoMsg.PlayerInfo{
 			UserID:    info.UserID,

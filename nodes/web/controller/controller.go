@@ -11,7 +11,8 @@ import (
 	data2 "superman/internal/conf"
 	. "superman/internal/constant"
 	. "superman/internal/hints"
-	pb "superman/internal/protocol/gofile"
+	pb "superman/internal/protocol/go_file/common"
+	gateMsg "superman/internal/protocol/go_file/gate"
 	"superman/internal/redis_cluster"
 	"superman/internal/rpc"
 	"superman/internal/token"
@@ -35,7 +36,7 @@ func (p *Controller) hello(c *superGin.Context) {
 
 // http://127.0.0.1:8089/class/list
 func (p *Controller) classList(c *superGin.Context) {
-	data, errCode := rpc.SendDataToDB(p.App, &pb.GetClassListReq{})
+	data, errCode := rpc.SendDataToDB(p.App, &gateMsg.GetClassListReq{})
 	//获取分类列表
 	if errCode != code.OK {
 		RenderResult(c, errCode, code.CodeTxt[errCode])
@@ -60,7 +61,7 @@ func (p *Controller) roomList(c *superGin.Context) {
 		return
 	}
 	uid, _ = strconv.ParseInt(clms.ID, 10, 64)
-	data, errCode := rpc.SendDataToDB(p.App, &pb.GetRoomListReq{
+	data, errCode := rpc.SendDataToDB(p.App, &gateMsg.GetRoomListReq{
 		Uid: uid,
 	})
 	//获取房间列表
@@ -79,7 +80,7 @@ func (p *Controller) tableList(c *superGin.Context) {
 		RenderResult(c, Service003)
 		return
 	}
-	data, errCode := rpc.SendDataToDB(p.App, &pb.GetTableListReq{
+	data, errCode := rpc.SendDataToDB(p.App, &gateMsg.GetTableListReq{
 		Rid: rid,
 	})
 	//获取游戏列表
@@ -98,7 +99,7 @@ func (p *Controller) gameList(c *superGin.Context) {
 		RenderResult(c, Service003)
 		return
 	}
-	data, errCode := rpc.SendDataToDB(p.App, &pb.GetGameListReq{
+	data, errCode := rpc.SendDataToDB(p.App, &gateMsg.GetGameListReq{
 		Kid: kid,
 	})
 	//获取游戏列表
@@ -123,7 +124,7 @@ func (p *Controller) roomCreate(c *superGin.Context) {
 	if clms, ok := claims.(*jwt.RegisteredClaims); ok {
 		uid, _ = strconv.ParseInt(clms.ID, 10, 64)
 	}
-	req := &pb.CreateRoomReq{
+	req := &gateMsg.CreateRoomReq{
 		HostId: uid,
 	}
 	if name, ok := c.GetPostForm("name"); ok {
@@ -167,7 +168,7 @@ func (p *Controller) roomCreate(c *superGin.Context) {
 		RenderResult(c, errCode, code.CodeTxt[errCode])
 		return
 	}
-	if resp, ok := data.(*pb.CreateRoomResp); ok {
+	if resp, ok := data.(*gateMsg.CreateRoomResp); ok {
 		if resp.Info == nil || resp.Info.Id == 0 {
 			RenderResult(c, Room18)
 			return
@@ -206,7 +207,7 @@ func (p *Controller) tableCreate(c *superGin.Context) {
 	opentime, _ := strconv.ParseInt(strOpentime, 10, 64)
 	commission, _ := strconv.ParseInt(strCommission, 10, 64)
 	maxRound, _ := strconv.ParseInt(strMaxRound, 10, 64)
-	data, errCode := rpc.SendDataToDB(p.App, &pb.CreateTableReq{
+	data, errCode := rpc.SendDataToDB(p.App, &gateMsg.CreateTableReq{
 		Rid:        rid,
 		Gid:        gid,
 		PlayScore:  playscore,
@@ -221,7 +222,7 @@ func (p *Controller) tableCreate(c *superGin.Context) {
 		RenderResult(c, errCode, code.CodeTxt[errCode])
 		return
 	}
-	if resp, ok := data.(*pb.CreateTableResp); ok {
+	if resp, ok := data.(*gateMsg.CreateTableResp); ok {
 		if resp.Table == nil || resp.Table.Id == 0 {
 			RenderResult(c, TableInfo14)
 			return
@@ -250,7 +251,7 @@ func (p *Controller) tableDelete(c *superGin.Context) {
 	}
 	// 先检测游戏服相应游戏是否处于关闭状态，如果没有关闭则请求关闭
 	tid, _ := strconv.ParseInt(strTid, 10, 64)
-	data, errCode := rpc.SendDataToDB(p.App, &pb.DeleteTableReq{
+	data, errCode := rpc.SendDataToDB(p.App, &gateMsg.DeleteTableReq{
 		Tid:    tid,
 		HostId: uid,
 	})
@@ -260,7 +261,7 @@ func (p *Controller) tableDelete(c *superGin.Context) {
 		RenderResult(c, errCode, code.CodeTxt[errCode])
 		return
 	}
-	if resp, ok := data.(*pb.DeleteTableResp); ok {
+	if resp, ok := data.(*gateMsg.DeleteTableResp); ok {
 		if resp.Tid == 0 || resp.Rid == 0 {
 			RenderResult(c, TableInfo13)
 			return
@@ -392,13 +393,13 @@ func (p *Controller) register(c *superGin.Context) {
 		}
 	}
 
-	data, statusCode := rpc.SendDataToAcc(p.App, &pb.RegisterReq{
+	data, statusCode := rpc.SendDataToAcc(p.App, &gateMsg.RegisterReq{
 		Name:     accountName,
 		Password: password,
 		Address:  c.ClientIP(),
 	})
 	if statusCode == code.OK {
-		resp, ok := data.(*pb.RegisterResp)
+		resp, ok := data.(*gateMsg.RegisterResp)
 		if ok {
 			if resp.OpenId == "-1" {
 				RenderResult(c, Register05)
@@ -484,7 +485,7 @@ func (p *Controller) recharge(c *superGin.Context) {
 		RenderResult(c, Login11)
 		return
 	}
-	req := &pb.RechargeReq{
+	req := &gateMsg.RechargeReq{
 		ByiD: byUid,
 	}
 	strUID, ok := c.GetPostForm("uid")

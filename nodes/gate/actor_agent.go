@@ -11,7 +11,8 @@ import (
 	cproto "github.com/po2656233/superplace/net/proto"
 	"superman/internal/conf"
 	. "superman/internal/constant"
-	pb "superman/internal/protocol/gofile"
+	pb "superman/internal/protocol/go_file/common"
+	gateMsg "superman/internal/protocol/go_file/gate"
 	"superman/internal/rpc"
 	"superman/internal/token"
 )
@@ -53,7 +54,7 @@ func (p *ActorAgent) setSession(req *pb.StringKeyValue) {
 }
 
 // login 用户登录，验证帐号 (*pb.LoginResponse, int32)
-func (p *ActorAgent) login(session *cproto.Session, req *pb.LoginRequest) {
+func (p *ActorAgent) login(session *cproto.Session, req *gateMsg.LoginRequest) {
 	agent, found := pomelo.GetAgent(p.ActorID())
 	if !found {
 		return
@@ -97,7 +98,7 @@ func (p *ActorAgent) login(session *cproto.Session, req *pb.LoginRequest) {
 	agent.Session().Set(ServerID, cstring.ToString(req.ServerId))
 	agent.Session().Set(PID, cstring.ToString(userToken.PID))
 	agent.Session().Set(OpenID, userToken.OpenID)
-	agent.Response(session, &pb.LoginResponse{
+	agent.Response(session, &gateMsg.LoginResponse{
 		Uid:    uid,
 		Pid:    userToken.PID,
 		OpenId: userToken.OpenID,
@@ -155,7 +156,7 @@ func (p *ActorAgent) setSimpleSession(req *pb.StringKeyValue) {
 }
 
 // Login 登录
-func (p *ActorAgent) Login(_ *cproto.Session, req *pb.LoginRequest) {
+func (p *ActorAgent) Login(_ *cproto.Session, req *gateMsg.LoginRequest) {
 	agent, found := simple.GetAgent(p.ActorID())
 	if !found {
 		return
@@ -180,7 +181,7 @@ func (p *ActorAgent) Login(_ *cproto.Session, req *pb.LoginRequest) {
 
 	agent.Session().Set(ServerID, cstring.ToString(req.ServerId))
 	agent.Session().Set(OpenID, cstring.ToString(uid))
-	res := &pb.LoginResponse{
+	res := &gateMsg.LoginResponse{
 		Uid:    uid,
 		OpenId: cstring.ToString(uid),
 	}
