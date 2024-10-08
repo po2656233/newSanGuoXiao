@@ -22,7 +22,7 @@ type (
 )
 
 func (p *ActorChat) AliasID() string {
-	return strings.Trim(cst.GameActor, superConst.DOT)
+	return strings.Trim(cst.ChatActor, superConst.DOT)
 }
 func (p *ActorChat) OnInit() {
 	// 加载协议文件
@@ -56,6 +56,7 @@ func (p *ActorChat) OnFindChild(msg *cfacade.Message) (cfacade.IActor, bool) {
 	// 动态创建 player child actor
 	childID := msg.TargetPath().ChildID
 	childActor, err := p.Child().Create(childID, &ActorPlayer{
+		session:  msg.Session,
 		isOnline: false,
 	})
 

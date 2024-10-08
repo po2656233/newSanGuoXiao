@@ -5,7 +5,6 @@ import (
 	"github.com/po2656233/superplace/components/cron"
 	superGORM "github.com/po2656233/superplace/components/gorm"
 	log "github.com/po2656233/superplace/logger"
-	"superman/internal/actors"
 	"superman/internal/conf"
 	"superman/nodes/center/db"
 	"superman/nodes/center/module/account"
@@ -32,7 +31,6 @@ func Run(profileFilePath, nodeId string) {
 	app.Register(superGORM.NewComponent())
 
 	app.AddActors(
-		&actors.ActorDB{},
 		&account.ActorAccount{},
 		&ops.ActorOps{},
 	)

@@ -228,19 +228,24 @@ def update_message_id_file(messages_by_node):
     更新 message_id.json 文件，记录所有以 Req、Resp、Request 和 Response 结尾的消息体及其所属节点。
     """
     message_id_data = {}
-    base_id = 100000
+    for node_index, (node, messages) in enumerate(messages_by_node.items()):
 
-    for node, messages in messages_by_node.items():
-        node_id = base_id * (list(messages_by_node.keys()).index(node) + 1)
-        for i, (msg, _) in enumerate(messages):
+        node_id =  node_index * 10000 
+        count = 0
+        for _, (msg, _) in enumerate(messages):
             if msg.endswith('Req') or msg.endswith('Resp') or msg.endswith('Request') or msg.endswith('Response'):
-                message_id_data[node_id + i] = {
+                count += 1
+                print(f"{node_id + count}: {msg} ")
+                message_id_data[node_id + count] = {
                     "name": msg,
                     "node": node
                 }
 
+    # 按照 ID 从小到大排序
+    sorted_message_id_data = dict(sorted(message_id_data.items()))
+
     with open(MESSAGE_ID_OUTPUT, 'w', encoding='utf-8') as f:
-        json.dump(message_id_data, f, indent=4, ensure_ascii=False)
+        json.dump(sorted_message_id_data, f, indent=4, ensure_ascii=False)
     print(f'已更新 {MESSAGE_ID_OUTPUT} 文件。')
 
 def replace_import_path_in_go_files(gofile_directories):

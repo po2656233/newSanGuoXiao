@@ -36,7 +36,7 @@ func (p *Controller) hello(c *superGin.Context) {
 
 // http://127.0.0.1:8089/class/list
 func (p *Controller) classList(c *superGin.Context) {
-	data, errCode := rpc.SendDataToDB(p.App, &gateMsg.GetClassListReq{})
+	data, errCode := rpc.SendDataToGame(p.App, &gateMsg.GetClassListReq{})
 	//获取分类列表
 	if errCode != code.OK {
 		RenderResult(c, errCode, code.CodeTxt[errCode])
@@ -61,7 +61,7 @@ func (p *Controller) roomList(c *superGin.Context) {
 		return
 	}
 	uid, _ = strconv.ParseInt(clms.ID, 10, 64)
-	data, errCode := rpc.SendDataToDB(p.App, &gateMsg.GetRoomListReq{
+	data, errCode := rpc.SendDataToGame(p.App, &gateMsg.GetRoomListReq{
 		Uid: uid,
 	})
 	//获取房间列表
@@ -80,7 +80,7 @@ func (p *Controller) tableList(c *superGin.Context) {
 		RenderResult(c, Service003)
 		return
 	}
-	data, errCode := rpc.SendDataToDB(p.App, &gateMsg.GetTableListReq{
+	data, errCode := rpc.SendDataToGame(p.App, &gateMsg.GetTableListReq{
 		Rid: rid,
 	})
 	//获取游戏列表
@@ -99,7 +99,7 @@ func (p *Controller) gameList(c *superGin.Context) {
 		RenderResult(c, Service003)
 		return
 	}
-	data, errCode := rpc.SendDataToDB(p.App, &gateMsg.GetGameListReq{
+	data, errCode := rpc.SendDataToGame(p.App, &gateMsg.GetGameListReq{
 		Kid: kid,
 	})
 	//获取游戏列表
@@ -161,7 +161,7 @@ func (p *Controller) roomCreate(c *superGin.Context) {
 		req.Remark = remark
 	}
 
-	data, errCode := rpc.SendDataToDB(p.App, req)
+	data, errCode := rpc.SendDataToGame(p.App, req)
 
 	// 创建房间结果
 	if errCode != code.OK {
@@ -207,7 +207,7 @@ func (p *Controller) tableCreate(c *superGin.Context) {
 	opentime, _ := strconv.ParseInt(strOpentime, 10, 64)
 	commission, _ := strconv.ParseInt(strCommission, 10, 64)
 	maxRound, _ := strconv.ParseInt(strMaxRound, 10, 64)
-	data, errCode := rpc.SendDataToDB(p.App, &gateMsg.CreateTableReq{
+	data, errCode := rpc.SendDataToGame(p.App, &gateMsg.CreateTableReq{
 		Rid:        rid,
 		Gid:        gid,
 		PlayScore:  playscore,
@@ -251,7 +251,7 @@ func (p *Controller) tableDelete(c *superGin.Context) {
 	}
 	// 先检测游戏服相应游戏是否处于关闭状态，如果没有关闭则请求关闭
 	tid, _ := strconv.ParseInt(strTid, 10, 64)
-	data, errCode := rpc.SendDataToDB(p.App, &gateMsg.DeleteTableReq{
+	data, errCode := rpc.SendDataToGame(p.App, &gateMsg.DeleteTableReq{
 		Tid:    tid,
 		HostId: uid,
 	})
@@ -524,7 +524,7 @@ func (p *Controller) recharge(c *superGin.Context) {
 		req.Switch = int32(swit)
 	}
 
-	data, errCode := rpc.SendDataToDB(p.App, req)
+	data, errCode := rpc.SendDataToGame(p.App, req)
 	//获取房间列表
 	if errCode != code.OK {
 		RenderResult(c, errCode, code.CodeTxt[errCode])

@@ -83,7 +83,7 @@ func (self *ClientManger) Get(userID int64) (Agent, bool) {
 // DeleteClient 删除客户端
 func (self *ClientManger) DeleteClient(userID int64) {
 	self.Delete(userID)
-	rpc.SendDataToDB(self.GetApp(), &gateMsg.LogoutReq{
+	rpc.SendDataToAcc(self.GetApp(), &gateMsg.LogoutReq{
 		Uid: userID,
 	})
 }

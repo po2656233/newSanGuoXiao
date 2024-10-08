@@ -1,1221 +1,1213 @@
 {
-    "100044": {
+    "1": {
         "name": "GetUserIDReq",
         "node": "common"
     },
-    "100045": {
+    "2": {
         "name": "GetUserIDResp",
         "node": "common"
     },
-    "100046": {
+    "3": {
         "name": "Request",
         "node": "common"
     },
-    "100047": {
+    "4": {
         "name": "Response",
         "node": "common"
     },
-    "100048": {
+    "5": {
         "name": "ErrorResponse",
         "node": "common"
     },
-    "200000": {
+    "10001": {
         "name": "GetClassListReq",
         "node": "gate"
     },
-    "200001": {
+    "10002": {
         "name": "GetClassListResp",
         "node": "gate"
     },
-    "200002": {
+    "10003": {
         "name": "GetRoomListReq",
         "node": "gate"
     },
-    "200003": {
+    "10004": {
         "name": "GetRoomListResp",
         "node": "gate"
     },
-    "200004": {
+    "10005": {
         "name": "GetTableListReq",
         "node": "gate"
     },
-    "200005": {
+    "10006": {
         "name": "GetTableListResp",
         "node": "gate"
     },
-    "200006": {
+    "10007": {
         "name": "GetTableReq",
         "node": "gate"
     },
-    "200007": {
+    "10008": {
         "name": "GetTableResp",
         "node": "gate"
     },
-    "200008": {
+    "10009": {
         "name": "GetGameListReq",
         "node": "gate"
     },
-    "200009": {
+    "10010": {
         "name": "GetGameListResp",
         "node": "gate"
     },
-    "200010": {
+    "10011": {
         "name": "GetTaskListReq",
         "node": "gate"
     },
-    "200011": {
+    "10012": {
         "name": "GetTaskListResp",
         "node": "gate"
     },
-    "200012": {
+    "10013": {
         "name": "GetUserInfoReq",
         "node": "gate"
     },
-    "200013": {
+    "10014": {
         "name": "GetUserInfoResp",
         "node": "gate"
     },
-    "200014": {
+    "10015": {
         "name": "ChooseClassReq",
         "node": "gate"
     },
-    "200015": {
+    "10016": {
         "name": "ChooseClassResp",
         "node": "gate"
     },
-    "200016": {
+    "10017": {
         "name": "ChooseRoomReq",
         "node": "gate"
     },
-    "200017": {
+    "10018": {
         "name": "ChooseRoomResp",
         "node": "gate"
     },
-    "200018": {
+    "10019": {
         "name": "ChooseTableReq",
         "node": "gate"
     },
-    "200019": {
+    "10020": {
         "name": "ChooseTableResp",
         "node": "gate"
     },
-    "200020": {
+    "10021": {
         "name": "CreateRoomReq",
         "node": "gate"
     },
-    "200021": {
+    "10022": {
         "name": "CreateRoomResp",
         "node": "gate"
     },
-    "200022": {
+    "10023": {
         "name": "CreateTableReq",
         "node": "gate"
     },
-    "200023": {
+    "10024": {
         "name": "CreateTableResp",
         "node": "gate"
     },
-    "200024": {
+    "10025": {
         "name": "DeleteTableReq",
         "node": "gate"
     },
-    "200025": {
+    "10026": {
         "name": "DeleteTableResp",
         "node": "gate"
     },
-    "200026": {
+    "10027": {
         "name": "FixNickNameReq",
         "node": "gate"
     },
-    "200027": {
+    "10028": {
         "name": "FixNickNameResp",
         "node": "gate"
     },
-    "200028": {
+    "10029": {
         "name": "CheckInReq",
         "node": "gate"
     },
-    "200029": {
+    "10030": {
         "name": "CheckInResp",
         "node": "gate"
     },
-    "200030": {
+    "10031": {
         "name": "GetCheckInReq",
         "node": "gate"
     },
-    "200031": {
+    "10032": {
         "name": "GetCheckInResp",
         "node": "gate"
     },
-    "200032": {
+    "10033": {
         "name": "DrawHeroReq",
         "node": "gate"
     },
-    "200033": {
+    "10034": {
         "name": "DrawHeroResp",
         "node": "gate"
     },
-    "200034": {
+    "10035": {
         "name": "GetMyHeroReq",
         "node": "gate"
     },
-    "200035": {
+    "10036": {
         "name": "GetMyHeroResp",
         "node": "gate"
     },
-    "200036": {
+    "10037": {
         "name": "ChooseHeroReq",
         "node": "gate"
     },
-    "200037": {
+    "10038": {
         "name": "ChooseHeroResp",
         "node": "gate"
     },
-    "200038": {
+    "10039": {
         "name": "DownHeroReq",
         "node": "gate"
     },
-    "200039": {
+    "10040": {
         "name": "DownHeroReqResp",
         "node": "gate"
     },
-    "200040": {
+    "10041": {
         "name": "GetAllHeroReq",
         "node": "gate"
     },
-    "200041": {
+    "10042": {
         "name": "GetAllHeroResp",
         "node": "gate"
     },
-    "200042": {
+    "10043": {
         "name": "CheckHeroReq",
         "node": "gate"
     },
-    "200043": {
+    "10044": {
         "name": "CheckHeroResp",
         "node": "gate"
     },
-    "200044": {
+    "10045": {
         "name": "HowPlayReq",
         "node": "gate"
     },
-    "200045": {
+    "10046": {
         "name": "HowPlayResp",
         "node": "gate"
     },
-    "200046": {
+    "10047": {
         "name": "RechargeReq",
         "node": "gate"
     },
-    "200047": {
+    "10048": {
         "name": "RechargeResp",
         "node": "gate"
     },
-    "200048": {
+    "10049": {
         "name": "GetRechargesReq",
         "node": "gate"
     },
-    "200049": {
+    "10050": {
         "name": "GetRechargesResp",
         "node": "gate"
     },
-    "200050": {
+    "10051": {
         "name": "UpdateMoneyReq",
         "node": "gate"
     },
-    "200051": {
+    "10052": {
         "name": "UpdateMoneyResp",
         "node": "gate"
     },
-    "200052": {
+    "10053": {
         "name": "BarterCoinReq",
         "node": "gate"
     },
-    "200053": {
+    "10054": {
         "name": "BarterCoinResp",
         "node": "gate"
     },
-    "200054": {
+    "10055": {
         "name": "BarterYuanBaoReq",
         "node": "gate"
     },
-    "200055": {
+    "10056": {
         "name": "BarterYuanBaoResp",
         "node": "gate"
     },
-    "200056": {
+    "10057": {
         "name": "BarterMoneyReq",
         "node": "gate"
     },
-    "200057": {
+    "10058": {
         "name": "BarterMoneyResp",
         "node": "gate"
     },
-    "200058": {
+    "10059": {
         "name": "GetGoodsReq",
         "node": "gate"
     },
-    "200059": {
+    "10060": {
         "name": "GetGoodsResp",
         "node": "gate"
     },
-    "200060": {
+    "10061": {
         "name": "GetAllGoodsReq",
         "node": "gate"
     },
-    "200061": {
+    "10062": {
         "name": "GetAllGoodsResp",
         "node": "gate"
     },
-    "200062": {
+    "10063": {
         "name": "BuyGoodsReq",
         "node": "gate"
     },
-    "200063": {
+    "10064": {
         "name": "BuyGoodsResp",
         "node": "gate"
     },
-    "200064": {
+    "10065": {
         "name": "CheckKnapsackReq",
         "node": "gate"
     },
-    "200065": {
+    "10066": {
         "name": "CheckKnapsackResp",
         "node": "gate"
     },
-    "200066": {
+    "10067": {
         "name": "BarterReq",
         "node": "gate"
     },
-    "200067": {
+    "10068": {
         "name": "BarterResp",
         "node": "gate"
     },
-    "200068": {
+    "10069": {
         "name": "ToShoppingResp",
         "node": "gate"
     },
-    "200069": {
+    "10070": {
         "name": "EmailReq",
         "node": "gate"
     },
-    "200070": {
+    "10071": {
         "name": "EmailResp",
         "node": "gate"
     },
-    "200071": {
+    "10072": {
         "name": "ClaimReq",
         "node": "gate"
     },
-    "200072": {
+    "10073": {
         "name": "ClaimResp",
         "node": "gate"
     },
-    "200073": {
+    "10074": {
         "name": "SuggestReq",
         "node": "gate"
     },
-    "200074": {
+    "10075": {
         "name": "SuggestResp",
         "node": "gate"
     },
-    "200075": {
+    "10076": {
         "name": "EmailReadReq",
         "node": "gate"
     },
-    "200076": {
+    "10077": {
         "name": "EmailReadResp",
         "node": "gate"
     },
-    "200077": {
+    "10078": {
         "name": "EmailDelReq",
         "node": "gate"
     },
-    "200078": {
+    "10079": {
         "name": "EmailDelResp",
         "node": "gate"
     },
-    "200079": {
+    "10080": {
         "name": "NotifyBeOutResp",
         "node": "gate"
     },
-    "200080": {
+    "10081": {
         "name": "NotifyBalanceChangeResp",
         "node": "gate"
     },
-    "200081": {
+    "10082": {
         "name": "NotifyNoticeReq",
         "node": "gate"
     },
-    "200082": {
+    "10083": {
         "name": "NotifyNoticeResp",
         "node": "gate"
     },
-    "200083": {
+    "10084": {
         "name": "ResultResp",
         "node": "gate"
     },
-    "200084": {
+    "10085": {
         "name": "ResultPopResp",
         "node": "gate"
     },
-    "200085": {
+    "10086": {
         "name": "PingReq",
         "node": "gate"
     },
-    "200086": {
+    "10087": {
         "name": "PongResp",
         "node": "gate"
     },
-    "200087": {
+    "10088": {
         "name": "RegisterReq",
         "node": "gate"
     },
-    "200088": {
+    "10089": {
         "name": "RegisterResp",
         "node": "gate"
     },
-    "200089": {
-        "name": "LoginRequest",
-        "node": "gate"
-    },
-    "200090": {
-        "name": "LoginResponse",
-        "node": "gate"
-    },
-    "200091": {
+    "10090": {
         "name": "LoginReq",
         "node": "gate"
     },
-    "200092": {
+    "10091": {
         "name": "LoginResp",
         "node": "gate"
     },
-    "200093": {
+    "10092": {
         "name": "AllopatricResp",
         "node": "gate"
     },
-    "200094": {
+    "10093": {
         "name": "ReconnectReq",
         "node": "gate"
     },
-    "200095": {
+    "10094": {
         "name": "ReconnectResp",
         "node": "gate"
     },
-    "200096": {
+    "10095": {
         "name": "LogoutReq",
         "node": "gate"
     },
-    "200097": {
+    "10096": {
         "name": "LogoutResp",
         "node": "gate"
     },
-    "300000": {
+    "20001": {
         "name": "ChatTextReq",
         "node": "chat"
     },
-    "300001": {
+    "20002": {
         "name": "ChatTextResp",
         "node": "chat"
     },
-    "300002": {
+    "20003": {
         "name": "ChatSgxInviteReq",
         "node": "chat"
     },
-    "300003": {
+    "20004": {
         "name": "ChatSgxInviteResp",
         "node": "chat"
     },
-    "300004": {
+    "20005": {
         "name": "ChatHisReq",
         "node": "chat"
     },
-    "300005": {
+    "20006": {
         "name": "ChatHisResp",
         "node": "chat"
     },
-    "300008": {
+    "20007": {
         "name": "ClubNewReq",
         "node": "chat"
     },
-    "300009": {
+    "20008": {
         "name": "ClubNewResp",
         "node": "chat"
     },
-    "300010": {
+    "20009": {
         "name": "ClubDissolveReq",
         "node": "chat"
     },
-    "300011": {
+    "20010": {
         "name": "ClubDissolveResp",
         "node": "chat"
     },
-    "300012": {
+    "20011": {
         "name": "ClubApplyReq",
         "node": "chat"
     },
-    "300013": {
+    "20012": {
         "name": "ClubApplyResp",
         "node": "chat"
     },
-    "300014": {
+    "20013": {
         "name": "ClubApplyDealReq",
         "node": "chat"
     },
-    "300015": {
+    "20014": {
         "name": "ClubApplyDealResp",
         "node": "chat"
     },
-    "300016": {
+    "20015": {
         "name": "ClubApplyListReq",
         "node": "chat"
     },
-    "300017": {
+    "20016": {
         "name": "ClubApplyListResp",
         "node": "chat"
     },
-    "300018": {
+    "20017": {
         "name": "ClubListReq",
         "node": "chat"
     },
-    "300019": {
+    "20018": {
         "name": "ClubListResp",
         "node": "chat"
     },
-    "300020": {
+    "20019": {
         "name": "ClubMembersReq",
         "node": "chat"
     },
-    "300021": {
+    "20020": {
         "name": "ClubMembersResp",
         "node": "chat"
     },
-    "300022": {
+    "20021": {
         "name": "ClubMineReq",
         "node": "chat"
     },
-    "300023": {
+    "20022": {
         "name": "ClubMineResp",
         "node": "chat"
     },
-    "300024": {
+    "20023": {
         "name": "ClubJobReq",
         "node": "chat"
     },
-    "300025": {
+    "20024": {
         "name": "ClubJobResp",
         "node": "chat"
     },
-    "300026": {
+    "20025": {
         "name": "ClubGiveReq",
         "node": "chat"
     },
-    "300027": {
+    "20026": {
         "name": "ClubGiveResp",
         "node": "chat"
     },
-    "300029": {
+    "20027": {
         "name": "ClubInviteReq",
         "node": "chat"
     },
-    "300030": {
+    "20028": {
         "name": "ClubInviteResp",
         "node": "chat"
     },
-    "300031": {
+    "20029": {
         "name": "ClubInviteListReq",
         "node": "chat"
     },
-    "300032": {
+    "20030": {
         "name": "ClubInviteListResp",
         "node": "chat"
     },
-    "300033": {
+    "20031": {
         "name": "ClubInviteDealReq",
         "node": "chat"
     },
-    "300034": {
+    "20032": {
         "name": "ClubInviteDealResp",
         "node": "chat"
     },
-    "300035": {
+    "20033": {
         "name": "FriendOnlineReq",
         "node": "chat"
     },
-    "300036": {
+    "20034": {
         "name": "FriendOnlineResp",
         "node": "chat"
     },
-    "300037": {
+    "20035": {
         "name": "FriendListReq",
         "node": "chat"
     },
-    "300038": {
+    "20036": {
         "name": "FriendListResp",
         "node": "chat"
     },
-    "300039": {
+    "20037": {
         "name": "FriendDelReq",
         "node": "chat"
     },
-    "300040": {
+    "20038": {
         "name": "FriendDelResp",
         "node": "chat"
     },
-    "300041": {
+    "20039": {
         "name": "FriendApplyReq",
         "node": "chat"
     },
-    "300042": {
+    "20040": {
         "name": "FriendApplyResp",
         "node": "chat"
     },
-    "300043": {
+    "20041": {
         "name": "FriendApplyBatchReq",
         "node": "chat"
     },
-    "300044": {
+    "20042": {
         "name": "FriendApplyBatchResp",
         "node": "chat"
     },
-    "300045": {
+    "20043": {
         "name": "FriendApplyListReq",
         "node": "chat"
     },
-    "300046": {
+    "20044": {
         "name": "FriendApplyListResp",
         "node": "chat"
     },
-    "300047": {
+    "20045": {
         "name": "FriendApplyDealReq",
         "node": "chat"
     },
-    "300048": {
+    "20046": {
         "name": "FriendApplyDealResp",
         "node": "chat"
     },
-    "300049": {
+    "20047": {
         "name": "FriendApplyBatchDealReq",
         "node": "chat"
     },
-    "300050": {
+    "20048": {
         "name": "FriendApplyBatchDealResp",
         "node": "chat"
     },
-    "400000": {
+    "30001": {
         "name": "BaccaratSceneResp",
         "node": "game"
     },
-    "400001": {
+    "30002": {
         "name": "BaccaratStateStartResp",
         "node": "game"
     },
-    "400002": {
+    "30003": {
         "name": "BaccaratStatePlayingResp",
         "node": "game"
     },
-    "400003": {
+    "30004": {
         "name": "BaccaratStateOpenResp",
         "node": "game"
     },
-    "400004": {
+    "30005": {
         "name": "BaccaratStateOverResp",
         "node": "game"
     },
-    "400005": {
+    "30006": {
         "name": "BaccaratHostReq",
         "node": "game"
     },
-    "400006": {
+    "30007": {
         "name": "BaccaratHostResp",
         "node": "game"
     },
-    "400007": {
+    "30008": {
         "name": "BaccaratSuperHostReq",
         "node": "game"
     },
-    "400008": {
+    "30009": {
         "name": "BaccaratSuperHostResp",
         "node": "game"
     },
-    "400009": {
+    "30010": {
         "name": "BaccaratBetReq",
         "node": "game"
     },
-    "400010": {
+    "30011": {
         "name": "BaccaratBetResp",
         "node": "game"
     },
-    "400011": {
+    "30012": {
         "name": "BaccaratOpenResp",
         "node": "game"
     },
-    "400012": {
+    "30013": {
         "name": "BaccaratCheckoutResp",
         "node": "game"
     },
-    "400013": {
+    "30014": {
         "name": "BrcowcowSceneResp",
         "node": "game"
     },
-    "400014": {
+    "30015": {
         "name": "BrcowcowStateFreeResp",
         "node": "game"
     },
-    "400015": {
+    "30016": {
         "name": "BrcowcowStateStartResp",
         "node": "game"
     },
-    "400016": {
+    "30017": {
         "name": "BrcowcowStatePlayingResp",
         "node": "game"
     },
-    "400017": {
+    "30018": {
         "name": "BrcowcowStateOpenResp",
         "node": "game"
     },
-    "400018": {
+    "30019": {
         "name": "BrcowcowStateOverResp",
         "node": "game"
     },
-    "400019": {
+    "30020": {
         "name": "BrcowcowBetReq",
         "node": "game"
     },
-    "400020": {
+    "30021": {
         "name": "BrcowcowBetResp",
         "node": "game"
     },
-    "400021": {
+    "30022": {
         "name": "BrcowcowOpenResp",
         "node": "game"
     },
-    "400022": {
+    "30023": {
         "name": "BrcowcowOverResp",
         "node": "game"
     },
-    "400023": {
+    "30024": {
         "name": "BrcowcowHostReq",
         "node": "game"
     },
-    "400024": {
+    "30025": {
         "name": "BrcowcowHostResp",
         "node": "game"
     },
-    "400025": {
+    "30026": {
         "name": "BrcowcowHostListReq",
         "node": "game"
     },
-    "400026": {
+    "30027": {
         "name": "BrcowcowHostListResp",
         "node": "game"
     },
-    "400027": {
+    "30028": {
         "name": "BrtoubaoSceneResp",
         "node": "game"
     },
-    "400028": {
+    "30029": {
         "name": "BrtoubaoStateStartResp",
         "node": "game"
     },
-    "400029": {
+    "30030": {
         "name": "BrtoubaoStatePlayingResp",
         "node": "game"
     },
-    "400030": {
+    "30031": {
         "name": "BrtoubaoStateOpenResp",
         "node": "game"
     },
-    "400031": {
+    "30032": {
         "name": "BrtoubaoStateOverResp",
         "node": "game"
     },
-    "400032": {
+    "30033": {
         "name": "BrtoubaoBetReq",
         "node": "game"
     },
-    "400033": {
+    "30034": {
         "name": "BrtoubaoBetResp",
         "node": "game"
     },
-    "400034": {
+    "30035": {
         "name": "BrtoubaoOpenResp",
         "node": "game"
     },
-    "400035": {
+    "30036": {
         "name": "BrtoubaoCheckoutResp",
         "node": "game"
     },
-    "400036": {
+    "30037": {
         "name": "BrtoubaoHostReq",
         "node": "game"
     },
-    "400037": {
+    "30038": {
         "name": "BrtoubaoHostResp",
         "node": "game"
     },
-    "400038": {
+    "30039": {
         "name": "BrtoubaoSuperHostReq",
         "node": "game"
     },
-    "400039": {
+    "30040": {
         "name": "BrtoubaoSuperHostResp",
         "node": "game"
     },
-    "400040": {
+    "30041": {
         "name": "BrTuitongziSceneResp",
         "node": "game"
     },
-    "400041": {
+    "30042": {
         "name": "BrTuitongziStateStartResp",
         "node": "game"
     },
-    "400042": {
+    "30043": {
         "name": "BrTuitongziStatePlayingResp",
         "node": "game"
     },
-    "400043": {
+    "30044": {
         "name": "BrTuitongziStateOpenResp",
         "node": "game"
     },
-    "400044": {
+    "30045": {
         "name": "BrTuitongziStateOverResp",
         "node": "game"
     },
-    "400045": {
+    "30046": {
         "name": "BrTuitongziBetReq",
         "node": "game"
     },
-    "400046": {
+    "30047": {
         "name": "BrTuitongziBetResp",
         "node": "game"
     },
-    "400047": {
+    "30048": {
         "name": "BrTuitongziOpenResp",
         "node": "game"
     },
-    "400048": {
+    "30049": {
         "name": "BrTuitongziCheckoutResp",
         "node": "game"
     },
-    "400049": {
+    "30050": {
         "name": "BrTuitongziHostReq",
         "node": "game"
     },
-    "400050": {
+    "30051": {
         "name": "BrTuitongziHostResp",
         "node": "game"
     },
-    "400051": {
+    "30052": {
         "name": "BrTuitongziSuperHostReq",
         "node": "game"
     },
-    "400052": {
+    "30053": {
         "name": "BrTuitongziSuperHostResp",
         "node": "game"
     },
-    "400056": {
+    "30054": {
         "name": "ChineseChessSceneResp",
         "node": "game"
     },
-    "400057": {
+    "30055": {
         "name": "ChineseChessStateReadyResp",
         "node": "game"
     },
-    "400058": {
+    "30056": {
         "name": "ChineseChessStateSetResp",
         "node": "game"
     },
-    "400059": {
+    "30057": {
         "name": "ChineseChessStateConfirmResp",
         "node": "game"
     },
-    "400060": {
+    "30058": {
         "name": "ChineseChessStateStartResp",
         "node": "game"
     },
-    "400061": {
+    "30059": {
         "name": "ChineseChessStatePlayingResp",
         "node": "game"
     },
-    "400062": {
+    "30060": {
         "name": "ChineseChessStateOpenResp",
         "node": "game"
     },
-    "400063": {
+    "30061": {
         "name": "ChineseChessStateOverResp",
         "node": "game"
     },
-    "400064": {
+    "30062": {
         "name": "ChineseChessJiangJuResp",
         "node": "game"
     },
-    "400065": {
+    "30063": {
         "name": "ChineseChessJueShaResp",
         "node": "game"
     },
-    "400066": {
+    "30064": {
         "name": "ChineseChessReadyReq",
         "node": "game"
     },
-    "400067": {
+    "30065": {
         "name": "ChineseChessReadyResp",
         "node": "game"
     },
-    "400068": {
+    "30066": {
         "name": "ChineseChessSetTimeReq",
         "node": "game"
     },
-    "400069": {
+    "30067": {
         "name": "ChineseChessSetTimeResp",
         "node": "game"
     },
-    "400070": {
+    "30068": {
         "name": "ChineseChessAgreeTimeReq",
         "node": "game"
     },
-    "400071": {
+    "30069": {
         "name": "ChineseChessAgreeTimeResp",
         "node": "game"
     },
-    "400072": {
+    "30070": {
         "name": "ChineseChessMoveReq",
         "node": "game"
     },
-    "400073": {
+    "30071": {
         "name": "ChineseChessMoveResp",
         "node": "game"
     },
-    "400074": {
+    "30072": {
         "name": "EnterGameReq",
         "node": "game"
     },
-    "400075": {
+    "30073": {
         "name": "EnterGameResp",
         "node": "game"
     },
-    "400076": {
+    "30074": {
         "name": "JoinAllReadyQueueReq",
         "node": "game"
     },
-    "400077": {
+    "30075": {
         "name": "JoinGameReadyQueueReq",
         "node": "game"
     },
-    "400078": {
+    "30076": {
         "name": "JoinGameReadyQueueResp",
         "node": "game"
     },
-    "400079": {
+    "30077": {
         "name": "WaitGameStartResp",
         "node": "game"
     },
-    "400080": {
+    "30078": {
         "name": "ExitGameReq",
         "node": "game"
     },
-    "400081": {
+    "30079": {
         "name": "ExitGameResp",
         "node": "game"
     },
-    "400082": {
+    "30080": {
         "name": "DisbandedTableReq",
         "node": "game"
     },
-    "400083": {
+    "30081": {
         "name": "DisbandedTableResp",
         "node": "game"
     },
-    "400084": {
+    "30082": {
         "name": "DisbandedGameReq",
         "node": "game"
     },
-    "400085": {
+    "30083": {
         "name": "DisbandedGameResp",
         "node": "game"
     },
-    "400086": {
+    "30084": {
         "name": "ChangeTableReq",
         "node": "game"
     },
-    "400087": {
+    "30085": {
         "name": "ChangeTableResp",
         "node": "game"
     },
-    "400088": {
+    "30086": {
         "name": "GetBackPasswordReq",
         "node": "game"
     },
-    "400089": {
+    "30087": {
         "name": "GetBackPasswordResp",
         "node": "game"
     },
-    "400090": {
+    "30088": {
         "name": "RankingListReq",
         "node": "game"
     },
-    "400091": {
+    "30089": {
         "name": "RankingListResp",
         "node": "game"
     },
-    "400092": {
+    "30090": {
         "name": "TrusteeReq",
         "node": "game"
     },
-    "400093": {
+    "30091": {
         "name": "TrusteeResp",
         "node": "game"
     },
-    "400094": {
+    "30092": {
         "name": "RollDiceReq",
         "node": "game"
     },
-    "400095": {
+    "30093": {
         "name": "RollDiceResp",
         "node": "game"
     },
-    "400096": {
+    "30094": {
         "name": "GameOverReq",
         "node": "game"
     },
-    "400097": {
+    "30095": {
         "name": "GameOverResp",
         "node": "game"
     },
-    "400098": {
+    "30096": {
         "name": "UpdateGoldReq",
         "node": "game"
     },
-    "400099": {
+    "30097": {
         "name": "UpdateGoldResp",
         "node": "game"
     },
-    "400100": {
+    "30098": {
         "name": "AddRecordReq",
         "node": "game"
     },
-    "400101": {
+    "30099": {
         "name": "AddRecordResp",
         "node": "game"
     },
-    "400102": {
+    "30100": {
         "name": "DecreaseGameRunReq",
         "node": "game"
     },
-    "400103": {
+    "30101": {
         "name": "DecreaseGameRunResp",
         "node": "game"
     },
-    "400104": {
+    "30102": {
         "name": "GetRecordResp",
         "node": "game"
     },
-    "400105": {
+    "30103": {
         "name": "GetInningsInfoReq",
         "node": "game"
     },
-    "400106": {
+    "30104": {
         "name": "GetInningsInfoResp",
         "node": "game"
     },
-    "400110": {
+    "30105": {
         "name": "EnterGameMJResp",
         "node": "game"
     },
-    "400111": {
+    "30106": {
         "name": "MahjongSceneResp",
         "node": "game"
     },
-    "400112": {
+    "30107": {
         "name": "MahjongStateFreeResp",
         "node": "game"
     },
-    "400113": {
+    "30108": {
         "name": "MahjongStateDirectResp",
         "node": "game"
     },
-    "400114": {
+    "30109": {
         "name": "MahjongStateDecideResp",
         "node": "game"
     },
-    "400115": {
+    "30110": {
         "name": "MahjongStateRollDiceResp",
         "node": "game"
     },
-    "400116": {
+    "30111": {
         "name": "MahjongStateStartResp",
         "node": "game"
     },
-    "400117": {
+    "30112": {
         "name": "MahjongStatePlayingResp",
         "node": "game"
     },
-    "400118": {
+    "30113": {
         "name": "MahjongStateWaitOperateResp",
         "node": "game"
     },
-    "400119": {
+    "30114": {
         "name": "MahjongStateOpenResp",
         "node": "game"
     },
-    "400120": {
+    "30115": {
         "name": "MahjongStateOverResp",
         "node": "game"
     },
-    "400121": {
+    "30116": {
         "name": "MahjongReadyReq",
         "node": "game"
     },
-    "400122": {
+    "30117": {
         "name": "MahjongReadyResp",
         "node": "game"
     },
-    "400123": {
+    "30118": {
         "name": "MahjongRollReq",
         "node": "game"
     },
-    "400124": {
+    "30119": {
         "name": "MahjongRollResp",
         "node": "game"
     },
-    "400125": {
+    "30120": {
         "name": "MahjongOutCardReq",
         "node": "game"
     },
-    "400126": {
+    "30121": {
         "name": "MahjongOutCardResp",
         "node": "game"
     },
-    "400127": {
+    "30122": {
         "name": "MahjongOperateReq",
         "node": "game"
     },
-    "400128": {
+    "30123": {
         "name": "MahjongOperateResp",
         "node": "game"
     },
-    "400129": {
+    "30124": {
         "name": "MahjongDealResp",
         "node": "game"
     },
-    "400130": {
+    "30125": {
         "name": "MahjongHintResp",
         "node": "game"
     },
-    "400136": {
+    "30126": {
         "name": "ChallengeReq",
         "node": "game"
     },
-    "400137": {
+    "30127": {
         "name": "ChallengeResp",
         "node": "game"
     },
-    "400138": {
+    "30128": {
         "name": "SanguoxiaoSceneResp",
         "node": "game"
     },
-    "400139": {
+    "30129": {
         "name": "SanguoxiaoStatePlayingResp",
         "node": "game"
     },
-    "400140": {
+    "30130": {
         "name": "SanguoxiaoStateEraseResp",
         "node": "game"
     },
-    "400141": {
+    "30131": {
         "name": "SanguoxiaoStateOverResp",
         "node": "game"
     },
-    "400142": {
+    "30132": {
         "name": "SanguoxiaoSwapReq",
         "node": "game"
     },
-    "400143": {
+    "30133": {
         "name": "SanguoxiaoSwapResp",
         "node": "game"
     },
-    "400144": {
+    "30134": {
         "name": "SanguoxiaoTriggerResp",
         "node": "game"
     },
-    "400147": {
+    "30135": {
         "name": "TigerXdragonSceneResp",
         "node": "game"
     },
-    "400148": {
+    "30136": {
         "name": "TigerXdragonStateStartResp",
         "node": "game"
     },
-    "400149": {
+    "30137": {
         "name": "TigerXdragonStatePlayingResp",
         "node": "game"
     },
-    "400150": {
+    "30138": {
         "name": "TigerXdragonStateOpenResp",
         "node": "game"
     },
-    "400151": {
+    "30139": {
         "name": "TigerXdragonStateOverResp",
         "node": "game"
     },
-    "400152": {
+    "30140": {
         "name": "TigerXdragonBetReq",
         "node": "game"
     },
-    "400153": {
+    "30141": {
         "name": "TigerXdragonBetResp",
         "node": "game"
     },
-    "400154": {
+    "30142": {
         "name": "TigerXdragonOpenResp",
         "node": "game"
     },
-    "400155": {
+    "30143": {
         "name": "TigerXdragonCheckoutResp",
         "node": "game"
     },
-    "400156": {
+    "30144": {
         "name": "TigerXdragonHostReq",
         "node": "game"
     },
-    "400157": {
+    "30145": {
         "name": "TigerXdragonHostResp",
         "node": "game"
     },
-    "400158": {
+    "30146": {
         "name": "TigerXdragonSuperHostReq",
         "node": "game"
     },
-    "400159": {
+    "30147": {
         "name": "TigerXdragonSuperHostResp",
         "node": "game"
     },
-    "400160": {
+    "30148": {
         "name": "ZhaocaimiaoSceneResp",
         "node": "game"
     },
-    "400161": {
+    "30149": {
         "name": "ZhaocaimiaoStateStartResp",
         "node": "game"
     },
-    "400162": {
+    "30150": {
         "name": "ZhaocaimiaoStatePlayingResp",
         "node": "game"
     },
-    "400163": {
+    "30151": {
         "name": "ZhaocaimiaoStateOpenResp",
         "node": "game"
     },
-    "400164": {
+    "30152": {
         "name": "ZhaocaimiaoBetReq",
         "node": "game"
     },
-    "400165": {
+    "30153": {
         "name": "ZhaocaimiaoBetResp",
         "node": "game"
     },
-    "400169": {
+    "30154": {
         "name": "ZhaocaimiaoOpenResp",
         "node": "game"
     }

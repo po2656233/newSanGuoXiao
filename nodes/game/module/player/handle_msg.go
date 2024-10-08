@@ -7,7 +7,7 @@ import (
 	commMsg "superman/internal/protocol/go_file/common"
 	gameMsg "superman/internal/protocol/go_file/game"
 	gateMsg "superman/internal/protocol/go_file/gate"
-	"superman/internal/rpc"
+	sqlmodel "superman/internal/sql_model/minigame"
 	mgr "superman/nodes/game/manger"
 	"superman/nodes/game/module/online"
 	"time"
@@ -17,7 +17,6 @@ import (
 
 // 注册接口
 func (p *ActorPlayer) registerLocalMsg() {
-
 	p.Local().Register(p.BrTuitongziHost)
 	p.Local().Register(p.DisbandedTable)
 	p.Local().Register(p.RankingList)
@@ -67,27 +66,15 @@ func (p *ActorPlayer) getPerson(session *cproto.Session) *mgr.Player {
 	person := mgr.GetPlayerMgr().Get(uid)
 	if person == nil {
 		// 获取玩家信息
-		data, errCode := rpc.SendDataToDB(p.App(), &gateMsg.GetUserInfoReq{Uid: uid})
-		if errCode == 0 && data != nil {
-			resp, ok := data.(*gateMsg.GetUserInfoResp)
-			if ok && resp.Info != nil {
-				person = mgr.ToPlayer(resp.Info)
-				online.BindPlayer(uid, person.UserID, p.PathString())
-				mgr.GetPlayerMgr().Append(person)
-			}
+		resp, err := mgr.GetDBCmpt().GetUserInfo(uid)
+		if err != nil {
+			clog.Errorf("[ActorPlayer] getPerson GetUserInfo err:%v", err)
+			return nil
 		}
+		person = mgr.ToPlayer(resp.Info)
+		online.BindPlayer(uid, person.UserID, p.PathString())
+		mgr.GetPlayerMgr().Append(person)
 	}
-	if person == nil {
-		userData := p.UserData()
-		if userData != nil {
-			person = userData.(*mgr.Player)
-			mgr.GetPlayerMgr().Append(person)
-		} else {
-			clog.Errorf("uid:%v There are no instance objects. ", uid)
-		}
-		return person
-	}
-
 	p.SetUserData(person)
 	mgr.GetClientMgr().Append(person.UserID, p)
 
@@ -114,18 +101,29 @@ func (p *ActorPlayer) EnterGame(session *cproto.Session, m *gameMsg.EnterGameReq
 	var tb *mgr.Table
 	tb = room.GetTable(m.TableID)
 	if tb == nil {
-		data, errCode := rpc.SendDataToDB(agent.App(), &gateMsg.GetTableReq{Tid: m.TableID})
-		if errCode == 0 {
-			if tbResp, ok := data.(*gateMsg.GetTableResp); ok {
-				var err error
-				tb, err = room.AddTable(tbResp.Info, NewGame)
-				if err != nil {
-					clog.Warnf("[enter] params %+v  uid:%+v AddTable err:%v", m, uid, err)
-					agent.SendResultPop(FAILED, StatusText[Title004], StatusText[Room17])
-					return
-				}
-			}
+		tbInfo, err := mgr.GetDBCmpt().CheckTable(m.TableID)
+		if err != nil {
+			agent.SendResultPop(FAILED, StatusText[Title004], StatusText[Room16])
+			return
 		}
+		tb, err = room.AddTable(&commMsg.TableInfo{
+			Id:         tbInfo.ID,
+			Name:       tbInfo.Name,
+			Rid:        tbInfo.Rid,
+			Gid:        tbInfo.Gid,
+			Commission: tbInfo.Commission,
+			MaxRound:   tbInfo.Maxround,
+			Remain:     tbInfo.Remain,
+			MaxSitter:  tbInfo.MaxSitter,
+			PlayScore:  tbInfo.Playscore,
+			OpenTime:   tbInfo.Opentime,
+		}, NewGame)
+		if err != nil {
+			clog.Warnf("[enter] params %+v  uid:%+v AddTable err:%v", m, uid, err)
+			agent.SendResultPop(FAILED, StatusText[Title004], StatusText[Room17])
+			return
+		}
+
 	}
 	if tb == nil {
 		clog.Warnf("[enter] params %+v  uid:%+v FAIL", m, uid)
@@ -194,28 +192,35 @@ func (p *ActorPlayer) JoinGameReadyQueue(session *cproto.Session, m *gameMsg.Joi
 		}
 		// 系统房主动添加牌桌。 如果没有加入队列,并且是系统房,则创建牌桌
 		// 请求数据库创建牌桌
-		data, errCode := rpc.SendDataToDB(agent.App(), &gateMsg.CreateTableReq{
-			Rid:        SYSTEMID,
+		id, maxSit, err := mgr.GetDBCmpt().AddTable(sqlmodel.Table{
 			Gid:        m.GameID,
-			PlayScore:  Unlimited,
+			Rid:        SYSTEMID,
 			Name:       gInfo.Name,
-			Opentime:   time.Now().Unix(),
+			Playscore:  Unlimited,
 			Commission: INVALID, //系统房没有税收
-			MaxRound:   Unlimited,
+			Maxround:   Unlimited,
+			Remain:     Unlimited,
+			Opentime:   time.Now().Unix(),
 		})
-		if errCode != SUCCESS {
-			clog.Warnf("[join] [SendDataToDB] params %+v  uid:%+v FAIL", m, uid)
-			agent.SendResultPop(FAILED, StatusText[Title001], StatusText[User29])
-			return
-		}
-		resp, ok1 := data.(*gateMsg.CreateTableResp)
-		if !ok1 || resp == nil || resp.Table == nil {
-			clog.Warnf("[join]  params %+v  uid:%+v FAIL", m, uid)
+		if err != nil {
+			clog.Warnf("[join] [SendDataToDB] params %+v  uid:%+v err:%v", m, uid, err)
 			agent.SendResultPop(FAILED, StatusText[Title001], StatusText[User29])
 			return
 		}
 		// 给系统房添加刚创建的牌桌
-		t, err := room.AddTable(resp.Table, NewGame)
+		tbInfo := &commMsg.TableInfo{
+			Id:         id,
+			Gid:        m.GameID,
+			Rid:        SYSTEMID,
+			Name:       gInfo.Name,
+			PlayScore:  Unlimited,
+			Commission: INVALID, //系统房没有税收
+			MaxRound:   Unlimited,
+			Remain:     Unlimited,
+			OpenTime:   time.Now().Unix(),
+			MaxSitter:  maxSit,
+		}
+		t, err := room.AddTable(tbInfo, NewGame)
 		if err != nil || t == nil {
 			clog.Warnf("[join] [AddTable] params %+v  uid:%+v FAIL. err:%v", m, uid, err)
 			agent.SendResultPop(FAILED, StatusText[Title001], StatusText[User29])

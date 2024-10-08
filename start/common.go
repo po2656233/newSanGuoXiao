@@ -2,7 +2,7 @@ package start
 
 import (
 	"fmt"
-	sgxConst "github.com/po2656233/superplace/const"
+	"github.com/po2656233/superplace/const"
 	"github.com/urfave/cli/v2"
 )
 
@@ -13,7 +13,7 @@ func VersionCommand() *cli.Command {
 		Usage:     "view version",
 		UsageText: "game cluster node version",
 		Action: func(c *cli.Context) error {
-			fmt.Println(sgxConst.Version())
+			fmt.Println(superConst.Version())
 			return nil
 		},
 	}

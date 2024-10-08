@@ -1,4 +1,4 @@
-//go:build master || leaf || game || gate || web || center || match
+//go:build master || leaf || game || gate || web || center || match || chat
 
 package main
 

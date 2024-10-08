@@ -1,6 +1,7 @@
 package chat
 
 import (
+	superGORM "github.com/po2656233/superplace/components/gorm"
 	checkCenter "superman/internal/component/check_center"
 	"superman/internal/conf"
 	db "superman/nodes/chat/db"
@@ -9,22 +10,21 @@ import (
 	"github.com/po2656233/superplace"
 	superCron "github.com/po2656233/superplace/components/cron"
 	superGops "github.com/po2656233/superplace/components/gops"
-	exSnowflake "github.com/po2656233/superplace/extend/snowflake"
-	cstring "github.com/po2656233/superplace/extend/string"
-	sgxUtils "github.com/po2656233/superplace/extend/utils"
 )
 
 func Run(profileFilePath, nodeId string) {
-	if sgxUtils.IsNumeric(nodeId) == false {
-		panic("node parameter must is number.")
-	}
-
-	// snowflake global id
-	serverId, _ := cstring.ToInt64(nodeId)
-	exSnowflake.SetDefaultNode(serverId)
+	//if sgxUtils.IsNumeric(nodeId) == false {
+	//	panic("node parameter must is number.")
+	//}
+	//
+	//// snowflake global id
+	//serverId, _ := cstring.ToInt64(nodeId)
+	//exSnowflake.SetDefaultNode(serverId)
 
 	// 配置sgx引擎
 	app := superplace.Configure(profileFilePath, nodeId, false, superplace.Cluster)
+	// 注册gorm组件来处理数据库数据
+	app.Register(superGORM.NewComponent())
 	// diagnose
 	app.Register(superGops.New())
 	// 注册调度组件

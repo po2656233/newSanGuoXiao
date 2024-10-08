@@ -47,6 +47,7 @@ var StatusText = map[int]string{
 	Login13: "操作频繁,请延迟3~5秒,再重试",
 	Login14: "签到",
 	Login15: "TOKEN无效",
+	Login16: "登出异常",
 
 	NetworkErr01: "连接失败",
 	NetworkErr02: "发送失败",
@@ -100,6 +101,7 @@ var StatusText = map[int]string{
 	Setting17: "游戏场数不能为0!",
 	Setting18: "游戏场数不得大于10000!",
 	Setting19: "名字长度不能超过6个字符!",
+	Setting20: "修改名字出错",
 
 	Room01: "密码有误!",
 	Room02: "登录房间成功",
@@ -238,6 +240,40 @@ var StatusText = map[int]string{
 	Game62: "设置时长过短",
 	Game63: "操作不符合规则",
 
+	Chat001: "申请加好友失败",
+	Chat002: "获取邀请信息失败",
+	Chat003: "邀请对战失败",
+	Chat004: "获取群列表失败",
+	Chat005: "获取好友列表失败",
+	Chat006: "建群失败",
+	Chat007: "处理邀请失败: 邀请不存在",
+	Chat008: "处理邀请失败",
+	Chat009: "删除好友失败",
+	Chat010: "获取好友在线状态失败",
+	Chat011: "获取好友申请列表失败",
+	Chat012: "申请入群失败",
+	Chat013: "解散群失败",
+	Chat014: "分配积分失败: 成员不存在",
+	Chat015: "分配积分失败",
+	Chat016: "处理好友申请失败: 申请不存在",
+	Chat017: "处理好友申请失败",
+	Chat018: "邀请入群失败",
+	Chat019: "获取群列表失败",
+	Chat020: "发送文本消息失败",
+	Chat021: "切换职务失败: 成员不存在",
+	Chat022: "切换职务失败",
+	Chat023: "处理入群申请失败: 申请不存在",
+	Chat024: "处理入群申请失败",
+	Chat025: "获取我的群失败",
+	Chat026: "获取申请列表失败",
+	Chat027: "",
+	Chat028: "",
+	Chat029: "",
+	Chat030: "",
+	Chat031: "",
+	Chat032: "",
+	Chat033: "",
+
 	Service001: "SDK无效",
 	Service002: "PID无效",
 	Service003: "CID无效",
@@ -302,6 +338,7 @@ const (
 	Login13
 	Login14
 	Login15
+	Login16
 )
 
 // 重连
@@ -531,6 +568,42 @@ const (
 	Service002
 	Service003
 	Service004
+)
+const (
+	_ = 40000 + iota //游戏清场
+	Chat001
+	Chat002
+	Chat003
+	Chat004
+	Chat005
+	Chat006
+	Chat007
+	Chat008
+	Chat009
+	Chat010
+	Chat011
+	Chat012
+	Chat013
+	Chat014
+	Chat015
+	Chat016
+	Chat017
+	Chat018
+	Chat019
+	Chat020
+	Chat021
+	Chat022
+	Chat023
+	Chat024
+	Chat025
+	Chat026
+	Chat027
+	Chat028
+	Chat029
+	Chat030
+	Chat031
+	Chat032
+	Chat033
 )
 
 /* 主要用于求取某位上是否 是1值

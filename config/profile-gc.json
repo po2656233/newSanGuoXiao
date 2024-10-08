@@ -51,10 +51,19 @@
         "node_id": "gc-gate-1",
         "address": ":10010",
         "__settings__": {
-          "db_id_list" : {
-            "game_db_id": "game_db_1"
-          },
           "ref_logger": "gate_log"
+        },
+        "enable": true
+      }
+    ],
+    "chat": [
+      {
+        "node_id": "gc-chat-1",
+        "__settings__": {
+          "db_id_list" : {
+            "chat_db_id": "chat_db_1"
+          },
+          "ref_logger": "chat_log"
         },
         "enable": true
       }
@@ -85,9 +94,6 @@
       {
         "node_id": "20001",
         "__settings__": {
-          "db_id_list" : {
-            "game_db_id": "match_db_1"
-          },
           "ref_logger": "match_log"
         },
         "enable": true
@@ -105,7 +111,7 @@
     "redis": {
       "prefix_key": "data_config",
       "subscribe_key": "data_config_change",
-      "address": "121.37.211.227:6379",
+      "address": "localhost:6379",
       "password": "",
       "db": 7
     }
@@ -115,10 +121,10 @@
       {
         "enable": true,
         "db_id": "center_db_1",
-        "db_name": "minigame",
-        "host": "121.37.211.227:3306",
+        "db_name": "center",
+        "host": "localhost:3306",
         "user_name": "root",
-        "password": "741963ko",
+        "password": "ko8899110",
         "max_idle_connect": 4,
         "max_open_connect": 16,
         "log_mode": false
@@ -128,10 +134,23 @@
       {
         "enable": true,
         "db_id": "game_db_1",
-        "db_name": "sanguoxiao",
-        "host": "121.37.211.227:3306",
+        "db_name": "minigame",
+        "host": "localhost:3306",
         "user_name": "root",
-        "password": "741963ko",
+        "password": "ko8899110",
+        "max_idle_connect": 4,
+        "max_open_connect": 16,
+        "log_mode": true
+      }
+    ],
+    "chat_db_group": [
+      {
+        "enable": true,
+        "db_id": "chat_db_1",
+        "db_name": "social",
+        "host": "localhost:3306",
+        "user_name": "root",
+        "password": "ko8899110",
         "max_idle_connect": 4,
         "max_open_connect": 16,
         "log_mode": true

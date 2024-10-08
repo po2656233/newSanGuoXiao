@@ -30,6 +30,13 @@
       "file_link_path": "logs/match.log",
       "file_path_format": "logs/match_%Y%m%d%H%M.log"
     },
+    "chat_log": {
+      "level": "debug",
+      "enable_console": true,
+      "enable_write_file": false,
+      "file_link_path": "logs/chat.log",
+      "file_path_format": "logs/chat_%Y%m%d%H%M.log"
+    },
     "center_log": {
       "level": "debug",
       "enable_console": true,

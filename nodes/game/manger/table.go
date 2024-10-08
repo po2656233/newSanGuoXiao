@@ -9,9 +9,10 @@ import (
 	commMsg "superman/internal/protocol/go_file/common"
 	gameMsg "superman/internal/protocol/go_file/game"
 	gateMsg "superman/internal/protocol/go_file/gate"
+	sqlmodel "superman/internal/sql_model/minigame"
+	"superman/nodes/game/db"
 
 	"superman/internal/redis_cluster"
-	"superman/internal/rpc"
 	"superman/internal/utils"
 	"sync"
 	"sync/atomic"
@@ -19,16 +20,17 @@ import (
 )
 
 // 废弃
-//var dbCmpt *db.Component
-//func GetDBCmpt() *db.Component {
-//	if dbCmpt == nil {
-//		var ok bool
-//		if dbCmpt, ok = GetClientMgr().GetApp().Find(GameDb).(*db.Component); !ok {
-//			panic("DB NOT init!!!")
-//		}
-//	}
-//	return dbCmpt
-//}
+var dbCmpt *db.Component
+
+func GetDBCmpt() *db.Component {
+	if dbCmpt == nil {
+		var ok bool
+		if dbCmpt, ok = GetClientMgr().GetApp().Find(GameDb).(*db.Component); !ok {
+			panic("DB NOT init!!!")
+		}
+	}
+	return dbCmpt
+}
 
 // Table 桌牌
 type Table struct {
@@ -381,8 +383,8 @@ func (tb *Table) ChairSettle(name, inning, result string) {
 			chair.Gain = int64(1000-tb.Commission) * chair.Gain / 1000
 		}
 		//通知金币变化
-		data, code := rpc.SendDataToDB(GetClientMgr().GetApp(), &gameMsg.AddRecordReq{
-			Uid:     chair.UserID,
+		err := GetDBCmpt().AddRecord(&sqlmodel.Record{
+			UID:     chair.UserID,
 			Tid:     tb.Id,
 			Payment: chair.Gain,
 			Code:    CodeSettle,
@@ -390,24 +392,18 @@ func (tb *Table) ChairSettle(name, inning, result string) {
 			Result:  result,
 			Remark:  name,
 		})
-		if code != SUCCESS {
-			log.Warnf("[%v:%v] inning:[%v] AddRecordReq is failed. code:%v", name, tb.Id, inning, code)
-			return true
-		}
-		resp, ok := data.(*gameMsg.AddRecordResp)
-		if !ok {
-			log.Warnf("[%v:%v] inning:[%v] AddRecordReq is failed. to AddRecordResp", name, tb.Id, inning)
+		if err != nil {
+			log.Warnf("[%v:%v] inning:[%v] AddRecordReq is failed. err:%v", name, tb.Id, inning, err)
 			return true
 		}
 		changeGold := &gateMsg.NotifyBalanceChangeResp{
 			UserID:    chair.UserID,
 			Code:      CodeSettle,
 			AlterCoin: chair.Gain,
-			Coin:      resp.Gold,
-			Reason:    resp.Order,
+			Coin:      chair.Coin + chair.Gain,
+			Reason:    inning,
 		}
 		chair.Coin = changeGold.Coin
-		chair.Gold = resp.Gold
 		GetClientMgr().SendTo(chair.UserID, changeGold)
 		return true
 	})
@@ -478,15 +474,12 @@ func (tb *Table) CalibratingRemain(delCount int32) {
 	if tb.Remain <= INVALID {
 		return
 	}
-	data, code := rpc.SendDataToDB(GetClientMgr().GetApp(), &gameMsg.DecreaseGameRunReq{
-		Amount: delCount,
-		Tid:    tb.Id,
-	})
-	if code == SUCCESS {
-		if resp, ok := data.(*gameMsg.DecreaseGameRunResp); ok {
-			tb.Remain = resp.Remain
-		}
+	remain, err := GetDBCmpt().EraseRemain(tb.Id, delCount)
+	if err != nil {
+		log.Errorf("[Table] CalibratingRemain DecreaseGameRun err:%v", err)
+		return
 	}
+	tb.Remain = remain
 }
 
 // CheckChairsNoLive 检测桌椅上已经离开的玩家

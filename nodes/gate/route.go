@@ -23,7 +23,7 @@ var (
 		//"game.player.select",  //查询玩家角色
 		//"game.player.create",  //玩家创建角色
 		//"game.player.enter",   //玩家角色进入游戏
-		Join(NodeTypeLeaf, ActIdGame, FuncEnter),
+		//Join(NodeTypeLeaf, ActIdGame, FuncEnter),
 		//"leaf.game.enter", //玩家角色进入游戏
 	}
 
@@ -109,23 +109,28 @@ func onSimpleDataRoute(agent *simple.Agent, msg *simple.Message, route *simple.N
 		return
 	}
 
+	serverId := Empty
 	if !session.IsBind() {
 		clog.Warnf("[sid = %s,uid = %d] Session is not bind with UID. failed to forward message.[route = %+v]",
 			agent.SID(),
 			agent.UID(),
 			route,
 		)
-		return
+		//return
+	} else {
+		serverId = session.GetString(ServerID)
 	}
 
-	serverId := session.GetString(ServerID)
-	if serverId == "" {
-		return
+	if serverId == Empty {
+		member, found := agent.Discovery().Random(route.NodeType)
+		if !found {
+			return
+		}
+		serverId = member.GetNodeId()
+		//targetPath = cfacade.NewPath(member.GetNodeId(), route.ActorID)
 	}
-
 	childId := cstring.ToString(session.Uid)
 	targetPath := cfacade.NewChildPath(serverId, route.ActorID, childId)
-
 	clusterPacket := cproto.GetClusterPacket()
 	clusterPacket.SourcePath = session.AgentPath
 	clusterPacket.TargetPath = targetPath

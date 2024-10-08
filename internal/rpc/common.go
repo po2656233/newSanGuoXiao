@@ -1,7 +1,6 @@
 package rpc
 
 import (
-	"encoding/binary"
 	"github.com/po2656233/superplace/const/code"
 	exReflect "github.com/po2656233/superplace/extend/reflect"
 	"github.com/po2656233/superplace/facade"
@@ -19,11 +18,6 @@ const (
 	Request2  = "Request"
 	Response1 = "Resp"
 	Response2 = "Response"
-)
-
-var (
-	MapIdMsg = make(map[string]string)
-	Endian   = binary.BigEndian
 )
 
 // MessageSender 是一个封装类，用于减少SendData的传参
@@ -103,9 +97,9 @@ func SendData(app facade.IApplication, source, actorID, nodeType string, req pro
 }
 
 // SendDataToDB 发送给数据库节点
-func SendDataToDB(app facade.IApplication, req proto.Message) (interface{}, int32) {
-	return SendData(app, SourcePath, DBActor, NodeTypeCenter, req)
-}
+//func SendDataToDB(app facade.IApplication, req proto.Message) (interface{}, int32) {
+//	return SendData(app, SourcePath, DBActor, NodeTypeCenter, req)
+//}
 
 // SendDataToAcc 发送给账号节点
 func SendDataToAcc(app facade.IApplication, req proto.Message) (interface{}, int32) {
@@ -115,7 +109,7 @@ func SendDataToOps(app facade.IApplication, req proto.Message) (interface{}, int
 	return SendData(app, SourcePath, OpsActor, NodeTypeCenter, req)
 }
 func SendDataToGame(app facade.IApplication, req proto.Message) (interface{}, int32) {
-	return SendData(app, SourcePath, GameActor, NodeTypeCenter, req)
+	return SendData(app, SourcePath, GameActor, NodeTypeGame, req)
 }
 func GetTargetPath(app facade.IApplication, actorID, nodeType string) string {
 	list := app.Discovery().ListByType(nodeType)

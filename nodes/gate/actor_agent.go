@@ -156,6 +156,20 @@ func (p *ActorAgent) setSimpleSession(req *pb.StringKeyValue) {
 }
 
 // Login 登录
+func (p *ActorAgent) Reconnect(_ *cproto.Session, req *gateMsg.ReconnectReq) {
+	agent, found := simple.GetAgent(p.ActorID())
+	if !found {
+		return
+	}
+	res := &gateMsg.ReconnectResp{
+		Uid:    uid,
+		OpenId: cstring.ToString(uid),
+	}
+	mid, data, err := rpc.ParseProto(res)
+	agent.Response(mid, data)
+}
+
+// Login 登录
 func (p *ActorAgent) Login(_ *cproto.Session, req *gateMsg.LoginRequest) {
 	agent, found := simple.GetAgent(p.ActorID())
 	if !found {
@@ -179,8 +193,11 @@ func (p *ActorAgent) Login(_ *cproto.Session, req *gateMsg.LoginRequest) {
 		return
 	}
 
-	agent.Session().Set(ServerID, cstring.ToString(req.ServerId))
-	agent.Session().Set(OpenID, cstring.ToString(uid))
+	if req.ServerId != INVALID {
+		agent.Session().Set(ServerID, cstring.ToString(req.ServerId))
+		agent.Session().Set(OpenID, cstring.ToString(uid))
+	}
+
 	res := &gateMsg.LoginResponse{
 		Uid:    uid,
 		OpenId: cstring.ToString(uid),

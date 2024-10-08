@@ -16,6 +16,7 @@ const (
 	DbList    = "db_id_list"
 	CenterDb  = "center_db_id"
 	GameDb    = "game_db_id"
+	ChatDb    = "chat_db_id"
 	TcpAddr   = ":10011"
 	KcpAddr   = ":10012"
 	Empty     = ""
@@ -41,6 +42,10 @@ const (
 	Lose = 0 // 输
 	Win  = 1 // 赢
 	Draw = 2 // 平局
+
+	Pending = 0 // 待处理
+	Agree   = 1 // 同意
+	Reject  = 2 // 拒绝
 
 	Ten       = 10
 	Twenty    = 20
@@ -112,6 +117,7 @@ const (
 	AccActor   = ".account"
 	GameActor  = ".game"
 	MatchActor = ".match"
+	ChatActor  = ".chat"
 )
 
 const (
@@ -123,7 +129,7 @@ const (
 	NodeTypeChat   = "chat" // 聊天服
 )
 const (
-	ActIdGate  = "user"
+	ActIdGate  = "gate"
 	ActIdGame  = "game"
 	ActIdMatch = "match"
 	ActIdChat  = "chat"

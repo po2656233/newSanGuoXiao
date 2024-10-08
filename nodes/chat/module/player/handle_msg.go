@@ -1,8 +1,17 @@
 package player
 
 import (
-	pb "superman/internal/protocol/go_file/common"
-	"superman/nodes/chat/db"
+	log "github.com/po2656233/superplace/logger"
+	"github.com/po2656233/superplace/net/parser/simple"
+	"google.golang.org/protobuf/proto"
+	. "superman/internal/constant"
+	commMsg "superman/internal/protocol/go_file/common"
+	"superman/internal/rpc"
+	sqlmodel "superman/internal/sql_model/social"
+	//pb "superman/internal/protocol/go_file/common"
+	chatMsg "superman/internal/protocol/go_file/chat"
+	gateMsg "superman/internal/protocol/go_file/gate"
+	//"superman/nodes/chat/db"
 	"time"
 
 	cproto "github.com/po2656233/superplace/net/proto"
@@ -35,65 +44,74 @@ func (p *ActorPlayer) registerLocalMsg() {
 	p.Local().Register(p.ChatText)
 }
 
+func (p *ActorPlayer) Response(v interface{}) error {
+	mid, data, err := rpc.ParseProto(v.(proto.Message))
+	if err != nil {
+		return err
+	}
+	simple.Response(p, p.session, mid, data)
+	return nil
+}
+
 // FriendApply 申请加好友
-func (p *ActorPlayer) FriendApply(session *cproto.Session, m *pb.FriendApplyReq) {
-	apply := &db.FriendApply{
-		SenderUid: session.Uid,
-		TargetUid: m.TargetUid,
+func (p *ActorPlayer) FriendApply(session *cproto.Session, m *chatMsg.FriendApplyReq) {
+	apply := &sqlmodel.Friendapply{
+		SenderUID: session.Uid,
+		TargetUID: m.TargetUid,
 		Cont:      m.Cont,
 		ApplyTime: time.Now().Unix(),
-		Status:    0, // 0: 待处理
+		Status:    Pending, // 0: 待处理
 	}
-	err := p.dbComponent.AddFriendApply(apply)
-
-	resp := &pb.FriendApplyResp{
-		ApplyData: &pb.FriendApplyReq{
-			SenderUid: apply.SenderUid,
-			TargetUid: apply.TargetUid,
-			Cont:      apply.Cont,
-		},
-	}
-	if err != nil {
-		p.Response(session, &pb.ErrorResp{
-			ErrorCode: 1,
-			ErrorStr:  "申请加好友失败: " + err.Error(),
+	if err := p.dbComponent.AddFriendApply(apply); err != nil {
+		log.Warnf("[FriendApply] uid:%v m:%v  err:%v", session.Uid, m, err)
+		p.Response(&gateMsg.ResultResp{
+			State: FAILED,
+			Hints: StatusText[Chat001],
 		})
 		return
 	}
-	p.Response(session, resp)
+	resp := &chatMsg.FriendApplyResp{
+		ApplyData: &chatMsg.FriendApplyReq{
+			SenderUid: apply.SenderUID,
+			TargetUid: apply.TargetUID,
+			Cont:      apply.Cont,
+		},
+	}
+	p.Response(resp)
 }
 
 // 邀请信息查询
-func (p *ActorPlayer) ClubInviteList(session *cproto.Session, m *pb.ClubInviteListReq) {
+func (p *ActorPlayer) ClubInviteList(session *cproto.Session, m *chatMsg.ClubInviteListReq) {
 	invites, err := p.dbComponent.GetClubInvitesByInviteType(session.Uid, m.InviteType)
 
-	resp := &pb.ClubInviteListResp{
+	resp := &chatMsg.ClubInviteListResp{
 		InviteType: m.InviteType,
-		DataArr:    make([]*pb.ClubInviteInfo, 0),
+		DataArr:    make([]*chatMsg.ClubInviteInfo, 0),
 	}
 	if err != nil {
-		p.Response(session, &pb.ErrorResp{
-			ErrorCode: 1,
-			ErrorStr:  "获取邀请信息失败: " + err.Error(),
+		log.Warnf("[ClubInviteList] uid:%v m:%v  err:%v", session.Uid, m, err)
+		p.Response(&gateMsg.ResultResp{
+			State: FAILED,
+			Hints: StatusText[Chat002],
 		})
 		return
 	}
 
 	for _, invite := range invites {
-		resp.DataArr = append(resp.DataArr, &pb.ClubInviteInfo{
-			ClubId: invite.ClubId,
+		resp.DataArr = append(resp.DataArr, &chatMsg.ClubInviteInfo{
+			ClubId: invite.ClubID,
 			// 只保留协议中存在的字段
 		})
 	}
-	p.Response(session, resp)
+	p.Response(resp)
 }
 
 // 邀请对战
-func (p *ActorPlayer) ChatSgxInvite(session *cproto.Session, m *pb.ChatSgxInviteReq) {
-	chat := &db.Chat{
+func (p *ActorPlayer) ChatSgxInvite(session *cproto.Session, m *chatMsg.ChatSgxInviteReq) {
+	chat := &sqlmodel.Chat{
 		//Channel:   m.Channel,
-		SenderUid: session.Uid,
-		TargetUid: m.TargetUid,
+		SenderUID: session.Uid,
+		TargetUID: m.TargetUid,
 		GameEid:   m.GameEid,
 		Cont:      m.Cont,
 		TimeStamp: time.Now().Unix(),
@@ -101,37 +119,39 @@ func (p *ActorPlayer) ChatSgxInvite(session *cproto.Session, m *pb.ChatSgxInvite
 	}
 	err := p.dbComponent.AddChat(chat)
 
-	resp := &pb.ChatSgxInviteResp{
-		SenderUid:  chat.SenderUid,
-		TargetUid:  chat.TargetUid,
+	resp := &chatMsg.ChatSgxInviteResp{
+		SenderUid:  chat.SenderUID,
+		TargetUid:  chat.TargetUID,
 		GameEid:    chat.GameEid,
 		Cont:       chat.Cont,
-		SenderData: p.getUserBaseInfo(chat.SenderUid), // 获取发送者基本信息
+		SenderData: p.getUserInfo(chat.SenderUID), // 获取发送者基本信息
 	}
 	if err != nil {
-		p.Response(session, &pb.ErrorResp{
-			ErrorCode: 1,
-			ErrorStr:  "邀请对战失败: " + err.Error(),
+		log.Warnf("[ChatSgxInvite] uid:%v m:%v  err:%v", session.Uid, m, err)
+		p.Response(&gateMsg.ResultResp{
+			State: FAILED,
+			Hints: StatusText[Chat003],
 		})
 		return
 	}
-	p.Response(session, resp)
+	p.Response(resp)
 }
 
 // 获取用户基本信息
-func (p *ActorPlayer) getUserInfo(uid int64) *pb.UserInfo {
+func (p *ActorPlayer) getUserInfo(uid int64) *commMsg.UserInfo {
 	user, err := p.dbComponent.GetUserByID(uid) // 假设有一个方法可以根据用户ID获取用户信息
 	if err != nil {
+		log.Errorf("[getUserInfo] uid:%v  err:%v", uid, err)
 		return nil // 如果获取失败，返回nil
 	}
-
 	return user
 }
 
 // 获取用户基本信息
-func (p *ActorPlayer) getUserBaseInfo(uid int64) *pb.UserBaseInfo {
+func (p *ActorPlayer) getUserBaseInfo(uid int64) *commMsg.UserFullInfo {
 	user, err := p.dbComponent.GetUserBaseByID(uid) // 假设有一个方法可以根据用户ID获取用户信息
 	if err != nil {
+		log.Errorf("[getUserBaseInfo] uid:%v  err:%v", uid, err)
 		return nil // 如果获取失败，返回nil
 	}
 
@@ -139,49 +159,51 @@ func (p *ActorPlayer) getUserBaseInfo(uid int64) *pb.UserBaseInfo {
 }
 
 // 群成员列表
-func (p *ActorPlayer) ClubMembers(session *cproto.Session, m *pb.ClubMembersReq) {
+func (p *ActorPlayer) ClubMembers(session *cproto.Session, m *chatMsg.ClubMembersReq) {
 	members, err := p.dbComponent.GetClubMembersByClubId(m.ClubId)
 
-	resp := &pb.ClubMembersResp{
+	resp := &chatMsg.ClubMembersResp{
 		ClubId:  m.ClubId,
-		DataArr: make([]*pb.ClubMemberInfo, 0),
+		DataArr: make([]*chatMsg.ClubMemberInfo, 0),
 	}
 	if err != nil {
-		p.Response(session, &pb.ErrorResp{
-			ErrorCode: 1,
-			ErrorStr:  "获取群成员列表失败: " + err.Error(),
+		log.Warnf("[ClubMembers] uid:%v m:%v  err:%v", session.Uid, m, err)
+		p.Response(&gateMsg.ResultResp{
+			State: FAILED,
+			Hints: StatusText[Chat004],
 		})
 		return
 	}
 
 	for _, member := range members {
-		resp.DataArr = append(resp.DataArr, &pb.ClubMemberInfo{
-			Uid:           member.Uid,
+		resp.DataArr = append(resp.DataArr, &chatMsg.ClubMemberInfo{
+			Uid:           member.UID,
 			Job:           int32(member.Job),
 			Liveness:      int32(member.Liveness),
 			TotalLiveness: int32(member.TotalLiveness),
 			Score:         member.Score,
 		})
 	}
-	p.Response(session, resp)
+	p.Response(resp)
 }
 
 // 批量处理好友申请
-func (p *ActorPlayer) FriendApplyBatchDeal(session *cproto.Session, m *pb.FriendApplyBatchDealReq) {
-	resp := &pb.FriendApplyBatchDealResp{
+func (p *ActorPlayer) FriendApplyBatchDeal(session *cproto.Session, m *chatMsg.FriendApplyBatchDealReq) {
+	resp := &chatMsg.FriendApplyBatchDealResp{
 		TargetUid:    session.Uid,
 		SenderUidArr: m.SenderUidArr,
 		IsAgree:      m.IsAgree,
-		FriendArr:    make([]*pb.UserInfo, 0),
+		FriendArr:    make([]*commMsg.UserInfo, 0),
 	}
 
 	for _, senderUid := range m.SenderUidArr {
 		apply, err := p.dbComponent.GetFriendApplyBySenderAndTarget(senderUid, session.Uid)
 		if err != nil {
+			log.Warnf("[FriendApplyBatchDeal]-->GetFriendApplyBySenderAndTarget uid:%v m:%v apply:%v err:%v", session.Uid, m, apply, err)
 			continue
 		}
 
-		apply.Status = int(m.IsAgree)
+		apply.Status = m.IsAgree
 		err = p.dbComponent.UpdateFriendApply(apply)
 
 		if m.IsAgree == 1 {
@@ -192,47 +214,48 @@ func (p *ActorPlayer) FriendApplyBatchDeal(session *cproto.Session, m *pb.Friend
 		}
 	}
 
-	p.Response(session, resp)
+	p.Response(resp)
 }
 
 // 好友列表
-func (p *ActorPlayer) FriendList(session *cproto.Session, m *pb.FriendListReq) {
+func (p *ActorPlayer) FriendList(session *cproto.Session, m *chatMsg.FriendListReq) {
 	friends, err := p.dbComponent.GetFriendsByUid(session.Uid)
 
-	resp := &pb.FriendListResp{
-		DataArr: make([]*pb.UserInfo, 0),
+	resp := &chatMsg.FriendListResp{
+		DataArr: make([]*commMsg.UserInfo, 0),
 	}
 	if err != nil {
-		p.Response(session, &pb.ErrorResp{
-			ErrorCode: 1,
-			ErrorStr:  "获取好友列表失败: " + err.Error(),
+		log.Warnf("[FriendList] uid:%v m:%v err:%v", session.Uid, m, err)
+		p.Response(&gateMsg.ResultResp{
+			State: FAILED,
+			Hints: StatusText[Chat005],
 		})
 		return
 	}
 
 	for _, friend := range friends {
-		userInfo := p.getUserInfo(friend.FriendUid)
+		userInfo := p.getUserInfo(friend.FriendUID)
 		if userInfo != nil {
 			resp.DataArr = append(resp.DataArr, userInfo)
 		}
 	}
-	p.Response(session, resp)
+	p.Response(resp)
 }
 
 // 建群
-func (p *ActorPlayer) ClubNew(session *cproto.Session, m *pb.ClubNewReq) {
-	club := &db.Club{
+func (p *ActorPlayer) ClubNew(session *cproto.Session, m *chatMsg.ClubNewReq) {
+	club := &sqlmodel.Club{
 		Master:    session.Uid,
 		Builder:   session.Uid,
 		CreatedAt: time.Now().Unix(),
-		Icon:      int(m.Icon),
+		Icon:      m.Icon,
 		Name:      m.Name,
 		Notice:    m.Notice,
 	}
 	err := p.dbComponent.AddClub(club)
 
-	resp := &pb.ClubNewResp{
-		Data: &pb.ClubInfo{
+	resp := &chatMsg.ClubNewResp{
+		Data: &chatMsg.ClubInfo{
 			Id:        club.ID,
 			Master:    club.Master,
 			Builder:   club.Builder,
@@ -243,71 +266,76 @@ func (p *ActorPlayer) ClubNew(session *cproto.Session, m *pb.ClubNewReq) {
 		},
 	}
 	if err != nil {
-		p.Response(session, &pb.ErrorResp{
-			ErrorCode: 1,
-			ErrorStr:  "建群失败: " + err.Error(),
+		log.Warnf("[ClubNew] uid:%v m:%v err:%v", session.Uid, m, err)
+		p.Response(&gateMsg.ResultResp{
+			State: FAILED,
+			Hints: StatusText[Chat006],
 		})
 		return
 	}
-	p.Response(session, resp)
+	p.Response(resp)
 }
 
 // 处理邀请
-func (p *ActorPlayer) ClubInviteDeal(session *cproto.Session, m *pb.ClubInviteDealReq) {
+func (p *ActorPlayer) ClubInviteDeal(session *cproto.Session, m *chatMsg.ClubInviteDealReq) {
 	invite, err := p.dbComponent.GetClubInviteByClubIdAndTargetUid(m.ClubId, session.Uid)
 	if err != nil {
-		p.Response(session, &pb.ErrorResp{
-			ErrorCode: 1,
-			ErrorStr:  "处理邀请失败: 邀请不存在",
+		log.Warnf("[ClubInviteDeal] uid:%v m:%v err:%v", session.Uid, m, err)
+		p.Response(&gateMsg.ResultResp{
+			State: FAILED,
+			Hints: StatusText[Chat007],
 		})
 		return
 	}
 
-	invite.Status = int(m.IsAgree)
+	invite.Status = m.IsAgree
 	err = p.dbComponent.UpdateClubInvite(invite)
 
-	resp := &pb.ClubInviteDealResp{
+	resp := &chatMsg.ClubInviteDealResp{
 		ClubId:  m.ClubId,
 		IsAgree: m.IsAgree,
 	}
 	if err != nil {
-		p.Response(session, &pb.ErrorResp{
-			ErrorCode: 1,
-			ErrorStr:  "处理邀请失败: " + err.Error(),
+		log.Warnf("[ClubInviteDeal] uid:%v m:%v err:%v", session.Uid, m, err)
+		p.Response(&gateMsg.ResultResp{
+			State: FAILED,
+			Hints: StatusText[Chat008],
 		})
 		return
 	}
-	p.Response(session, resp)
+	p.Response(resp)
 }
 
 // 删除好友
-func (p *ActorPlayer) FriendDel(session *cproto.Session, m *pb.FriendDelReq) {
+func (p *ActorPlayer) FriendDel(session *cproto.Session, m *chatMsg.FriendDelReq) {
 	err := p.dbComponent.DeleteFriend(session.Uid, m.FriendUid)
 
-	resp := &pb.FriendDelResp{
+	resp := &chatMsg.FriendDelResp{
 		FriendUid: m.FriendUid,
 	}
 	if err != nil {
-		p.Response(session, &pb.ErrorResp{
-			ErrorCode: 1,
-			ErrorStr:  "删除好友失败: " + err.Error(),
+		log.Warnf("[FriendDel] uid:%v m:%v err:%v", session.Uid, m, err)
+		p.Response(&gateMsg.ResultResp{
+			State: FAILED,
+			Hints: StatusText[Chat009],
 		})
 		return
 	}
-	p.Response(session, resp)
+	p.Response(resp)
 }
 
 // 好友在线情况
-func (p *ActorPlayer) FriendOnline(session *cproto.Session, m *pb.FriendOnlineReq) {
+func (p *ActorPlayer) FriendOnline(session *cproto.Session, m *chatMsg.FriendOnlineReq) {
 	onlineStatus, err := p.dbComponent.GetFriendOnlineStatus(session.Uid)
 
-	resp := &pb.FriendOnlineResp{
+	resp := &chatMsg.FriendOnlineResp{
 		UidList: make([]int64, 0),
 	}
 	if err != nil {
-		p.Response(session, &pb.ErrorResp{
-			ErrorCode: 1,
-			ErrorStr:  "获取好友在线状态失败: " + err.Error(),
+		log.Warnf("[FriendOnline] uid:%v m:%v err:%v", session.Uid, m, err)
+		p.Response(&gateMsg.ResultResp{
+			State: FAILED,
+			Hints: StatusText[Chat010],
 		})
 		return
 	}
@@ -317,83 +345,87 @@ func (p *ActorPlayer) FriendOnline(session *cproto.Session, m *pb.FriendOnlineRe
 			resp.UidList = append(resp.UidList, status.Uid)
 		}
 	}
-	p.Response(session, resp)
+	p.Response(resp)
 }
 
-// 好友申请列表
-func (p *ActorPlayer) FriendApplyList(session *cproto.Session, m *pb.FriendApplyListReq) {
+// 好友申请列表 todo
+func (p *ActorPlayer) FriendApplyList(session *cproto.Session, m *chatMsg.FriendApplyListReq) {
 	applies, err := p.dbComponent.GetFriendAppliesByTargetUid(session.Uid)
 
-	resp := &pb.FriendApplyListResp{
-		DataArr: make([]*pb.UserInfo, 0),
+	resp := &chatMsg.FriendApplyListResp{
+		DataArr: make([]*commMsg.UserInfo, 0),
 	}
 	if err != nil {
-		p.Response(session, &pb.ErrorResp{
-			ErrorCode: 1,
-			ErrorStr:  "获取好友申请列表失败: " + err.Error(),
+		log.Warnf("[FriendApplyList] uid:%v m:%v err:%v", session.Uid, m, err)
+		p.Response(&gateMsg.ResultResp{
+			State: FAILED,
+			Hints: StatusText[Chat011],
 		})
 		return
 	}
 
 	for _, apply := range applies {
-		resp.DataArr = append(resp.DataArr, &pb.UserInfo{
-			UserID: apply.SenderUid,
+		resp.DataArr = append(resp.DataArr, &commMsg.UserInfo{
+			UserID: apply.SenderUID,
 			// .....
 
 		})
 	}
-	p.Response(session, resp)
+	p.Response(resp)
 }
 
 // 申请入群
-func (p *ActorPlayer) ClubApply(session *cproto.Session, m *pb.ClubApplyReq) {
-	apply := &db.ClubApply{
-		ClubId:    m.ClubId,
-		Uid:       session.Uid,
+func (p *ActorPlayer) ClubApply(session *cproto.Session, m *chatMsg.ClubApplyReq) {
+	apply := &sqlmodel.Clubapply{
+		ClubID:    m.ClubId,
+		UID:       session.Uid,
 		ApplyTime: time.Now().Unix(),
-		Status:    0, // 0: 待处理
+		Status:    Pending, // 0: 待处理
 	}
 	err := p.dbComponent.AddClubApply(apply)
 
-	resp := &pb.ClubApplyResp{
+	resp := &chatMsg.ClubApplyResp{
 		ClubId:   m.ClubId,
 		ClubName: m.ClubName,
 		ApplyMan: p.getUserInfo(session.Uid), // 获取申请人信息
 	}
 	if err != nil {
-		p.Response(session, &pb.ErrorResp{
-			ErrorCode: 1,
-			ErrorStr:  "申请入群失败: " + err.Error(),
+		log.Warnf("[ClubApply] uid:%v m:%v err:%v", session.Uid, m, err)
+		p.Response(&gateMsg.ResultResp{
+			State: FAILED,
+			Hints: StatusText[Chat012],
 		})
 		return
 	}
-	p.Response(session, resp)
+	p.Response(resp)
 }
 
 // 解散群
-func (p *ActorPlayer) ClubDissolve(session *cproto.Session, m *pb.ClubDissolveReq) {
+func (p *ActorPlayer) ClubDissolve(session *cproto.Session, m *chatMsg.ClubDissolveReq) {
 	err := p.dbComponent.DeleteClub(m.ClubId)
 
-	resp := &pb.ClubDissolveResp{
+	resp := &chatMsg.ClubDissolveResp{
 		ClubId: m.ClubId,
 	}
 	if err != nil {
-		p.Response(session, &pb.ErrorResp{
-			ErrorCode: 1,
-			ErrorStr:  "解散群失败: " + err.Error(),
+		log.Warnf("[ClubDissolve] uid:%v m:%v err:%v", session.Uid, m, err)
+		p.Response(&gateMsg.ResultResp{
+			State: FAILED,
+			Hints: StatusText[Chat013],
 		})
 		return
 	}
-	p.Response(session, resp)
+	p.Response(resp)
 }
 
 // 为成员分配积分
-func (p *ActorPlayer) ClubGive(session *cproto.Session, m *pb.ClubGiveReq) {
+func (p *ActorPlayer) ClubGive(session *cproto.Session, m *chatMsg.ClubGiveReq) {
 	member, err := p.dbComponent.GetClubMember(m.ClubId, m.TargetUid)
 	if err != nil {
-		p.Response(session, &pb.ErrorResp{
-			ErrorCode: 1,
-			ErrorStr:  "分配积分失败: 成员不存在",
+		log.Warnf("[ClubGive] uid:%v m:%v err:%v", session.Uid, m, err)
+		p.Response(&gateMsg.ResultResp{
+			State: FAILED,
+			Hints: StatusText[Chat014],
 		})
 		return
 	}
@@ -401,24 +433,25 @@ func (p *ActorPlayer) ClubGive(session *cproto.Session, m *pb.ClubGiveReq) {
 	member.Score += m.Count // 假设Count是要分配的积分
 	err = p.dbComponent.UpdateClubMember(member)
 
-	resp := &pb.ClubGiveResp{
+	resp := &chatMsg.ClubGiveResp{
 		ReqData:   m,
 		SenderUid: session.Uid,
 	}
 	if err != nil {
-		p.Response(session, &pb.ErrorResp{
-			ErrorCode: 1,
-			ErrorStr:  "分配积分失败: " + err.Error(),
+		log.Warnf("[ClubGive] uid:%v m:%v err:%v", session.Uid, m, err)
+		p.Response(&gateMsg.ResultResp{
+			State: FAILED,
+			Hints: StatusText[Chat015],
 		})
 		return
 	}
-	p.Response(session, resp)
+	p.Response(resp)
 }
 
-// 批量加好友
-func (p *ActorPlayer) FriendApplyBatch(session *cproto.Session, m *pb.FriendApplyBatchReq) {
-	resp := &pb.FriendApplyBatchResp{
-		ApplyData: &pb.FriendApplyBatchReq{},
+// 批量加好友 todo
+func (p *ActorPlayer) FriendApplyBatch(session *cproto.Session, m *chatMsg.FriendApplyBatchReq) {
+	resp := &chatMsg.FriendApplyBatchResp{
+		ApplyData: &chatMsg.FriendApplyBatchReq{},
 	}
 
 	//for _, apply := range m.List {
@@ -431,7 +464,7 @@ func (p *ActorPlayer) FriendApplyBatch(session *cproto.Session, m *pb.FriendAppl
 	//	}
 	//	err := p.dbComponent.AddFriendApply(friendApply)
 	//
-	//	applyInfo := &pb.FriendApplyInfo{
+	//	applyInfo := &chatMsg.FriendApplyInfo{
 	//		Id:        friendApply.ID,
 	//		SenderUid: friendApply.SenderUid,
 	//		Cont:      friendApply.Cont,
@@ -445,16 +478,17 @@ func (p *ActorPlayer) FriendApplyBatch(session *cproto.Session, m *pb.FriendAppl
 	//	resp.DataArr = append(resp.DataArr, applyInfo)
 	//}
 
-	p.Response(session, resp)
+	p.Response(resp)
 }
 
 // 处理好友申请
-func (p *ActorPlayer) FriendApplyDeal(session *cproto.Session, m *pb.FriendApplyDealReq) {
+func (p *ActorPlayer) FriendApplyDeal(session *cproto.Session, m *chatMsg.FriendApplyDealReq) {
 	apply, err := p.dbComponent.GetFriendApplyByID(m.SenderUid)
 	if err != nil {
-		p.Response(session, &pb.ErrorResp{
-			ErrorCode: 1,
-			ErrorStr:  "处理好友申请失败: 申请不存在",
+		log.Warnf("[FriendApplyDeal] uid:%v m:%v err:%v", session.Uid, m, err)
+		p.Response(&gateMsg.ResultResp{
+			State: FAILED,
+			Hints: StatusText[Chat016],
 		})
 		return
 	}
@@ -462,62 +496,65 @@ func (p *ActorPlayer) FriendApplyDeal(session *cproto.Session, m *pb.FriendApply
 	//apply.Status = int(m.Status)
 	err = p.dbComponent.UpdateFriendApply(apply)
 
-	resp := &pb.FriendApplyDealResp{
+	resp := &chatMsg.FriendApplyDealResp{
 
 		//Msg: "处理成功",
 	}
 	if err != nil {
-		p.Response(session, &pb.ErrorResp{
-			ErrorCode: 1,
-			ErrorStr:  "处理好友申请失败: " + err.Error(),
+		log.Warnf("[FriendApplyDeal] uid:%v m:%v err:%v", session.Uid, m, err)
+		p.Response(&gateMsg.ResultResp{
+			State: FAILED,
+			Hints: StatusText[Chat017],
 		})
 		return
 	}
-	p.Response(session, resp)
+	p.Response(resp)
 }
 
 // 邀请入群
-func (p *ActorPlayer) ClubInvite(session *cproto.Session, m *pb.ClubInviteReq) {
-	invite := &db.ClubInvite{
-		ClubId:     m.ClubId,
-		SenderUid:  session.Uid,
-		TargetUid:  m.TargetUid,
+func (p *ActorPlayer) ClubInvite(session *cproto.Session, m *chatMsg.ClubInviteReq) {
+	invite := &sqlmodel.Clubinvite{
+		ClubID:     m.ClubId,
+		SenderUID:  session.Uid,
+		TargetUID:  m.TargetUid,
 		InviteTime: time.Now().Unix(),
-		Status:     0, // 0: 待处理
+		Status:     Pending, // 0: 待处理
 	}
 	err := p.dbComponent.AddClubInvite(invite)
 
-	resp := &pb.ClubInviteResp{
+	resp := &chatMsg.ClubInviteResp{
 		//Msg: "邀请成功",
 		///
 	}
 	if err != nil {
-		p.Response(session, &pb.ErrorResp{
-			ErrorCode: 1,
-			ErrorStr:  "邀请入群失败: " + err.Error(),
+		log.Warnf("[ClubInvite] uid:%v m:%v err:%v", session.Uid, m, err)
+		p.Response(&gateMsg.ResultResp{
+			State: FAILED,
+			Hints: StatusText[Chat018],
 		})
 		return
 	}
-	p.Response(session, resp)
+	p.Response(resp)
 }
 
 // 群列表
-func (p *ActorPlayer) ClubList(session *cproto.Session, m *pb.ClubListReq) {
+func (p *ActorPlayer) ClubList(session *cproto.Session, m *chatMsg.ClubListReq) {
 	clubs, err := p.dbComponent.GetAllClubs()
 
-	resp := &pb.ClubListResp{
-		DataArr: make([]*pb.ClubInfo, 0),
+	resp := &chatMsg.ClubListResp{
+		DataArr: make([]*chatMsg.ClubInfo, 0),
 	}
 	if err != nil {
-		p.Response(session, &pb.ErrorResp{
-			ErrorCode: 1,
-			ErrorStr:  "获取群列表失败: " + err.Error(),
+		log.Warnf("[ClubList] uid:%v m:%v err:%v", session.Uid, m, err)
+		p.Response(&gateMsg.ResultResp{
+			State: FAILED,
+			Hints: StatusText[Chat019],
 		})
 		return
 	}
 
 	for _, club := range clubs {
-		resp.DataArr = append(resp.DataArr, &pb.ClubInfo{
+		resp.DataArr = append(resp.DataArr, &chatMsg.ClubInfo{
 			Id:        club.ID,
 			Master:    club.Master,
 			Builder:   club.Builder,
@@ -528,78 +565,81 @@ func (p *ActorPlayer) ClubList(session *cproto.Session, m *pb.ClubListReq) {
 			Notice:    club.Notice,
 		})
 	}
-	p.Response(session, resp)
+	p.Response(resp)
 }
 
 // 纯文本聊天消息
-func (p *ActorPlayer) ChatText(session *cproto.Session, m *pb.ChatTextReq) {
-	chat := &db.Chat{
-		Channel:   int(m.Channel),
-		SenderUid: session.Uid,
-		TargetUid: m.TargetUid,
-		ClubId:    m.ClubId,
+func (p *ActorPlayer) ChatText(session *cproto.Session, m *chatMsg.ChatTextReq) {
+	chat := &sqlmodel.Chat{
+		Channel:   m.Channel,
+		SenderUID: session.Uid,
+		TargetUID: m.TargetUid,
+		ClubID:    m.ClubId,
 		TimeStamp: time.Now().Unix(),
 		Cont:      m.Cont,
 		MsgType:   0, // 假设0表示普通文本消息
 	}
 	err := p.dbComponent.AddChat(chat)
 
-	resp := &pb.ChatTextResp{
+	resp := &chatMsg.ChatTextResp{
 		Channel:   m.Channel,
-		SenderUid: chat.SenderUid,
-		TargetUid: chat.TargetUid,
-		ClubId:    chat.ClubId,
+		SenderUid: chat.SenderUID,
+		TargetUid: chat.TargetUID,
+		ClubId:    chat.ClubID,
 		TimeStamp: chat.TimeStamp,
 		Cont:      chat.Cont,
 	}
 	if err != nil {
-		p.Response(session, &pb.ErrorResp{
-			ErrorCode: 1,
-			ErrorStr:  "发送文本消息失败: " + err.Error(),
+		log.Warnf("[ChatText] uid:%v m:%v err:%v", session.Uid, m, err)
+		p.Response(&gateMsg.ResultResp{
+			State: FAILED,
+			Hints: StatusText[Chat020],
 		})
 		return
 	}
-	p.Response(session, resp)
+	p.Response(resp)
 }
 
 // 切换群成员职务
-func (p *ActorPlayer) ClubJob(session *cproto.Session, m *pb.ClubJobReq) {
+func (p *ActorPlayer) ClubJob(session *cproto.Session, m *chatMsg.ClubJobReq) {
 
 	member, err := p.dbComponent.GetClubMember(m.ClubId, m.Uid)
 	if err != nil {
-		p.Response(session, &pb.ErrorResp{
-			ErrorCode: 1,
-			ErrorStr:  "切换职务失败: 成员不存在",
+		log.Warnf("[ClubJob] uid:%v m:%v err:%v", session.Uid, m, err)
+		p.Response(&gateMsg.ResultResp{
+			State: FAILED,
+			Hints: StatusText[Chat021],
 		})
 		return
 	}
 
-	member.Job = int(m.Job)
+	member.Job = m.Job
 	err = p.dbComponent.UpdateClubMember(member)
 
-	resp := &pb.ClubJobResp{
+	resp := &chatMsg.ClubJobResp{
 		//Msg: "切换成功",
 	}
 	if err != nil {
-		p.Response(session, &pb.ErrorResp{
-			ErrorCode: 1,
-			ErrorStr:  "切换职务失败: " + err.Error(),
+		log.Warnf("[ClubJob] uid:%v m:%v err:%v", session.Uid, m, err)
+		p.Response(&gateMsg.ResultResp{
+			State: FAILED,
+			Hints: StatusText[Chat022],
 		})
 		return
 	}
-	p.Response(session, resp)
+	p.Response(resp)
 }
 
-// 聊天记录
-func (p *ActorPlayer) ChatHis(session *cproto.Session, m *pb.ChatHisReq) {
+// 聊天记录 todo
+func (p *ActorPlayer) ChatHis(session *cproto.Session, m *chatMsg.ChatHisReq) {
 
 	//chats, err := p.dbComponent.GetChatHistory(m.Channel, m.SenderUid, m.TargetUid, m.ClubId, m.StartTime, m.EndTime)
 	//
-	resp := &pb.ChatHisResp{
-		//DataArr: make([]*pb.ChatInfo, 0),
+	resp := &chatMsg.ChatHisResp{
+		//DataArr: make([]*chatMsg.ChatInfo, 0),
 	}
 	//if err != nil {
-	//	p.Response(session, &pb.ErrorResp{
+	//	p.Response(&chatMsg.ErrorResp{
 	//		ErrorCode: 1,
 	//		ErrorStr:  "获取聊天记录失败: " + err.Error(),
 	//	})
@@ -607,7 +647,7 @@ func (p *ActorPlayer) ChatHis(session *cproto.Session, m *pb.ChatHisReq) {
 	//}
 	//
 	//for _, chat := range chats {
-	//	resp.DataArr = append(resp.DataArr, &pb.ChatInfo{
+	//	resp.DataArr = append(resp.DataArr, &chatMsg.ChatInfo{
 	//		Channel:   int32(chat.Channel),
 	//		SenderUid: chat.SenderUid,
 	//		TargetUid: chat.TargetUid,
@@ -618,17 +658,18 @@ func (p *ActorPlayer) ChatHis(session *cproto.Session, m *pb.ChatHisReq) {
 	//		MsgType:   int32(chat.MsgType),
 	//	})
 	//}
-	p.Response(session, resp)
+	p.Response(resp)
 }
 
 // 处理入群申请
-func (p *ActorPlayer) ClubApplyDeal(session *cproto.Session, m *pb.ClubApplyDealReq) {
+func (p *ActorPlayer) ClubApplyDeal(session *cproto.Session, m *chatMsg.ClubApplyDealReq) {
 
 	apply, err := p.dbComponent.GetClubApplyByID(session.Uid)
 	if err != nil {
-		p.Response(session, &pb.ErrorResp{
-			ErrorCode: 1,
-			ErrorStr:  "处理入群申请失败: 申请不存在",
+		log.Warnf("[ClubApplyDeal] uid:%v m:%v err:%v", session.Uid, m, err)
+		p.Response(&gateMsg.ResultResp{
+			State: FAILED,
+			Hints: StatusText[Chat023],
 		})
 		return
 	}
@@ -636,38 +677,38 @@ func (p *ActorPlayer) ClubApplyDeal(session *cproto.Session, m *pb.ClubApplyDeal
 	//apply.Status = int(m.Status)
 	err = p.dbComponent.UpdateClubApply(apply)
 
-	resp := &pb.ClubApplyDealResp{
+	resp := &chatMsg.ClubApplyDealResp{
 		//Msg: "处理成功",
 	}
 	if err != nil {
-		p.Response(session, &pb.ErrorResp{
-			ErrorCode: 1,
-			ErrorStr:  "处理入群申请失败: " + err.Error(),
+		log.Warnf("[ClubApplyDeal] uid:%v m:%v err:%v", session.Uid, m, err)
+		p.Response(&gateMsg.ResultResp{
+			State: FAILED,
+			Hints: StatusText[Chat024],
 		})
 		return
 	}
-	p.Response(session, resp)
+	p.Response(resp)
 }
 
 // 我的群
-func (p *ActorPlayer) ClubMine(session *cproto.Session, m *pb.ClubMineReq) {
-
+func (p *ActorPlayer) ClubMine(session *cproto.Session, m *chatMsg.ClubMineReq) {
 	clubs, err := p.dbComponent.GetClubsByUid(session.Uid)
-
-	resp := &pb.ClubMineResp{
+	resp := &chatMsg.ClubMineResp{
 		//Uid:     m.Uid,
-		DataArr: make([]*pb.ClubInfo, 0),
+		DataArr: make([]*chatMsg.ClubInfo, 0),
 	}
 	if err != nil {
-		p.Response(session, &pb.ErrorResp{
-			ErrorCode: 1,
-			ErrorStr:  "获取我的群失败: " + err.Error(),
+		log.Warnf("[ClubMine] uid:%v m:%v err:%v", session.Uid, m, err)
+		p.Response(&gateMsg.ResultResp{
+			State: FAILED,
+			Hints: StatusText[Chat025],
 		})
 		return
 	}
 
 	for _, club := range clubs {
-		resp.DataArr = append(resp.DataArr, &pb.ClubInfo{
+		resp.DataArr = append(resp.DataArr, &chatMsg.ClubInfo{
 			Id:        club.ID,
 			Master:    club.Master,
 			Builder:   club.Builder,
@@ -678,30 +719,31 @@ func (p *ActorPlayer) ClubMine(session *cproto.Session, m *pb.ClubMineReq) {
 			Notice:    club.Notice,
 		})
 	}
-	p.Response(session, resp)
+	p.Response(resp)
 }
 
 // 申请列表
-func (p *ActorPlayer) ClubApplyList(session *cproto.Session, m *pb.ClubApplyListReq) {
+func (p *ActorPlayer) ClubApplyList(session *cproto.Session, m *chatMsg.ClubApplyListReq) {
 
 	applies, err := p.dbComponent.GetClubAppliesByClubId(m.ClubId)
 
-	resp := &pb.ClubApplyListResp{
+	resp := &chatMsg.ClubApplyListResp{
 		ClubId: m.ClubId,
-		Mans:   make([]*pb.UserInfo, 0),
+		Mans:   make([]*commMsg.UserInfo, 0),
 	}
 	if err != nil {
-		p.Response(session, &pb.ErrorResp{
-			ErrorCode: 1,
-			ErrorStr:  "获取申请列表失败: " + err.Error(),
+		log.Warnf("[ClubApplyList] uid:%v m:%v err:%v", session.Uid, m, err)
+		p.Response(&gateMsg.ResultResp{
+			State: FAILED,
+			Hints: StatusText[Chat026],
 		})
 		return
 	}
 
 	for _, apply := range applies {
-		resp.Mans = append(resp.Mans, &pb.UserInfo{
+		resp.Mans = append(resp.Mans, &commMsg.UserInfo{
 			UserID: apply.ID,
 		})
 	}
-	p.Response(session, resp)
+	p.Response(resp)
 }

@@ -8,7 +8,6 @@ import (
 	cconnector "github.com/po2656233/superplace/net/connector"
 	"github.com/po2656233/superplace/net/parser/pomelo"
 	"github.com/po2656233/superplace/net/parser/simple"
-	"strconv"
 	"strings"
 	"superman/internal/component/check_center"
 	"superman/internal/conf"
@@ -91,68 +90,29 @@ func buildSimpleParser(app *superplace.AppBuilder) cfacade.INetParser {
 	// 设置积压消息数量
 	agentActor.SetWriteBacklog(64)
 
-	// 设置数据路由函数 (leaf)
+	// 设置数据路由函数 (用于分配协议到各个节点)
 	agentActor.SetOnDataRoute(onSimpleDataRoute)
 
 	// 设置消息节点路由(建议配合data-config组件进行使用)
-	// mid = 1 的消息路由到  gate节点.user的Actor.login函数上
-	//agentActor.AddNodeRoute(MIDGate, &simple.NodeRoute{
-	//	NodeType: NodeTypeGate,
-	//	ActorID:  ActIdGate,
-	//	FuncName: FuncSimpLogin,
-	//})
-	//
-	//agentActor.AddNodeRoute(MIDPing, &simple.NodeRoute{
-	//	NodeType: NodeTypeGate,
-	//	ActorID:  ActIdGate,
-	//})
-	//
-	//agentActor.AddNodeRoute(MIDLeaf, &simple.NodeRoute{
-	//	NodeType: NodeTypeLeaf,
-	//	ActorID:  ActIdGame,
-	//	FuncName: FuncRequest,
-	//})
-	//
-	//agentActor.AddNodeRoute(MIDGame, &simple.NodeRoute{
-	//	NodeType: NodeTypeGame,
-	//	ActorID:  ActIdGame,
-	//	FuncName: FuncRequest,
-	//})
-	//
-	//agentActor.AddNodeRoute(MIDMatch, &simple.NodeRoute{
-	//	NodeType: NodeTypeMatch,
-	//	ActorID:  ActIdMatch,
-	//	FuncName: FuncMatch,
-	//})
-
 	mapIDs := rpc.LoadMsgInfos()
-	gateStart := int64(236)
-	gateEnd := int64(244)
-	registerProto := func(id int64, field, key string) bool {
+	registerProto := func(id uint32, node, field, key string) bool {
 		size := len(field)
 		n := len(key)
 		if size < n+1 || field[size-n:] != key {
 			return false
 		}
-		nodeType := NodeTypeGame
-		actorID := ActIdGame
-		if gateStart <= id && id <= gateEnd {
-			nodeType = NodeTypeGate
-			actorID = ActIdGate
-		}
-		agentActor.AddNodeRoute(uint32(id), &simple.NodeRoute{
-			NodeType: nodeType,
-			ActorID:  actorID,
+		agentActor.AddNodeRoute(id, &simple.NodeRoute{
+			NodeType: node,
+			ActorID:  node,
 			FuncName: field[:size-n],
 		})
-		clog.Infof("路由消息注册--节点类型:%v\t 实例:%v\t 消息ID:%v 消息类型:%v", nodeType, actorID, id, field)
+		clog.Infof("路由消息注册--节点类型:%v\t  消息ID:%v 消息类型:%v", node, id, field)
 
 		return true
 	}
-	for id, field := range mapIDs {
-		nID, _ := strconv.ParseInt(id, 10, 32)
-		if !registerProto(nID, field, "Req") {
-			registerProto(nID, field, "Request")
+	for _, message := range mapIDs {
+		if !registerProto(message.ID, message.Node, message.Name, "Req") {
+			registerProto(message.ID, message.Node, message.Name, "Request")
 		}
 
 	}

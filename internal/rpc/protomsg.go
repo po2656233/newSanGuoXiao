@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	clog "github.com/po2656233/superplace/logger"
 	"google.golang.org/protobuf/proto"
 	"os"
 	"reflect"
@@ -13,16 +14,34 @@ import (
 	gateMsg "superman/internal/protocol/go_file/gate"
 )
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Message 定义结构体
+type Message struct {
+	ID   uint32 `json:"id"`
+	Name string `json:"name"`
+	Node string `json:"node"`
+}
+
+type Messages []Message
+
+// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+var (
+	MapIdMsg = make(map[string]Message)
+	Endian   = binary.BigEndian
+)
 
 // LoadMsgInfos 获取消息映射文件message_id.json
-func LoadMsgInfos() map[string]string {
+func LoadMsgInfos() map[string]Message {
 	data, _ := os.ReadFile(MSGFile)
-	//创建map，用于接收解码好的数据
-	//创建文件的解码器
-	_ = json.Unmarshal(data, &MapIdMsg)
-	//解码文件中的数据，丢入dataMap所在的内存
-	//fmt.Println("解码成功", mapFuncs)
+	// 解析JSON数据
+	err := json.Unmarshal(data, &MapIdMsg)
+	if err != nil {
+		clog.Errorf("Error:%v", err)
+	}
+	for s, message := range MapIdMsg {
+		id, _ := strconv.ParseInt(s, 10, 64)
+		message.ID = uint32(id)
+		MapIdMsg[s] = message
+	}
 	return MapIdMsg
 }
 
@@ -30,8 +49,8 @@ func LoadMsgInfos() map[string]string {
 func GetProtoData(msg proto.Message) ([]byte, error) {
 	strId := ""
 	name := reflect.Indirect(reflect.ValueOf(msg)).Type().Name()
-	for id, protoName := range MapIdMsg {
-		if protoName == name {
+	for id, message := range MapIdMsg {
+		if message.Name == name {
 			strId = id
 			break
 		}
@@ -97,8 +116,8 @@ func GetProtoResultPopFatal(code int) ([]byte, error) {
 func ParseProto(msg proto.Message) (uint32, []byte, error) {
 	strId := ""
 	name := reflect.Indirect(reflect.ValueOf(msg)).Type().Name()
-	for id, protoName := range MapIdMsg {
-		if protoName == name {
+	for id, message := range MapIdMsg {
+		if message.Name == name {
 			strId = id
 			break
 		}
