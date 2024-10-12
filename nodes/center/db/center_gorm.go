@@ -7,41 +7,6 @@ import (
 	"time"
 )
 
-//func (self *Component) AliasID() string {
-//	return strings.Trim(DBActor, superConst.DOT)
-//}
-
-// OnInit Actor初始化前触发该函数
-//func (self *Component) OnInit() {
-//self.Remote().Register(self.Register)
-//self.Remote().Register(self.Login)
-//self.Remote().Register(self.Logout)
-//
-//self.Remote().Register(self.GetClassList)
-//self.Remote().Register(self.GetRoomList)
-//self.Remote().Register(self.GetTableList)
-//self.Remote().Register(self.GetGameList)
-//
-//self.Remote().Register(self.CreateRoom)
-//self.Remote().Register(self.CreateTable)
-//self.Remote().Register(self.DeleteTable)
-//
-//self.Remote().Register(self.GetTable)
-//self.Remote().Register(self.GetUserInfo)
-//
-//self.Remote().Register(self.FixNickName)
-//
-//self.Remote().Register(self.Recharge)
-//self.Remote().Register(self.AddRecord)
-//self.Remote().Register(self.DecreaseGameRun)
-//// 每秒查询一次db
-//p.Timer().Add(5*time.Second, p.selectDB)
-//// 1秒后进行一次分页查询
-//p.Timer().AddOnce(1*time.Second, p.selectPagination)
-//}
-
-/////////////////////////////////////////////////////////////////////////////////
-
 // //////////////////////////////以下有关写操作 强烈要求加锁////////////////////////////////////////////////////////////////////
 
 // AddUser 完成注册 【新增一个玩家】

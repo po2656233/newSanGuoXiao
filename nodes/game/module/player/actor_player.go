@@ -5,13 +5,11 @@ import (
 	"github.com/po2656233/superplace/net/parser/simple"
 	cproto "github.com/po2656233/superplace/net/proto"
 	"golang.org/x/net/websocket"
-	"google.golang.org/protobuf/proto"
 	"net"
 	"net/url"
 	. "superman/internal/constant"
 	event2 "superman/internal/event"
 	gateMsg "superman/internal/protocol/go_file/gate"
-	"superman/internal/rpc"
 	mgr "superman/nodes/game/manger"
 	"superman/nodes/game/module/online"
 	"time"
@@ -94,12 +92,12 @@ func (p *ActorPlayer) OnStop() {
 //////////////////////////////实现Agent/////////////////////////////////////////////////////////
 
 func (p *ActorPlayer) WriteMsg(v interface{}) {
-	mid, data, err := rpc.ParseProto(v.(proto.Message))
-	if err != nil {
-		clog.Errorf("game send msg err:%v", err)
-		return
-	}
-	p.ResponseX(p.Session, mid, data)
+	//mid, data, err := rpc.ParseProto(v.(proto.Message))
+	//if err != nil {
+	//	clog.Errorf("game send msg err:%v", err)
+	//	return
+	//}
+	p.Feedback(v)
 }
 func (p *ActorPlayer) LocalAddr() net.Addr {
 	return nil

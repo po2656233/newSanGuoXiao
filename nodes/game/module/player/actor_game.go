@@ -13,7 +13,6 @@ import (
 	commMsg "superman/internal/protocol/go_file/common"
 	gameMsg "superman/internal/protocol/go_file/game"
 	gateMsg "superman/internal/protocol/go_file/gate"
-	"superman/internal/rpc"
 	sqlmodel "superman/internal/sql_model/minigame"
 	"superman/internal/utils"
 	mgr "superman/nodes/game/manger"
@@ -40,8 +39,7 @@ func (p *ActorGame) AliasID() string {
 func (p *ActorGame) OnInit() {
 	// 加载游戏配置
 	category.InitConfig()
-	// 加载协议文件
-	rpc.LoadMsgInfos()
+
 	// 客户端管理实例句柄
 	mgr.GetClientMgr().SetApp(p.App())
 

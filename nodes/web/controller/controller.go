@@ -22,6 +22,7 @@ import (
 
 // index h5客户端
 func (p *Controller) index(c *superGin.Context) {
+	return
 	c.HTML200("index.html")
 }
 

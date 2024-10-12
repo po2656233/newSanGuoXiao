@@ -31,7 +31,8 @@ func (c *Component) Init() {
 }
 
 func (c *Component) OnAfterInit() {
-	addOnload(loadDevAccount)
+	//addOnload()
+	
 	// db配置的注解
 	// 打开profile-dev.json，找到"game-1"和"db"配置
 	// 当前示例启动的节点id为 game-1

@@ -149,6 +149,16 @@ github.com/po2656233/goleaf v0.0.0-20240617091014-ede6cdcd76b7 h1:DPDkw5T3j1EJtx
 github.com/po2656233/goleaf v0.0.0-20240617091014-ede6cdcd76b7/go.mod h1:YGmD8p1A1EuVLQUVCe79L2EmjhmJ44PjTkLzuuv0Sd4=
 github.com/po2656233/superplace v1.2.12 h1:D73ygzf3bgMUgEw+YGF2BLRh3800L1pMU3JyV3IiKxE=
 github.com/po2656233/superplace v1.2.12/go.mod h1:LwfsrEGarlxnVPIomg8fBeJXjZFOelmOsNeG/E9upAE=
+github.com/po2656233/superplace v1.2.13 h1:yifyMvUJCc4IZ7AORqlnl5efpNzoGK7OdmUsQJ9pPuA=
+github.com/po2656233/superplace v1.2.13/go.mod h1:LwfsrEGarlxnVPIomg8fBeJXjZFOelmOsNeG/E9upAE=
+github.com/po2656233/superplace v1.2.14 h1:Fjv+vbhmElzavGX/8Okx1Dg4une2zHwZVXrBNyXrutg=
+github.com/po2656233/superplace v1.2.14/go.mod h1:LwfsrEGarlxnVPIomg8fBeJXjZFOelmOsNeG/E9upAE=
+github.com/po2656233/superplace v1.2.15 h1:RZ/RvhBwbU2XX9Y3E4HfG9sEK9ZwMLcjQCuueH3TZIA=
+github.com/po2656233/superplace v1.2.15/go.mod h1:LwfsrEGarlxnVPIomg8fBeJXjZFOelmOsNeG/E9upAE=
+github.com/po2656233/superplace v1.2.16 h1:z7H3cxq2Mi0XjIHHyFplLMSIA4rOXgHtjaPjz23FouU=
+github.com/po2656233/superplace v1.2.16/go.mod h1:LwfsrEGarlxnVPIomg8fBeJXjZFOelmOsNeG/E9upAE=
+github.com/po2656233/superplace v1.2.17 h1:rqSr578l+p6hxkv49QNZ4YxnxQ84RuVmdbmskbMP7MI=
+github.com/po2656233/superplace v1.2.17/go.mod h1:LwfsrEGarlxnVPIomg8fBeJXjZFOelmOsNeG/E9upAE=
 github.com/po2656233/superplace/components/cron v0.0.0-20240707013405-d96b3ef2803b h1:QAhOmCsq43GHOWLYNYsm3yEMzMdMQD7xbIwYC6R5nko=
 github.com/po2656233/superplace/components/cron v0.0.0-20240707013405-d96b3ef2803b/go.mod h1:gBrY7vwQ6kjhb7fDIkTfDt1odr5zVTK+aiuMr1khH94=
 github.com/po2656233/superplace/components/data-config v0.0.0-20240707013405-d96b3ef2803b h1:i+ZQynSRHz9W64zk4qyh5AzGy+ykyuVrVPuE4roylOQ=

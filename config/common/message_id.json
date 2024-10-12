@@ -376,30 +376,38 @@
         "node": "gate"
     },
     "10090": {
-        "name": "LoginReq",
+        "name": "LoginRequest",
         "node": "gate"
     },
     "10091": {
-        "name": "LoginResp",
+        "name": "LoginResponse",
         "node": "gate"
     },
     "10092": {
-        "name": "AllopatricResp",
+        "name": "LoginReq",
         "node": "gate"
     },
     "10093": {
-        "name": "ReconnectReq",
+        "name": "LoginResp",
         "node": "gate"
     },
     "10094": {
-        "name": "ReconnectResp",
+        "name": "AllopatricResp",
         "node": "gate"
     },
     "10095": {
-        "name": "LogoutReq",
+        "name": "ReconnectReq",
         "node": "gate"
     },
     "10096": {
+        "name": "ReconnectResp",
+        "node": "gate"
+    },
+    "10097": {
+        "name": "LogoutReq",
+        "node": "gate"
+    },
+    "10098": {
         "name": "LogoutResp",
         "node": "gate"
     },

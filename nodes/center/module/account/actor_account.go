@@ -84,7 +84,6 @@ func (p *ActorAccount) Register(req *gateMsg.RegisterReq) (*gateMsg.RegisterResp
 		uid = -1
 		log.Warnf("[actor_gorm] Register uid:%v err:%v", uid, err)
 	}
-	db2.DevAccountRegister(uid, accountName, password, req.Address)
 	resp := &gateMsg.RegisterResp{
 		OpenId: fmt.Sprintf("%d", uid),
 	}
@@ -132,14 +131,6 @@ func (p *ActorAccount) Login(req *gateMsg.LoginReq) (*gateMsg.LoginResp, int32) 
 		},
 	}
 
-	accountName := req.Account
-	password := req.Password
-	devAccount, _ := db2.DevAccountWithName(accountName)
-	if devAccount == nil {
-		db2.DevAccountRegister(userInfo.ID, accountName, password, req.MachineCode)
-	} else if devAccount.Password != password {
-		return nil, Login07
-	}
 	return resp, SUCCESS
 }
 

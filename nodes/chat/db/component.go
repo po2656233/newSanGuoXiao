@@ -91,6 +91,18 @@ func (c *Component) GetClubByID(id int64) (*sqlmodel.Club, error) {
 	return &club, err
 }
 
+func (c *Component) GetClubsByID(id int64, page, pageSize int) ([]*sqlmodel.Club, error) {
+	var clubs []*sqlmodel.Club
+	if pageSize <= 0 {
+		pageSize = 20
+	}
+	if page <= 0 {
+		page = 1
+	}
+	err := c.db.Limit(pageSize).Offset((page-1)*pageSize).Find(&clubs, "master = ?", id).Error
+	return clubs, err
+}
+
 func (c *Component) UpdateClub(club *sqlmodel.Club) error {
 	return c.db.Save(club).Error
 }

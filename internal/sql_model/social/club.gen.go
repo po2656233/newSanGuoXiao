@@ -15,7 +15,7 @@ type Club struct {
 	Icon      int32  `gorm:"column:icon;comment:俱乐部图标ID" json:"icon"`                           // 俱乐部图标ID
 	Mode      int32  `gorm:"column:mode;comment:俱乐部模式" json:"mode"`                             // 俱乐部模式
 	Score     int64  `gorm:"column:score;comment:俱乐部总积分" json:"score"`                          // 俱乐部总积分
-	Name      string `gorm:"column:name;comment:俱乐部名称" json:"name"`                             // 俱乐部名称
+	Name      string `gorm:"column:name;not null;comment:俱乐部名称" json:"name"`                    // 俱乐部名称
 	Notice    string `gorm:"column:notice;comment:俱乐部公告" json:"notice"`                         // 俱乐部公告
 }
 

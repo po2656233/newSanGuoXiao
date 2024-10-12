@@ -3,7 +3,6 @@ package player
 import (
 	"strings"
 	cst "superman/internal/constant"
-	"superman/internal/rpc"
 	"time"
 
 	superConst "github.com/po2656233/superplace/const"
@@ -25,9 +24,6 @@ func (p *ActorChat) AliasID() string {
 	return strings.Trim(cst.ChatActor, superConst.DOT)
 }
 func (p *ActorChat) OnInit() {
-	// 加载协议文件
-	rpc.LoadMsgInfos()
-
 	// 注册协议
 	//p.registerLocalMsg()  // 注册(与客户端通信)的协议
 	p.registerRemoteMsg() // 注意服务间交互的协议

@@ -93,6 +93,9 @@ func buildSimpleParser(app *superplace.AppBuilder) cfacade.INetParser {
 	// 设置数据路由函数 (用于分配协议到各个节点)
 	agentActor.SetOnDataRoute(onSimpleDataRoute)
 
+	//
+	simple.SetParseProtoFunc(rpc.ParseProto)
+
 	// 设置消息节点路由(建议配合data-config组件进行使用)
 	mapIDs := rpc.LoadMsgInfos()
 	registerProto := func(id uint32, node, field, key string) bool {

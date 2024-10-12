@@ -10,13 +10,13 @@ const TableNameChat = "chat"
 type Chat struct {
 	ID        int64  `gorm:"column:id;primaryKey;autoIncrement:true;comment:聊天记录唯一标识" json:"id"` // 聊天记录唯一标识
 	Channel   int32  `gorm:"column:channel;comment:聊天频道" json:"channel"`                         // 聊天频道
-	SenderUID int64  `gorm:"column:senderUid;comment:发送者用户ID" json:"senderUid"`                  // 发送者用户ID
-	TargetUID int64  `gorm:"column:targetUid;comment:接收者用户ID" json:"targetUid"`                  // 接收者用户ID
-	ClubID    int64  `gorm:"column:clubId;comment:俱乐部ID（如果是俱乐部聊天）" json:"clubId"`                // 俱乐部ID（如果是俱乐部聊天）
-	TimeStamp int64  `gorm:"column:timeStamp;comment:消息发送时间戳" json:"timeStamp"`                  // 消息发送时间戳
+	SenderUID int64  `gorm:"column:sender_uid;comment:发送者用户ID" json:"sender_uid"`                // 发送者用户ID
+	TargetUID int64  `gorm:"column:target_uid;comment:接收者用户ID" json:"target_uid"`                // 接收者用户ID
+	ClubID    int64  `gorm:"column:club_id;comment:俱乐部ID（如果是俱乐部聊天）" json:"club_id"`              // 俱乐部ID（如果是俱乐部聊天）
+	Timestamp int64  `gorm:"column:timestamp;comment:消息发送时间戳" json:"timestamp"`                  // 消息发送时间戳
 	Cont      string `gorm:"column:cont;comment:消息内容" json:"cont"`                               // 消息内容
-	GameEid   int64  `gorm:"column:gameEid;comment:游戏ID（如果是游戏邀请）" json:"gameEid"`                // 游戏ID（如果是游戏邀请）
-	MsgType   int32  `gorm:"column:msgType;comment:消息类型（0: 普通文本, 1: 邀请对战）" json:"msgType"`       // 消息类型（0: 普通文本, 1: 邀请对战）
+	GameEid   int64  `gorm:"column:game_eid;comment:游戏ID（如果是游戏邀请）" json:"game_eid"`              // 游戏ID（如果是游戏邀请）
+	MsgType   int32  `gorm:"column:msg_type;comment:消息类型（0: 普通文本, 1: 邀请对战）" json:"msg_type"`     // 消息类型（0: 普通文本, 1: 邀请对战）
 }
 
 // TableName Chat's table name

@@ -9,7 +9,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
 	github.com/po2656233/goleaf v0.0.0-20240617091014-ede6cdcd76b7
-	github.com/po2656233/superplace v1.2.12
+	github.com/po2656233/superplace v1.2.17
 	github.com/po2656233/superplace/components/cron v0.0.0-20240707013405-d96b3ef2803b
 	github.com/po2656233/superplace/components/data-config v0.0.0-20240707013405-d96b3ef2803b
 	github.com/po2656233/superplace/components/gin v0.0.0-20240707013405-d96b3ef2803b

@@ -121,7 +121,8 @@ func onSimpleDataRoute(agent *simple.Agent, msg *simple.Message, route *simple.N
 		serverId = session.GetString(ServerID)
 	}
 
-	if serverId == Empty {
+	// 聊天服,走随机节点
+	if serverId == Empty || route.NodeType == NodeTypeChat {
 		member, found := agent.Discovery().Random(route.NodeType)
 		if !found {
 			return
@@ -144,5 +145,9 @@ func onSimpleDataRoute(agent *simple.Agent, msg *simple.Message, route *simple.N
 	}
 	if err := agent.Cluster().PublishLocal(serverId, clusterPacket); err != nil {
 		clog.Errorf("[route][gameNodeRoute] ClusterLocalDataRoute err:%v", err)
+		agent.SendMsg(&gateMsg.ResultResp{
+			State: NetworkErr02,
+			Hints: StatusText[NetworkErr02],
+		})
 	}
 }

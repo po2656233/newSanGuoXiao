@@ -3,7 +3,10 @@ package start
 import (
 	"fmt"
 	"github.com/po2656233/superplace/const"
+	"github.com/po2656233/superplace/net/parser/simple"
 	"github.com/urfave/cli/v2"
+	"strings"
+	"superman/internal/rpc"
 )
 
 func VersionCommand() *cli.Command {
@@ -22,6 +25,12 @@ func VersionCommand() *cli.Command {
 func getParameters(c *cli.Context) (path, node string) {
 	path = c.String("path")
 	node = c.String("node")
+	// 网络协议区分
+	if !strings.Contains(node, "pomelo") {
+		// 加载协议文件
+		rpc.LoadMsgInfos()
+		simple.SetParseProtoFunc(rpc.ParseProto)
+	}
 	return path, node
 }
 
