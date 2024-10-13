@@ -92,11 +92,6 @@ func (p *ActorPlayer) OnStop() {
 //////////////////////////////实现Agent/////////////////////////////////////////////////////////
 
 func (p *ActorPlayer) WriteMsg(v interface{}) {
-	//mid, data, err := rpc.ParseProto(v.(proto.Message))
-	//if err != nil {
-	//	clog.Errorf("game send msg err:%v", err)
-	//	return
-	//}
 	p.Feedback(v)
 }
 func (p *ActorPlayer) LocalAddr() net.Addr {

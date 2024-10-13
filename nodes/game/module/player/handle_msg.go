@@ -13,8 +13,6 @@ import (
 	"time"
 )
 
-// p.Call(session.AgentPath, "Response", &gameMsg.Response{})
-
 // 注册接口
 func (p *ActorPlayer) registerLocalMsg() {
 	p.Local().Register(p.BrTuitongziHost)

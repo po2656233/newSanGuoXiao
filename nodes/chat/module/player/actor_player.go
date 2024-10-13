@@ -3,7 +3,6 @@ package player
 import (
 	clog "github.com/po2656233/superplace/logger"
 	"github.com/po2656233/superplace/net/parser/simple"
-	cproto "github.com/po2656233/superplace/net/proto"
 	. "superman/internal/constant"
 	event2 "superman/internal/event"
 	"superman/nodes/chat/db"
@@ -18,7 +17,6 @@ type (
 		isOnline    bool // 玩家是否在线
 		playerId    int64
 		uid         int64
-		session     *cproto.Session
 		userData    interface{}
 		dbComponent *db.Component
 	}

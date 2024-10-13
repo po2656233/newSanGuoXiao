@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	clog "github.com/po2656233/superplace/logger"
+	"github.com/po2656233/superplace/net/parser/simple"
 	"google.golang.org/protobuf/proto"
 	"os"
 	"reflect"
@@ -78,41 +79,6 @@ func GetProtoData(msg proto.Message) ([]byte, error) {
 	return data, nil
 }
 
-// GetProtoResult 获取协议结构数据 msgID + data.len + data
-func GetProtoResult(code int) ([]byte, error) {
-	return GetProtoData(&gateMsg.ResultResp{
-		State: int32(code),
-		Hints: StatusText[code],
-	})
-}
-
-// GetProtoResultPop 获取协议结构数据 msgID + data.len + data
-func GetProtoResultPop(code int) ([]byte, error) {
-	return GetProtoData(&gateMsg.ResultPopResp{
-		Title: StatusText[Title001],
-		Flag:  int32(code),
-		Hints: StatusText[code],
-	})
-}
-
-// GetProtoResultPopWarn 获取协议结构数据 msgID + data.len + data
-func GetProtoResultPopWarn(code int) ([]byte, error) {
-	return GetProtoData(&gateMsg.ResultPopResp{
-		Title: StatusText[Title002],
-		Flag:  int32(code),
-		Hints: StatusText[code],
-	})
-}
-
-// GetProtoResultPopFatal 获取协议结构数据 msgID + data.len + data
-func GetProtoResultPopFatal(code int) ([]byte, error) {
-	return GetProtoData(&gateMsg.ResultPopResp{
-		Title: StatusText[Title005],
-		Flag:  int32(code),
-		Hints: StatusText[code],
-	})
-}
-
 func ParseProto(msg proto.Message) (uint32, []byte, error) {
 	strId := ""
 	name := reflect.Indirect(reflect.ValueOf(msg)).Type().Name()
@@ -134,30 +100,100 @@ func ParseProto(msg proto.Message) (uint32, []byte, error) {
 	return uint32(id), data, err
 }
 
-func ParseResult(code int) (uint32, []byte, error) {
-	return ParseProto(&gateMsg.ResultResp{
+///////////////////////////simple协议/////////////////////////////////////
+
+// SendResult 反馈结果
+func SendResult(p *simple.ActorBase, code int) {
+	p.SendMsg(&gateMsg.ResultResp{
 		State: int32(code),
 		Hints: StatusText[code],
 	})
 }
 
-func ParseResultPop(code int) (uint32, []byte, error) {
-	return ParseProto(&gateMsg.ResultPopResp{
+func SendHint(p *simple.ActorBase, code int) {
+	p.SendMsg(&gateMsg.ResultPopResp{
 		Flag:  int32(code),
 		Title: StatusText[Title001],
 		Hints: StatusText[code],
 	})
 }
-
-func ParseResultPopWarn(code int) (uint32, []byte, error) {
-	return ParseProto(&gateMsg.ResultPopResp{
+func SendWarn(p *simple.ActorBase, code int) {
+	p.SendMsg(&gateMsg.ResultPopResp{
 		Flag:  int32(code),
 		Title: StatusText[Title002],
 		Hints: StatusText[code],
 	})
 }
-func ParseResultPopFatal(code int) (uint32, []byte, error) {
-	return ParseProto(&gateMsg.ResultPopResp{
+
+func SendError(p *simple.ActorBase, code int) {
+	p.SendMsg(&gateMsg.ResultPopResp{
+		Flag:  int32(code),
+		Title: StatusText[Title003],
+		Hints: StatusText[code],
+	})
+}
+
+// SendSerious 严重错误
+func SendSerious(p *simple.ActorBase, code int) {
+	p.SendMsg(&gateMsg.ResultPopResp{
+		Flag:  int32(code),
+		Title: StatusText[Title004],
+		Hints: StatusText[code],
+	})
+}
+
+func SendFatal(p *simple.ActorBase, code int) {
+	p.SendMsg(&gateMsg.ResultPopResp{
+		Flag:  int32(code),
+		Title: StatusText[Title005],
+		Hints: StatusText[code],
+	})
+}
+
+///////////////////////simple agent//////////////////////////////////////////////
+
+// ASendResult 反馈结果
+func ASendResult(agent *simple.Agent, code int) {
+	agent.SendMsg(&gateMsg.ResultResp{
+		State: int32(code),
+		Hints: StatusText[code],
+	})
+}
+
+func ASendHint(agent *simple.Agent, code int) {
+	agent.SendMsg(&gateMsg.ResultPopResp{
+		Flag:  int32(code),
+		Title: StatusText[Title001],
+		Hints: StatusText[code],
+	})
+}
+func ASendWarn(agent *simple.Agent, code int) {
+	agent.SendMsg(&gateMsg.ResultPopResp{
+		Flag:  int32(code),
+		Title: StatusText[Title002],
+		Hints: StatusText[code],
+	})
+}
+
+func ASendError(agent *simple.Agent, code int) {
+	agent.SendMsg(&gateMsg.ResultPopResp{
+		Flag:  int32(code),
+		Title: StatusText[Title003],
+		Hints: StatusText[code],
+	})
+}
+
+// ASendSerious 严重错误
+func ASendSerious(agent *simple.Agent, code int) {
+	agent.SendMsg(&gateMsg.ResultPopResp{
+		Flag:  int32(code),
+		Title: StatusText[Title004],
+		Hints: StatusText[code],
+	})
+}
+
+func ASendFatal(agent *simple.Agent, code int) {
+	agent.SendMsg(&gateMsg.ResultPopResp{
 		Flag:  int32(code),
 		Title: StatusText[Title005],
 		Hints: StatusText[code],

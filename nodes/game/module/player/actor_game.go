@@ -98,9 +98,12 @@ func (p *ActorGame) checkBaseInfo() {
 func (p *ActorGame) OnFindChild(msg *cfacade.Message) (cfacade.IActor, bool) {
 	// 动态创建 player child actor
 	childID := msg.TargetPath().ChildID
-	childActor, err := p.Child().Create(childID, &ActorPlayer{
+
+	player := &ActorPlayer{
 		isOnline: false,
-	})
+	}
+	player.SetSession(msg.Session)
+	childActor, err := p.Child().Create(childID, player)
 
 	if err != nil {
 		return nil, false

@@ -165,8 +165,7 @@ func (p *ActorAgent) Login(_ *cproto.Session, req *gateMsg.LoginRequest) {
 	// 验证token
 	uid, _ := token.GetIDForToken(req.Token)
 	if uid == Fault {
-		mid, data, _ := rpc.ParseResultPop(Login07)
-		agent.Response(mid, data)
+		rpc.ASendError(agent, Login07)
 		return
 	}
 
@@ -174,8 +173,7 @@ func (p *ActorAgent) Login(_ *cproto.Session, req *gateMsg.LoginRequest) {
 
 	if err := agent.Bind(uid); err != nil {
 		clog.Warn(err)
-		mid, data, _ := rpc.ParseResultPop(Flag0003)
-		agent.Response(mid, data)
+		rpc.ASendError(agent, Flag0003)
 		return
 	}
 
@@ -195,8 +193,7 @@ func (p *ActorAgent) Login(_ *cproto.Session, req *gateMsg.LoginRequest) {
 
 func (p *ActorAgent) checkSimpleSession(uid cfacade.UID) {
 	if agent, found := simple.GetAgentWithUID(uid); found {
-		mid, data, _ := rpc.ParseResult(Login12)
-		agent.Response(mid, data)
+		rpc.ASendError(agent, Login12)
 		return
 	}
 
