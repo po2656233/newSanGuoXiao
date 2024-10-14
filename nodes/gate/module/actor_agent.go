@@ -1,4 +1,4 @@
-package gate
+package module
 
 import (
 	"github.com/po2656233/superplace/const/code"
@@ -124,8 +124,8 @@ func (p *ActorAgent) checkSession(uid cfacade.UID) {
 	}
 }
 
-// onSessionClose  当agent断开时，关闭对应的ActorAgent
-func (p *ActorAgent) onPomeloSessionClose(agent *pomelo.Agent) {
+// OnPomeloSessionClose  当agent断开时，关闭对应的ActorAgent
+func (p *ActorAgent) OnPomeloSessionClose(agent *pomelo.Agent) {
 	session := agent.Session()
 	serverId := session.GetString(ServerID)
 	if serverId == "" {
@@ -159,6 +159,7 @@ func (p *ActorAgent) setSimpleSession(req *pb.StringKeyValue) {
 func (p *ActorAgent) Login(_ *cproto.Session, req *gateMsg.LoginRequest) {
 	agent, found := simple.GetAgent(p.ActorID())
 	if !found {
+		rpc.ASendError(agent, Login02)
 		return
 	}
 
@@ -186,9 +187,8 @@ func (p *ActorAgent) Login(_ *cproto.Session, req *gateMsg.LoginRequest) {
 		Uid:    uid,
 		OpenId: cstring.ToString(uid),
 	}
-	mid, data, err := rpc.ParseProto(res)
-	agent.Response(mid, data)
-	clog.Infof("Login mid:%v  err:%v", mid, err)
+	agent.SendMsg(res)
+	clog.Infof("Login sid:%v  uid:%v", req.ServerId, uid)
 }
 
 func (p *ActorAgent) checkSimpleSession(uid cfacade.UID) {
@@ -211,8 +211,8 @@ func (p *ActorAgent) checkSimpleSession(uid cfacade.UID) {
 	}
 }
 
-// onSessionClose  当agent断开时，关闭对应的ActorAgent
-func (p *ActorAgent) onSimpleSessionClose(agent *simple.Agent) {
+// OnSimpleSessionClose  当agent断开时，关闭对应的ActorAgent
+func (p *ActorAgent) OnSimpleSessionClose(agent *simple.Agent) {
 	session := agent.Session()
 	serverId := session.GetString(ServerID)
 	if serverId == "" {
@@ -221,8 +221,9 @@ func (p *ActorAgent) onSimpleSessionClose(agent *simple.Agent) {
 
 	// 通知game节点关闭session
 	childId := cstring.ToString(session.Uid)
-	if childId != "" {
-		targetPath := cfacade.NewChildPath(serverId, ActIdGame, childId)
+	node, ok := simple.GetNodeRoute(session.Mid)
+	if childId != "" && ok {
+		targetPath := cfacade.NewChildPath(serverId, node.NodeType, childId)
 		p.Call(targetPath, FuncSessionClose, nil)
 	}
 

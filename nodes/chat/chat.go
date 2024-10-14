@@ -2,10 +2,8 @@ package chat
 
 import (
 	superGORM "github.com/po2656233/superplace/components/gorm"
-	"github.com/po2656233/superplace/net/parser/simple"
 	checkCenter "superman/internal/component/check_center"
 	"superman/internal/conf"
-	"superman/internal/rpc"
 	db "superman/nodes/chat/db"
 	"superman/nodes/chat/module/player"
 
@@ -15,17 +13,6 @@ import (
 )
 
 func Run(profileFilePath, nodeId string) {
-	//if sgxUtils.IsNumeric(nodeId) == false {
-	//	panic("node parameter must is number.")
-	//}
-	//
-	//// snowflake global id
-	//serverId, _ := cstring.ToInt64(nodeId)
-	//exSnowflake.SetDefaultNode(serverId)
-
-	//
-	simple.SetParseProtoFunc(rpc.ParseProto)
-
 	// 配置sgx引擎
 	app := superplace.Configure(profileFilePath, nodeId, false, superplace.Cluster)
 	// 注册gorm组件来处理数据库数据

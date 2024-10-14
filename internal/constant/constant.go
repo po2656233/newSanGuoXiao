@@ -33,6 +33,9 @@ const (
 	Fault   = -1 // 故障
 	Default = 1  // 默认
 
+	True  = 1
+	False = 0
+
 	IndexStart = 1 // 起始索引
 	SYSTEMID   = 0
 

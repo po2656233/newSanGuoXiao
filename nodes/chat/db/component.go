@@ -111,7 +111,7 @@ func (c *Component) DeleteClub(id int64) error {
 	return c.db.Delete(&sqlmodel.Club{}, id).Error
 }
 
-// ClubMember表操作
+// AddClubMember 表操作
 func (c *Component) AddClubMember(member *sqlmodel.Clubmember) error {
 	return c.db.Create(member).Error
 }
@@ -130,7 +130,7 @@ func (c *Component) DeleteClubMember(id int64) error {
 	return c.db.Delete(&sqlmodel.Clubmember{}, id).Error
 }
 
-// ClubApply表操作
+// AddClubApply 表操作
 func (c *Component) AddClubApply(apply *sqlmodel.Clubapply) error {
 	return c.db.Create(apply).Error
 }
@@ -139,6 +139,11 @@ func (c *Component) GetClubApplyByID(id int64) (*sqlmodel.Clubapply, error) {
 	var apply sqlmodel.Clubapply
 	err := c.db.First(&apply, id).Error
 	return &apply, err
+}
+
+func (c *Component) GetClubMaster(id int64) (uid int64, err error) {
+	err = c.db.Select("master").First(&uid, id).Error
+	return
 }
 
 func (c *Component) UpdateClubApply(apply *sqlmodel.Clubapply) error {
@@ -223,6 +228,13 @@ func (c *Component) GetFriendsByUid(uid int64) ([]*sqlmodel.Friend, error) {
 	return friends, err
 }
 
+// GetFriendsIds 根据用户ID获取好友列表
+func (c *Component) GetFriendsIds(uid int64) ([]int64, error) {
+	var friends []int64
+	err := c.db.Select("friend_uid").Where("uid = ?", uid).Find(&friends).Error
+	return friends, err
+}
+
 // DeleteFriend 删除好友关系
 func (c *Component) DeleteFriend(uid, friendUid int64) error {
 	return c.db.Where("uid = ? AND friend_uid = ?", uid, friendUid).Delete(&sqlmodel.Friend{}).Error
@@ -242,6 +254,18 @@ func (c *Component) GetClubMember(clubId, uid int64) (*sqlmodel.Clubmember, erro
 	return &member, err
 }
 
+// GetClubMembers 获取特定俱乐部的成员
+func (c *Component) GetClubMembers(clubId int64) (member []*sqlmodel.Clubmember, err error) {
+	err = c.db.Where("club_id = ? ", clubId).Find(&member).Error
+	return
+}
+
+// GetClubMemberIds 获取特定俱乐部成员的IDs
+func (c *Component) GetClubMemberIds(clubId int64) (members []int64, err error) {
+	err = c.db.Select("uid").Where("club_id = ? ", clubId).Find(&members).Error
+	return
+}
+
 // GetChatHistory 获取聊天历史记录
 func (c *Component) GetChatHistory(channel int32, senderUid, targetUid, clubId, startTime, endTime int64) ([]*sqlmodel.Chat, error) {
 	var chats []*sqlmodel.Chat
@@ -251,6 +275,26 @@ func (c *Component) GetChatHistory(channel int32, senderUid, targetUid, clubId, 
 	}
 	if targetUid != 0 {
 		query = query.Where("target_uid = ?", targetUid)
+	}
+	if clubId != 0 {
+		query = query.Where("club_id = ?", clubId)
+	}
+	if startTime != 0 {
+		query = query.Where("timestamp >= ?", startTime)
+	}
+	if endTime != 0 {
+		query = query.Where("timestamp <= ?", endTime)
+	}
+	err := query.Find(&chats).Error
+	return chats, err
+}
+
+// GetChatHistoryUid 获取聊天历史记录
+func (c *Component) GetChatHistoryUid(channel int32, uid, clubId, startTime, endTime int64) ([]*sqlmodel.Chat, error) {
+	var chats []*sqlmodel.Chat
+	query := c.db.Where("channel = ?", channel)
+	if uid != 0 {
+		query = query.Where("sender_uid = ? or target_uid = ?", uid, uid)
 	}
 	if clubId != 0 {
 		query = query.Where("club_id = ?", clubId)
@@ -316,13 +360,6 @@ func (c *Component) GetClubInviteByClubIdAndTargetUid(clubId, targetUid int64) (
 	var invite sqlmodel.Clubinvite
 	err := c.db.Where("club_id = ? AND target_uid = ?", clubId, targetUid).First(&invite).Error
 	return &invite, err
-}
-
-// GetFriendOnlineStatus 获取好友在线状态
-func (c *Component) GetFriendOnlineStatus(uid int64) ([]*FriendOnlineStatus, error) {
-	// 这里需要实现具体的逻辑，可能需要查询其他服务或缓存
-	// 返回类型改为 []*FriendOnlineStatus
-	return nil, nil
 }
 
 // GetUserBaseByID 根据用户ID获取用户信息

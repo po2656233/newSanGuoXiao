@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	superConst "github.com/po2656233/superplace/const"
 	"github.com/po2656233/superplace/const/code"
 	exReflect "github.com/po2656233/superplace/extend/reflect"
 	"github.com/po2656233/superplace/facade"
@@ -111,6 +112,11 @@ func SendDataToOps(app facade.IApplication, req proto.Message) (interface{}, int
 func SendDataToGame(app facade.IApplication, req proto.Message) (interface{}, int32) {
 	return SendData(app, SourcePath, GameActor, NodeTypeGame, req)
 }
+
+func SendDataToGate(app facade.IApplication, req proto.Message) (interface{}, int32) {
+	return SendData(app, SourcePath, superConst.DOT+NodeTypeGate, NodeTypeGate, req)
+}
+
 func GetTargetPath(app facade.IApplication, actorID, nodeType string) string {
 	list := app.Discovery().ListByType(nodeType)
 	if len(list) == 0 {

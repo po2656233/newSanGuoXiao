@@ -1,8 +1,10 @@
 package player
 
 import (
+	cproto "github.com/po2656233/superplace/net/proto"
 	"strings"
 	cst "superman/internal/constant"
+	gateMsg "superman/internal/protocol/go_file/gate"
 	"time"
 
 	superConst "github.com/po2656233/superplace/const"
@@ -36,6 +38,7 @@ func (p *ActorChat) OnInit() {
 // registerRemoteMsg 注意服务间交互的协议
 func (p *ActorChat) registerRemoteMsg() {
 	p.Remote().Register(p.checkChild) // 与子节点交互
+	p.Remote().Register(p.Login)      // 与子节点交互
 }
 
 // checkBaseInfo 检查基础信息
@@ -69,6 +72,8 @@ func (p *ActorChat) OnStop() {
 	log.Debugf("[ActorChat] path = %s exit!", p.PathString())
 }
 
+/////////////////////////////////////////////////////////////////
+
 func (p *ActorChat) checkChild() {
 	// 扫描所有玩家actor
 	p.Child().Each(func(iActor cfacade.IActor) {
@@ -85,4 +90,7 @@ func (p *ActorChat) checkChild() {
 	})
 }
 
-/////////////////////////////////////////////////////////////////
+// Login 申请加好友
+func (p *ActorChat) Login(session *cproto.Session, m *gateMsg.LoginReq) {
+	_ = session
+}

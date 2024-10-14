@@ -159,6 +159,12 @@ github.com/po2656233/superplace v1.2.16 h1:z7H3cxq2Mi0XjIHHyFplLMSIA4rOXgHtjaPjz
 github.com/po2656233/superplace v1.2.16/go.mod h1:LwfsrEGarlxnVPIomg8fBeJXjZFOelmOsNeG/E9upAE=
 github.com/po2656233/superplace v1.2.17 h1:rqSr578l+p6hxkv49QNZ4YxnxQ84RuVmdbmskbMP7MI=
 github.com/po2656233/superplace v1.2.17/go.mod h1:LwfsrEGarlxnVPIomg8fBeJXjZFOelmOsNeG/E9upAE=
+github.com/po2656233/superplace v1.2.18 h1:gnhUNLD5S4E7x7vJWl/3+Fk/UwWqQoq0LlfAg1DKgKI=
+github.com/po2656233/superplace v1.2.18/go.mod h1:LwfsrEGarlxnVPIomg8fBeJXjZFOelmOsNeG/E9upAE=
+github.com/po2656233/superplace v1.2.19 h1:cY0N1A/7gpZnmEL8gUNH8H6JnNHlQZVl5XA9MeXzZwk=
+github.com/po2656233/superplace v1.2.19/go.mod h1:LwfsrEGarlxnVPIomg8fBeJXjZFOelmOsNeG/E9upAE=
+github.com/po2656233/superplace v1.2.20 h1:bfH4HSev4GHxlJtsxPpgy+Bx7F9kpEzoyFN82LJMNGw=
+github.com/po2656233/superplace v1.2.20/go.mod h1:LwfsrEGarlxnVPIomg8fBeJXjZFOelmOsNeG/E9upAE=
 github.com/po2656233/superplace/components/cron v0.0.0-20240707013405-d96b3ef2803b h1:QAhOmCsq43GHOWLYNYsm3yEMzMdMQD7xbIwYC6R5nko=
 github.com/po2656233/superplace/components/cron v0.0.0-20240707013405-d96b3ef2803b/go.mod h1:gBrY7vwQ6kjhb7fDIkTfDt1odr5zVTK+aiuMr1khH94=
 github.com/po2656233/superplace/components/data-config v0.0.0-20240707013405-d96b3ef2803b h1:i+ZQynSRHz9W64zk4qyh5AzGy+ykyuVrVPuE4roylOQ=

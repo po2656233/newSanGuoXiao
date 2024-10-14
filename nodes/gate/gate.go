@@ -13,6 +13,7 @@ import (
 	"superman/internal/conf"
 	. "superman/internal/constant"
 	"superman/internal/rpc"
+	"superman/nodes/gate/module"
 	"time"
 )
 
@@ -58,13 +59,13 @@ func buildPomeloParser(app *superplace.AppBuilder) cfacade.INetParser {
 	agentActor.AddConnector(cconnector.NewWS(app.Address()))
 	//当有新连接创建Agent时，启动一个自定义(ActorAgent)的子actor
 	agentActor.SetOnNewAgent(func(newAgent *pomelo.Agent) {
-		childActor := &ActorAgent{}
-		newAgent.AddOnClose(childActor.onPomeloSessionClose)
+		childActor := &module.ActorAgent{}
+		newAgent.AddOnClose(childActor.OnPomeloSessionClose)
 		_, _ = agentActor.Child().Create(newAgent.SID(), childActor) // actorID == sid
 	})
 
 	// 设置数据路由函数
-	agentActor.SetOnDataRoute(onPomeloDataRoute)
+	agentActor.SetOnDataRoute(module.OnPomeloDataRoute)
 
 	return agentActor
 }
@@ -77,8 +78,8 @@ func buildSimpleParser(app *superplace.AppBuilder) cfacade.INetParser {
 	agentActor.AddConnector(cconnector.NewWS(app.Address()))
 
 	agentActor.SetOnNewAgent(func(newAgent *simple.Agent) {
-		childActor := &ActorAgent{}
-		newAgent.AddOnClose(childActor.onSimpleSessionClose)
+		childActor := &module.ActorAgent{}
+		newAgent.AddOnClose(childActor.OnSimpleSessionClose)
 		_, _ = agentActor.Child().Create(newAgent.SID(), childActor)
 		clog.Infof("新增客户端 sid:%v uid:%v", newAgent.SID(), newAgent.UID())
 	})
@@ -91,10 +92,7 @@ func buildSimpleParser(app *superplace.AppBuilder) cfacade.INetParser {
 	agentActor.SetWriteBacklog(64)
 
 	// 设置数据路由函数 (用于分配协议到各个节点)
-	agentActor.SetOnDataRoute(onSimpleDataRoute)
-
-	//
-	simple.SetParseProtoFunc(rpc.ParseProto)
+	agentActor.SetOnDataRoute(module.OnSimpleDataRoute)
 
 	// 设置消息节点路由(建议配合data-config组件进行使用)
 	mapIDs := rpc.LoadMsgInfos()

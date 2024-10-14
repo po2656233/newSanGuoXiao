@@ -1,10 +1,16 @@
 package player
 
 import (
+	exString "github.com/po2656233/superplace/extend/string"
+	cfacade "github.com/po2656233/superplace/facade"
 	clog "github.com/po2656233/superplace/logger"
+	superActor "github.com/po2656233/superplace/net/actor"
 	"github.com/po2656233/superplace/net/parser/simple"
+	"google.golang.org/protobuf/proto"
+	"strconv"
 	. "superman/internal/constant"
 	event2 "superman/internal/event"
+	"superman/internal/rpc"
 	"superman/nodes/chat/db"
 	"superman/nodes/game/module/online"
 )
@@ -42,6 +48,68 @@ func (p *ActorPlayer) sessionClose() {
 	logoutEvent := event2.NewPlayerLogout(p.ActorID(), p.playerId)
 	p.PostEvent(&logoutEvent)
 
+}
+
+// NotifyAll 通知玩家
+func (p *ActorPlayer) NotifyAll(message proto.Message) bool {
+	parent, ok := p.System().GetIActor(ActIdChat)
+	if !ok {
+		rpc.SendResult(&p.ActorBase, Chat028)
+		return false
+	}
+	chatAct, ok1 := parent.(*superActor.Actor)
+	if !ok1 {
+		rpc.SendResult(&p.ActorBase, Chat029)
+		return false
+	}
+
+	chatAct.Child().Each(func(i cfacade.IActor) {
+		p.SendTo(i.SID(), message)
+	})
+	return true
+}
+
+// NotifyTo 通知玩家
+func (p *ActorPlayer) NotifyTo(uidList []int64, message proto.Message) bool {
+	parent, ok := p.System().GetIActor(ActIdChat)
+	if !ok {
+		rpc.SendResult(&p.ActorBase, Chat028)
+		return false
+	}
+	chatAct, ok1 := parent.(*superActor.Actor)
+	if !ok1 {
+		rpc.SendResult(&p.ActorBase, Chat029)
+		return false
+	}
+	for _, uid := range uidList {
+		if act, ok2 := chatAct.Child().Get(exString.ToString(uid)); ok2 {
+			p.SendTo(act.SID(), message)
+		}
+	}
+	return true
+}
+
+// GetOnline 通知玩家
+func (p *ActorPlayer) GetOnline() []int64 {
+	parent, ok := p.System().GetIActor(ActIdChat)
+	if !ok {
+		rpc.SendResult(&p.ActorBase, Chat028)
+		return nil
+	}
+	chatAct, ok1 := parent.(*superActor.Actor)
+	if !ok1 {
+		rpc.SendResult(&p.ActorBase, Chat029)
+		return nil
+	}
+	uidList := make([]int64, 0)
+	chatAct.Child().Each(func(i cfacade.IActor) {
+		i.ActorID()
+		uid, _ := strconv.ParseInt(i.ActorID(), 10, 64)
+		if 0 < uid {
+			uidList = append(uidList, uid)
+		}
+	})
+	return uidList
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
