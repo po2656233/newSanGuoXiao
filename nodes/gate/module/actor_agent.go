@@ -1,6 +1,7 @@
 package module
 
 import (
+	superConst "github.com/po2656233/superplace/const"
 	"github.com/po2656233/superplace/const/code"
 	cstring "github.com/po2656233/superplace/extend/string"
 	cfacade "github.com/po2656233/superplace/facade"
@@ -9,6 +10,8 @@ import (
 	"github.com/po2656233/superplace/net/parser/pomelo"
 	"github.com/po2656233/superplace/net/parser/simple"
 	cproto "github.com/po2656233/superplace/net/proto"
+	"strconv"
+	"strings"
 	"superman/internal/conf"
 	. "superman/internal/constant"
 	pb "superman/internal/protocol/go_file/common"
@@ -28,6 +31,10 @@ type (
 	}
 )
 
+func (p *ActorAgent) AliasID() string {
+	return strings.Trim(GateActor, superConst.DOT)
+}
+
 func (p *ActorAgent) OnInit() {
 	duplicateLoginCode, _ = p.App().Serializer().Marshal(&cproto.I32{
 		Value: Login12,
@@ -39,6 +46,89 @@ func (p *ActorAgent) OnInit() {
 	// simple
 	p.Remote().Register(p.setSimpleSession)
 	p.Local().Register(p.Login)
+	p.Remote().Register(p.Request)
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+func (p *ActorAgent) checkSession(uid cfacade.UID) {
+	if agent, found := pomelo.GetAgentWithUID(uid); found {
+		agent.Kick(duplicateLoginCode, true)
+	}
+
+	rsp := &cproto.PomeloKick{
+		Uid:    uid,
+		Reason: duplicateLoginCode,
+	}
+
+	// 遍历所有网关节点，踢除旧的session
+	members := p.App().Discovery().ListByType(p.App().NodeType(), p.App().NodeId())
+	for _, member := range members {
+		// user是gate.go里自定义的agentActorID
+		actorPath := cfacade.NewPath(member.GetNodeId(), ActIdGate)
+		p.Call(actorPath, pomelo.KickFuncName, rsp)
+	}
+}
+
+func (p *ActorAgent) checkSimpleSession(uid cfacade.UID) {
+	if agent, found := simple.GetAgentWithUID(uid); found {
+		rpc.ASendError(agent, Login12)
+		return
+	}
+
+	rsp := &cproto.PomeloKick{
+		Uid:    uid,
+		Reason: duplicateLoginCode,
+	}
+
+	// 遍历所有网关节点，踢除旧的session
+	members := p.App().Discovery().ListByType(p.App().NodeType(), p.App().NodeId())
+	for _, member := range members {
+		// user是gate.go里自定义的agentActorID
+		actorPath := cfacade.NewPath(member.GetNodeId(), ActIdGate)
+		p.Call(actorPath, pomelo.KickFuncName, rsp)
+	}
+}
+
+// OnPomeloSessionClose  当agent断开时，关闭对应的ActorAgent
+func (p *ActorAgent) OnPomeloSessionClose(agent *pomelo.Agent) {
+	session := agent.Session()
+	serverId := session.GetString(ServerID)
+	if serverId == "" {
+		return
+	}
+
+	// 通知game节点关闭session
+	childId := cstring.ToString(session.Uid)
+	if childId != "" {
+		targetPath := cfacade.NewChildPath(serverId, ActIdGame, childId)
+		p.Call(targetPath, "sessionClose", nil)
+	}
+
+	// 自己退出
+	p.Exit()
+	clog.Infof("sessionClose path = %s", p.Path())
+}
+
+// OnSimpleSessionClose  当agent断开时，关闭对应的ActorAgent
+func (p *ActorAgent) OnSimpleSessionClose(agent *simple.Agent) {
+	session := agent.Session()
+	serverId := session.GetString(ServerID)
+	if serverId == "" {
+		return
+	}
+
+	// 通知game节点关闭session
+	childId := cstring.ToString(session.Uid)
+	node, ok := simple.GetNodeRoute(session.Mid)
+	if childId != "" && ok {
+		targetPath := cfacade.NewChildPath(serverId, node.NodeType, childId)
+		p.Call(targetPath, FuncSessionClose, nil)
+	}
+
+	// 自己退出
+	p.Exit()
+	clog.Infof("sessionClose path = %s", p.Path())
 }
 
 ////////////////////////pomelo//////////////////////////////////////
@@ -105,45 +195,6 @@ func (p *ActorAgent) login(session *cproto.Session, req *gateMsg.LoginRequest) {
 	})
 }
 
-func (p *ActorAgent) checkSession(uid cfacade.UID) {
-	if agent, found := pomelo.GetAgentWithUID(uid); found {
-		agent.Kick(duplicateLoginCode, true)
-	}
-
-	rsp := &cproto.PomeloKick{
-		Uid:    uid,
-		Reason: duplicateLoginCode,
-	}
-
-	// 遍历所有网关节点，踢除旧的session
-	members := p.App().Discovery().ListByType(p.App().NodeType(), p.App().NodeId())
-	for _, member := range members {
-		// user是gate.go里自定义的agentActorID
-		actorPath := cfacade.NewPath(member.GetNodeId(), ActIdGate)
-		p.Call(actorPath, pomelo.KickFuncName, rsp)
-	}
-}
-
-// OnPomeloSessionClose  当agent断开时，关闭对应的ActorAgent
-func (p *ActorAgent) OnPomeloSessionClose(agent *pomelo.Agent) {
-	session := agent.Session()
-	serverId := session.GetString(ServerID)
-	if serverId == "" {
-		return
-	}
-
-	// 通知game节点关闭session
-	childId := cstring.ToString(session.Uid)
-	if childId != "" {
-		targetPath := cfacade.NewChildPath(serverId, ActIdGame, childId)
-		p.Call(targetPath, "sessionClose", nil)
-	}
-
-	// 自己退出
-	p.Exit()
-	clog.Infof("sessionClose path = %s", p.Path())
-}
-
 // ///////////////////////////simple/////////////////////////////////////////////
 func (p *ActorAgent) setSimpleSession(req *pb.StringKeyValue) {
 	if req.Key == "" {
@@ -191,43 +242,18 @@ func (p *ActorAgent) Login(_ *cproto.Session, req *gateMsg.LoginRequest) {
 	clog.Infof("Login sid:%v  uid:%v", req.ServerId, uid)
 }
 
-func (p *ActorAgent) checkSimpleSession(uid cfacade.UID) {
-	if agent, found := simple.GetAgentWithUID(uid); found {
-		rpc.ASendError(agent, Login12)
+// Request 登录
+func (p *ActorAgent) Request(req *pb.Request) {
+	uid, _ := strconv.ParseInt(req.Route, 10, 64)
+	mid, _ := strconv.ParseInt(req.Sid, 10, 64)
+	agent, found := simple.GetAgentWithUID(uid)
+	if !found {
+		rpc.ASendError(agent, Login02)
 		return
 	}
 
-	rsp := &cproto.PomeloKick{
-		Uid:    uid,
-		Reason: duplicateLoginCode,
-	}
-
-	// 遍历所有网关节点，踢除旧的session
-	members := p.App().Discovery().ListByType(p.App().NodeType(), p.App().NodeId())
-	for _, member := range members {
-		// user是gate.go里自定义的agentActorID
-		actorPath := cfacade.NewPath(member.GetNodeId(), ActIdGate)
-		p.Call(actorPath, pomelo.KickFuncName, rsp)
-	}
+	agent.Response(uint32(mid), req.Data)
+	clog.Infof("-> toUid:%v mid:%v", uid, mid)
 }
 
-// OnSimpleSessionClose  当agent断开时，关闭对应的ActorAgent
-func (p *ActorAgent) OnSimpleSessionClose(agent *simple.Agent) {
-	session := agent.Session()
-	serverId := session.GetString(ServerID)
-	if serverId == "" {
-		return
-	}
-
-	// 通知game节点关闭session
-	childId := cstring.ToString(session.Uid)
-	node, ok := simple.GetNodeRoute(session.Mid)
-	if childId != "" && ok {
-		targetPath := cfacade.NewChildPath(serverId, node.NodeType, childId)
-		p.Call(targetPath, FuncSessionClose, nil)
-	}
-
-	// 自己退出
-	p.Exit()
-	clog.Infof("sessionClose path = %s", p.Path())
-}
+///////////////////////////////////////////////////////////////////////////////////

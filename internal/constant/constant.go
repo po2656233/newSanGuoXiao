@@ -121,6 +121,7 @@ const (
 	GameActor  = ".game"
 	MatchActor = ".match"
 	ChatActor  = ".chat"
+	GateActor  = ".gate"
 )
 
 const (

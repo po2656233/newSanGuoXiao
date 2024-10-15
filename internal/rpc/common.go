@@ -1,16 +1,19 @@
 package rpc
 
 import (
-	superConst "github.com/po2656233/superplace/const"
 	"github.com/po2656233/superplace/const/code"
 	exReflect "github.com/po2656233/superplace/extend/reflect"
+	exString "github.com/po2656233/superplace/extend/string"
 	"github.com/po2656233/superplace/facade"
 	clog "github.com/po2656233/superplace/logger"
+	"github.com/po2656233/superplace/net/parser/simple"
+	cproto "github.com/po2656233/superplace/net/proto"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
 	"strings"
 	. "superman/internal/constant"
+	pb "superman/internal/protocol/go_file/common"
 	gateMsg "superman/internal/protocol/go_file/gate"
 )
 
@@ -113,8 +116,26 @@ func SendDataToGame(app facade.IApplication, req proto.Message) (interface{}, in
 	return SendData(app, SourcePath, GameActor, NodeTypeGame, req)
 }
 
-func SendDataToGate(app facade.IApplication, req proto.Message) (interface{}, int32) {
-	return SendData(app, SourcePath, superConst.DOT+NodeTypeGate, NodeTypeGate, req)
+func SendToGate(app facade.IApplication, toUid int64, req proto.Message) int32 {
+	mid, data, err := ParseProto(req)
+	if err != nil {
+		clog.Errorf("[rpc] SendDataToGate err:%v", err)
+	}
+	target := GetTargetPath(app, GateActor, NodeTypeGate)
+
+	rsp := &cproto.PomeloResponse{
+		Sid:  p.session.Sid,
+		Mid:  mid,
+		Data: data,
+	}
+
+	p.Call(session.AgentPath, simple.ResponseFuncName, resp)
+
+	return app.ActorSystem().Call(SourcePath, target, simple.ResponseFuncName, &pb.Request{
+		Sid:   exString.ToString(mid),
+		Route: exString.ToString(toUid),
+		Data:  data,
+	})
 }
 
 func GetTargetPath(app facade.IApplication, actorID, nodeType string) string {
