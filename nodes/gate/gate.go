@@ -45,10 +45,6 @@ func Run(profileFilePath, nodeId string) {
 	// 注册数据配表组件，具体详见data-config的使用方法和参数配置
 	app.Register(conf.New())
 
-	app.AddActors(
-		&module.ActorAgent{},
-	)
-
 	//启动sgx引擎
 	app.Startup()
 }

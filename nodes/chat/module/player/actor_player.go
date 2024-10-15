@@ -83,7 +83,7 @@ func (p *ActorPlayer) NotifyTo(uidList []int64, message proto.Message) bool {
 	}
 	for _, uid := range uidList {
 		if act, ok2 := chatAct.Child().Get(exString.ToString(uid)); ok2 {
-			p.SendTo(act.SID(), message)
+			rpc.SendToGate(act.App(), uid, message)
 		}
 	}
 	return true

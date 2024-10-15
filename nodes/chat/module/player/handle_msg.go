@@ -568,9 +568,8 @@ func (p *ActorPlayer) ChatText(session *cproto.Session, m *chatMsg.ChatTextReq) 
 
 	log.Infof("uid:%v \t sid:%v", session.Uid, session.Sid)
 
-	rpc.SendToGate(p.App(), m.TargetUid, resp)
 	// 发送消息
-	//p.NotifyTo([]int64{m.TargetUid}, resp)
+	p.NotifyTo([]int64{session.Uid, m.TargetUid}, resp)
 }
 
 // ClubJob 切换群成员职务

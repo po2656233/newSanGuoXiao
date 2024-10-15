@@ -9,7 +9,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
 	github.com/po2656233/goleaf v0.0.0-20240617091014-ede6cdcd76b7
-	github.com/po2656233/superplace v1.2.20
+	github.com/po2656233/superplace v1.2.21
 	github.com/po2656233/superplace/components/cron v0.0.0-20240707013405-d96b3ef2803b
 	github.com/po2656233/superplace/components/data-config v0.0.0-20240707013405-d96b3ef2803b
 	github.com/po2656233/superplace/components/gin v0.0.0-20240707013405-d96b3ef2803b
@@ -42,6 +42,7 @@ require (
 	github.com/go-playground/validator/v10 v10.22.0 // indirect
 	github.com/go-sql-driver/mysql v1.8.1 // indirect
 	github.com/goccy/go-json v0.10.3 // indirect
+	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/gops v0.3.28 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
