@@ -9,12 +9,14 @@ import (
 	protoMsg "superman/internal/protocol/go_file/common"
 	sqlmodel "superman/internal/sql_model/social"
 	"superman/internal/utils"
+	"sync"
 )
 
 type Component struct {
 	facade.Component
 	db    *gorm.DB
 	curDB string
+	sync.Mutex
 }
 
 func New() *Component {
@@ -63,6 +65,8 @@ func (c *Component) OnStop() {
 
 // Chat表操作
 func (c *Component) AddChat(chat *sqlmodel.Chat) error {
+	c.Lock()
+	defer c.Unlock()
 	return c.db.Create(chat).Error
 }
 
@@ -73,7 +77,10 @@ func (c *Component) GetChatByID(id int64) (*sqlmodel.Chat, error) {
 }
 
 func (c *Component) UpdateChat(chat *sqlmodel.Chat) error {
-	return c.db.Save(chat).Error
+	c.Lock()
+	defer c.Unlock()
+	err := c.db.Save(chat).Error
+	return err
 }
 
 func (c *Component) DeleteChat(id int64) error {
@@ -82,7 +89,10 @@ func (c *Component) DeleteChat(id int64) error {
 
 // Club表操作
 func (c *Component) AddClub(club *sqlmodel.Club) error {
-	return c.db.Create(club).Error
+	c.Lock()
+	defer c.Unlock()
+	err := c.db.Create(club).Error
+	return err
 }
 
 func (c *Component) GetClubByID(id int64) (*sqlmodel.Club, error) {
@@ -91,7 +101,7 @@ func (c *Component) GetClubByID(id int64) (*sqlmodel.Club, error) {
 	return &club, err
 }
 
-func (c *Component) GetClubsByID(id int64, page, pageSize int) ([]*sqlmodel.Club, error) {
+func (c *Component) GetClubsByUID(id int64, page, pageSize int) ([]*sqlmodel.Club, error) {
 	var clubs []*sqlmodel.Club
 	if pageSize <= 0 {
 		pageSize = 20
@@ -104,7 +114,10 @@ func (c *Component) GetClubsByID(id int64, page, pageSize int) ([]*sqlmodel.Club
 }
 
 func (c *Component) UpdateClub(club *sqlmodel.Club) error {
-	return c.db.Save(club).Error
+	c.Lock()
+	defer c.Unlock()
+	err := c.db.Save(club).Error
+	return err
 }
 
 func (c *Component) DeleteClub(id int64) error {
@@ -113,7 +126,10 @@ func (c *Component) DeleteClub(id int64) error {
 
 // AddClubMember 表操作
 func (c *Component) AddClubMember(member *sqlmodel.Clubmember) error {
-	return c.db.Create(member).Error
+	c.Lock()
+	defer c.Unlock()
+	err := c.db.Create(member).Error
+	return err
 }
 
 func (c *Component) GetClubMemberByID(id int64) (*sqlmodel.Clubmember, error) {
@@ -123,16 +139,26 @@ func (c *Component) GetClubMemberByID(id int64) (*sqlmodel.Clubmember, error) {
 }
 
 func (c *Component) UpdateClubMember(member *sqlmodel.Clubmember) error {
-	return c.db.Save(member).Error
+	c.Lock()
+	defer c.Unlock()
+	err := c.db.Save(member).Error
+	return err
 }
 
 func (c *Component) DeleteClubMember(id int64) error {
 	return c.db.Delete(&sqlmodel.Clubmember{}, id).Error
 }
 
+func (c *Component) DeleteClubOneMember(club, uid int64) error {
+	return c.db.Delete(&sqlmodel.Clubmember{}, "club_id = ? AND uid = ?", club, uid).Error
+}
+
 // AddClubApply 表操作
 func (c *Component) AddClubApply(apply *sqlmodel.Clubapply) error {
-	return c.db.Create(apply).Error
+	c.Lock()
+	defer c.Unlock()
+	err := c.db.Create(apply).Error
+	return err
 }
 
 func (c *Component) GetClubApplyByID(id int64) (*sqlmodel.Clubapply, error) {
@@ -141,13 +167,24 @@ func (c *Component) GetClubApplyByID(id int64) (*sqlmodel.Clubapply, error) {
 	return &apply, err
 }
 
-func (c *Component) GetClubMaster(id int64) (uid int64, err error) {
-	err = c.db.Select("master").First(&uid, id).Error
+func (c *Component) GetClubApply(club, uid int64) (*sqlmodel.Clubapply, error) {
+	var apply sqlmodel.Clubapply
+	apply.ClubID = club
+	apply.UID = uid
+	err := c.db.First(&apply).Error
+	return &apply, err
+}
+
+func (c *Component) GetClubMaster(club *sqlmodel.Club) (uid int64, err error) {
+	err = c.db.Model(club).Select("master").First(&uid, club).Error
 	return
 }
 
 func (c *Component) UpdateClubApply(apply *sqlmodel.Clubapply) error {
-	return c.db.Save(apply).Error
+	c.Lock()
+	defer c.Unlock()
+	err := c.db.Save(apply).Error
+	return err
 }
 
 func (c *Component) DeleteClubApply(id int64) error {
@@ -156,7 +193,10 @@ func (c *Component) DeleteClubApply(id int64) error {
 
 // ClubInvite表操作
 func (c *Component) AddClubInvite(invite *sqlmodel.Clubinvite) error {
-	return c.db.Create(invite).Error
+	c.Lock()
+	defer c.Unlock()
+	err := c.db.Create(invite).Error
+	return err
 }
 
 func (c *Component) GetClubInviteByID(id int64) (*sqlmodel.Clubinvite, error) {
@@ -166,7 +206,10 @@ func (c *Component) GetClubInviteByID(id int64) (*sqlmodel.Clubinvite, error) {
 }
 
 func (c *Component) UpdateClubInvite(invite *sqlmodel.Clubinvite) error {
-	return c.db.Save(invite).Error
+	c.Lock()
+	defer c.Unlock()
+	err := c.db.Save(invite).Error
+	return err
 }
 
 func (c *Component) DeleteClubInvite(id int64) error {
@@ -175,7 +218,10 @@ func (c *Component) DeleteClubInvite(id int64) error {
 
 // Friend表操作
 func (c *Component) AddFriend(friend *sqlmodel.Friend) error {
-	return c.db.Create(friend).Error
+	c.Lock()
+	defer c.Unlock()
+	err := c.db.Create(friend).Error
+	return err
 }
 
 func (c *Component) GetFriendByID(id int64) (*sqlmodel.Friend, error) {
@@ -185,12 +231,18 @@ func (c *Component) GetFriendByID(id int64) (*sqlmodel.Friend, error) {
 }
 
 func (c *Component) UpdateFriend(friend *sqlmodel.Friend) error {
-	return c.db.Save(friend).Error
+	c.Lock()
+	defer c.Unlock()
+	err := c.db.Save(friend).Error
+	return err
 }
 
 // FriendApply表操作
 func (c *Component) AddFriendApply(apply *sqlmodel.Friendapply) error {
-	return c.db.Create(apply).Error
+	c.Lock()
+	defer c.Unlock()
+	err := c.db.Create(apply).Error
+	return err
 }
 
 func (c *Component) GetFriendApplyByID(id int64) (*sqlmodel.Friendapply, error) {
@@ -199,8 +251,19 @@ func (c *Component) GetFriendApplyByID(id int64) (*sqlmodel.Friendapply, error) 
 	return &apply, err
 }
 
+func (c *Component) GetFriendApplyByUID(senderUID, targetUID int64) (*sqlmodel.Friendapply, error) {
+	var apply sqlmodel.Friendapply
+	apply.SenderUID = senderUID
+	apply.TargetUID = targetUID
+	err := c.db.Model(apply).First(&apply).Error
+	return &apply, err
+}
+
 func (c *Component) UpdateFriendApply(apply *sqlmodel.Friendapply) error {
-	return c.db.Save(apply).Error
+	c.Lock()
+	defer c.Unlock()
+	err := c.db.Save(apply).Error
+	return err
 }
 
 func (c *Component) DeleteFriendApply(id int64) error {
@@ -217,7 +280,7 @@ func (c *Component) GetClubInvitesByTargetUid(targetUid int64) ([]*sqlmodel.Club
 // GetClubMembersByClubId 根据俱乐部ID获���成员列表
 func (c *Component) GetClubMembersByClubId(clubId int64) ([]*sqlmodel.Clubmember, error) {
 	var members []*sqlmodel.Clubmember
-	err := c.db.Where("club_id = ?", clubId).Find(&members).Error
+	err := c.db.Model(members).Where("club_id = ?", clubId).Find(&members).Error
 	return members, err
 }
 
@@ -362,10 +425,17 @@ func (c *Component) GetClubInviteByClubIdAndTargetUid(clubId, targetUid int64) (
 	return &invite, err
 }
 
+// GetClubInviteById 根据俱乐部ID和目标用户ID获取俱乐部邀请
+func (c *Component) GetClubInviteById(id int64) (*sqlmodel.Clubinvite, error) {
+	var invite sqlmodel.Clubinvite
+	err := c.db.Model(invite).First(&invite, id).Error
+	return &invite, err
+}
+
 // GetUserBaseByID 根据用户ID获取用户信息
 func (c *Component) GetUserBaseByID(uid int64) (*protoMsg.UserFullInfo, error) {
 	var user protoMsg.UserFullInfo
-	err := c.db.Where("id = ?", uid).First(&user).Error
+	err := c.db.Model(user).Where("id = ?", uid).First(&user).Error
 	return &user, err
 }
 

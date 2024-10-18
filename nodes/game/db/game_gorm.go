@@ -8,6 +8,7 @@ import (
 	. "superman/internal/constant"
 	gateMsg "superman/internal/protocol/go_file/gate"
 	"superman/internal/rpc"
+	"superman/internal/sql_model/center"
 	sqlmodel "superman/internal/sql_model/minigame"
 	. "superman/internal/utils"
 
@@ -96,11 +97,11 @@ func (self *Component) AddRecharge(table *sqlmodel.Recharge) error {
 	if err != nil {
 		return err
 	}
-	err = self.db.Transaction(func(tx *gorm.DB) error {
+	err = self.centerDB.Transaction(func(tx *gorm.DB) error {
 		// 获取充值前的金额
 		money := userInfo.Info.Money
 		// 插入新的记录
-		user := sqlmodel.User{
+		user := center.User{
 			ID: table.UID,
 		}
 		switch table.Switch {
@@ -138,7 +139,7 @@ func (self *Component) AddRecord(table *sqlmodel.Record) error {
 	if err != nil {
 		return err
 	}
-	err = self.db.Transaction(func(tx *gorm.DB) error {
+	err = self.centerDB.Transaction(func(tx *gorm.DB) error {
 		// 获取充值前的金额
 		coin := userInfo.Info.Coin
 		// 获取充值前的金额
@@ -152,7 +153,7 @@ func (self *Component) AddRecord(table *sqlmodel.Record) error {
 		if err = self.db.Create(&table).Error; err != nil {
 			return err
 		}
-		user := sqlmodel.User{
+		user := center.User{
 			ID: table.UID,
 		}
 		if err = self.db.Model(user).UpdateColumn("coin", gorm.Expr("coin + ?", table.Payment)).Error; err != nil {

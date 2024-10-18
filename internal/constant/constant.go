@@ -17,8 +17,6 @@ const (
 	CenterDb  = "center_db_id"
 	GameDb    = "game_db_id"
 	ChatDb    = "chat_db_id"
-	TcpAddr   = ":10011"
-	KcpAddr   = ":10012"
 	Empty     = ""
 	MSGFile   = "config/common/message_id.json"
 	RedisConf = "config/common/redis.toml"
@@ -116,7 +114,6 @@ const (
 const (
 	SourcePath = ".system"
 	OpsActor   = ".ops"
-	DBActor    = ".db"
 	AccActor   = ".account"
 	GameActor  = ".game"
 	MatchActor = ".match"

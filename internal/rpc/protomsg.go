@@ -11,6 +11,7 @@ import (
 	"os"
 	"reflect"
 	"strconv"
+	"strings"
 	. "superman/internal/constant"
 	gateMsg "superman/internal/protocol/go_file/gate"
 )
@@ -27,6 +28,7 @@ type Messages []Message
 // ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 var (
 	MapIdMsg = make(map[string]Message)
+	pingID   = uint32(INVALID)
 	Endian   = binary.BigEndian
 )
 
@@ -98,6 +100,40 @@ func ParseProto(msg proto.Message) (uint32, []byte, error) {
 	}
 	data, err := proto.Marshal(msg)
 	return uint32(id), data, err
+}
+
+func GetMsgID(msg proto.Message) (uint32, []byte, error) {
+	name := reflect.Indirect(reflect.ValueOf(msg)).Type().Name()
+	for id, message := range MapIdMsg {
+		if message.Name == name {
+			nId, err := strconv.Atoi(id)
+			if err != nil {
+				return 0, nil, err
+			}
+			return uint32(nId), nil, err
+		}
+	}
+	return 0, nil, fmt.Errorf("no msg id")
+}
+
+func GetPingMsgID() uint32 {
+	if pingID != INVALID {
+		return pingID
+	}
+	if len(MapIdMsg) == INVALID {
+		MapIdMsg = LoadMsgInfos()
+	}
+	if len(MapIdMsg) == INVALID {
+		return INVALID
+	}
+
+	for id, message := range MapIdMsg {
+		if strings.Contains(message.Name, "PingReq") {
+			nId, _ := strconv.ParseInt(id, 10, 64)
+			return uint32(nId)
+		}
+	}
+	return INVALID
 }
 
 ///////////////////////////simple协议/////////////////////////////////////

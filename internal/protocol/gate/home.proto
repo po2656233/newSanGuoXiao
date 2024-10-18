@@ -53,6 +53,7 @@ message GetTaskListResp{
 // 获取用户简要信息
 message GetUserInfoReq{
   int64 uid = 1;
+  string username = 2;
 }
 message GetUserInfoResp{
   UserInfo info = 1;

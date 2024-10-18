@@ -540,66 +540,74 @@
         "node": "chat"
     },
     "20033": {
-        "name": "FriendOnlineReq",
+        "name": "ClubDelMemberReq",
         "node": "chat"
     },
     "20034": {
-        "name": "FriendOnlineResp",
+        "name": "ClubDelMemberResp",
         "node": "chat"
     },
     "20035": {
-        "name": "FriendListReq",
+        "name": "FriendOnlineReq",
         "node": "chat"
     },
     "20036": {
-        "name": "FriendListResp",
+        "name": "FriendOnlineResp",
         "node": "chat"
     },
     "20037": {
-        "name": "FriendDelReq",
+        "name": "FriendListReq",
         "node": "chat"
     },
     "20038": {
-        "name": "FriendDelResp",
+        "name": "FriendListResp",
         "node": "chat"
     },
     "20039": {
-        "name": "FriendApplyReq",
+        "name": "FriendDelReq",
         "node": "chat"
     },
     "20040": {
-        "name": "FriendApplyResp",
+        "name": "FriendDelResp",
         "node": "chat"
     },
     "20041": {
-        "name": "FriendApplyBatchReq",
+        "name": "FriendApplyReq",
         "node": "chat"
     },
     "20042": {
-        "name": "FriendApplyBatchResp",
+        "name": "FriendApplyResp",
         "node": "chat"
     },
     "20043": {
-        "name": "FriendApplyListReq",
+        "name": "FriendApplyBatchReq",
         "node": "chat"
     },
     "20044": {
-        "name": "FriendApplyListResp",
+        "name": "FriendApplyBatchResp",
         "node": "chat"
     },
     "20045": {
-        "name": "FriendApplyDealReq",
+        "name": "FriendApplyListReq",
         "node": "chat"
     },
     "20046": {
-        "name": "FriendApplyDealResp",
+        "name": "FriendApplyListResp",
         "node": "chat"
     },
     "20047": {
-        "name": "FriendApplyBatchDealReq",
+        "name": "FriendApplyDealReq",
         "node": "chat"
     },
     "20048": {
+        "name": "FriendApplyDealResp",
+        "node": "chat"
+    },
+    "20049": {
+        "name": "FriendApplyBatchDealReq",
+        "node": "chat"
+    },
+    "20050": {
         "name": "FriendApplyBatchDealResp",
         "node": "chat"
     },

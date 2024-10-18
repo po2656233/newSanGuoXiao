@@ -99,18 +99,26 @@ func OnSimpleDataRoute(agent *simple.Agent, msg *simple.Message, route *simple.N
 	session := agent.Session()
 	session.Mid = msg.MID
 
-	if session.Mid == MIDPing {
+	if session.Mid == rpc.GetPingMsgID() {
 		data, _ := rpc.GetProtoData(&gateMsg.PongResp{})
 		agent.SendRaw(data)
 		return
 	}
+
 	// current node
 	if agent.NodeType() == route.NodeType {
 		targetPath := cfacade.NewChildPath(agent.NodeId(), route.ActorID, session.Sid)
 		simple.LocalDataRoute(agent, session, msg, route, targetPath)
 		return
 	}
-
+	if session.Uid == INVALID {
+		data, _ := rpc.GetProtoData(&gateMsg.ResultResp{
+			State: False,
+			Hints: StatusText[Login06],
+		})
+		agent.SendRaw(data)
+		return
+	}
 	serverId := Empty
 	if !session.IsBind() {
 		clog.Warnf("[sid = %s,uid = %d] Session is not bind with UID. failed to forward message.[route = %+v]",

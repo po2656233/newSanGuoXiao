@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-const dbName = "social"
+const dbName = "center"
 
 // 以下尽量不改动
 const sqlModelDir = "internal/sql_model/" + dbName

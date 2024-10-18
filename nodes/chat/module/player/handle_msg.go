@@ -1,9 +1,13 @@
 package player
 
 import (
+	"fmt"
 	log "github.com/po2656233/superplace/logger"
+	"golang.org/x/net/context"
+	"google.golang.org/protobuf/proto"
 	. "superman/internal/constant"
 	commMsg "superman/internal/protocol/go_file/common"
+	. "superman/internal/redis_cluster"
 	"superman/internal/rpc"
 	sqlmodel "superman/internal/sql_model/social"
 	//pb "superman/internal/protocol/go_file/common"
@@ -41,7 +45,74 @@ func (p *ActorPlayer) registerLocalMsg() {
 	p.Local().Register(p.ClubApplyList)
 	p.Local().Register(p.ClubList)
 	p.Local().Register(p.ChatText)
+	p.Local().Register(p.ClubDelMember)
 }
+
+// 获取用户基本信息
+func (p *ActorPlayer) getUserInfo(uid int64) *commMsg.UserInfo {
+	ret := SingleRedis().DB.Get(context.Background(), GetUserKey(uid))
+	if ret.Err() == nil {
+		data, _ := ret.Bytes()
+		if INVALID < len(data) {
+			info := commMsg.UserInfo{}
+			proto.Unmarshal(data, &info)
+			log.Infof("[ActorAccount] getUserInfo SingleRedis uid:%v (redis-uid:%v) info:%#v", uid, info.UserID, info)
+			return &info
+		}
+	}
+
+	resp, code := rpc.SendDataToAcc(p.App(), &gateMsg.GetUserInfoReq{
+		Uid: uid,
+	})
+	if code != SUCCESS {
+		log.Errorf("[getUserInfo] uid:%v fail code:%v", uid, code)
+		return nil
+	}
+	user, ok := resp.(*gateMsg.GetUserInfoResp)
+	if !ok || user == nil || user.Info == nil {
+		log.Errorf("[getUserInfo] uid:%v nodata ", uid)
+		return nil
+	}
+	if user.Info.UserID == INVALID {
+		log.Errorf("[getUserInfo] uid:%v nodata ", user)
+		return nil
+	}
+	return user.Info
+}
+
+// 获取用户基本信息
+func (p *ActorPlayer) getUserNameInfo(username string) *commMsg.UserInfo {
+	resp, code := rpc.SendDataToAcc(p.App(), &gateMsg.GetUserInfoReq{
+		Username: username,
+	})
+	if code != SUCCESS {
+		log.Errorf("[getUserNameInfo] username:%v fail code:%v", username, code)
+		return nil
+	}
+	user, ok := resp.(*gateMsg.GetUserInfoResp)
+	if !ok || user == nil || user.Info == nil {
+		log.Errorf("[getUserNameInfo] uid:%v nodata ", username)
+		return nil
+	}
+	if user.Info.UserID == INVALID {
+		log.Errorf("[getUserInfo] uid:%v nodata ", user)
+		return nil
+	}
+	return user.Info
+}
+
+// 获取用户基本信息
+func (p *ActorPlayer) getUserBaseInfo(uid int64) *commMsg.UserFullInfo {
+	user, err := p.dbComponent.GetUserBaseByID(uid) // 假设有一个方法可以根据用户ID获取用户信息
+	if err != nil {
+		log.Errorf("[getUserBaseInfo] uid:%v  err:%v", uid, err)
+		return nil // 如果获取失败，返回nil
+	}
+
+	return user
+}
+
+// ///////////////////////////////////////////////////////////////////////////////
 
 // FriendApply 申请加好友
 func (p *ActorPlayer) FriendApply(session *cproto.Session, m *chatMsg.FriendApplyReq) {
@@ -52,6 +123,12 @@ func (p *ActorPlayer) FriendApply(session *cproto.Session, m *chatMsg.FriendAppl
 		ApplyTime: time.Now().Unix(),
 		Status:    Pending, // 0: 待处理
 	}
+
+	if session.Uid == m.TargetUid || m.SenderUid != session.Uid {
+		rpc.SendResult(&p.ActorBase, Chat039)
+		return
+	}
+
 	if err := p.dbComponent.AddFriendApply(apply); err != nil {
 		log.Warnf("[FriendApply] uid:%v m:%v  err:%v", session.Uid, m, err)
 		rpc.SendResult(&p.ActorBase, Chat001)
@@ -64,13 +141,12 @@ func (p *ActorPlayer) FriendApply(session *cproto.Session, m *chatMsg.FriendAppl
 			Cont:      apply.Cont,
 		},
 	}
-	p.SendMsg(resp)
+	p.NotifyTo([]int64{apply.TargetUID, session.Uid}, resp)
 }
 
-// 邀请信息查询
+// ClubInviteList 邀请信息查询
 func (p *ActorPlayer) ClubInviteList(session *cproto.Session, m *chatMsg.ClubInviteListReq) {
 	invites, err := p.dbComponent.GetClubInvitesByInviteType(session.Uid, m.InviteType)
-
 	resp := &chatMsg.ClubInviteListResp{
 		InviteType: m.InviteType,
 		DataArr:    make([]*chatMsg.ClubInviteInfo, 0),
@@ -82,11 +158,21 @@ func (p *ActorPlayer) ClubInviteList(session *cproto.Session, m *chatMsg.ClubInv
 	}
 
 	for _, invite := range invites {
+		targetData := p.getUserInfo(invite.TargetUID)
+		if targetData == nil {
+			log.Warnf("[ClubInviteList] getUserInfo uid:%v m:%v  TargetUid:%v", session.Uid, m, invite.TargetUID)
+		}
+		senderData := p.getUserInfo(invite.SenderUID)
+		if senderData == nil {
+			log.Warnf("[ClubInviteList] getUserInfo uid:%v m:%v  SenderUID:%v", session.Uid, m, invite.SenderUID)
+		}
 		resp.DataArr = append(resp.DataArr, &chatMsg.ClubInviteInfo{
-			ClubId: invite.ClubID,
-			// 只保留协议中存在的字段
+			ClubId:     invite.ClubID,
+			TargetData: targetData,
+			SenderData: senderData,
 		})
 	}
+	log.Infof("[ClubInviteList] req:%v res:%v", m, resp)
 	p.SendMsg(resp)
 }
 
@@ -118,34 +204,6 @@ func (p *ActorPlayer) ChatSgxInvite(session *cproto.Session, m *chatMsg.ChatSgxI
 	p.SendMsg(resp)
 }
 
-// 获取用户基本信息
-func (p *ActorPlayer) getUserInfo(uid int64) *commMsg.UserInfo {
-	resp, code := rpc.SendDataToAcc(p.App(), &gateMsg.GetUserInfoReq{
-		Uid: uid,
-	})
-	if code == SUCCESS {
-		user, ok := resp.(*gateMsg.GetUserInfoResp)
-		if !ok {
-			log.Errorf("[getUserInfo] uid:%v nodata ", uid)
-			return nil
-		}
-		return user.Info
-	}
-	log.Errorf("[getUserInfo] uid:%v fail code:%v", uid, code)
-	return nil
-}
-
-// 获取用户基本信息
-func (p *ActorPlayer) getUserBaseInfo(uid int64) *commMsg.UserFullInfo {
-	user, err := p.dbComponent.GetUserBaseByID(uid) // 假设有一个方法可以根据用户ID获取用户信息
-	if err != nil {
-		log.Errorf("[getUserBaseInfo] uid:%v  err:%v", uid, err)
-		return nil // 如果获取失败，返回nil
-	}
-
-	return user
-}
-
 // 群成员列表
 func (p *ActorPlayer) ClubMembers(session *cproto.Session, m *chatMsg.ClubMembersReq) {
 	members, err := p.dbComponent.GetClubMembersByClubId(m.ClubId)
@@ -162,11 +220,14 @@ func (p *ActorPlayer) ClubMembers(session *cproto.Session, m *chatMsg.ClubMember
 
 	for _, member := range members {
 		resp.DataArr = append(resp.DataArr, &chatMsg.ClubMemberInfo{
+			Id:            member.ID,
 			Uid:           member.UID,
-			Job:           int32(member.Job),
-			Liveness:      int32(member.Liveness),
-			TotalLiveness: int32(member.TotalLiveness),
+			Job:           member.Job,
+			Liveness:      member.Liveness,
+			TotalLiveness: member.TotalLiveness,
 			Score:         member.Score,
+			RefereeUid:    member.RefereeUID,
+			ClubId:        member.ClubID,
 		})
 	}
 	p.SendMsg(resp)
@@ -181,6 +242,7 @@ func (p *ActorPlayer) FriendApplyBatchDeal(session *cproto.Session, m *chatMsg.F
 		FriendArr:    make([]*commMsg.UserInfo, 0),
 	}
 
+	now := time.Now().Unix()
 	for _, senderUid := range m.SenderUidArr {
 		apply, err := p.dbComponent.GetFriendApplyBySenderAndTarget(senderUid, session.Uid)
 		if err != nil {
@@ -190,13 +252,28 @@ func (p *ActorPlayer) FriendApplyBatchDeal(session *cproto.Session, m *chatMsg.F
 
 		apply.Status = m.IsAgree
 		err = p.dbComponent.UpdateFriendApply(apply)
-
-		if m.IsAgree == 1 {
-			friendInfo := p.getUserInfo(senderUid)
-			if friendInfo != nil {
-				resp.FriendArr = append(resp.FriendArr, friendInfo)
-			}
+		if err != nil {
+			log.Warnf("[FriendApplyBatchDeal]-->UpdateFriendApply uid:%v m:%v apply:%v err:%v", session.Uid, m, apply, err)
+			continue
 		}
+		if m.IsAgree == False {
+			continue
+		}
+		err = p.dbComponent.AddFriend(&sqlmodel.Friend{
+			UID:       session.Uid,
+			FriendUID: senderUid,
+			IsBlack:   False,
+			AddTime:   now,
+		})
+		if err != nil {
+			log.Warnf("[FriendApplyBatchDeal]-->AddFriend uid:%v m:%v apply:%v err:%v", session.Uid, m, apply, err)
+			continue
+		}
+		friendInfo := p.getUserInfo(senderUid)
+		if friendInfo != nil {
+			resp.FriendArr = append(resp.FriendArr, friendInfo)
+		}
+
 	}
 
 	p.SendMsg(resp)
@@ -234,7 +311,6 @@ func (p *ActorPlayer) ClubNew(session *cproto.Session, m *chatMsg.ClubNewReq) {
 		Name:      m.Name,
 		Notice:    m.Notice,
 	}
-	err := p.dbComponent.AddClub(club)
 
 	resp := &chatMsg.ClubNewResp{
 		Data: &chatMsg.ClubInfo{
@@ -247,6 +323,18 @@ func (p *ActorPlayer) ClubNew(session *cproto.Session, m *chatMsg.ClubNewReq) {
 			Notice:    club.Notice,
 		},
 	}
+	err := p.dbComponent.AddClub(club)
+	if err != nil {
+		log.Warnf("[ClubNew] uid:%v m:%v err:%v", session.Uid, m, err)
+		rpc.SendResult(&p.ActorBase, Chat006)
+		return
+	}
+	err = p.dbComponent.AddClubMember(&sqlmodel.Clubmember{
+		ClubID:   club.ID,
+		UID:      club.Builder,
+		Job:      1,
+		Liveness: 0,
+	})
 	if err != nil {
 		log.Warnf("[ClubNew] uid:%v m:%v err:%v", session.Uid, m, err)
 		rpc.SendResult(&p.ActorBase, Chat006)
@@ -257,25 +345,67 @@ func (p *ActorPlayer) ClubNew(session *cproto.Session, m *chatMsg.ClubNewReq) {
 
 // 处理邀请
 func (p *ActorPlayer) ClubInviteDeal(session *cproto.Session, m *chatMsg.ClubInviteDealReq) {
-	invite, err := p.dbComponent.GetClubInviteByClubIdAndTargetUid(m.ClubId, session.Uid)
+	invite, err := p.dbComponent.GetClubInviteById(m.Id)
 	if err != nil {
 		log.Warnf("[ClubInviteDeal] uid:%v m:%v err:%v", session.Uid, m, err)
 		rpc.SendResult(&p.ActorBase, Chat007)
 		return
 	}
 
+	if invite.TargetUID != session.Uid {
+		log.Warnf("[ClubInviteDeal] uid:%v m:%v err:%v", session.Uid, m, err)
+		rpc.SendResult(&p.ActorBase, Chat008)
+		return
+	}
+	//mem, err := p.dbComponent.GetClubMember(invite.ClubID, session.Uid)
+	//if err != nil {
+	//	log.Warnf("[ClubInviteDeal] uid:%v m:%v err:%v", session.Uid, m, err)
+	//	rpc.SendResult(&p.ActorBase, Chat007)
+	//	return
+	//}
+	//if mem.Job == 0 {
+	//	rpc.SendResult(&p.ActorBase, Chat036)
+	//	return
+	//}
+
 	invite.Status = m.IsAgree
 	err = p.dbComponent.UpdateClubInvite(invite)
-
-	resp := &chatMsg.ClubInviteDealResp{
-		ClubId:  m.ClubId,
-		IsAgree: m.IsAgree,
-	}
 	if err != nil {
 		log.Warnf("[ClubInviteDeal] uid:%v m:%v err:%v", session.Uid, m, err)
 		rpc.SendResult(&p.ActorBase, Chat008)
 		return
 	}
+
+	username := ""
+	if info := p.getUserInfo(invite.TargetUID); info != nil {
+		username = info.Account
+	}
+
+	hint := fmt.Sprintf("%v 已经拒绝了您的请求!", username)
+	if m.IsAgree == True {
+		err = p.dbComponent.AddClubMember(&sqlmodel.Clubmember{
+			ClubID:   invite.ClubID,
+			UID:      invite.TargetUID,
+			Job:      0,
+			Liveness: 0,
+		})
+		if err != nil {
+			log.Warnf("[ClubNew] uid:%v m:%v err:%v", session.Uid, m, err)
+			rpc.SendResult(&p.ActorBase, Chat006)
+			return
+		}
+		hint = fmt.Sprintf("%v 已经同意了您的请求!", username)
+	}
+
+	resp := &chatMsg.ClubInviteDealResp{
+		Id:      m.Id,
+		IsAgree: m.IsAgree,
+	}
+
+	p.NotifyTo([]int64{invite.SenderUID}, &gateMsg.ResultResp{
+		State: SUCCESS,
+		Hints: hint,
+	})
 	p.SendMsg(resp)
 }
 
@@ -344,19 +474,24 @@ func (p *ActorPlayer) FriendApplyList(session *cproto.Session, m *chatMsg.Friend
 
 // ClubApply 申请入群
 func (p *ActorPlayer) ClubApply(session *cproto.Session, m *chatMsg.ClubApplyReq) {
+	master, err := p.dbComponent.GetClubMaster(&sqlmodel.Club{
+		ID: m.ClubId,
+	})
+	if err != nil {
+		log.Warnf("[ClubApply] uid:%v m:%v err:%v", session.Uid, m, err)
+		rpc.SendResult(&p.ActorBase, Chat033)
+		return
+	}
+	if session.Uid == INVALID {
+		session.Uid = p.uid
+	}
 	apply := &sqlmodel.Clubapply{
 		ClubID:    m.ClubId,
 		UID:       session.Uid,
 		ApplyTime: time.Now().Unix(),
 		Status:    Pending, // 0: 待处理
 	}
-	err := p.dbComponent.AddClubApply(apply)
-	if err != nil {
-		log.Warnf("[ClubApply] uid:%v m:%v err:%v", session.Uid, m, err)
-		rpc.SendResult(&p.ActorBase, Chat012)
-		return
-	}
-	master, err := p.dbComponent.GetClubMaster(m.ClubId)
+	err = p.dbComponent.AddClubApply(apply)
 	if err != nil {
 		log.Warnf("[ClubApply] uid:%v m:%v err:%v", session.Uid, m, err)
 		rpc.SendResult(&p.ActorBase, Chat012)
@@ -447,7 +582,7 @@ func (p *ActorPlayer) FriendApplyBatch(session *cproto.Session, m *chatMsg.Frien
 
 // FriendApplyDeal 处理好友申请
 func (p *ActorPlayer) FriendApplyDeal(session *cproto.Session, m *chatMsg.FriendApplyDealReq) {
-	apply, err := p.dbComponent.GetFriendApplyByID(m.SenderUid)
+	apply, err := p.dbComponent.GetFriendApplyByUID(m.SenderUid, session.Uid)
 	if err != nil {
 		log.Warnf("[FriendApplyDeal] uid:%v m:%v err:%v", session.Uid, m, err)
 		rpc.SendResult(&p.ActorBase, Chat016)
@@ -473,13 +608,22 @@ func (p *ActorPlayer) FriendApplyDeal(session *cproto.Session, m *chatMsg.Friend
 		TargetUid: apply.TargetUID,
 		IsAgree:   m.IsAgree,
 	}
-	if resp.IsAgree == 1 {
+	if resp.IsAgree == True {
+		err = p.dbComponent.AddFriend(&sqlmodel.Friend{
+			UID:       session.Uid,
+			FriendUID: apply.TargetUID,
+			IsBlack:   False,
+			AddTime:   time.Now().Unix(),
+		})
+		if err != nil {
+			log.Warnf("[FriendApplyBatchDeal]-->AddFriend uid:%v m:%v apply:%v err:%v", session.Uid, m, apply, err)
+		}
 		resp.FriendData = p.getUserInfo(apply.TargetUID)
 	}
 	p.SendMsg(resp)
 
 	// 通知对方
-	if resp.IsAgree == 1 {
+	if resp.IsAgree == True {
 		resp.FriendData = p.getUserInfo(apply.SenderUID)
 	}
 	p.NotifyTo([]int64{apply.TargetUID}, resp)
@@ -487,6 +631,33 @@ func (p *ActorPlayer) FriendApplyDeal(session *cproto.Session, m *chatMsg.Friend
 
 // ClubInvite 邀请入群
 func (p *ActorPlayer) ClubInvite(session *cproto.Session, m *chatMsg.ClubInviteReq) {
+
+	if m.TargetUid == INVALID {
+		userInfo := p.getUserNameInfo(m.TargetName)
+		if userInfo == nil {
+			rpc.SendResult(&p.ActorBase, Chat042)
+			return
+		}
+		m.TargetUid = userInfo.UserID
+	} else {
+		userInfo := p.getUserInfo(m.TargetUid)
+		if userInfo == nil {
+			rpc.SendResult(&p.ActorBase, Chat042)
+			return
+		}
+	}
+
+	if session.Uid == m.TargetUid {
+		rpc.SendResult(&p.ActorBase, Chat039)
+		return
+	}
+
+	mem, err := p.dbComponent.GetClubMember(m.ClubId, m.TargetUid)
+	if INVALID < mem.ID {
+		rpc.SendResult(&p.ActorBase, Chat040)
+		return
+	}
+
 	invite := &sqlmodel.Clubinvite{
 		ClubID:     m.ClubId,
 		SenderUID:  session.Uid,
@@ -494,7 +665,7 @@ func (p *ActorPlayer) ClubInvite(session *cproto.Session, m *chatMsg.ClubInviteR
 		InviteTime: time.Now().Unix(),
 		Status:     Pending, // 0: 待处理
 	}
-	err := p.dbComponent.AddClubInvite(invite)
+	err = p.dbComponent.AddClubInvite(invite)
 	if err != nil {
 		log.Warnf("[ClubInvite] uid:%v m:%v err:%v", session.Uid, m, err)
 		rpc.SendResult(&p.ActorBase, Chat018)
@@ -508,7 +679,8 @@ func (p *ActorPlayer) ClubInvite(session *cproto.Session, m *chatMsg.ClubInviteR
 			TargetData: p.getUserInfo(m.TargetUid),
 		},
 	}
-	p.NotifyTo([]int64{session.Uid, m.TargetUid}, resp)
+	rpc.SendResult(&p.ActorBase, Chat018)
+	p.NotifyTo([]int64{m.TargetUid}, resp)
 }
 
 // ClubList 群列表
@@ -574,6 +746,28 @@ func (p *ActorPlayer) ChatText(session *cproto.Session, m *chatMsg.ChatTextReq) 
 
 // ClubJob 切换群成员职务
 func (p *ActorPlayer) ClubJob(session *cproto.Session, m *chatMsg.ClubJobReq) {
+
+	// 检验当前用户的权限
+	master, err := p.dbComponent.GetClubMember(m.ClubId, session.Uid)
+	if master.Job == 0 {
+		rpc.SendResult(&p.ActorBase, Chat035)
+		return
+	}
+
+	if master.Job == m.Job {
+		rpc.SendResult(&p.ActorBase, Chat037)
+		return
+	}
+	if m.Job == 2 && master.Job != 1 {
+		rpc.SendResult(&p.ActorBase, Chat038)
+		return
+	}
+
+	if m.Job == 1 && master.Job != 1 {
+		rpc.SendResult(&p.ActorBase, Chat038)
+		return
+	}
+
 	member, err := p.dbComponent.GetClubMember(m.ClubId, m.Uid)
 	if err != nil {
 		log.Warnf("[ClubJob] uid:%v m:%v err:%v", session.Uid, m, err)
@@ -626,37 +820,58 @@ func (p *ActorPlayer) ChatHis(session *cproto.Session, m *chatMsg.ChatHisReq) {
 
 // ClubApplyDeal 处理入群申请
 func (p *ActorPlayer) ClubApplyDeal(session *cproto.Session, m *chatMsg.ClubApplyDealReq) {
-	apply, err := p.dbComponent.GetClubApplyByID(session.Uid)
+
+	apply, err := p.dbComponent.GetClubApplyByID(m.Id)
 	if err != nil {
 		log.Warnf("[ClubApplyDeal] uid:%v m:%v err:%v", session.Uid, m, err)
 		rpc.SendResult(&p.ActorBase, Chat023)
 		return
 	}
 
+	if apply.Status != Pending {
+		rpc.SendResult(&p.ActorBase, Chat034)
+		return
+	}
+
+	// 检验当前用户的权限
+	if user, err := p.dbComponent.GetClubMember(apply.ClubID, session.Uid); err == nil && user.Job == 0 {
+		rpc.SendResult(&p.ActorBase, Chat035)
+		return
+	}
+
 	if m.IsAgree == True {
 		apply.Status = Agree
+		err = p.dbComponent.AddClubMember(&sqlmodel.Clubmember{
+			ClubID:   apply.ClubID,
+			UID:      apply.UID,
+			Job:      0,
+			Liveness: 0,
+		})
+		if err != nil {
+			log.Warnf("[ClubApplyDeal] AddClubMember uid:%v m:%v err:%v", session.Uid, m, err)
+			rpc.SendResult(&p.ActorBase, Chat024)
+			return
+		}
 	} else if m.IsAgree == False {
 		apply.Status = Reject
 	}
 
-	err = p.dbComponent.UpdateClubApply(apply)
-
-	resp := &chatMsg.ClubApplyDealResp{
-		Uid:     m.Uid,
-		ClubId:  m.ClubId,
-		IsAgree: m.IsAgree,
-	}
-	if err != nil {
-		log.Warnf("[ClubApplyDeal] uid:%v m:%v err:%v", session.Uid, m, err)
+	if err = p.dbComponent.UpdateClubApply(apply); err != nil {
+		log.Warnf("[ClubApplyDeal] UpdateClubApply uid:%v m:%v err:%v", session.Uid, m, err)
 		rpc.SendResult(&p.ActorBase, Chat024)
 		return
 	}
-	p.NotifyTo([]int64{m.Uid, session.Uid}, resp)
+
+	resp := &chatMsg.ClubApplyDealResp{
+		Id:      m.Id,
+		IsAgree: m.IsAgree,
+	}
+	p.NotifyTo([]int64{apply.UID, session.Uid}, resp)
 }
 
 // ClubMine 我的群
 func (p *ActorPlayer) ClubMine(session *cproto.Session, m *chatMsg.ClubMineReq) {
-	clubs, err := p.dbComponent.GetClubsByID(session.Uid, 0, 0)
+	clubs, err := p.dbComponent.GetClubsByUid(session.Uid)
 	resp := &chatMsg.ClubMineResp{
 		DataArr: make([]*chatMsg.ClubInfo, 0),
 	}
@@ -672,8 +887,8 @@ func (p *ActorPlayer) ClubMine(session *cproto.Session, m *chatMsg.ClubMineReq) 
 			Master:    club.Master,
 			Builder:   club.Builder,
 			CreatedAt: club.CreatedAt,
-			Icon:      int32(club.Icon),
-			Mode:      int32(club.Mode),
+			Icon:      club.Icon,
+			Mode:      club.Mode,
 			Name:      club.Name,
 			Notice:    club.Notice,
 		})
@@ -685,21 +900,46 @@ func (p *ActorPlayer) ClubMine(session *cproto.Session, m *chatMsg.ClubMineReq) 
 func (p *ActorPlayer) ClubApplyList(session *cproto.Session, m *chatMsg.ClubApplyListReq) {
 
 	applies, err := p.dbComponent.GetClubAppliesByClubId(m.ClubId)
-
-	resp := &chatMsg.ClubApplyListResp{
-		ClubId: m.ClubId,
-		Mans:   make([]*commMsg.UserInfo, 0),
-	}
 	if err != nil {
 		log.Warnf("[ClubApplyList] uid:%v m:%v err:%v", session.Uid, m, err)
 		rpc.SendResult(&p.ActorBase, Chat026)
 		return
 	}
-
+	resp := &chatMsg.ClubApplyListResp{
+		ClubId: m.ClubId,
+		Mans:   make([]*commMsg.ClubApplyInfo, 0),
+	}
 	for _, apply := range applies {
-		resp.Mans = append(resp.Mans, &commMsg.UserInfo{
-			UserID: apply.ID,
+		info := p.getUserInfo(apply.UID)
+		log.Infof("[ClubApplyList] apply:%v info:%v", apply, info)
+		resp.Mans = append(resp.Mans, &commMsg.ClubApplyInfo{
+			Id:     apply.ID,
+			Status: apply.Status,
+			Info:   info,
 		})
 	}
+	log.Infof("[ClubApplyList] req:%v res:%v", m, resp)
 	p.SendMsg(resp)
+}
+
+// 删除成员
+func (p *ActorPlayer) ClubDelMember(session *cproto.Session, m *chatMsg.ClubDelMemberReq) {
+	// 判断当前权限
+	mem, err := p.dbComponent.GetClubMember(m.ClubId, session.Uid)
+	if err != nil || mem.Job == INVALID {
+		log.Warnf("[ClubDelMember]  GetClubMember err:%v", err)
+		rpc.SendResult(&p.ActorBase, Chat036)
+		return
+	}
+	err = p.dbComponent.DeleteClubOneMember(m.ClubId, m.Uid)
+	if err != nil {
+		log.Warnf("[ClubDelMember]  GetClubMember err:%v", err)
+		rpc.SendResult(&p.ActorBase, Chat041)
+		return
+	}
+	resp := &chatMsg.ClubDelMemberResp{
+		ClubId: m.ClubId,
+		Uid:    m.Uid,
+	}
+	p.NotifyTo([]int64{session.Uid, m.Uid}, resp)
 }

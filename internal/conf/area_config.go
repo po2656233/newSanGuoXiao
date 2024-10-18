@@ -10,6 +10,8 @@ type (
 		AreaId   int32  `json:"areaId"`   // 游戏区id
 		AreaName string `json:"areaName"` // 游戏区名称
 		Gate     string `json:"gate"`     // 游戏区对应的网关地址
+		GateTcp  string `json:"gate_tcp"` // 游戏区对应的网关地址
+		GateKcp  string `json:"gate_kcp"` // 游戏区对应的网关地址
 	}
 
 	// 游戏区

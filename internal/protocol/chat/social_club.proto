@@ -53,14 +53,12 @@ message ClubApplyResp {
 }
 // 处理入群申请
 message ClubApplyDealReq {
-	int64 clubId = 1;	//群ID
-	int64 uid = 2;		//申请人Uid
-	int32 isAgree = 3;	//是否同意 1是 0否
+	int64 id = 1;	//申请
+	int32 isAgree = 2;	//是否同意 1是 0否
 }
 message ClubApplyDealResp {
-	int64 clubId = 1;	//群ID
-	int64 uid = 2;		//申请人Uid
-	int32 isAgree = 3;	//是否同意 1是 0否
+	int64 id = 1;	//申请
+	int32 isAgree = 2;	//是否同意 1是 0否
 }
 // 申请列表
 message ClubApplyListReq {
@@ -68,7 +66,7 @@ message ClubApplyListReq {
 }
 message ClubApplyListResp {
 	int64 clubId = 1;
-	repeated UserInfo mans = 2;	//申请者序列
+	repeated ClubApplyInfo mans = 2;	//申请者序列
 }
 // 群列表
 message ClubListReq {
@@ -137,10 +135,19 @@ message ClubInviteListResp {
 }
 //同意/拒绝邀请
 message ClubInviteDealReq {
-	int64 clubId = 1;		//群ID
+	int64 id = 1;		//审批id
 	int32 isAgree = 2;		//是否同意 1是 0否
 }
 message ClubInviteDealResp {
-	int64 clubId = 1;		//群ID
+	int64 id = 1;		//审批id
 	int32 isAgree = 2;		//是否同意 1是 0否
+}
+//删除成员
+message ClubDelMemberReq {
+	int64 clubId = 1;		//群ID
+	int64 uid	= 2; 	//删除对象Uid
+}
+message ClubDelMemberResp {
+	int64 clubId = 1;		//群ID
+	int64 uid	= 2; 	//删除对象Uid
 }

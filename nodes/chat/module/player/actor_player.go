@@ -10,6 +10,7 @@ import (
 	"strconv"
 	. "superman/internal/constant"
 	event2 "superman/internal/event"
+	. "superman/internal/redis_cluster"
 	"superman/internal/rpc"
 	"superman/nodes/chat/db"
 	"superman/nodes/game/module/online"
@@ -37,6 +38,7 @@ func (p *ActorPlayer) OnInit() {
 	p.Remote().Register(p.sessionClose)
 	p.registerLocalMsg()
 	p.dbComponent = p.App().Find(ChatDb).(*db.Component)
+	SingleRedis()
 }
 
 // sessionClose 接收角色session关闭处理

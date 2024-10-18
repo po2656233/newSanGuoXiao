@@ -90,7 +90,8 @@ func SendData(app facade.IApplication, source, actorID, nodeType string, req pro
 			resp = msgType.New().Interface()
 		}
 	}
-
+	
+	clog.Infof("SendData source:%v, actorID:%v, nodeType:%v,target:%v, funcName:%v, req:%v ", source, actorID, nodeType, target, funcName, req)
 	errCode = app.ActorSystem().CallWait(source, target, funcName, req, resp)
 	if code.IsFail(errCode) {
 		clog.Warnf("[SendData] sourcePath:%s targetPath:%v funcName:%s reqData:%+v errCode:%v", source, target, funcName, req, errCode)

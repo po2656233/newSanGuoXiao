@@ -2,26 +2,29 @@ package account
 
 import "C"
 import (
+	"context"
 	"fmt"
 	"github.com/google/uuid"
 	superConst "github.com/po2656233/superplace/const"
 	log "github.com/po2656233/superplace/logger"
 	cactor "github.com/po2656233/superplace/net/actor"
+	"google.golang.org/protobuf/proto"
 	"strconv"
 	"strings"
 	. "superman/internal/constant"
 	commMsg "superman/internal/protocol/go_file/common"
 	gateMsg "superman/internal/protocol/go_file/gate"
-	sqlmodel "superman/internal/sql_model/minigame"
+	. "superman/internal/redis_cluster"
+	sqlmodel "superman/internal/sql_model/center"
 	"superman/internal/utils"
-	db2 "superman/nodes/center/db"
+	db "superman/nodes/center/db"
 	"time"
 )
 
 type (
 	ActorAccount struct {
 		cactor.Base
-		dbComponent *db2.Component
+		dbComponent *db.Component
 	}
 )
 
@@ -36,10 +39,11 @@ func (p *ActorAccount) OnInit() {
 	p.Remote().Register(p.Logout)
 	p.Remote().Register(p.GetUserID)
 	p.Remote().Register(p.GetUserInfo)
-	p.dbComponent = p.App().Find(CenterDb).(*db2.Component)
+	p.dbComponent = p.App().Find(CenterDb).(*db.Component)
 	if p.dbComponent == nil {
 		log.Fatal("db component not found")
 	}
+	SingleRedis()
 }
 
 // Register 注册开发者账号
@@ -94,7 +98,7 @@ func (p *ActorAccount) Register(req *gateMsg.RegisterReq) (*gateMsg.RegisterResp
 func (p *ActorAccount) Login(req *gateMsg.LoginReq) (*gateMsg.LoginResp, int32) {
 	psw := utils.Md5Sum(req.Password + strconv.FormatInt(int64(len(req.Password)), 10))
 	userInfo, err := p.dbComponent.CheckUserInfo(req.Account, psw)
-	if err != nil {
+	if err != nil || userInfo.ID == INVALID {
 		log.Error("[ActorAccount] login CheckUserInfo req:%v error:%v", req, err)
 		return nil, Login08
 	}
@@ -102,6 +106,7 @@ func (p *ActorAccount) Login(req *gateMsg.LoginReq) (*gateMsg.LoginResp, int32) 
 		log.Error("[ActorAccount] login UpdateLoginTime req:%v error:%v", req, err)
 		return nil, Login03
 	}
+
 	resp := &gateMsg.LoginResp{}
 	resp.MainInfo = &commMsg.MasterInfo{
 		UserInfo: &commMsg.UserInfo{
@@ -130,7 +135,13 @@ func (p *ActorAccount) Login(req *gateMsg.LoginReq) (*gateMsg.LoginResp, int32) 
 			//ClientAddr:   userInfo.Clientaddr,
 		},
 	}
-
+	data, _ := proto.Marshal(resp.MainInfo.UserInfo)
+	// 新增玩家数据
+	err = SingleRedis().DB.Set(context.Background(), GetUserKey(userInfo.ID), data, 0).Err()
+	if err != nil {
+		log.Error("[ActorAccount] login SingleRedis req:%v error:%v", req, err)
+		return nil, Login03
+	}
 	return resp, SUCCESS
 }
 
@@ -148,7 +159,7 @@ func (p *ActorAccount) Logout(req *gateMsg.LogoutReq) (*gateMsg.LogoutResp, int3
 
 // GetUserID 获取uid
 func (p *ActorAccount) GetUserID(req *commMsg.GetUserIDReq) (*commMsg.GetUserIDResp, int32) {
-	uid, ok := db2.BindUID(req.SdkId, req.Pid, req.OpenId)
+	uid, ok := p.dbComponent.BindUID(req.SdkId, req.Pid, req.OpenId)
 	if uid == 0 || ok == false {
 		return nil, Login07
 	}
@@ -170,9 +181,18 @@ func (p *ActorAccount) FixNickName(req *gateMsg.FixNickNameReq) (*gateMsg.FixNic
 
 func (p *ActorAccount) GetUserInfo(req *gateMsg.GetUserInfoReq) (*gateMsg.GetUserInfoResp, error) {
 	resp := &gateMsg.GetUserInfoResp{}
-	info, err := p.dbComponent.CheckUserSimpInfo(req.Uid)
+	var info *sqlmodel.User
+	var err error
+	if req.Uid == INVALID {
+		info, err = p.dbComponent.CheckUsernameSimpInfo(req.Username)
+	} else {
+		info, err = p.dbComponent.CheckUserSimpInfo(req.Uid)
+	}
 	if err != nil {
 		return resp, err
+	}
+	if info.ID == INVALID {
+		return resp, fmt.Errorf("no userinfo")
 	}
 	resp.Info = &commMsg.UserInfo{
 		UserID:   info.ID,

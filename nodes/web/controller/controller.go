@@ -272,6 +272,69 @@ func (p *Controller) tableDelete(c *superGin.Context) {
 }
 
 // ///////////////////////////////////////////////////////////////////////////
+
+// register 开发模式帐号注册
+// http://127.0.0.1:8089/register?account=test11&password=test11
+func (p *Controller) register(c *superGin.Context) {
+	accountName := c.PostString(Username, "")
+	password := c.PostString(Password, "")
+	pid := c.PostInt32(ProcessId, 0)
+	if accountName == Empty {
+		RenderResult(c, Register10)
+		return
+	}
+	if password == Empty {
+		RenderResult(c, Register11)
+		return
+	}
+
+	plist := data2.SdkConfig.GetPidList()
+	if pid == 0 {
+		size := len(plist)
+		if 0 < size {
+			pid = plist[0]
+			//index := rand.Int() % len(plist)
+			//pid = plist[index]
+		}
+	} else {
+		isOk := false
+		for _, item := range plist {
+			if item == pid {
+				isOk = true
+				break
+			}
+		}
+		if !isOk {
+			RenderResult(c, Service002)
+			return
+		}
+	}
+
+	data, statusCode := rpc.SendDataToAcc(p.App, &gateMsg.RegisterReq{
+		Name:     accountName,
+		Password: password,
+		Address:  c.ClientIP(),
+	})
+	if statusCode == code.OK {
+		resp, ok := data.(*gateMsg.RegisterResp)
+		if ok {
+			if resp.OpenId == "-1" {
+				RenderResult(c, Register05)
+				return
+			}
+
+			config := data2.SdkConfig.Get(pid)
+			resp.SdkId = config.SdkId
+			resp.Pid = pid
+			resp.Ip = c.ClientIP()
+		}
+		RenderResult(c, http.StatusOK, resp)
+		return
+	}
+	sgxLogger.Warnf("register fail. params= %s", c.GetParams())
+	RenderResult(c, statusCode)
+}
+
 // login 根据pid获取sdkConfig，与第三方进行帐号登陆效验
 // http://127.0.0.1:8089/login?pid=2126001&account=test1&password=test1
 func (p *Controller) login(c *superGin.Context) {
@@ -357,74 +420,13 @@ func (p *Controller) login(c *superGin.Context) {
 	})
 }
 
-// register 开发模式帐号注册
-// http://127.0.0.1:8089/register?account=test11&password=test11
-func (p *Controller) register(c *superGin.Context) {
-	accountName := c.PostString(Username, "")
-	password := c.PostString(Password, "")
-	pid := c.PostInt32(ProcessId, 0)
-	if accountName == Empty {
-		RenderResult(c, Register10)
-		return
-	}
-	if password == Empty {
-		RenderResult(c, Register11)
-		return
-	}
-
-	plist := data2.SdkConfig.GetPidList()
-	if pid == 0 {
-		size := len(plist)
-		if 0 < size {
-			pid = plist[0]
-			//index := rand.Int() % len(plist)
-			//pid = plist[index]
-		}
-	} else {
-		isOk := false
-		for _, item := range plist {
-			if item == pid {
-				isOk = true
-				break
-			}
-		}
-		if !isOk {
-			RenderResult(c, Service002)
-			return
-		}
-	}
-
-	data, statusCode := rpc.SendDataToAcc(p.App, &gateMsg.RegisterReq{
-		Name:     accountName,
-		Password: password,
-		Address:  c.ClientIP(),
-	})
-	if statusCode == code.OK {
-		resp, ok := data.(*gateMsg.RegisterResp)
-		if ok {
-			if resp.OpenId == "-1" {
-				RenderResult(c, Register05)
-				return
-			}
-
-			config := data2.SdkConfig.Get(pid)
-			resp.SdkId = config.SdkId
-			resp.Pid = pid
-			resp.Ip = c.ClientIP()
-		}
-		RenderResult(c, http.StatusOK, resp)
-		return
-	}
-	sgxLogger.Warnf("register fail. params= %s", c.GetParams())
-	RenderResult(c, statusCode)
-}
+// severList 区服列表
+// http://127.0.0.1:8089/server/list/2126001
 func (p *Controller) serverList0(c *superGin.Context) {
 	c.Set("pid", 2126001)
 	p.serverList(c)
 }
 
-// severList 区服列表
-// http://127.0.0.1:8089/server/list/2126001
 func (p *Controller) serverList(c *superGin.Context) {
 	pid := c.GetInt32("pid", 2126001)
 

@@ -12,8 +12,9 @@ type Clubinvite struct {
 	ClubID     int64 `gorm:"column:club_id;comment:邀请加入的俱乐部ID" json:"club_id"`                      // 邀请加入的俱乐部ID
 	SenderUID  int64 `gorm:"column:sender_uid;comment:邀请人用户ID" json:"sender_uid"`                   // 邀请人用户ID
 	TargetUID  int64 `gorm:"column:target_uid;comment:被邀请人用户ID" json:"target_uid"`                  // 被邀请人用户ID
-	InviteTime int64 `gorm:"column:invite_time;comment:邀请时间戳" json:"invite_time"`                   // 邀请时间戳
-	Status     int32 `gorm:"column:status;comment:邀请状态（0: 待处理, 1: 已同意, 2: 已拒绝）" json:"status"`      // 邀请状态（0: 待处理, 1: 已同意, 2: 已拒绝）
+	InviteType int32 `gorm:"column:invite_type" json:"invite_type"`
+	InviteTime int64 `gorm:"column:invite_time;comment:邀请时间戳" json:"invite_time"`              // 邀请时间戳
+	Status     int32 `gorm:"column:status;comment:邀请状态（0: 待处理, 1: 已同意, 2: 已拒绝）" json:"status"` // 邀请状态（0: 待处理, 1: 已同意, 2: 已拒绝）
 }
 
 // TableName Clubinvite's table name

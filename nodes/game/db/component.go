@@ -13,7 +13,8 @@ import (
 
 type Component struct {
 	facade.Component
-	db *gorm.DB
+	db       *gorm.DB
+	centerDB *gorm.DB
 	sync.Mutex
 }
 
@@ -51,6 +52,18 @@ func (self *Component) OnAfterInit() {
 	if self.db == nil {
 		clog.Panic(dbID, " not found")
 	}
+
+	centerDbID := self.App().Settings().GetConfig(DbList).GetString(CenterDb)
+	if self.centerDB != nil {
+		dbObj, _ := self.centerDB.DB()
+		_ = dbObj.Close()
+		self.centerDB = nil
+	}
+	self.centerDB = gormCpt.GetDb(centerDbID)
+	if self.centerDB == nil {
+		clog.Panic(centerDbID, " not found CenterDb ")
+	}
+
 	//// 每秒查询一次db
 	//p.Timer().Add(5*time.Second, p.selectDB)
 	//// 1秒后进行一次分页查询

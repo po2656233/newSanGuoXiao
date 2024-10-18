@@ -9,9 +9,9 @@ const TableNameClubapply = "clubapply"
 // Clubapply 俱乐部申请表
 type Clubapply struct {
 	ID        int64 `gorm:"column:id;primaryKey;autoIncrement:true;comment:俱乐部申请记录唯一标识" json:"id"` // 俱乐部申请记录唯一标识
-	ClubID    int64 `gorm:"column:clubId;comment:申请加入的俱乐部ID" json:"clubId"`                        // 申请加入的俱乐部ID
+	ClubID    int64 `gorm:"column:club_id;comment:申请加入的俱乐部ID" json:"club_id"`                      // 申请加入的俱乐部ID
 	UID       int64 `gorm:"column:uid;comment:申请人用户ID" json:"uid"`                                 // 申请人用户ID
-	ApplyTime int64 `gorm:"column:applyTime;comment:申请时间戳" json:"applyTime"`                       // 申请时间戳
+	ApplyTime int64 `gorm:"column:apply_time;comment:申请时间戳" json:"apply_time"`                     // 申请时间戳
 	Status    int32 `gorm:"column:status;comment:申请状态（0: 待处理, 1: 已同意, 2: 已拒绝）" json:"status"`      // 申请状态（0: 待处理, 1: 已同意, 2: 已拒绝）
 }
 

@@ -8,6 +8,9 @@ import (
 	cconnector "github.com/po2656233/superplace/net/connector"
 	"github.com/po2656233/superplace/net/parser/pomelo"
 	"github.com/po2656233/superplace/net/parser/simple"
+	"math"
+	"net"
+	"strconv"
 	"strings"
 	"superman/internal/component/check_center"
 	"superman/internal/conf"
@@ -49,14 +52,32 @@ func Run(profileFilePath, nodeId string) {
 	app.Startup()
 }
 
+func getAddress(app *superplace.AppBuilder) (wsAddr, tcpAddr, kcpAddr string) {
+	addr := app.Address()
+	host, port, err := net.SplitHostPort(addr)
+	if err != nil {
+		panic(err)
+	}
+	// tcp和kcp 使用 邻近端口
+	nPort, _ := strconv.ParseInt(port, 10, 64)
+	if math.MaxUint16 < nPort {
+		nPort = math.MaxUint16 - 3
+	}
+	tcpAddr = net.JoinHostPort(host, strconv.Itoa(int(nPort+1)))
+	kcpAddr = net.JoinHostPort(host, strconv.Itoa(int(nPort+2)))
+	return addr, tcpAddr, kcpAddr
+}
+
 func buildPomeloParser(app *superplace.AppBuilder) cfacade.INetParser {
 	// 使用pomelo网络数据包解析器
 	agentActor := pomelo.NewActor(ActIdGate)
-	//创建一个tcp监听，用于client/robot压测机器人连接网关tcp
-	agentActor.AddConnector(cconnector.NewTCP(TcpAddr))
-	agentActor.AddConnector(cconnector.NewKCP(KcpAddr))
-	//再创建一个websocket监听，用于h5客户端建立连接
-	agentActor.AddConnector(cconnector.NewWS(app.Address()))
+
+	// 再创建一个websocket监听，用于h5客户端建立连接
+	wsAddr, tcpAddr, kcpAddr := getAddress(app)
+	agentActor.AddConnector(cconnector.NewWS(wsAddr))
+	agentActor.AddConnector(cconnector.NewTCP(tcpAddr))
+	agentActor.AddConnector(cconnector.NewKCP(kcpAddr))
+
 	//当有新连接创建Agent时，启动一个自定义(ActorAgent)的子actor
 	agentActor.SetOnNewAgent(func(newAgent *pomelo.Agent) {
 		childActor := &module.ActorAgent{}
@@ -73,9 +94,10 @@ func buildPomeloParser(app *superplace.AppBuilder) cfacade.INetParser {
 // 构建简单的网络数据包解析器
 func buildSimpleParser(app *superplace.AppBuilder) cfacade.INetParser {
 	agentActor := simple.NewActor(ActIdGate)
-	agentActor.AddConnector(cconnector.NewTCP(TcpAddr))
-	agentActor.AddConnector(cconnector.NewKCP(KcpAddr))
-	agentActor.AddConnector(cconnector.NewWS(app.Address()))
+	wsAddr, tcpAddr, kcpAddr := getAddress(app)
+	agentActor.AddConnector(cconnector.NewWS(wsAddr))
+	agentActor.AddConnector(cconnector.NewTCP(tcpAddr))
+	agentActor.AddConnector(cconnector.NewKCP(kcpAddr))
 
 	agentActor.SetOnNewAgent(func(newAgent *simple.Agent) {
 		childActor := &module.ActorAgent{}

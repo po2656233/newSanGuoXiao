@@ -54,6 +54,14 @@
           "ref_logger": "gate_log"
         },
         "enable": true
+      },
+      {
+        "node_id": "gc-gate-2",
+        "address": ":10020",
+        "__settings__": {
+          "ref_logger": "gate_log"
+        },
+        "enable": true
       }
     ],
     "chat": [
@@ -83,7 +91,8 @@
         "node_id": "10001",
         "__settings__": {
           "db_id_list" : {
-            "game_db_id": "game_db_1"
+            "game_db_id": "game_db_1",
+            "center_db_id": "center_db_1"
           },
           "ref_logger": "game_log"
         },

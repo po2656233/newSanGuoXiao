@@ -208,6 +208,7 @@ func (p *ActorAgent) setSimpleSession(req *pb.StringKeyValue) {
 
 // Login 登录
 func (p *ActorAgent) Login(_ *cproto.Session, req *gateMsg.LoginRequest) {
+	clog.Infof("Login sid:%v path:%v Start", req.ServerId, p.PathString())
 	agent, found := simple.GetAgent(p.ActorID())
 	if !found {
 		rpc.ASendError(agent, Login02)
@@ -239,7 +240,7 @@ func (p *ActorAgent) Login(_ *cproto.Session, req *gateMsg.LoginRequest) {
 		OpenId: cstring.ToString(uid),
 	}
 	agent.SendMsg(res)
-	clog.Infof("Login sid:%v  uid:%v", req.ServerId, uid)
+	clog.Infof("Login sid:%v path:%v uid:%v", req.ServerId, p.PathString(), uid)
 }
 
 // Request 登录

@@ -3605,7 +3605,8 @@ proto.pb.GetUserInfoReq.prototype.toObject = function(opt_includeInstance) {
  */
 proto.pb.GetUserInfoReq.toObject = function(includeInstance, msg) {
   var obj = {
-    uid: jspb.Message.getFieldWithDefault(msg, 1, 0)
+    uid: jspb.Message.getFieldWithDefault(msg, 1, 0),
+    username: jspb.Message.getFieldWithDefault(msg, 2, "")
   };
 
   if (includeInstance) {
@@ -3646,6 +3647,10 @@ proto.pb.GetUserInfoReq.deserializeBinaryFromReader = function(msg, reader) {
       var value = /** @type {number} */ (reader.readInt64());
       msg.setUid(value);
       break;
+    case 2:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setUsername(value);
+      break;
     default:
       reader.skipField();
       break;
@@ -3682,6 +3687,13 @@ proto.pb.GetUserInfoReq.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
+  f = message.getUsername();
+  if (f.length > 0) {
+    writer.writeString(
+      2,
+      f
+    );
+  }
 };
 
 
@@ -3697,6 +3709,21 @@ proto.pb.GetUserInfoReq.prototype.getUid = function() {
 /** @param {number} value */
 proto.pb.GetUserInfoReq.prototype.setUid = function(value) {
   jspb.Message.setProto3IntField(this, 1, value);
+};
+
+
+/**
+ * optional string username = 2;
+ * @return {string}
+ */
+proto.pb.GetUserInfoReq.prototype.getUsername = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
+};
+
+
+/** @param {string} value */
+proto.pb.GetUserInfoReq.prototype.setUsername = function(value) {
+  jspb.Message.setProto3StringField(this, 2, value);
 };
 
 
