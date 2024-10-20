@@ -120,8 +120,12 @@ func (c *Component) UpdateClub(club *sqlmodel.Club) error {
 	return err
 }
 
-func (c *Component) DeleteClub(id int64) error {
-	return c.db.Delete(&sqlmodel.Club{}, id).Error
+func (c *Component) DeleteClub(id int64) (row int64, err error) {
+	delDB := c.db.Delete(&sqlmodel.Club{}, id)
+	err = delDB.Error
+	row = delDB.RowsAffected
+	return
+
 }
 
 // AddClubMember 表操作
@@ -145,12 +149,18 @@ func (c *Component) UpdateClubMember(member *sqlmodel.Clubmember) error {
 	return err
 }
 
-func (c *Component) DeleteClubMember(id int64) error {
-	return c.db.Delete(&sqlmodel.Clubmember{}, id).Error
+func (c *Component) DeleteClubMember(id int64) (row int64, err error) {
+	delDB := c.db.Delete(&sqlmodel.Clubmember{}, id)
+	err = delDB.Error
+	row = delDB.RowsAffected
+	return
 }
 
-func (c *Component) DeleteClubOneMember(club, uid int64) error {
-	return c.db.Delete(&sqlmodel.Clubmember{}, "club_id = ? AND uid = ?", club, uid).Error
+func (c *Component) DeleteClubOneMember(club, uid int64) (row int64, err error) {
+	delDB := c.db.Delete(&sqlmodel.Clubmember{}, "club_id = ? AND uid = ?", club, uid)
+	err = delDB.Error
+	row = delDB.RowsAffected
+	return
 }
 
 // AddClubApply 表操作
@@ -292,8 +302,8 @@ func (c *Component) GetFriendsByUid(uid int64) ([]*sqlmodel.Friend, error) {
 }
 
 // GetFriendsIds 根据用户ID获取好友列表
-func (c *Component) GetFriendsIds(uid int64) ([]int64, error) {
-	var friends []int64
+func (c *Component) GetFriendsIds(uid int64) ([]*sqlmodel.Friend, error) {
+	var friends []*sqlmodel.Friend
 	err := c.db.Select("friend_uid").Where("uid = ?", uid).Find(&friends).Error
 	return friends, err
 }
@@ -324,7 +334,7 @@ func (c *Component) GetClubMembers(clubId int64) (member []*sqlmodel.Clubmember,
 }
 
 // GetClubMemberIds 获取特定俱乐部成员的IDs
-func (c *Component) GetClubMemberIds(clubId int64) (members []int64, err error) {
+func (c *Component) GetClubMemberIds(clubId int64) (members []*sqlmodel.Clubmember, err error) {
 	err = c.db.Select("uid").Where("club_id = ? ", clubId).Find(&members).Error
 	return
 }

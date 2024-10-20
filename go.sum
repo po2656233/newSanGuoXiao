@@ -155,6 +155,8 @@ github.com/po2656233/superplace v1.2.26 h1:0P1JBrfasDjCDzEyFMDKDGjB9QOZnRlAw8JeC
 github.com/po2656233/superplace v1.2.26/go.mod h1:LwfsrEGarlxnVPIomg8fBeJXjZFOelmOsNeG/E9upAE=
 github.com/po2656233/superplace v1.2.27 h1:u69iqwMX7/kHgPUc7q9Ik7JvPfg3wIbfjjZ32ZbLsrQ=
 github.com/po2656233/superplace v1.2.27/go.mod h1:LwfsrEGarlxnVPIomg8fBeJXjZFOelmOsNeG/E9upAE=
+github.com/po2656233/superplace v1.2.28 h1:xnurc+hHW0PIYQU8kum9Jl/AWn+TxINEIO04/QumGQM=
+github.com/po2656233/superplace v1.2.28/go.mod h1:LwfsrEGarlxnVPIomg8fBeJXjZFOelmOsNeG/E9upAE=
 github.com/po2656233/superplace/components/cron v0.0.0-20240707013405-d96b3ef2803b h1:QAhOmCsq43GHOWLYNYsm3yEMzMdMQD7xbIwYC6R5nko=
 github.com/po2656233/superplace/components/cron v0.0.0-20240707013405-d96b3ef2803b/go.mod h1:gBrY7vwQ6kjhb7fDIkTfDt1odr5zVTK+aiuMr1khH94=
 github.com/po2656233/superplace/components/data-config v0.0.0-20240707013405-d96b3ef2803b h1:i+ZQynSRHz9W64zk4qyh5AzGy+ykyuVrVPuE4roylOQ=

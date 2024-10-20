@@ -285,6 +285,8 @@ var StatusText = map[int]string{
 	Chat043: "成功发起邀请,请等待对方通过",
 	Chat044: "您的邀请已被接纳",
 	Chat045: "您的邀请已被拒绝",
+	Chat046: "群主无法切换级别",
+	Chat047: "不能剔出群主",
 
 	Service001: "SDK无效",
 	Service002: "PID无效",
@@ -629,6 +631,10 @@ const (
 	Chat044
 	Chat045
 	Chat046
+	Chat047
+	Chat048
+	Chat049
+	Chat050
 )
 
 /* 主要用于求取某位上是否 是1值

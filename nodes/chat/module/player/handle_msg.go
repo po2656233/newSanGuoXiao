@@ -343,7 +343,7 @@ func (p *ActorPlayer) ClubNew(session *cproto.Session, m *chatMsg.ClubNewReq) {
 	p.SendMsg(resp)
 }
 
-// 处理邀请
+// ClubInviteDeal 处理邀请
 func (p *ActorPlayer) ClubInviteDeal(session *cproto.Session, m *chatMsg.ClubInviteDealReq) {
 	invite, err := p.dbComponent.GetClubInviteById(m.Id)
 	if err != nil {
@@ -409,7 +409,7 @@ func (p *ActorPlayer) ClubInviteDeal(session *cproto.Session, m *chatMsg.ClubInv
 	p.SendMsg(resp)
 }
 
-// 删除好友
+// FriendDel 删除好友
 func (p *ActorPlayer) FriendDel(session *cproto.Session, m *chatMsg.FriendDelReq) {
 	err := p.dbComponent.DeleteFriend(session.Uid, m.FriendUid)
 
@@ -427,7 +427,7 @@ func (p *ActorPlayer) FriendDel(session *cproto.Session, m *chatMsg.FriendDelReq
 // FriendOnline 好友在线情况
 func (p *ActorPlayer) FriendOnline(session *cproto.Session, m *chatMsg.FriendOnlineReq) {
 	friends, err := p.dbComponent.GetFriendsIds(session.Uid)
-	if err != nil {
+	if err != nil || len(friends) == INVALID {
 		log.Warnf("[FriendOnline] uid:%v m:%v err:%v", session.Uid, m, err)
 		rpc.SendResult(&p.ActorBase, Chat010)
 		return
@@ -441,8 +441,8 @@ func (p *ActorPlayer) FriendOnline(session *cproto.Session, m *chatMsg.FriendOnl
 	count := 0
 	for _, uid := range uids {
 		for _, friend := range friends {
-			if uid == friend {
-				resp.UidList = append(resp.UidList, friend)
+			if uid == friend.UID {
+				resp.UidList = append(resp.UidList, friend.UID)
 				count++
 				break
 			}
@@ -509,6 +509,7 @@ func (p *ActorPlayer) ClubApply(session *cproto.Session, m *chatMsg.ClubApplyReq
 
 // ClubDissolve 解散群
 func (p *ActorPlayer) ClubDissolve(session *cproto.Session, m *chatMsg.ClubDissolveReq) {
+
 	// 获取所有成员
 	members, err := p.dbComponent.GetClubMemberIds(m.ClubId)
 	if err != nil {
@@ -517,16 +518,29 @@ func (p *ActorPlayer) ClubDissolve(session *cproto.Session, m *chatMsg.ClubDisso
 		return
 	}
 
-	err = p.dbComponent.DeleteClub(m.ClubId)
-	if err != nil {
+	masterId, err := p.dbComponent.GetClubMaster(&sqlmodel.Club{
+		ID: m.ClubId,
+	})
+	if err != nil || masterId != session.Uid {
 		log.Warnf("[ClubDissolve] uid:%v m:%v err:%v", session.Uid, m, err)
+		rpc.SendResult(&p.ActorBase, Chat036)
+		return
+	}
+
+	row, err := p.dbComponent.DeleteClub(m.ClubId)
+	if err != nil || row == INVALID {
+		log.Warnf("[ClubDissolve] uid:%v m:%v row:%v err:%v", session.Uid, m, row, err)
 		rpc.SendResult(&p.ActorBase, Chat013)
 		return
 	}
 	resp := &chatMsg.ClubDissolveResp{
 		ClubId: m.ClubId,
 	}
-	p.NotifyTo(members, resp)
+	uids := make([]int64, 0)
+	for _, member := range members {
+		uids = append(uids, member.UID)
+	}
+	p.NotifyTo(uids, resp)
 }
 
 // 为成员分配积分
@@ -754,16 +768,16 @@ func (p *ActorPlayer) ClubJob(session *cproto.Session, m *chatMsg.ClubJobReq) {
 		return
 	}
 
+	if master.UID == 1 && master.UID == m.Uid {
+		rpc.SendResult(&p.ActorBase, Chat046)
+		return
+	}
+
 	if master.Job == m.Job {
 		rpc.SendResult(&p.ActorBase, Chat037)
 		return
 	}
-	if m.Job == 2 && master.Job != 1 {
-		rpc.SendResult(&p.ActorBase, Chat038)
-		return
-	}
-
-	if m.Job == 1 && master.Job != 1 {
+	if master.Job != 1 && (m.Job == 2 || m.Job == 1) {
 		rpc.SendResult(&p.ActorBase, Chat038)
 		return
 	}
@@ -931,9 +945,30 @@ func (p *ActorPlayer) ClubDelMember(session *cproto.Session, m *chatMsg.ClubDelM
 		rpc.SendResult(&p.ActorBase, Chat036)
 		return
 	}
-	err = p.dbComponent.DeleteClubOneMember(m.ClubId, m.Uid)
+	// 查看 对方权限
+	other, err := p.dbComponent.GetClubMember(m.ClubId, m.Uid)
 	if err != nil {
 		log.Warnf("[ClubDelMember]  GetClubMember err:%v", err)
+		rpc.SendResult(&p.ActorBase, Chat036)
+		return
+	}
+
+	//
+	if other.Job == 1 {
+		log.Warnf("[ClubDelMember]  GetClubMember err:%v", err)
+		rpc.SendResult(&p.ActorBase, Chat047)
+		return
+	}
+
+	if other.Job == mem.Job {
+		log.Warnf("[ClubDelMember]  GetClubMember err:%v", err)
+		rpc.SendResult(&p.ActorBase, Chat037)
+		return
+	}
+
+	row, err := p.dbComponent.DeleteClubOneMember(m.ClubId, m.Uid)
+	if err != nil || row == INVALID {
+		log.Warnf("[ClubDelMember]  GetClubMember row:%v err:%v ", row, err)
 		rpc.SendResult(&p.ActorBase, Chat041)
 		return
 	}

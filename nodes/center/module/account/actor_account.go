@@ -1,6 +1,5 @@
 package account
 
-import "C"
 import (
 	"context"
 	"fmt"
@@ -142,6 +141,7 @@ func (p *ActorAccount) Login(req *gateMsg.LoginReq) (*gateMsg.LoginResp, int32) 
 		log.Error("[ActorAccount] login SingleRedis req:%v error:%v", req, err)
 		return nil, Login03
 	}
+	log.Infof("[ActorAccount] login ok req:%v resp:%v", req, resp)
 	return resp, SUCCESS
 }
 
